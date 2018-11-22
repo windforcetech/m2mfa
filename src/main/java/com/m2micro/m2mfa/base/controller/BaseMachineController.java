@@ -2,6 +2,9 @@ package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.m2mfa.base.service.BaseMachineService;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -52,6 +55,7 @@ public class BaseMachineController {
     @RequestMapping("/save")
     @ApiOperation(value="保存机台主档")
     public ResponseMessage<BaseMachine> save(@RequestBody BaseMachine baseMachine){
+        ValidatorUtil.validateEntity(baseMachine, AddGroup.class);
         baseMachine.setMachineId(UUIDUtil.getUUID());
         return ResponseMessage.ok(baseMachineService.save(baseMachine));
     }
@@ -62,7 +66,7 @@ public class BaseMachineController {
     @RequestMapping("/update")
     @ApiOperation(value="更新机台主档")
     public ResponseMessage<BaseMachine> update(@RequestBody BaseMachine baseMachine){
-
+        ValidatorUtil.validateEntity(baseMachine, UpdateGroup.class);
         BaseMachine baseMachineOld = baseMachineService.findById(baseMachine.getMachineId()).orElse(null);
         PropertyUtil.copy(baseMachine,baseMachineOld);
         return ResponseMessage.ok(baseMachineService.save(baseMachineOld));

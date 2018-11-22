@@ -3,9 +3,12 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -21,10 +24,13 @@ public class BaseMachine extends BaseEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @ApiModelProperty(value = "主键")
     @Id
+    @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
     private String machineId;
     @ApiModelProperty(value = "编号")
+    @NotEmpty(message="编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String code;
     @ApiModelProperty(value = "名称")
+    @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String name;
     @ApiModelProperty(value = "固资编号")
     private String assdtId;
