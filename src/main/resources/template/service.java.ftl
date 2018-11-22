@@ -9,7 +9,7 @@ import com.m2micro.framework.commons.util.Query;
  * @author ${author}
  * @since ${date}
  */
-public interface ${table.serviceName} extends BaseService<${entity},Long> {
+public interface ${table.serviceName} extends BaseService<${entity},String> {
     /**
      * 分页查询
      * @param query

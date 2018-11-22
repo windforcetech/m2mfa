@@ -2,9 +2,10 @@ package ${package.Entity};
 
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.io.Serializable;
+import java.util.Date;
+import com.m2micro.m2mfa.common.entity.BaseEntity;
 <#--<#list table.importPackages as pkg>
 import ${pkg};
 </#list>-->
@@ -44,7 +45,7 @@ public class ${entity} extends ${superEntityClass}<#if activeRecord><${entity}><
 <#elseif activeRecord>
 public class ${entity} extends Model<${entity}> {
 <#else>
-public class ${entity} implements Serializable {
+public class ${entity} extends BaseEntity implements Serializable {
 </#if>
 
     private static final long serialVersionUID = 1L;
@@ -53,10 +54,15 @@ public class ${entity} implements Serializable {
     <#if field.keyFlag>
         <#assign keyPropertyName="${field.propertyName}"/>
     </#if>
-
     <#if field.comment!?length gt 0>
         <#if swagger2>
+            <#if field.propertyName == "createOn">
+            <#elseif field.propertyName == "createBy">
+            <#elseif field.propertyName == "modifiedOn">
+            <#elseif field.propertyName == "modifiedBy">
+            <#else>
     @ApiModelProperty(value = "${field.comment}")
+            </#if>
         <#else>
     /**
      * ${field.comment}
@@ -65,9 +71,9 @@ public class ${entity} implements Serializable {
     </#if>
     <#if field.keyFlag>
     <#-- 主键 -->
-        <#if field.keyIdentityFlag>
     @Id
-    @GeneratedValue
+        <#if field.keyIdentityFlag>
+    <#--@Id-->
         <#elseif idType??>
     @TableId(value = "${field.name}", type = IdType.${idType})
         <#elseif field.convert>
@@ -92,7 +98,13 @@ public class ${entity} implements Serializable {
     <#if (logicDeleteFieldName!"") == field.name>
     @TableLogic
     </#if>
+    <#if field.propertyName == "createOn">
+    <#elseif field.propertyName == "createBy">
+    <#elseif field.propertyName == "modifiedOn">
+    <#elseif field.propertyName == "modifiedBy">
+    <#else>
     private ${field.propertyType} ${field.propertyName};
+    </#if>
 </#list>
 <#------------  END 字段循环遍历  ---------->
 
@@ -103,20 +115,32 @@ public class ${entity} implements Serializable {
         <#else>
             <#assign getprefix="get"/>
         </#if>
+        <#if field.propertyName == "createOn">
+        <#elseif field.propertyName == "createBy">
+        <#elseif field.propertyName == "modifiedOn">
+        <#elseif field.propertyName == "modifiedBy">
+        <#else>
     public ${field.propertyType} ${getprefix}${field.capitalName}() {
         return ${field.propertyName};
     }
-
-        <#if entityBuilderModel>
-    public ${entity} set${field.capitalName}(${field.propertyType} ${field.propertyName}) {
+        </#if>
+        <#if field.propertyName == "createOn">
+        <#elseif field.propertyName == "createBy">
+        <#elseif field.propertyName == "modifiedOn">
+        <#elseif field.propertyName == "modifiedBy">
         <#else>
+            <#if entityBuilderModel>
+    public ${entity} set${field.capitalName}(${field.propertyType} ${field.propertyName}) {
+            <#else>
     public void set${field.capitalName}(${field.propertyType} ${field.propertyName}) {
-        </#if>
+            </#if>
         this.${field.propertyName} = ${field.propertyName};
-        <#if entityBuilderModel>
+            <#if entityBuilderModel>
         return this;
-        </#if>
+            </#if>
     }
+
+        </#if>
     </#list>
 </#if>
 
@@ -137,18 +161,5 @@ public class ${entity} implements Serializable {
     }
 
 </#if>
-<#if !entityLombokModel>
-    @Override
-    public String toString() {
-        return "${entity}{" +
-    <#list table.fields as field>
-        <#if field_index==0>
-        "${field.propertyName}=" + ${field.propertyName} +
-        <#else>
-        ", ${field.propertyName}=" + ${field.propertyName} +
-        </#if>
-    </#list>
-        "}";
-    }
-</#if>
+
 }

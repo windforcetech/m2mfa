@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
  * @since ${date}
  */
 @Repository
-public interface ${entity}Repository extends BaseRepository<${entity},Long> {
+public interface ${entity}Repository extends BaseRepository<${entity},String> {
 
 }
