@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.service.BaseMoldService;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
@@ -73,6 +74,9 @@ public class BaseMoldController {
     public ResponseMessage<BaseMold> update(@RequestBody BaseMold baseMold){
         ValidatorUtil.validateEntity(baseMold, UpdateGroup.class);
         BaseMold baseMoldOld = baseMoldService.findById(baseMold.getMoldId()).orElse(null);
+        if(baseMoldOld==null){
+            throw new MMException("数据库不存在该记录");
+        }
         PropertyUtil.copy(baseMold,baseMoldOld);
         return ResponseMessage.ok(baseMoldService.save(baseMoldOld));
     }

@@ -84,6 +84,9 @@ public class ${table.controllerName} {
     public ResponseMessage<${entity}> update(@RequestBody ${entity} ${entity?uncap_first}){
 
         ${entity} ${entity?uncap_first}Old = ${table.serviceName?uncap_first}.findById(${entity?uncap_first}.get${keyPropertyName?cap_first}()).orElse(null);
+        if(${entity?uncap_first}Old==null){
+            throw new MMException("数据库不存在该记录");
+        }
         PropertyUtil.copy(${entity?uncap_first},${entity?uncap_first}Old);
         return ResponseMessage.ok(${table.serviceName?uncap_first}.save(${entity?uncap_first}Old));
     }
