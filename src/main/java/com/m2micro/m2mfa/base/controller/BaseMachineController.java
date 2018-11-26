@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -34,6 +35,7 @@ public class BaseMachineController {
      */
     @RequestMapping("/list")
     @ApiOperation(value="机台主档列表")
+    @UserOperationLog("机台主档列表")
     public ResponseMessage<PageUtil<BaseMachine>> list(Query query){
         PageUtil<BaseMachine> page = baseMachineService.list(query);
         return ResponseMessage.ok(page);
@@ -44,6 +46,7 @@ public class BaseMachineController {
      */
     @RequestMapping("/info/{id}")
     @ApiOperation(value="机台主档详情")
+    @UserOperationLog("机台主档详情")
     public ResponseMessage<BaseMachine> info(@PathVariable("id") String id){
         BaseMachine baseMachine = baseMachineService.findById(id).orElse(null);
         return ResponseMessage.ok(baseMachine);
@@ -54,6 +57,7 @@ public class BaseMachineController {
      */
     @RequestMapping("/save")
     @ApiOperation(value="保存机台主档")
+    @UserOperationLog("保存机台主档")
     public ResponseMessage<BaseMachine> save(@RequestBody BaseMachine baseMachine){
         ValidatorUtil.validateEntity(baseMachine, AddGroup.class);
         baseMachine.setMachineId(UUIDUtil.getUUID());
@@ -65,6 +69,7 @@ public class BaseMachineController {
      */
     @RequestMapping("/update")
     @ApiOperation(value="更新机台主档")
+    @UserOperationLog("更新机台主档")
     public ResponseMessage<BaseMachine> update(@RequestBody BaseMachine baseMachine){
         ValidatorUtil.validateEntity(baseMachine, UpdateGroup.class);
         BaseMachine baseMachineOld = baseMachineService.findById(baseMachine.getMachineId()).orElse(null);
@@ -77,6 +82,7 @@ public class BaseMachineController {
      */
     @RequestMapping("/delete")
     @ApiOperation(value="删除机台主档")
+    @UserOperationLog("删除机台主档")
     public ResponseMessage delete(@RequestBody String[] ids){
         baseMachineService.deleteByIds(ids);
         return ResponseMessage.ok();

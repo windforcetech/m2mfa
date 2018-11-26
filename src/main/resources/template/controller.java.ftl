@@ -39,6 +39,7 @@ public class ${table.controllerName} {
      */
     @RequestMapping("/list")
     @ApiOperation(value="${table.comment!}列表")
+    @UserOperationLog("${table.comment!}列表")
     public ResponseMessage<PageUtil<${entity}>> list(Query query){
         PageUtil<${entity}> page = ${table.serviceName?uncap_first}.list(query);
         return ResponseMessage.ok(page);
@@ -49,6 +50,7 @@ public class ${table.controllerName} {
      */
     @RequestMapping("/info/{id}")
     @ApiOperation(value="${table.comment!}详情")
+    @UserOperationLog("${table.comment!}详情")
     public ResponseMessage<${entity}> info(@PathVariable("id") String id){
         ${entity} ${entity?uncap_first} = ${table.serviceName?uncap_first}.findById(id).orElse(null);
         return ResponseMessage.ok(${entity?uncap_first});
@@ -59,6 +61,7 @@ public class ${table.controllerName} {
      */
     @RequestMapping("/save")
     @ApiOperation(value="保存${table.comment!}")
+    @UserOperationLog("保存${table.comment!}")
     public ResponseMessage<${entity}> save(@RequestBody ${entity} ${entity?uncap_first}){
     <#list table.fields as field>
         <#if field.keyFlag>
@@ -76,6 +79,7 @@ public class ${table.controllerName} {
      */
     @RequestMapping("/update")
     @ApiOperation(value="更新${table.comment!}")
+    @UserOperationLog("更新${table.comment!}")
     public ResponseMessage<${entity}> update(@RequestBody ${entity} ${entity?uncap_first}){
 
         ${entity} ${entity?uncap_first}Old = ${table.serviceName?uncap_first}.findById(${entity?uncap_first}.get${keyPropertyName?cap_first}()).orElse(null);
@@ -88,6 +92,7 @@ public class ${table.controllerName} {
      */
     @RequestMapping("/delete")
     @ApiOperation(value="删除${table.comment!}")
+    @UserOperationLog("删除${table.comment!}")
     public ResponseMessage delete(@RequestBody String[] ids){
         ${table.serviceName?uncap_first}.deleteByIds(ids);
         return ResponseMessage.ok();
