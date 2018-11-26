@@ -1,6 +1,7 @@
 package ${package.Controller};
 
 import ${package.Service}.${table.serviceName};
+import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
