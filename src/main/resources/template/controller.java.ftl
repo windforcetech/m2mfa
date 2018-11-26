@@ -1,6 +1,10 @@
 package ${package.Controller};
 
 import ${package.Service}.${table.serviceName};
+import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,6 +68,7 @@ public class ${table.controllerName} {
     @ApiOperation(value="保存${table.comment!}")
     @UserOperationLog("保存${table.comment!}")
     public ResponseMessage<${entity}> save(@RequestBody ${entity} ${entity?uncap_first}){
+        ValidatorUtil.validateEntity(${entity?uncap_first}, AddGroup.class);
     <#list table.fields as field>
         <#if field.keyFlag>
             <#assign keyPropertyName="${field.propertyName}"/>
@@ -82,7 +87,7 @@ public class ${table.controllerName} {
     @ApiOperation(value="更新${table.comment!}")
     @UserOperationLog("更新${table.comment!}")
     public ResponseMessage<${entity}> update(@RequestBody ${entity} ${entity?uncap_first}){
-
+        ValidatorUtil.validateEntity(${entity?uncap_first}, UpdateGroup.class);
         ${entity} ${entity?uncap_first}Old = ${table.serviceName?uncap_first}.findById(${entity?uncap_first}.get${keyPropertyName?cap_first}()).orElse(null);
         if(${entity?uncap_first}Old==null){
             throw new MMException("数据库不存在该记录");
