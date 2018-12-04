@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.query.BaseMachineQuery;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -37,7 +38,7 @@ public class BaseMachineController {
     @RequestMapping("/list")
     @ApiOperation(value="机台主档列表")
     @UserOperationLog("机台主档列表")
-    public ResponseMessage<PageUtil<BaseMachine>> list(Query query){
+    public ResponseMessage<PageUtil<BaseMachine>> list(BaseMachineQuery query){
         PageUtil<BaseMachine> page = baseMachineService.list(query);
         return ResponseMessage.ok(page);
     }

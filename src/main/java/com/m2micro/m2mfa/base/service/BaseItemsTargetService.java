@@ -4,6 +4,9 @@ import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+
+import java.util.List;
+
 /**
  * 参考资料对应表 服务类
  * @author liaotao
@@ -17,4 +20,12 @@ public interface BaseItemsTargetService extends BaseService<BaseItemsTarget,Stri
      * @return  分页信息
      */
     PageUtil<BaseItemsTarget> list(Query query);
+
+    /**
+     * 根据资料维护主表名称获取所有参考资料
+     * @param itemName
+     *          资料维护主表名称
+     * @return  资料对应表的所有详情
+     */
+    List<BaseItemsTarget> getAllItemsTarget(String itemName);
 }

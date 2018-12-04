@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -18,6 +19,9 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * 参考资料对应表 前端控制器
@@ -90,6 +94,18 @@ public class BaseItemsTargetController {
     public ResponseMessage delete(@RequestBody String[] ids){
         baseItemsTargetService.deleteByIds(ids);
         return ResponseMessage.ok();
+    }
+
+    /**
+     * 获取所有的资料信息
+     */
+    @RequestMapping("/getAllItemsTarget")
+    @ApiOperation(value="获取所有参考资料")
+    @UserOperationLog("获取所有参考资料")
+    public ResponseMessage getAllItemsTarget(@ApiParam("名称")String itemName){
+        List<BaseItemsTarget> list = baseItemsTargetService.getAllItemsTarget(itemName);
+        String[] itemNames = list.stream().map(BaseItemsTarget::getItemName).toArray(String[]::new);
+        return ResponseMessage.ok(itemNames);
     }
 
 }
