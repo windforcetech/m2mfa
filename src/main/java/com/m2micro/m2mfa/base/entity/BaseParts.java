@@ -45,6 +45,8 @@ public class BaseParts extends BaseEntity implements Serializable {
     private String grade;
     @ApiModelProperty(value = "物料来源")
     private String source;
+    @ApiModelProperty(value = "类型")
+    private String category;
     @ApiModelProperty(value = "单重/净重(单位kg)")
     private BigDecimal single;
     @ApiModelProperty(value = "检验否")
@@ -137,6 +139,14 @@ public class BaseParts extends BaseEntity implements Serializable {
     }
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public BigDecimal getSingle() {

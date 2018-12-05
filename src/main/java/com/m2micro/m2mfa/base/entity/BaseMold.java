@@ -35,6 +35,8 @@ public class BaseMold extends BaseEntity implements Serializable {
     private String name;
     @ApiModelProperty(value = "固资编号")
     private String assdtId;
+    @ApiModelProperty(value = "所属客户")
+    private String customerId;
     @ApiModelProperty(value = "分类")
     @NotEmpty(message="分类不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String categoryId;
@@ -134,6 +136,14 @@ public class BaseMold extends BaseEntity implements Serializable {
     }
     public void setAssdtId(String assdtId) {
         this.assdtId = assdtId;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
 
     public String getCategoryId() {

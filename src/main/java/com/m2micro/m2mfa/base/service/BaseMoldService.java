@@ -4,6 +4,10 @@ import com.m2micro.m2mfa.base.entity.BaseMold;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.query.BaseMoldQuery;
+
+import java.util.List;
+
 /**
  * 模具主档 服务类
  * @author liaotao
@@ -16,5 +20,20 @@ public interface BaseMoldService extends BaseService<BaseMold,String> {
      *         查询参数
      * @return  分页信息
      */
-    PageUtil<BaseMold> list(Query query);
+    PageUtil<BaseMold> list(BaseMoldQuery query);
+
+    /**
+     * 根据编号查找模具
+     * @param code
+     * @return
+     */
+    List<BaseMold> findAllByCode(String code);
+
+    /**
+     * 校验code唯一性
+     * @param code
+     * @param moldId
+     * @return
+     */
+    List<BaseMold> findByCodeAndMoldIdNot(String code, String moldId);
 }

@@ -20,6 +20,8 @@ import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 机台主档 前端控制器
  * @author liaotao
@@ -63,6 +65,11 @@ public class BaseMachineController {
     public ResponseMessage<BaseMachine> save(@RequestBody BaseMachine baseMachine){
         ValidatorUtil.validateEntity(baseMachine, AddGroup.class);
         baseMachine.setMachineId(UUIDUtil.getUUID());
+        //校验code唯一性
+        List<BaseMachine> list = baseMachineService.findAllByCode(baseMachine.getCode());
+        if(list!=null&&list.size()>0){
+            throw new MMException("编号不唯一！");
+        }
         return ResponseMessage.ok(baseMachineService.save(baseMachine));
     }
 
@@ -77,6 +84,10 @@ public class BaseMachineController {
         BaseMachine baseMachineOld = baseMachineService.findById(baseMachine.getMachineId()).orElse(null);
         if(baseMachineOld==null){
             throw new MMException("数据库不存在该记录");
+        }
+        List<BaseMachine> list = baseMachineService.findByCodeAndMachineIdNot(baseMachine.getCode(),baseMachine.getMachineId());
+        if(list!=null&&list.size()>0){
+            throw new MMException("编号不唯一！");
         }
         PropertyUtil.copy(baseMachine,baseMachineOld);
         return ResponseMessage.ok(baseMachineService.save(baseMachineOld));

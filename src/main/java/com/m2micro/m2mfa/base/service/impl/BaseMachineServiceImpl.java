@@ -55,4 +55,14 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 
+    @Override
+    public List<BaseMachine> findAllByCode(String code) {
+        return baseMachineRepository.findAllByCode(code);
+    }
+
+    @Override
+    public List<BaseMachine> findByCodeAndMachineIdNot(String code, String machineId) {
+        return baseMachineRepository.findByCodeAndMachineIdNot(code,machineId);
+    }
+
 }
