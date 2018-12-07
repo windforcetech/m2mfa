@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.service.BaseShiftService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -18,6 +19,8 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseShift;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * 班别基本资料 前端控制器
@@ -62,6 +65,11 @@ public class BaseShiftController {
     public ResponseMessage<BaseShift> save(@RequestBody BaseShift baseShift){
         ValidatorUtil.validateEntity(baseShift, AddGroup.class);
         baseShift.setShiftId(UUIDUtil.getUUID());
+        //校验编号唯一性
+        List<BaseShift> list = baseShiftService.findByCodeAndShiftIdNot(baseShift.getCode(),"");
+        if(list!=null&&list.size()>0){
+            throw new MMException("编号不唯一！");
+        }
         return ResponseMessage.ok(baseShiftService.save(baseShift));
     }
 
@@ -76,6 +84,11 @@ public class BaseShiftController {
         BaseShift baseShiftOld = baseShiftService.findById(baseShift.getShiftId()).orElse(null);
         if(baseShiftOld==null){
             throw new MMException("数据库不存在该记录");
+        }
+        //校验编号唯一性
+        List<BaseShift> list = baseShiftService.findByCodeAndShiftIdNot(baseShift.getCode(),baseShift.getShiftId());
+        if(list!=null&&list.size()>0){
+            throw new MMException("编号不唯一！");
         }
         PropertyUtil.copy(baseShift,baseShiftOld);
         return ResponseMessage.ok(baseShiftService.save(baseShiftOld));

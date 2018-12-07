@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.m2micro.m2mfa.base.query.BaseCustomerQuery;
 import com.m2micro.m2mfa.base.service.BaseCustomerService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -19,6 +20,8 @@ import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 客户基本资料档 前端控制器
  * @author liaotao
@@ -37,7 +40,7 @@ public class BaseCustomerController {
     @RequestMapping("/list")
     @ApiOperation(value="客户基本资料档列表")
     @UserOperationLog("客户基本资料档列表")
-    public ResponseMessage<PageUtil<BaseCustomer>> list(Query query){
+    public ResponseMessage<PageUtil<BaseCustomer>> list(BaseCustomerQuery query){
         PageUtil<BaseCustomer> page = baseCustomerService.list(query);
         return ResponseMessage.ok(page);
     }
@@ -62,6 +65,10 @@ public class BaseCustomerController {
     public ResponseMessage<BaseCustomer> save(@RequestBody BaseCustomer baseCustomer){
         //ValidatorUtil.validateEntity(baseCustomer, AddGroup.class);
         baseCustomer.setCustomerId(UUIDUtil.getUUID());
+        List<BaseCustomer> list = baseCustomerService.findByCodeAndCustomerIdNot(baseCustomer.getCode(),"");
+        if(list!=null&&list.size()>0){
+            throw new MMException("编号不唯一！");
+        }
         return ResponseMessage.ok(baseCustomerService.save(baseCustomer));
     }
 
@@ -76,6 +83,10 @@ public class BaseCustomerController {
         BaseCustomer baseCustomerOld = baseCustomerService.findById(baseCustomer.getCustomerId()).orElse(null);
         if(baseCustomerOld==null){
             throw new MMException("数据库不存在该记录");
+        }
+        List<BaseCustomer> list = baseCustomerService.findByCodeAndCustomerIdNot(baseCustomer.getCode(),baseCustomer.getCustomerId());
+        if(list!=null&&list.size()>0){
+            throw new MMException("编号不唯一！");
         }
         PropertyUtil.copy(baseCustomer,baseCustomerOld);
         return ResponseMessage.ok(baseCustomerService.save(baseCustomerOld));

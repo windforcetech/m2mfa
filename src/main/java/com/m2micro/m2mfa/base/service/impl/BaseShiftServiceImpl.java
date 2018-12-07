@@ -38,4 +38,9 @@ public class BaseShiftServiceImpl implements BaseShiftService {
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 
+    @Override
+    public List<BaseShift> findByCodeAndShiftIdNot(String code, String shiftId) {
+        return baseShiftRepository.findByCodeAndShiftIdNot(code, shiftId);
+    }
+
 }

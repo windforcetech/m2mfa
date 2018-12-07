@@ -4,6 +4,9 @@ import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+
+import java.util.List;
+
 /**
  * 班别基本资料 服务类
  * @author liaotao
@@ -17,4 +20,14 @@ public interface BaseShiftService extends BaseService<BaseShift,String> {
      * @return  分页信息
      */
     PageUtil<BaseShift> list(Query query);
+
+    /**
+     * 根据编号和id查找班别
+     * @param code
+     *              编号
+     * @param shiftId
+     *              主键
+     * @return     班别基本资料
+     */
+    List<BaseShift> findByCodeAndShiftIdNot(String code , String shiftId);
 }
