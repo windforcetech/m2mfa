@@ -23,7 +23,7 @@
         <project.build.locales>zh_CN</project.build.locales>
         <java.version>1.8</java.version>
         <project.build.jdk>${java.version}</project.build.jdk>
-        <docker.image.prefix>M2Micro</docker.image.prefix>
+        <docker.image.prefix>m2micro</docker.image.prefix>
     </properties>
 
     <dependencyManagement>
@@ -190,8 +190,21 @@
                 <groupId>com.spotify</groupId>
                 <artifactId>dockerfile-maven-plugin</artifactId>
                 <version>1.3.6</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <repository>${docker.image.prefix}/${project.artifactId}</repository>
+                    <!--<tag>${project.version}</tag>-->
+                    <buildArgs>
+                        <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
                 </configuration>
             </plugin>
         </plugins>
