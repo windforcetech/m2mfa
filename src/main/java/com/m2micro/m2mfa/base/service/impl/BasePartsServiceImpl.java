@@ -73,14 +73,14 @@ public class BasePartsServiceImpl implements BasePartsService {
     @Override
     @Transactional
     public void deleteAllByIds(String[] ids) {
-        //删除物料时检查有没有发生业务，通过物料编号【Part_No】，查询工单主表【Mes_Mo_Desc】。
+        //删除物料时检查有没有发生业务，通过物料编号【Part_Id】，查询工单主表【Mes_Mo_Desc】。
         //如已产生业务，提示已有业务不允许删除。
         for (String id:ids){
             BaseParts bp = findById(id).orElse(null);
             if(bp==null){
                 throw new MMException("数据库不存在数据！");
             }
-            List<MesMoDesc> list = mesMoDescRepository.findByPartNo(bp.getPartNo());
+            List<MesMoDesc> list = mesMoDescRepository.findByPartId(bp.getPartId());
             if(list!=null&&list.size()>0){
                 throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
             }

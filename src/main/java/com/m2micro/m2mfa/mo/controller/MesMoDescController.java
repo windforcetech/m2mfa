@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.mo.controller;
 
+import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -19,10 +20,12 @@ import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 工单主档 前端控制器
  * @author liaotao
- * @since 2018-11-30
+ * @since 2018-12-10
  */
 @RestController
 @RequestMapping("/mo/mesMoDesc")
@@ -37,7 +40,7 @@ public class MesMoDescController {
     @RequestMapping("/list")
     @ApiOperation(value="工单主档列表")
     @UserOperationLog("工单主档列表")
-    public ResponseMessage<PageUtil<MesMoDesc>> list(Query query){
+    public ResponseMessage<PageUtil<MesMoDesc>> list(MesMoDescQuery query){
         PageUtil<MesMoDesc> page = mesMoDescService.list(query);
         return ResponseMessage.ok(page);
     }
@@ -61,7 +64,11 @@ public class MesMoDescController {
     @UserOperationLog("保存工单主档")
     public ResponseMessage<MesMoDesc> save(@RequestBody MesMoDesc mesMoDesc){
         ValidatorUtil.validateEntity(mesMoDesc, AddGroup.class);
-        mesMoDesc.setMoNumber(UUIDUtil.getUUID());
+        mesMoDesc.setMoId(UUIDUtil.getUUID());
+        List<MesMoDesc> list = mesMoDescService.findByMoNumberAndMoIdNot(mesMoDesc.getMoNumber(),"");
+        if(list!=null&&list.size()>0){
+            throw new MMException("工单号码不唯一！");
+        }
         return ResponseMessage.ok(mesMoDescService.save(mesMoDesc));
     }
 
@@ -73,9 +80,13 @@ public class MesMoDescController {
     @UserOperationLog("更新工单主档")
     public ResponseMessage<MesMoDesc> update(@RequestBody MesMoDesc mesMoDesc){
         ValidatorUtil.validateEntity(mesMoDesc, UpdateGroup.class);
-        MesMoDesc mesMoDescOld = mesMoDescService.findById(mesMoDesc.getMoNumber()).orElse(null);
+        MesMoDesc mesMoDescOld = mesMoDescService.findById(mesMoDesc.getMoId()).orElse(null);
         if(mesMoDescOld==null){
             throw new MMException("数据库不存在该记录");
+        }
+        List<MesMoDesc> list = mesMoDescService.findByMoNumberAndMoIdNot(mesMoDesc.getMoNumber(),mesMoDesc.getMoId());
+        if(list!=null&&list.size()>0){
+            throw new MMException("工单号码不唯一！");
         }
         PropertyUtil.copy(mesMoDesc,mesMoDescOld);
         return ResponseMessage.ok(mesMoDescService.save(mesMoDescOld));
@@ -88,7 +99,7 @@ public class MesMoDescController {
     @ApiOperation(value="删除工单主档")
     @UserOperationLog("删除工单主档")
     public ResponseMessage delete(@RequestBody String[] ids){
-        mesMoDescService.deleteByIds(ids);
+        mesMoDescService.deleteAll(ids);
         return ResponseMessage.ok();
     }
 

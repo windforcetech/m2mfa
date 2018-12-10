@@ -16,25 +16,26 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * 工单主档
  * @author liaotao
- * @since 2018-11-30
+ * @since 2018-12-10
  */
 @Entity
 @ApiModel(value="MesMoDesc对象", description="工单主档")
 public class MesMoDesc extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @ApiModelProperty(value = "工单号码")
+    @ApiModelProperty(value = "工单id")
     @Id
     @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
+    private String moId;
+    @ApiModelProperty(value = "工单号码")
+    @NotEmpty(message="工单号码不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String moNumber;
     @ApiModelProperty(value = "工单类型")
+    @NotEmpty(message="工单类型不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String category;
-    @ApiModelProperty(value = "料件编号")
-    @NotEmpty(message="料件编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
-    private String partNo;
-    @ApiModelProperty(value = "品名")
-    @NotEmpty(message="品名不能为空",groups = {AddGroup.class, UpdateGroup.class})
-    private String partName;
+    @NotEmpty(message="料件id不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @ApiModelProperty(value = "料件id")
+    private String partId;
     @ApiModelProperty(value = "目标量")
     @NotNull(message="目标量不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private Integer targetQty;
@@ -89,6 +90,13 @@ public class MesMoDesc extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     private String description;
 
+    public String getMoId() {
+        return moId;
+    }
+    public void setMoId(String moId) {
+        this.moId = moId;
+    }
+
     public String getMoNumber() {
         return moNumber;
     }
@@ -103,18 +111,11 @@ public class MesMoDesc extends BaseEntity implements Serializable {
         this.category = category;
     }
 
-    public String getPartNo() {
-        return partNo;
+    public String getPartId() {
+        return partId;
     }
-    public void setPartNo(String partNo) {
-        this.partNo = partNo;
-    }
-
-    public String getPartName() {
-        return partName;
-    }
-    public void setPartName(String partName) {
-        this.partName = partName;
+    public void setPartId(String partId) {
+        this.partId = partId;
     }
 
     public Integer getTargetQty() {
