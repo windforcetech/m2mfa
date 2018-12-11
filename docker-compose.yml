@@ -5,7 +5,7 @@ services:
     build:
       context: .
       args:
-        - JAR_FILE=target/m2mfa-1.0-SNAPSHOT.jar
+        - JAR_FILE=target/m2mfa-2.0.0-SNAPSHOT.jar
       dockerfile: Dockerfile
     ports:
       - 8081:8081
