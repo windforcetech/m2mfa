@@ -75,6 +75,7 @@ public class BasePartsServiceImpl implements BasePartsService {
     public void deleteAllByIds(String[] ids) {
         //删除物料时检查有没有发生业务，通过物料编号【Part_Id】，查询工单主表【Mes_Mo_Desc】。
         //如已产生业务，提示已有业务不允许删除。
+        //这里可以优化，做关联查询。
         for (String id:ids){
             BaseParts bp = findById(id).orElse(null);
             if(bp==null){
