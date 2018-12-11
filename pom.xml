@@ -140,11 +140,11 @@
                 </exclusion>
             </exclusions>-->
         </dependency>
-       <!--  <dependency>
+        <dependency>
             <groupId>com.m2micro</groupId>
             <artifactId>m2mfa-ui</artifactId>
             <version>${project.version}</version>
-        </dependency>-->
+        </dependency>
 
     </dependencies>
 
