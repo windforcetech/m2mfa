@@ -4,6 +4,7 @@ package com.m2micro.m2mfa.base.entity;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
@@ -36,32 +37,40 @@ public class BaseShift extends BaseEntity implements Serializable {
     @NotEmpty(message="类型不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String category;
     @ApiModelProperty(value = "上班1")
+    @Pattern(regexp="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]",message="日期格式不正确",groups = {AddGroup.class, UpdateGroup.class})
     private String onTime1;
     @ApiModelProperty(value = "下班1")
+    @Pattern(regexp="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]",message="日期格式不正确",groups = {AddGroup.class, UpdateGroup.class})
     private String offTime1;
     @ApiModelProperty(value = "累计休息1")
     private Integer restTime1;
     @ApiModelProperty(value = "时间类型")
     private String timeCategory1;
     @ApiModelProperty(value = "上班2")
+    @Pattern(regexp="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]",message="日期格式不正确",groups = {AddGroup.class, UpdateGroup.class})
     private String onTime2;
     @ApiModelProperty(value = "下班2")
+    @Pattern(regexp="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]",message="日期格式不正确",groups = {AddGroup.class, UpdateGroup.class})
     private String offTime2;
     @ApiModelProperty(value = "累计休息2")
     private Integer restTime2;
     @ApiModelProperty(value = "时间类型2")
     private String timeCategory2;
     @ApiModelProperty(value = "上班3")
+    @Pattern(regexp="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]",message="日期格式不正确",groups = {AddGroup.class, UpdateGroup.class})
     private String onTime3;
     @ApiModelProperty(value = "下班3")
+    @Pattern(regexp="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]",message="日期格式不正确",groups = {AddGroup.class, UpdateGroup.class})
     private String offTime3;
     @ApiModelProperty(value = "累计休息3")
     private Integer restTime3;
     @ApiModelProperty(value = "时间类型3")
     private String timeCategory3;
     @ApiModelProperty(value = "上班4")
+    @Pattern(regexp="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]",message="日期格式不正确",groups = {AddGroup.class, UpdateGroup.class})
     private String onTime4;
     @ApiModelProperty(value = "下班4")
+    @Pattern(regexp="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]",message="日期格式不正确",groups = {AddGroup.class, UpdateGroup.class})
     private String offTime4;
     @ApiModelProperty(value = "累计休息4")
     private Integer restTime4;
