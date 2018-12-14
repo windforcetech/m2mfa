@@ -44,8 +44,8 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(StringUtils.isNotEmpty(query.getMoNumber())){
             condition.and(qMesMoDesc.moNumber.like("%"+query.getMoNumber()+"%"));
         }
-        if(query.getCloseFlag()!=null){
-            condition.and(qMesMoDesc.closeFlag.eq(query.getCloseFlag()));
+        if(StringUtils.isNotEmpty(query.getCloseFlag())){
+            condition.and(qMesMoDesc.closeFlag.eq(Integer.valueOf(query.getCloseFlag())));
         }
         if (query.getStartTime() != null) {
             condition.and(qMesMoDesc.planInputDate.goe(query.getStartTime()));

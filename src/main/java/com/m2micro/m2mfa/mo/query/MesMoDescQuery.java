@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.mo.query;
 import com.m2micro.framework.commons.util.Query;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiParam;
 
 
 /**
@@ -15,7 +16,7 @@ public class MesMoDescQuery extends Query {
     @ApiModelProperty(value = "工单号码")
     private String moNumber;
     @ApiModelProperty(value = "工单状态")
-    private Integer closeFlag;
+    private String closeFlag;
 
     public String getMoNumber() {
         return moNumber;
@@ -25,11 +26,11 @@ public class MesMoDescQuery extends Query {
         this.moNumber = moNumber;
     }
 
-    public Integer getCloseFlag() {
+    public String getCloseFlag() {
         return closeFlag;
     }
 
-    public void setCloseFlag(Integer closeFlag) {
+    public void setCloseFlag(String closeFlag) {
         this.closeFlag = closeFlag;
     }
 }
