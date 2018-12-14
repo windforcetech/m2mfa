@@ -27,6 +27,7 @@
         <m2micro.framework.version>1.0.0-SNAPSHOT</m2micro.framework.version>
         <joda>2.10</joda>
         <mybatis.plus>3.0.1</mybatis.plus>
+        <flowable.version>6.4.0</flowable.version>
     </properties>
 
     <dependencyManagement>
@@ -88,6 +89,22 @@
             <version>${mybatis.plus}</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-spring-boot-starter</artifactId>
+            <version>${flowable.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-bpmn-layout</artifactId>
+            <version>${flowable.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-process-validation</artifactId>
+            <version>${flowable.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
