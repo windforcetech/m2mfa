@@ -90,7 +90,7 @@
         </dependency>
 
 
-        <dependency>
+        <!--<dependency>
             <groupId>org.flowable</groupId>
             <artifactId>flowable-spring-boot-starter</artifactId>
             <version>${flowable.version}</version>
@@ -104,7 +104,7 @@
             <groupId>org.flowable</groupId>
             <artifactId>flowable-process-validation</artifactId>
             <version>${flowable.version}</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>org.projectlombok</groupId>
