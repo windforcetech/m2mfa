@@ -2,6 +2,8 @@ package com.m2micro.m2mfa.mo.repository;
 
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.framework.commons.BaseRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -36,6 +38,18 @@ public interface MesMoDescRepository extends BaseRepository<MesMoDesc,String> {
      * @return
      */
     List<MesMoDesc> findByMoNumberAndMoIdNot(String moNumber,String moId);
+
+    /**
+     * 更新工单状态
+     * @param closeFlag
+     *          状态
+     * @param moId
+     *          工单id
+     * @return
+     */
+    @Modifying
+    @Query("update MesMoDesc m set m.closeFlag = ?1 where m.moId = ?2")
+    Integer setCloseFlagFor(Integer closeFlag, String moId);
 
 
 }

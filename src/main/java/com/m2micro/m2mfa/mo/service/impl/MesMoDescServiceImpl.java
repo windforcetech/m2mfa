@@ -83,4 +83,81 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         deleteByIds(ids);
     }
 
+    @Override
+    @Transactional
+    public void auditing(String id) {
+        MesMoDesc mesMoDesc = mesMoDescRepository.findById(id).orElse(null);
+        if(mesMoDesc==null){
+            throw new MMException("不存在该工单");
+        }
+        // 当工单状态为  初始时Close_flag=0  才可以进行审核 Close_flag=1
+        if(!MoStatus.INITIAL.getKey().equals(mesMoDesc.getCloseFlag())){
+            throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许审核！");
+        }
+        //更改为已审待排
+        mesMoDescRepository.setCloseFlagFor(MoStatus.AUDITED.getKey(),mesMoDesc.getMoId());
+    }
+
+    @Override
+    @Transactional
+    public void cancel(String id) {
+        MesMoDesc mesMoDesc = mesMoDescRepository.findById(id).orElse(null);
+        if(mesMoDesc==null){
+            throw new MMException("不存在该工单");
+        }
+        //工单状态【Close_Flag】为：已审待排=1  已排产=2  时允许取消审核  SET Close_Flag=0
+        if(!(MoStatus.AUDITED.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.SCHEDULED.getKey().equals(mesMoDesc.getCloseFlag()))){
+            throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许反审！");
+        }
+        //更改为初始状态
+        mesMoDescRepository.setCloseFlagFor(MoStatus.INITIAL.getKey(),mesMoDesc.getMoId());
+    }
+
+    @Override
+    @Transactional
+    public void frozen(String id) {
+        MesMoDesc mesMoDesc = mesMoDescRepository.findById(id).orElse(null);
+        if(mesMoDesc==null){
+            throw new MMException("不存在该工单");
+        }
+        //只有工单状态 close_flag=3时 ， 才可以冻结  SET close_flag=12
+        if(!MoStatus.PRODUCTION.getKey().equals(mesMoDesc.getCloseFlag())){
+            throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许冻结！");
+        }
+        //更改为冻结状态
+        mesMoDescRepository.setCloseFlagFor(MoStatus.FROZEN.getKey(),mesMoDesc.getMoId());
+    }
+
+    @Override
+    @Transactional
+    public void unfreeze(String id) {
+        MesMoDesc mesMoDesc = mesMoDescRepository.findById(id).orElse(null);
+        if(mesMoDesc==null){
+            throw new MMException("不存在该工单");
+        }
+        if(!MoStatus.FROZEN.getKey().equals(mesMoDesc.getCloseFlag())){
+            throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不需要解冻！");
+        }
+        //更改为生产状态
+        mesMoDescRepository.setCloseFlagFor(MoStatus.PRODUCTION.getKey(),mesMoDesc.getMoId());
+    }
+
+    @Override
+    @Transactional
+    public void forceClose(String id) {
+        MesMoDesc mesMoDesc = mesMoDescRepository.findById(id).orElse(null);
+        if(mesMoDesc==null){
+            throw new MMException("不存在该工单");
+        }
+        //工单状态  若Close_Flag >=10 （结案10，强制结案11，冻结12） 不允许强制结案。
+        if(MoStatus.CLOSE.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.FORCECLOSE.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.FROZEN.getKey().equals(mesMoDesc.getCloseFlag())){
+            throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许强制结案！");
+        }
+        //更改为强制结案状态
+        mesMoDescRepository.setCloseFlagFor(MoStatus.FORCECLOSE.getKey(),mesMoDesc.getMoId());
+    }
+
 }

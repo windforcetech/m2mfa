@@ -103,4 +103,61 @@ public class MesMoDescController {
         return ResponseMessage.ok();
     }
 
+    /**
+     * 审核
+     */
+    @RequestMapping("/auditing/{id}")
+    @ApiOperation(value="审核工单")
+    @UserOperationLog("审核工单")
+    public ResponseMessage<MesMoDesc> auditing(@PathVariable("id") String id){
+        mesMoDescService.auditing(id);
+        return ResponseMessage.ok();
+    }
+
+
+    /**
+     * 取消审核
+     */
+    @RequestMapping("/cancel/{id}")
+    @ApiOperation(value="取消审核工单")
+    @UserOperationLog("取消审核工单")
+    public ResponseMessage<MesMoDesc> cancel(@PathVariable("id") String id){
+        mesMoDescService.cancel(id);
+        return ResponseMessage.ok();
+    }
+
+    /**
+     * 冻结
+     */
+    @RequestMapping("/frozen/{id}")
+    @ApiOperation(value="冻结工单")
+    @UserOperationLog("冻结工单")
+    public ResponseMessage<MesMoDesc> frozen(@PathVariable("id") String id){
+        mesMoDescService.frozen(id);
+        return ResponseMessage.ok();
+    }
+
+    /**
+     * 解冻
+     */
+    @RequestMapping("/unfreeze/{id}")
+    @ApiOperation(value="解冻工单")
+    @UserOperationLog("解冻工单")
+    public ResponseMessage<MesMoDesc> unfreeze(@PathVariable("id") String id){
+        mesMoDescService.unfreeze(id);
+        return ResponseMessage.ok();
+    }
+
+
+    /**
+     * 强制结案
+     */
+    @RequestMapping("/forceClose/{id}")
+    @ApiOperation(value="工单强制结案")
+    @UserOperationLog("工单强制结案")
+    public ResponseMessage<MesMoDesc> forceClose(@PathVariable("id") String id){
+        mesMoDescService.forceClose(id);
+        return ResponseMessage.ok();
+    }
+
 }

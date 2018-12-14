@@ -38,4 +38,39 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      *      主键id数组
      */
     void deleteAll(String[] ids);
+
+    /**
+     * 审核工单
+     * @param id
+     *      工单id
+     */
+    void auditing(String id);
+
+    /**
+     * 取消审核工单
+     * @param id
+     *      工单id
+     */
+    void cancel(String id);
+
+    /**
+     * 冻结工单
+     * @param id
+     *      工单id
+     */
+    void frozen(String id);
+
+    /**
+     * 解冻工单
+     * @param id
+     *      工单id
+     */
+    void unfreeze(String id);
+
+    /**
+     * 强制结案
+     * @param id
+     *      工单id
+     */
+    void forceClose(String id);
 }
