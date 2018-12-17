@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BaseRouteDefRepository extends BaseRepository<BaseRouteDef,String> {
 
+
     @Query("select r.routeDefId  from  BaseRouteDef  as r  where r.processId =?1 ")
     public String  selectoneprocessId(String processId);
+
 }
