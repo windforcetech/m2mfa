@@ -17,9 +17,8 @@ public interface BaseRouteDefService extends BaseService<BaseRouteDef,String> {
      * @return  分页信息
      */
     PageUtil<BaseRouteDef> list(Query query);
-<<<<<<< HEAD
+
 
     String selectoneprocessId(String processId);
-=======
->>>>>>> origin/dev
+
 }
