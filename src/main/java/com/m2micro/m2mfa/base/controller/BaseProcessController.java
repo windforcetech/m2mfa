@@ -1,20 +1,15 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.m2mfa.base.service.BaseProcessService;
-import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.common.util.ValidatorUtil;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import com.m2micro.m2mfa.base.vo.Processvo;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
-import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseProcess;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,64 +27,60 @@ public class BaseProcessController {
     BaseProcessService baseProcessService;
 
     /**
-     * 列表
+     * 添加工序
      */
-    @RequestMapping("/list")
-    @ApiOperation(value="工序基本档列表")
-    @UserOperationLog("工序基本档列表")
-    public ResponseMessage<PageUtil<BaseProcess>> list(Query query){
-        PageUtil<BaseProcess> page = baseProcessService.list(query);
-        return ResponseMessage.ok(page);
-    }
-
-    /**
-     * 详情
-     */
-    @RequestMapping("/info/{id}")
-    @ApiOperation(value="工序基本档详情")
-    @UserOperationLog("工序基本档详情")
-    public ResponseMessage<BaseProcess> info(@PathVariable("id") String id){
-        BaseProcess baseProcess = baseProcessService.findById(id).orElse(null);
-        return ResponseMessage.ok(baseProcess);
-    }
-
-    /**
-     * 保存
-     */
-    @RequestMapping("/save")
-    @ApiOperation(value="保存工序基本档")
-    @UserOperationLog("保存工序基本档")
-    public ResponseMessage<BaseProcess> save(@RequestBody BaseProcess baseProcess){
-        ValidatorUtil.validateEntity(baseProcess, AddGroup.class);
-        baseProcess.setProcessId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(baseProcessService.save(baseProcess));
-    }
-
-    /**
-     * 更新
-     */
-    @RequestMapping("/update")
-    @ApiOperation(value="更新工序基本档")
-    @UserOperationLog("更新工序基本档")
-    public ResponseMessage<BaseProcess> update(@RequestBody BaseProcess baseProcess){
-        ValidatorUtil.validateEntity(baseProcess, UpdateGroup.class);
-        BaseProcess baseProcessOld = baseProcessService.findById(baseProcess.getProcessId()).orElse(null);
-        if(baseProcessOld==null){
-            throw new MMException("数据库不存在该记录");
+    @PostMapping("/save")
+    @ApiOperation(value="添加工序")
+    @UserOperationLog("添加工序")
+    @ResponseBody
+    public ResponseMessage save(@RequestBody Processvo processvo){
+        if(baseProcessService.save(processvo.getBaseProcess(),processvo.getBaseProcessStation(),processvo.getBasePageElemen())){
+            return ResponseMessage.ok("添加工序成功。");
         }
-        PropertyUtil.copy(baseProcess,baseProcessOld);
-        return ResponseMessage.ok(baseProcessService.save(baseProcessOld));
+        return ResponseMessage.error("添加工序失败。");
     }
 
+
     /**
-     * 删除
+     * 修改工序
      */
-    @RequestMapping("/delete")
-    @ApiOperation(value="删除工序基本档")
-    @UserOperationLog("删除工序基本档")
-    public ResponseMessage delete(@RequestBody String[] ids){
-        baseProcessService.deleteByIds(ids);
-        return ResponseMessage.ok();
+    @PostMapping("/update")
+    @ApiOperation(value="修改工序")
+    @UserOperationLog("修改工序")
+    @ResponseBody
+    public ResponseMessage update(@RequestBody Processvo processvo){
+        if(baseProcessService.update(processvo.getBaseProcess(),processvo.getBaseProcessStation(),processvo.getBasePageElemen())){
+            return ResponseMessage.ok("修改工序成功。");
+        }
+        return ResponseMessage.error("修改工序失败工序编号有误。");
     }
+
+
+    /**
+     * 查询工序
+     */
+    @PostMapping("/list")
+    @ApiOperation(value="查询工序")
+    @UserOperationLog("查询工序")
+    @ResponseBody
+    public ResponseMessage<PageUtil<BaseProcess>> list(@ApiParam(required = false,value = "工序编码")  @RequestParam(required = false) String processCode ,@ApiParam(required = false,value = "工序名称")  @RequestParam(required = false) String processName
+   , @ApiParam(required = false,value = "工序类型")  @RequestParam(required = false) String category,@ApiParam(value = "当前页数" ,required=false,defaultValue = "1") @RequestParam(required = true) Integer page,
+                                                       @ApiParam(value = "获取条数" ,required=false,defaultValue = "10") @RequestParam(required = true) Integer size ){
+        return ResponseMessage.ok(baseProcessService.list(processCode,  processName,  category, page, size));
+    }
+
+
+
+    /**
+     * 删除工序
+     */
+    @PostMapping("/delete")
+    @ApiOperation(value="删除工序")
+    @UserOperationLog("删除工序")
+    @ResponseBody
+    public ResponseMessage delete(@ApiParam(required = true,value = "工序Id")  @RequestParam(required = true) String processId ){
+        return baseProcessService.delete(processId);
+    }
+
 
 }

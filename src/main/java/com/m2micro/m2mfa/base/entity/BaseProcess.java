@@ -3,9 +3,13 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -21,17 +25,24 @@ public class BaseProcess extends BaseEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @ApiModelProperty(value = "主键")
     @Id
+    @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
     private String processId;
+    @NotEmpty(message="工艺编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "编号")
     private String processCode;
+    @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "名称")
     private String processName;
+    @NotEmpty(message="数据采集方式不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "数据采集方式")
     private String collection;
+    @NotEmpty(message="类型",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "类型")
     private String category;
+    @NotNull(message="有效否",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
+    @NotEmpty(message="描述不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "描述")
     private String description;
 
