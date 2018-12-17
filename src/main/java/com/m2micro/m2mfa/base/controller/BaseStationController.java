@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.m2micro.m2mfa.base.query.BaseStationQuery;
 import com.m2micro.m2mfa.base.service.BaseStationService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -37,7 +38,7 @@ public class BaseStationController {
     @RequestMapping("/list")
     @ApiOperation(value="工位基本档列表")
     @UserOperationLog("工位基本档列表")
-    public ResponseMessage<PageUtil<BaseStation>> list(Query query){
+    public ResponseMessage<PageUtil<BaseStation>> list(BaseStationQuery query){
         PageUtil<BaseStation> page = baseStationService.list(query);
         return ResponseMessage.ok(page);
     }
@@ -60,9 +61,7 @@ public class BaseStationController {
     @ApiOperation(value="保存工位基本档")
     @UserOperationLog("保存工位基本档")
     public ResponseMessage<BaseStation> save(@RequestBody BaseStation baseStation){
-        ValidatorUtil.validateEntity(baseStation, AddGroup.class);
-        baseStation.setStationId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(baseStationService.save(baseStation));
+        return ResponseMessage.ok(baseStationService.saveEntity(baseStation));
     }
 
     /**
@@ -72,13 +71,7 @@ public class BaseStationController {
     @ApiOperation(value="更新工位基本档")
     @UserOperationLog("更新工位基本档")
     public ResponseMessage<BaseStation> update(@RequestBody BaseStation baseStation){
-        ValidatorUtil.validateEntity(baseStation, UpdateGroup.class);
-        BaseStation baseStationOld = baseStationService.findById(baseStation.getStationId()).orElse(null);
-        if(baseStationOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        PropertyUtil.copy(baseStation,baseStationOld);
-        return ResponseMessage.ok(baseStationService.save(baseStationOld));
+        return ResponseMessage.ok(baseStationService.updateEntity(baseStation));
     }
 
     /**
@@ -88,7 +81,7 @@ public class BaseStationController {
     @ApiOperation(value="删除工位基本档")
     @UserOperationLog("删除工位基本档")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseStationService.deleteByIds(ids);
+        baseStationService.deleteAll(ids);
         return ResponseMessage.ok();
     }
 
