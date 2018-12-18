@@ -16,13 +16,6 @@ import java.util.List;
  * @since 2018-12-14
  */
 public interface BaseProcessService extends BaseService<BaseProcess,String> {
-    /**
-     * 分页查询
-     * @param query
-     *         查询参数
-     * @return  分页信息
-     */
-    PageUtil<BaseProcess> list(Query query);
 
     //添加工艺
      boolean save( BaseProcess baseProcess,  BaseProcessStation baseProcessStation,  BasePageElemen basePageElemen);

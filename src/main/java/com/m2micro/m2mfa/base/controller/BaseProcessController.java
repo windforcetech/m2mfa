@@ -34,10 +34,8 @@ public class BaseProcessController {
     @UserOperationLog("添加工序")
     @ResponseBody
     public ResponseMessage save(@RequestBody Processvo processvo){
-        if(baseProcessService.save(processvo.getBaseProcess(),processvo.getBaseProcessStation(),processvo.getBasePageElemen())){
-            return ResponseMessage.ok("添加工序成功。");
-        }
-        return ResponseMessage.error("添加工序失败。");
+        baseProcessService.save(processvo.getBaseProcess(),processvo.getBaseProcessStation(),processvo.getBasePageElemen());
+        return ResponseMessage.ok("添加工序成功。");
     }
 
 
@@ -49,10 +47,8 @@ public class BaseProcessController {
     @UserOperationLog("修改工序")
     @ResponseBody
     public ResponseMessage update(@RequestBody Processvo processvo){
-        if(baseProcessService.update(processvo.getBaseProcess(),processvo.getBaseProcessStation(),processvo.getBasePageElemen())){
-            return ResponseMessage.ok("修改工序成功。");
-        }
-        return ResponseMessage.error("修改工序失败工序编号有误。");
+        baseProcessService.update(processvo.getBaseProcess(),processvo.getBaseProcessStation(),processvo.getBasePageElemen());
+        return ResponseMessage.ok("修改工序成功。");
     }
 
 

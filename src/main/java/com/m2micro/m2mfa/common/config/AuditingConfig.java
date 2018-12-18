@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.common.config;
 
 
+import com.m2micro.framework.authorization.TokenInfo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -23,8 +24,8 @@ class SpringSecurityAuditAwareImpl implements AuditorAware<String> {
 
     @Override
     public Optional<String> getCurrentAuditor() {
-
-        return Optional.ofNullable("1");
+        TokenInfo tokenInfo = TokenInfo.getTokenInfo("");
+        return Optional.ofNullable(tokenInfo.getUserID());
     }
 
 }
