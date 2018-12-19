@@ -38,4 +38,9 @@ public class BaseProcessStationServiceImpl implements BaseProcessStationService 
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 
+    @Override
+    public void deleteprocessId(String processId) {
+       baseProcessStationRepository.deleteprocessId(processId);
+    }
+
 }

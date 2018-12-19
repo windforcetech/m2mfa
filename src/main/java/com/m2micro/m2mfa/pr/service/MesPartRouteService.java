@@ -17,4 +17,7 @@ public interface MesPartRouteService extends BaseService<MesPartRoute,String> {
      * @return  分页信息
      */
     PageUtil<MesPartRoute> list(Query query);
+
+    //根据工艺id查询业务
+     String selectRouteid(String routeId);
 }

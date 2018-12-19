@@ -16,6 +16,6 @@ import java.util.List;
 public interface BaseProcessRepository extends BaseRepository<BaseProcess,String> {
 
     @Query("select p.processId from BaseProcess  as p  where p.processCode=?1")
-    public String selectprocessCode(String processCode);
+     String selectprocessCode(String processCode);
 
 }

@@ -44,5 +44,10 @@ public class BaseRouteDefServiceImpl implements BaseRouteDefService {
         return baseRouteDefRepository.selectoneprocessId(processId);
     }
 
+    @Override
+    public void deleterouteId(String routeId) {
+        baseRouteDefRepository.deleterouteId(routeId);
+    }
+
 
 }

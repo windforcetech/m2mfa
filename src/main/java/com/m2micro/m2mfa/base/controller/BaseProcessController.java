@@ -36,8 +36,7 @@ public class BaseProcessController {
     @ApiOperation(value="添加工序")
     @UserOperationLog("添加工序")
     public ResponseMessage save(@RequestBody Processvo processvo){
-        baseProcessService.save(processvo.getBaseProcess(),processvo.getBaseProcessStation(),processvo.getBasePageElemen());
-        return ResponseMessage.ok("添加工序成功。");
+        return   baseProcessService.save(processvo.getBaseProcess(),processvo.getBaseProcessStation(),processvo.getBasePageElemen()) ==true ? ResponseMessage.ok("添加工序成功。"): ResponseMessage.error("工序已存在。");
     }
 
 
@@ -48,8 +47,7 @@ public class BaseProcessController {
     @ApiOperation(value="修改工序")
     @UserOperationLog("修改工序")
     public ResponseMessage update(@RequestBody Processvo processvo){
-        baseProcessService.update(processvo.getBaseProcess(),processvo.getBaseProcessStation(),processvo.getBasePageElemen());
-        return ResponseMessage.ok("修改工序成功。");
+        return  baseProcessService.update(processvo.getBaseProcess(),processvo.getBaseProcessStation(),processvo.getBasePageElemen()) == true ?ResponseMessage.ok("修改工序成功。"):ResponseMessage.error("工序编号不存在修改工序失败。");
     }
 
 

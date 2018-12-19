@@ -38,4 +38,9 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 
+    @Override
+    public String selectRouteid(String routeId) {
+        return mesPartRouteRepository.selectRouteid(routeId);
+    }
+
 }

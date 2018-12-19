@@ -56,29 +56,31 @@ public class BaseProcessServiceImpl implements BaseProcessService {
     @Override
     @Transactional
     public boolean save(BaseProcess baseProcess, BaseProcessStation baseProcessStation, BasePageElemen basePageElemen) {
-        String uuid =UUIDUtil.getUUID();
-        baseProcess.setProcessId(uuid);
-        baseProcessStation.setProcessId(uuid);
-        baseProcessStation.setPsId(uuid);
-        basePageElemen.setElemenId(uuid);
-
-        ValidatorUtil.validateEntity(baseProcess, AddGroup.class);
-        ValidatorUtil.validateEntity(baseProcessStation,AddGroup.class);
-        ValidatorUtil.validateEntity(basePageElemen,AddGroup.class);
-
-        baseProcessRepository.save(baseProcess);
-        baseProcessStationService.save(baseProcessStation);
-        basePageElemenService.save(basePageElemen);
-        return true;
+        if(!StringUtils.isNotEmpty(baseProcessRepository.selectprocessCode(baseProcess.getProcessCode()))) {
+            String uuid = UUIDUtil.getUUID();
+            baseProcess.setProcessId(uuid);
+            baseProcessStation.setProcessId(uuid);
+            baseProcessStation.setPsId(UUIDUtil.getUUID());
+            basePageElemen.setElemenId(uuid);
+            ValidatorUtil.validateEntity(baseProcess, AddGroup.class);
+            ValidatorUtil.validateEntity(baseProcessStation, AddGroup.class);
+            ValidatorUtil.validateEntity(basePageElemen, AddGroup.class);
+            baseProcessRepository.save(baseProcess);
+            baseProcessStationService.save(baseProcessStation);
+            basePageElemenService.save(basePageElemen);
+            return true;
+        }
+        return false;
     }
 
     @Override
+    @Transactional
     public boolean update(BaseProcess baseProcess, BaseProcessStation baseProcessStation, BasePageElemen basePageElemen) {
 
-        if(baseProcessRepository.selectprocessCode(baseProcess.getProcessCode())!=null){
-            this.updateById(null,baseProcess);
-            baseProcessStationService.updateById(null,baseProcessStation);
-            basePageElemenService.updateById(null,basePageElemen);
+        if(StringUtils.isNotEmpty(baseProcessRepository.selectprocessCode(baseProcess.getProcessCode()))){
+            this.updateById(baseProcess.getProcessId(),baseProcess);
+            basePageElemenService.updateById(basePageElemen.getElemenId(),basePageElemen);
+            baseProcessStationService.updateById(baseProcessStation.getPsId(),baseProcessStation);
             return  true;
         }
         return false;
@@ -91,7 +93,7 @@ public class BaseProcessServiceImpl implements BaseProcessService {
             throw new MMException("产生业务不允许删除.");
         }
         baseProcessRepository.deleteById(processId);
-        baseProcessStationService.deleteById(processId);
+        baseProcessStationService.deleteprocessId(processId);
         basePageElemenService.deleteById(processId);
         return ResponseMessage.ok();
     }

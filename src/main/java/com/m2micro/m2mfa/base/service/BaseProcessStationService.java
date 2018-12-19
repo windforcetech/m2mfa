@@ -17,4 +17,6 @@ public interface BaseProcessStationService extends BaseService<BaseProcessStatio
      * @return  分页信息
      */
     PageUtil<BaseProcessStation> list(Query query);
+    //根据工序主键删除工序工位关系
+    void deleteprocessId(String processId);
 }
