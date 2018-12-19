@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.m2mfa.base.service.BaseRouteDescService;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.vo.BaseRoutevo;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -31,65 +32,16 @@ public class BaseRouteDescController {
     @Autowired
     BaseRouteDescService baseRouteDescService;
 
-    /**
-     * 列表
-     */
-    @RequestMapping("/list")
-    @ApiOperation(value="生产途程单头列表")
-    @UserOperationLog("生产途程单头列表")
-    public ResponseMessage<PageUtil<BaseRouteDesc>> list(Query query){
-        PageUtil<BaseRouteDesc> page = baseRouteDescService.list(query);
-        return ResponseMessage.ok(page);
-    }
-
-    /**
-     * 详情
-     */
-    @RequestMapping("/info/{id}")
-    @ApiOperation(value="生产途程单头详情")
-    @UserOperationLog("生产途程单头详情")
-    public ResponseMessage<BaseRouteDesc> info(@PathVariable("id") String id){
-        BaseRouteDesc baseRouteDesc = baseRouteDescService.findById(id).orElse(null);
-        return ResponseMessage.ok(baseRouteDesc);
-    }
 
     /**
      * 保存
      */
-    @RequestMapping("/save")
-    @ApiOperation(value="保存生产途程单头")
-    @UserOperationLog("保存生产途程单头")
-    public ResponseMessage<BaseRouteDesc> save(@RequestBody BaseRouteDesc baseRouteDesc){
-        ValidatorUtil.validateEntity(baseRouteDesc, AddGroup.class);
-        baseRouteDesc.setRouteId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(baseRouteDescService.save(baseRouteDesc));
+    @PostMapping("/save")
+    @ApiOperation(value=" 添加工艺")
+    @UserOperationLog("添加工艺")
+    public ResponseMessage save(@RequestBody BaseRoutevo routevo){
+        return baseRouteDescService.save(routevo.getBaseRouteDesc(),routevo.getBaseRouteDef(),routevo.getBasePageElemen())==true ? ResponseMessage.ok(" 添加工艺成功。") : ResponseMessage.error(" 添加工艺失败。");
     }
 
-    /**
-     * 更新
-     */
-    @RequestMapping("/update")
-    @ApiOperation(value="更新生产途程单头")
-    @UserOperationLog("更新生产途程单头")
-    public ResponseMessage<BaseRouteDesc> update(@RequestBody BaseRouteDesc baseRouteDesc){
-        ValidatorUtil.validateEntity(baseRouteDesc, UpdateGroup.class);
-        BaseRouteDesc baseRouteDescOld = baseRouteDescService.findById(baseRouteDesc.getRouteId()).orElse(null);
-        if(baseRouteDescOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        PropertyUtil.copy(baseRouteDesc,baseRouteDescOld);
-        return ResponseMessage.ok(baseRouteDescService.save(baseRouteDescOld));
-    }
-
-    /**
-     * 删除
-     */
-    @RequestMapping("/delete")
-    @ApiOperation(value="删除生产途程单头")
-    @UserOperationLog("删除生产途程单头")
-    public ResponseMessage delete(@RequestBody String[] ids){
-        baseRouteDescService.deleteByIds(ids);
-        return ResponseMessage.ok();
-    }
 
 }

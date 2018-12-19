@@ -3,9 +3,13 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -21,22 +25,31 @@ public class BaseRouteDef extends BaseEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @ApiModelProperty(value = "主键guid")
     @Id
+    @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
     private String routeDefId;
     @ApiModelProperty(value = "工艺主表id")
+    @NotNull(message="工艺主表id不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String routeId;
     @ApiModelProperty(value = "步骤")
+    @NotNull(message="步骤不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private Integer setp;
     @ApiModelProperty(value = "工序")
+    @NotNull(message="工序不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String processId;
     @ApiModelProperty(value = "下一工序")
+    @NotNull(message="下一工序不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String nextprocessId;
     @ApiModelProperty(value = "不良工序")
+    @NotNull(message="不良工序不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String failprocessId;
     @ApiModelProperty(value = "允许跳过")
+    @NotNull(message="允许跳过不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private Integer jump;
     @ApiModelProperty(value = "有效否")
+    @NotNull(message="有效否",groups = {AddGroup.class, UpdateGroup.class})
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
+    @NotNull(message="描述",groups = {AddGroup.class, UpdateGroup.class})
     private String description;
 
     public String getRouteDefId() {
