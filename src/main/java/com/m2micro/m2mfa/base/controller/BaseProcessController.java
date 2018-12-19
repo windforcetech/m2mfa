@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.base.vo.Processvo;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/base/baseProcess")
 @Api(value="工序基本档 前端控制器")
+@Authorize
 public class BaseProcessController {
     @Autowired
     BaseProcessService baseProcessService;

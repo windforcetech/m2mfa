@@ -22,9 +22,9 @@ public class DateUtil {
 	public final static String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     /**
-     * 日期格式化 日期格式为：yyyy-MM-dd
+     * 日期格式化 日期格式为：yyyy-MM-dd HH:mm:ss
      * @param date  日期
-     * @return  返回yyyy-MM-dd格式日期
+     * @return  返回yyyy-MM-dd HH:mm:ss格式日期
      */
 	public static String format(Date date) {
         return format(date, DATE_TIME_PATTERN);

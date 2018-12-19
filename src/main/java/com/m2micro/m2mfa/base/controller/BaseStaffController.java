@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/base/baseStaff")
 @Api(value="员工（职员）表 前端控制器")
+@Authorize
 public class BaseStaffController {
     @Autowired
     BaseStaffService baseStaffService;

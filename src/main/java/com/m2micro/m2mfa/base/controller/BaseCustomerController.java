@@ -31,6 +31,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/base/baseCustomer")
 @Api(value="客户基本资料档 前端控制器")
+@Authorize
 public class BaseCustomerController {
     @Autowired
     BaseCustomerService baseCustomerService;

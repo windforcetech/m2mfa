@@ -4,6 +4,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      *         查询参数
      * @return  分页信息
      */
-    PageUtil<MesMoDesc> list(MesMoDescQuery query);
+    PageUtil<MesMoDescModel> list(MesMoDescQuery query);
 
     /**
      * 根据编号查找工单主档

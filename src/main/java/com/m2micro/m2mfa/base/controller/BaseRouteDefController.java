@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.service.BaseRouteDefService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/base/baseRouteDef")
 @Api(value="生产途程单身 前端控制器")
+@Authorize
 public class BaseRouteDefController {
     @Autowired
     BaseRouteDefService baseRouteDefService;

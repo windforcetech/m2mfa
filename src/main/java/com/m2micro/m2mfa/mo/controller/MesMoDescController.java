@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.mo.controller;
 
+import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.framework.commons.exception.MMException;
@@ -30,6 +32,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/mo/mesMoDesc")
 @Api(value="工单主档 前端控制器")
+@Authorize
 public class MesMoDescController {
     @Autowired
     MesMoDescService mesMoDescService;
@@ -40,8 +43,8 @@ public class MesMoDescController {
     @RequestMapping("/list")
     @ApiOperation(value="工单主档列表")
     @UserOperationLog("工单主档列表")
-    public ResponseMessage<PageUtil<MesMoDesc>> list(MesMoDescQuery query){
-        PageUtil<MesMoDesc> page = mesMoDescService.list(query);
+    public ResponseMessage<PageUtil<MesMoDescModel>> list(MesMoDescQuery query){
+        PageUtil<MesMoDescModel> page = mesMoDescService.list(query);
         return ResponseMessage.ok(page);
     }
 

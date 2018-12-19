@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
@@ -30,6 +31,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/base/baseMachine")
 @Api(value="机台主档 前端控制器")
+@Authorize
 public class BaseMachineController {
     @Autowired
     BaseMachineService baseMachineService;

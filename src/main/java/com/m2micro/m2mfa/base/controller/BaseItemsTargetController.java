@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -31,6 +32,7 @@ import java.util.stream.Stream;
 @RestController
 @RequestMapping("/base/baseItemsTarget")
 @Api(value="参考资料对应表 前端控制器")
+@Authorize
 public class BaseItemsTargetController {
     @Autowired
     BaseItemsTargetService baseItemsTargetService;
