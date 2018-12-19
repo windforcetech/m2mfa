@@ -7,6 +7,7 @@ import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.BaseProcessStation;
+import com.m2micro.m2mfa.base.query.BaseProcessQuery;
 
 import java.util.List;
 
@@ -27,6 +28,6 @@ public interface BaseProcessService extends BaseService<BaseProcess,String> {
      ResponseMessage delete(String processId);
 
      //查询
-     public PageUtil<BaseProcess> list(String processCode , String processName, String category,Integer page,Integer size);
+     public PageUtil<BaseProcess> list(BaseProcessQuery  query);
 
     }

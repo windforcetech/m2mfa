@@ -3,9 +3,13 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -20,18 +24,25 @@ public class BaseProcessStation extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @ApiModelProperty(value = "主键")
+    @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
     @Id
     private String psId;
+    @NotEmpty(message="工序主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "工序主键")
     private String processId;
+    @NotEmpty(message="行为主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "行为主键")
     private String stationId;
+    @NotNull(message="步骤不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "步骤")
     private Integer step;
+    @NotNull(message="允许跳过不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "允许跳过")
     private Integer jump;
+    @NotNull(message="有效否不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
+    @NotNull(message="描述不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "描述")
     private String description;
 

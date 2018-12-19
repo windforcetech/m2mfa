@@ -1,8 +1,16 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.m2mfa.base.entity.BasePageElemen;
+import com.m2micro.m2mfa.base.entity.BaseRouteDef;
 import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
 import com.m2micro.m2mfa.base.repository.BaseRouteDescRepository;
+import com.m2micro.m2mfa.base.service.BasePageElemenService;
+import com.m2micro.m2mfa.base.service.BaseRouteDefService;
 import com.m2micro.m2mfa.base.service.BaseRouteDescService;
+import com.m2micro.m2mfa.base.vo.BaseRoutevo;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,6 +29,10 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
     @Autowired
     BaseRouteDescRepository baseRouteDescRepository;
     @Autowired
+    private BaseRouteDefService  baseRouteDefService;
+    @Autowired
+    private BasePageElemenService basePageElemenService;
+    @Autowired
     JPAQueryFactory queryFactory;
 
     public BaseRouteDescRepository getRepository() {
@@ -36,6 +48,22 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         List<BaseRouteDesc> list = jq.fetch();
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    @Override
+    public boolean save(BaseRouteDesc baseRouteDesc, BaseRouteDef baseRouteDef, BasePageElemen basePageElemen) {
+        String routeuuid = UUIDUtil.getUUID();
+        baseRouteDesc.setRouteId(routeuuid);
+        baseRouteDef.setRouteId(routeuuid);
+        basePageElemen.setElemenId(routeuuid);
+        baseRouteDef.setRouteDefId(UUIDUtil.getUUID());
+        ValidatorUtil.validateEntity(baseRouteDesc, AddGroup.class);
+        ValidatorUtil.validateEntity(baseRouteDef, AddGroup.class);
+        ValidatorUtil.validateEntity(basePageElemen, AddGroup.class);
+        baseRouteDescRepository.save(baseRouteDesc);
+        baseRouteDefService.save(baseRouteDef);
+        basePageElemenService.save(basePageElemen);
+        return true;
     }
 
 }

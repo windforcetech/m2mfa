@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.query.BaseProcessQuery;
 import com.m2micro.m2mfa.base.repository.BasePageElemenRepository;
 import com.m2micro.m2mfa.base.repository.BaseProcessRepository;
 import com.m2micro.m2mfa.base.repository.BaseProcessStationRepository;
@@ -96,23 +97,23 @@ public class BaseProcessServiceImpl implements BaseProcessService {
     }
 
     @Override
-    public PageUtil<BaseProcess> list(String processCode, String processName, String category,Integer page,Integer size  ) {
+    public PageUtil<BaseProcess> list(BaseProcessQuery query) {
         QBaseProcess qBaseProcess=   QBaseProcess.baseProcess;
         JPAQuery<BaseProcess> jq = queryFactory.selectFrom(qBaseProcess);
         BooleanBuilder condition = new BooleanBuilder();
-        if(StringUtils.isNotEmpty(processCode)){
-            condition.and(qBaseProcess.processCode.like("%"+processCode+"%"));
+        if(StringUtils.isNotEmpty(query.getProcessCode())){
+            condition.and(qBaseProcess.processCode.like("%"+query.getProcessCode()+"%"));
         }
-        if(StringUtils.isNotEmpty(processName)){
-            condition.and(qBaseProcess.processName.like("%"+processName+"%"));
+        if(StringUtils.isNotEmpty(query.getProcessName())){
+            condition.and(qBaseProcess.processName.like("%"+query.getProcessName()+"%"));
         }
-        if(StringUtils.isNotEmpty(category)){
-            condition.and(qBaseProcess.category.eq(category));
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            condition.and(qBaseProcess.category.eq(query.getCategory()));
         }
-        jq.where(condition).offset((page - 1) * size).limit(size);
+        jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
         List<BaseProcess> list = jq.fetch();
         long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,size,page);
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 
 }

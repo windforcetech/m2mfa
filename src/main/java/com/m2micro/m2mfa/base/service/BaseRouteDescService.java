@@ -1,9 +1,13 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.m2mfa.base.entity.BasePageElemen;
+import com.m2micro.m2mfa.base.entity.BaseRouteDef;
 import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.vo.BaseRoutevo;
+
 /**
  * 生产途程单头 服务类
  * @author chenshuhong
@@ -17,4 +21,7 @@ public interface BaseRouteDescService extends BaseService<BaseRouteDesc,String> 
      * @return  分页信息
      */
     PageUtil<BaseRouteDesc> list(Query query);
+
+    //添加
+    boolean save(BaseRouteDesc baseRouteDesc, BaseRouteDef baseRouteDef, BasePageElemen basePageElemen);
 }
