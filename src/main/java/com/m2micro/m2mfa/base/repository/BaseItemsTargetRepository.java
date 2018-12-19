@@ -17,4 +17,5 @@ public interface BaseItemsTargetRepository extends BaseRepository<BaseItemsTarge
     List<BaseItemsTarget> findAllByItemId(String itemId);
 
     List<BaseItemsTarget> findAllByTreeParentId(String treeParentId);
+
 }

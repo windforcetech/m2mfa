@@ -4,6 +4,8 @@ import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.node.SelectNode;
+import com.m2micro.m2mfa.base.node.TreeNode;
 
 import java.util.List;
 
@@ -28,4 +30,21 @@ public interface BaseItemsTargetService extends BaseService<BaseItemsTarget,Stri
      * @return  资料对应表的所有详情
      */
     List<BaseItemsTarget> getAllItemsTarget(String itemName);
+
+    /**
+     * 根据资料维护主表名称获取所有参考资料下拉选项
+     * @param itemName
+     *          资料维护主表名称
+     * @return  资料对应表的所有下拉选项
+     */
+    List<SelectNode> getSelectNode(String itemName);
+    /**
+     * 根据资料维护主表名称获取所有参考资料树形选项
+     * @param itemName
+     *          资料维护主表名称
+     * @return  资料对应表的所有树形选项
+     */
+    TreeNode getTreeNode(String itemName);
+
+
 }

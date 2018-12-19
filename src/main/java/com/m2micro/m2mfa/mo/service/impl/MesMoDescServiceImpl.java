@@ -87,9 +87,8 @@ public class MesMoDescServiceImpl implements MesMoDescService {
             }
 
             if(!(MoStatus.INITIAL.getKey().equals(mesMoDesc.getCloseFlag())||
-                    MoStatus.AUDITED.getKey().equals(mesMoDesc.getCloseFlag()))){
-                throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许删除！");
-            }
+                    MoStatus.AUDITED.getKey().equals(mesMoDesc.getCloseFlag())))
+                throw new MMException("用户工单【" + mesMoDesc.getMoNumber() + "】当前状态【" + MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue() + "】,不允许删除！");
         }
         deleteByIds(ids);
     }

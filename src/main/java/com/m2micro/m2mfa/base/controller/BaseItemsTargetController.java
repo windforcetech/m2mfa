@@ -1,6 +1,8 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.node.SelectNode;
+import com.m2micro.m2mfa.base.node.TreeNode;
 import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -108,6 +110,20 @@ public class BaseItemsTargetController {
         List<BaseItemsTarget> list = baseItemsTargetService.getAllItemsTarget(itemName);
         String[] itemNames = list.stream().map(BaseItemsTarget::getItemName).toArray(String[]::new);
         return ResponseMessage.ok(itemNames);
+    }
+
+    @RequestMapping("/getTreeNode")
+    @ApiOperation(value="获取所有参考资料")
+    @UserOperationLog("获取所有参考资料")
+    public ResponseMessage<TreeNode> getTreeNode(@RequestParam("itemName")@ApiParam("名称")String itemName){
+        return ResponseMessage.ok(baseItemsTargetService.getTreeNode(itemName));
+    }
+
+    @RequestMapping("/getSelectNode")
+    @ApiOperation(value="获取所有参考资料")
+    @UserOperationLog("获取所有参考资料")
+    public ResponseMessage<List<SelectNode>> getSelectNode(@RequestParam("itemName")@ApiParam("名称")String itemName){
+        return ResponseMessage.ok(baseItemsTargetService.getSelectNode(itemName));
     }
 
 }
