@@ -1,5 +1,6 @@
 package ${package.Controller};
 
+import com.m2micro.framework.authorization.Authorize;
 import ${package.Service}.${table.serviceName};
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Controller;
 </#if>
 @RequestMapping("<#if package.ModuleName??>/${package.ModuleName}/${table.entityPath}</#if>")
 @Api(value="${table.comment!} 前端控制器")
+@Authorize
 public class ${table.controllerName} {
     @Autowired
     ${table.serviceName} ${table.serviceName?uncap_first};

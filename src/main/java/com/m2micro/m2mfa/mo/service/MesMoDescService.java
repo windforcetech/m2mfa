@@ -74,4 +74,11 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      *      工单id
      */
     void forceClose(String id);
+
+    /**
+     * 查询工单综合信息
+     * @param id
+     *      工单id
+     */
+    MesMoDescModel info(String id);
 }

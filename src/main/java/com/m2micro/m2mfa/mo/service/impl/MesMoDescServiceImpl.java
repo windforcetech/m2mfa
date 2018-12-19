@@ -44,30 +44,6 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         return mesMoDescRepository;
     }
 
-   /* @Override
-    public PageUtil<MesMoDesc> list(MesMoDescQuery query) {
-        QMesMoDesc qMesMoDesc = QMesMoDesc.mesMoDesc;
-        JPAQuery<MesMoDesc> jq = queryFactory.selectFrom(qMesMoDesc);
-
-        BooleanBuilder condition = new BooleanBuilder();
-        if(StringUtils.isNotEmpty(query.getMoNumber())){
-            condition.and(qMesMoDesc.moNumber.like("%"+query.getMoNumber()+"%"));
-        }
-        if(StringUtils.isNotEmpty(query.getCloseFlag())){
-            condition.and(qMesMoDesc.closeFlag.eq(Integer.valueOf(query.getCloseFlag())));
-        }
-        if (query.getStartTime() != null) {
-            condition.and(qMesMoDesc.planInputDate.goe(query.getStartTime()));
-        }
-        if (query.getEndTime() != null) {
-            condition.and(qMesMoDesc.planInputDate.loe(query.getEndTime()));
-        }
-
-        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-        List<MesMoDesc> list = jq.fetch();
-        long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
-    }*/
     @Override
     public PageUtil<MesMoDescModel> list(MesMoDescQuery query) {
 
@@ -86,7 +62,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if (query.getEndTime() != null) {
             sql = sql+" and t.plan_input_date <= "+"'"+DateUtil.format(query.getEndTime())+"'" ;
         }
-        sql = sql + " order by t.create_on desc";
+        sql = sql + " order by t.modified_on desc";
         sql = sql + " limit "+query.getPage()*query.getSize()+","+query.getSize();
 
         List<MesMoDescModel> list = jdbcTemplate.queryForList(sql,MesMoDescModel.class);
@@ -193,6 +169,16 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         }
         //更改为强制结案状态
         mesMoDescRepository.setCloseFlagFor(MoStatus.FORCECLOSE.getKey(),mesMoDesc.getMoId());
+    }
+
+    @Override
+    public MesMoDescModel info(String id) {
+        if(StringUtils.isEmpty(id)){
+            throw new MMException("不存在记录！");
+        }
+        String sql = "select t.mo_id moId,t.mo_number moNumber,t.category category,t.part_id partId,t.target_qty targetQty,t.revsion revsion,t.distinguish distinguish,t.parent_mo parentMo,t.bom_revsion bomRevsion,t.plan_input_date planInputDate,t.plan_close_date planCloseDate,t.actual_input_date actualInputDate,t.actualc_lose_date actualcLoseDate,t.route_id routeId,t.input_process_id inputProcessId,t.output_process_id outputProcessId,t.reach_date reachDate,t.machine_qty machineQty,t.customer_id customerId,t.order_id orderId,t.order_seq orderSeq,t.is_schedul isSchedul,t.schedul_qty schedulQty,t.input_qty inputQty,t.output_qty outputQty,t.scrapped_qty scrappedQty,t.fail_qty failQty,t.close_flag closeFlag,t.enabled enabled,t.description description,t.create_on createOn,t.create_by createBy,t.modified_on modifiedOn,t.modified_by modifiedBy,t.part_name partName,t.part_spec partSpec,t.route_name routeName,t.input_process_name inputProcessName,t.output_process_name outputProcessName,t.customer_name customerName "
+                +" from v_mes_mo_desc t where t.mo_id = '"+id+"'";
+        return jdbcTemplate.queryForObject(sql,MesMoDescModel.class);
     }
 
 }

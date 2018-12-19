@@ -54,9 +54,8 @@ public class MesMoDescController {
     @RequestMapping("/info/{id}")
     @ApiOperation(value="工单主档详情")
     @UserOperationLog("工单主档详情")
-    public ResponseMessage<MesMoDesc> info(@PathVariable("id") String id){
-        MesMoDesc mesMoDesc = mesMoDescService.findById(id).orElse(null);
-        return ResponseMessage.ok(mesMoDesc);
+    public ResponseMessage<MesMoDescModel> info(@PathVariable("id") String id){
+        return ResponseMessage.ok(mesMoDescService.info(id));
     }
 
     /**
