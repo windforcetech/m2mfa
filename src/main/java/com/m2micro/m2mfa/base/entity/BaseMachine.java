@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
@@ -40,10 +41,18 @@ public class BaseMachine extends BaseEntity implements Serializable {
     private String categoryId;
     @ApiModelProperty(value = "摆放位置")
     private String placement;
+    @ApiModelProperty(value = "摆放位置名称")
+    private String placementName;
     @ApiModelProperty(value = "设备状态")
     private String flag;
+    @Transient
+    @ApiModelProperty(value = "设备状态名称")
+    private String flagName;
     @ApiModelProperty(value = "归属部门")
     private String departmentId;
+    @Transient
+    @ApiModelProperty(value = "归属部门名称")
+    private String departmentName;
     @ApiModelProperty(value = "购入日期")
     private Date purchaseDate;
     @ApiModelProperty(value = "购入费用")
@@ -234,6 +243,27 @@ public class BaseMachine extends BaseEntity implements Serializable {
         this.description = description;
     }
 
+    public String getPlacementName() {
+        return placementName;
+    }
 
+    public void setPlacementName(String placementName) {
+        this.placementName = placementName;
+    }
 
+    public String getFlagName() {
+        return flagName;
+    }
+
+    public void setFlagName(String flagName) {
+        this.flagName = flagName;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
 }
