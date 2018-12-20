@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
@@ -35,6 +36,9 @@ public class BaseCustomer extends BaseEntity implements Serializable {
     private String fullname;
     @ApiModelProperty(value = "类型")
     private String category;
+    @Transient
+    @ApiModelProperty(value = "类型名称")
+    private String categoryName;
     @ApiModelProperty(value = "区域")
     private String area;
     @ApiModelProperty(value = "电话号码")
@@ -132,6 +136,11 @@ public class BaseCustomer extends BaseEntity implements Serializable {
         this.description = description;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
 
-
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 }
