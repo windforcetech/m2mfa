@@ -1,9 +1,11 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseCustomerQuery;
 import com.m2micro.m2mfa.base.service.BaseCustomerService;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -21,7 +23,9 @@ import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 客户基本资料档 前端控制器
@@ -35,7 +39,8 @@ import java.util.List;
 public class BaseCustomerController {
     @Autowired
     BaseCustomerService baseCustomerService;
-
+    @Autowired
+    BaseItemsTargetService baseItemsTargetService;
     /**
      * 列表
      */
@@ -53,9 +58,14 @@ public class BaseCustomerController {
     @RequestMapping("/info/{id}")
     @ApiOperation(value="客户基本资料档详情")
     @UserOperationLog("客户基本资料档详情")
-    public ResponseMessage<BaseCustomer> info(@PathVariable("id") String id){
+    public ResponseMessage info(@PathVariable("id") String id){
         BaseCustomer baseCustomer = baseCustomerService.findById(id).orElse(null);
-        return ResponseMessage.ok(baseCustomer);
+        Map map = new HashMap();
+        List<SelectNode> customerCategory = baseItemsTargetService.getSelectNode("Customer_Category");
+        map.put("customerCategory",customerCategory);
+        map.put("baseCustomer",baseCustomer);
+        return ResponseMessage.ok(map);
+
     }
 
     /**
@@ -105,4 +115,13 @@ public class BaseCustomerController {
         return ResponseMessage.ok();
     }
 
+    @RequestMapping("/addDetails")
+    @ApiOperation(value="获取客户管理添加基本信息")
+    @UserOperationLog("获取客户管理添加基本信息")
+    public ResponseMessage addDetails(){
+        Map map = new HashMap();
+        List<SelectNode> customerCategory = baseItemsTargetService.getSelectNode("Customer_Category");
+        map.put("customerCategory",customerCategory);
+        return ResponseMessage.ok(map);
+    }
 }

@@ -2,6 +2,9 @@ package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.m2mfa.base.node.SelectNode;
+import com.m2micro.m2mfa.base.node.TreeNode;
+import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.base.service.BaseShiftService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -21,7 +24,9 @@ import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseShift;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 班别基本资料 前端控制器
@@ -35,7 +40,8 @@ import java.util.List;
 public class BaseShiftController {
     @Autowired
     BaseShiftService baseShiftService;
-
+    @Autowired
+    BaseItemsTargetService baseItemsTargetService;
     /**
      * 列表
      */
@@ -53,9 +59,15 @@ public class BaseShiftController {
     @RequestMapping("/info/{id}")
     @ApiOperation(value="班别基本资料详情")
     @UserOperationLog("班别基本资料详情")
-    public ResponseMessage<BaseShift> info(@PathVariable("id") String id){
+    public ResponseMessage info(@PathVariable("id") String id){
         BaseShift baseShift = baseShiftService.findById(id).orElse(null);
-        return ResponseMessage.ok(baseShift);
+        Map map = new HashMap();
+        List<SelectNode> timeCategory = baseItemsTargetService.getSelectNode("Time_Category");
+        List<SelectNode> shiftCategory = baseItemsTargetService.getSelectNode("Shift_Category");
+        map.put("timeCategory",timeCategory);
+        map.put("shiftCategory",shiftCategory);
+        map.put("baseShift",baseShift);
+        return ResponseMessage.ok(map);
     }
 
     /**
@@ -106,5 +118,15 @@ public class BaseShiftController {
         baseShiftService.deleteByIds(ids);
         return ResponseMessage.ok();
     }
-
+    @RequestMapping("/addDetails")
+    @ApiOperation(value="获取班别添加基本信息")
+    @UserOperationLog("获取班别添加基本信息")
+    public ResponseMessage addDetails(){
+        Map map = new HashMap();
+        List<SelectNode> timeCategory = baseItemsTargetService.getSelectNode("Time_Category");
+        List<SelectNode> shiftCategory = baseItemsTargetService.getSelectNode("Shift_Category");
+        map.put("timeCategory",timeCategory);
+        map.put("shiftCategory",shiftCategory);
+        return ResponseMessage.ok(map);
+    }
 }
