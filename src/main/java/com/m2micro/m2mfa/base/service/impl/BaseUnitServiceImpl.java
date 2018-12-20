@@ -27,15 +27,13 @@ public class BaseUnitServiceImpl implements BaseUnitService {
         return baseUnitRepository;
     }
 
+
+
     @Override
-    public PageUtil<BaseUnit> list(Query query) {
+    public List<BaseUnit> list() {
         QBaseUnit qBaseUnit = QBaseUnit.baseUnit;
         JPAQuery<BaseUnit> jq = queryFactory.selectFrom(qBaseUnit);
-
-        jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-        List<BaseUnit> list = jq.fetch();
-        long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        return jq.fetch();
     }
 
 }

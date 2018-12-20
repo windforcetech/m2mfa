@@ -2,9 +2,14 @@ package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.entity.BaseUnit;
+import com.m2micro.m2mfa.base.node.SelectNode;
+import com.m2micro.m2mfa.base.node.TreeNode;
 import com.m2micro.m2mfa.base.query.BasePartsQuery;
+import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
+import com.m2micro.m2mfa.base.service.BaseUnitService;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
@@ -20,7 +25,9 @@ import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 料件基本资料 前端控制器
@@ -34,6 +41,10 @@ import java.util.List;
 public class BasePartsController {
     @Autowired
     BasePartsService basePartsService;
+    @Autowired
+    BaseUnitService baseUnitService;
+    @Autowired
+    BaseItemsTargetService baseItemsTargetService;
 
     /**
      * 列表
@@ -52,9 +63,14 @@ public class BasePartsController {
     @RequestMapping("/info/{id}")
     @ApiOperation(value="料件基本资料详情")
     @UserOperationLog("料件基本资料详情")
-    public ResponseMessage<BaseParts> info(@PathVariable("id") String id){
+    public ResponseMessage<Map> info(@PathVariable("id") String id){
+        Map map = new HashMap();
+        List<SelectNode> partsSource = baseItemsTargetService.getSelectNode("Parts_Source");
+        map.put("partsSource",partsSource);
+        map.put("baseUnitService",baseUnitService.list());
         BaseParts baseParts = basePartsService.findById(id).orElse(null);
-        return ResponseMessage.ok(baseParts);
+        map.put("baseParts",baseParts);
+        return ResponseMessage.ok(map);
     }
 
     /**
@@ -104,6 +120,17 @@ public class BasePartsController {
     public ResponseMessage delete(@RequestBody String[] ids){
         basePartsService.deleteAllByIds(ids);
         return ResponseMessage.ok();
+    }
+
+    @RequestMapping("/addDetails")
+    @ApiOperation(value="获取物料添加基本信息")
+    @UserOperationLog("获取物料添加基本信息")
+    public ResponseMessage addDetails(){
+        Map map = new HashMap();
+        List<SelectNode> partsSource = baseItemsTargetService.getSelectNode("Parts_Source");
+        map.put("partsSource",partsSource);
+        map.put("baseUnitService",baseUnitService.list());
+        return ResponseMessage.ok(map);
     }
 
 }

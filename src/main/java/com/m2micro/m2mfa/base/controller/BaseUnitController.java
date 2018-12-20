@@ -33,16 +33,6 @@ public class BaseUnitController {
     @Autowired
     BaseUnitService baseUnitService;
 
-    /**
-     * 列表
-     */
-    @RequestMapping("/list")
-    @ApiOperation(value="列表")
-    @UserOperationLog("列表")
-    public ResponseMessage<PageUtil<BaseUnit>> list(Query query){
-        PageUtil<BaseUnit> page = baseUnitService.list(query);
-        return ResponseMessage.ok(page);
-    }
 
     /**
      * 详情
