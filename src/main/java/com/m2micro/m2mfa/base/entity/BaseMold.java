@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
@@ -41,16 +42,28 @@ public class BaseMold extends BaseEntity implements Serializable {
     private String assdtId;
     @ApiModelProperty(value = "所属客户")
     private String customerId;
+    @Transient
+    @ApiModelProperty(value = "客户名称")
+    private String customerName;
     @ApiModelProperty(value = "分类")
     @NotEmpty(message="分类不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String categoryId;
+    @Transient
+    @ApiModelProperty(value = "分类名称")
+    private String categoryName;
     @ApiModelProperty(value = "类型")
     @NotEmpty(message="类型不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String typeId;
     @ApiModelProperty(value = "摆放位置")
     private String placement;
+    @Transient
+    @ApiModelProperty(value = "摆放位置")
+    private String placementName;
     @ApiModelProperty(value = "状态")
     private String flag;
+    @Transient
+    @ApiModelProperty(value = "状态名称")
+    private String flagName;
     @ApiModelProperty(value = "归属部门")
     private String departmentId;
     @ApiModelProperty(value = "开模日期")
@@ -395,6 +408,35 @@ public class BaseMold extends BaseEntity implements Serializable {
         this.description = description;
     }
 
+    public String getCustomerName() {
+        return customerName;
+    }
 
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public String getPlacementName() {
+        return placementName;
+    }
+
+    public void setPlacementName(String placementName) {
+        this.placementName = placementName;
+    }
+
+    public String getFlagName() {
+        return flagName;
+    }
+
+    public void setFlagName(String flagName) {
+        this.flagName = flagName;
+    }
 }

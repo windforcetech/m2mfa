@@ -13,7 +13,9 @@ import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.query.NativeQuery;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -63,7 +65,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
             sql = sql+" and t.plan_input_date <= "+"'"+DateUtil.format(query.getEndTime())+"'" ;
         }
         sql = sql + " order by t.modified_on desc";
-        sql = sql + " limit "+query.getPage()*query.getSize()+","+query.getSize();
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
 
         List<MesMoDescModel> list = jdbcTemplate.queryForList(sql,MesMoDescModel.class);
         String countSql = "select count(*) from v_mes_mo_desc";
