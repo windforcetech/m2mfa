@@ -2,7 +2,11 @@ package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.node.SelectNode;
+import com.m2micro.m2mfa.base.node.TreeNode;
 import com.m2micro.m2mfa.base.query.BaseMoldQuery;
+import com.m2micro.m2mfa.base.repository.BaseItemsTargetRepository;
+import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.base.service.BaseMoldService;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
@@ -21,7 +25,9 @@ import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseMold;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 模具主档 前端控制器
@@ -35,6 +41,8 @@ import java.util.List;
 public class BaseMoldController {
     @Autowired
     BaseMoldService baseMoldService;
+    @Autowired
+    BaseItemsTargetService baseItemsTargetService;
 
     /**
      * 列表
@@ -113,6 +121,18 @@ public class BaseMoldController {
         }
         baseMoldService.deleteByIds(ids);
         return ResponseMessage.ok();
+    }
+
+    @RequestMapping("/addDetails")
+    @ApiOperation(value="删除模具主档")
+    @UserOperationLog("删除模具主档")
+    public ResponseMessage addDetails(){
+        Map map = new HashMap();
+        List<SelectNode> moldState = baseItemsTargetService.getSelectNode("Mold_State");
+        TreeNode moldCategory = baseItemsTargetService.getTreeNode("Mold_Category");
+
+        map.put("moldState",moldState);
+        return ResponseMessage.ok(map);
     }
 
 }
