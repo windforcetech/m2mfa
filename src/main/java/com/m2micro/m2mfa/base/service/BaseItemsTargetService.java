@@ -33,18 +33,18 @@ public interface BaseItemsTargetService extends BaseService<BaseItemsTarget,Stri
 
     /**
      * 根据资料维护主表名称获取所有参考资料下拉选项
-     * @param itemName
+     * @param itemCode
      *          资料维护主表名称
      * @return  资料对应表的所有下拉选项
      */
-    List<SelectNode> getSelectNode(String itemName);
+    List<SelectNode> getSelectNode(String itemCode);
     /**
      * 根据资料维护主表名称获取所有参考资料树形选项
-     * @param itemName
+     * @param itemCode
      *          资料维护主表名称
      * @return  资料对应表的所有树形选项
      */
-    TreeNode getTreeNode(String itemName);
+    TreeNode getTreeNode(String itemCode);
 
 
 }

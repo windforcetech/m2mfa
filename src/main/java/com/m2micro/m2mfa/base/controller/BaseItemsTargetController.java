@@ -115,15 +115,15 @@ public class BaseItemsTargetController {
     @RequestMapping("/getTreeNode")
     @ApiOperation(value="获取所有参考资料")
     @UserOperationLog("获取所有参考资料")
-    public ResponseMessage<TreeNode> getTreeNode(@RequestParam("itemName")@ApiParam("名称")String itemName){
-        return ResponseMessage.ok(baseItemsTargetService.getTreeNode(itemName));
+    public ResponseMessage<TreeNode> getTreeNode(@RequestParam("itemCode")@ApiParam("名称")String itemCode){
+        return ResponseMessage.ok(baseItemsTargetService.getTreeNode(itemCode));
     }
 
     @RequestMapping("/getSelectNode")
     @ApiOperation(value="获取所有参考资料")
     @UserOperationLog("获取所有参考资料")
-    public ResponseMessage<List<SelectNode>> getSelectNode(@RequestParam("itemName")@ApiParam("名称")String itemName){
-        return ResponseMessage.ok(baseItemsTargetService.getSelectNode(itemName));
+    public ResponseMessage<List<SelectNode>> getSelectNode(@RequestParam("itemCode")@ApiParam("名称")String itemCode){
+        return ResponseMessage.ok(baseItemsTargetService.getSelectNode(itemCode));
     }
 
 }

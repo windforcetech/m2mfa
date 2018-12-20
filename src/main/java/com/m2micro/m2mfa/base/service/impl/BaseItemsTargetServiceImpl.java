@@ -112,9 +112,9 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
     }
 
     @Override
-    public List<SelectNode> getSelectNode(String itemName) {
+    public List<SelectNode> getSelectNode(String itemCode) {
         // 获取资料主表
-        List<BaseItems> items = baseItemsRepository.findAllByItemName(itemName);
+        List<BaseItems> items = baseItemsRepository.findAllByItemCode(itemCode);
         // 如果不存在及不唯一（校验）
         if(items==null||items.size()!=1){
             throw new MMException("资料主档不存在或异常");
@@ -128,9 +128,9 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
     }
 
     @Override
-    public TreeNode getTreeNode(String itemName) {
+    public TreeNode getTreeNode(String itemCode) {
         // 获取资料主表
-        List<BaseItems> items = baseItemsRepository.findAllByItemName(itemName);
+        List<BaseItems> items = baseItemsRepository.findAllByItemCode(itemCode);
         // 如果不存在及不唯一（校验）
         if(items==null||items.size()!=1){
             throw new MMException("资料主档不存在或异常");
@@ -161,7 +161,7 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
     private void getAllChildrenTreeNode(TreeNode treeNode,List<BaseItemsTarget> baseItemsTargets){
         //获取下一级所有节点
         List<TreeNode> nextAllTreeNode = getNextAllTreeNode(treeNode,baseItemsTargets);
-        if(nextAllTreeNode==null){
+        if(nextAllTreeNode==null||(nextAllTreeNode!=null&&nextAllTreeNode.size()==0)){
             return ;
         }
         for(TreeNode nextTreeNode:nextAllTreeNode){
