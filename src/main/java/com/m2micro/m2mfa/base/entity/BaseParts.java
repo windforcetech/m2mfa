@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
@@ -45,8 +46,14 @@ public class BaseParts extends BaseEntity implements Serializable {
     private String grade;
     @ApiModelProperty(value = "物料来源")
     private String source;
+    @Transient
+    @ApiModelProperty(value = "物料来源名称")
+    private String sourceName;
     @ApiModelProperty(value = "类型")
     private String category;
+    @Transient
+    @ApiModelProperty(value = "类型名称")
+    private String categoryName;
     @ApiModelProperty(value = "单重/净重(单位kg)")
     private BigDecimal single;
     @ApiModelProperty(value = "检验否")
@@ -303,6 +310,19 @@ public class BaseParts extends BaseEntity implements Serializable {
         this.description = description;
     }
 
+    public String getSourceName() {
+        return sourceName;
+    }
 
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 }

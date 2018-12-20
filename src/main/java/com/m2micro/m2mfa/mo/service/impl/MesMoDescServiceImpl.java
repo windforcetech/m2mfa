@@ -66,8 +66,8 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         }
         sql = sql + " order by t.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-
-        List<MesMoDescModel> list = jdbcTemplate.queryForList(sql,MesMoDescModel.class);
+        RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDescModel.class);
+        List<MesMoDescModel> list = jdbcTemplate.query(sql,rm);
         String countSql = "select count(*) from v_mes_mo_desc";
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
