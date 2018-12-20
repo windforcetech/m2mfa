@@ -93,5 +93,17 @@ public class MesPartRouteController {
         mesPartRouteService.deleteByIds(ids);
         return ResponseMessage.ok();
     }
+/*
+    这两个是返回给前端然后进行选择后添加到关联表的选择
+    SELECT  * from base_route_desc m
+    INNER JOIN  base_route_def  r    ON r.route_id=m.route_id
+    WHERE m.route_id='481E498831274406987045502FF3E36C'
 
+
+     这是工序跟工艺的关联
+      SELECT  * from base_route_desc    m
+			inner join  base_route_def      l   on l.route_id=m.route_id
+      inner join base_process_station  p  on  l.process_id=p.process_id
+      where m.route_id='481e498831274406987045502ff3e36c'
+ */
 }

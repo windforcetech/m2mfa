@@ -61,9 +61,25 @@ public class BaseMoldController {
     @RequestMapping("/info/{id}")
     @ApiOperation(value="模具主档详情")
     @UserOperationLog("模具主档详情")
-    public ResponseMessage<BaseMold> info(@PathVariable("id") String id){
+    public ResponseMessage<Map> info(@PathVariable("id") String id){
         BaseMold baseMold = baseMoldService.findById(id).orElse(null);
-        return ResponseMessage.ok(baseMold);
+        Map map = new HashMap();
+        List<SelectNode> moldState = baseItemsTargetService.getSelectNode("Mold_State");
+        List<SelectNode> moldPlacementoldPlacement = baseItemsTargetService.getSelectNode("Mold_Placement");
+        List<SelectNode> moldType = baseItemsTargetService.getSelectNode("Mold_Type");
+        List<SelectNode> moldStructure = baseItemsTargetService.getSelectNode("Mold_Structure");
+        List<SelectNode> materialType = baseItemsTargetService.getSelectNode("Material_Type");
+        TreeNode moldCategory = baseItemsTargetService.getTreeNode("Mold_Category");
+
+        map.put("moldState",moldState);
+        map.put("moldCategory",moldCategory);
+        map.put("moldPlacementoldPlacement",moldPlacementoldPlacement);
+        map.put("moldType",moldType);
+        map.put("moldStructure",moldStructure);
+        map.put("materialType",materialType);
+        map.put("baseMold",baseMold);
+        return ResponseMessage.ok(map);
+
     }
 
     /**
@@ -111,7 +127,7 @@ public class BaseMoldController {
     @RequestMapping("/delete")
     @ApiOperation(value="删除模具主档")
     @UserOperationLog("删除模具主档")
-    public ResponseMessage delete(@RequestBody String[] ids){
+    public ResponseMessage delete(@RequestBody  String[] ids){
         //根据ID删除模具，删除时查询【Mes_Record_Mold】表是否已产生业务，如果已有记录，提示用户已产生业务不允许删除。
         for (String id:ids){
             // 预留，是否产生业务
@@ -124,14 +140,23 @@ public class BaseMoldController {
     }
 
     @RequestMapping("/addDetails")
-    @ApiOperation(value="删除模具主档")
-    @UserOperationLog("删除模具主档")
+    @ApiOperation(value="获取模具主档添加基本信息")
+    @UserOperationLog("获取模具主档添加基本信息")
     public ResponseMessage addDetails(){
         Map map = new HashMap();
         List<SelectNode> moldState = baseItemsTargetService.getSelectNode("Mold_State");
+        List<SelectNode> moldPlacementoldPlacement = baseItemsTargetService.getSelectNode("Mold_Placement");
+        List<SelectNode> moldType = baseItemsTargetService.getSelectNode("Mold_Type");
+        List<SelectNode> moldStructure = baseItemsTargetService.getSelectNode("Mold_Structure");
+        List<SelectNode> materialType = baseItemsTargetService.getSelectNode("Material_Type");
         TreeNode moldCategory = baseItemsTargetService.getTreeNode("Mold_Category");
 
         map.put("moldState",moldState);
+        map.put("moldCategory",moldCategory);
+        map.put("moldPlacementoldPlacement",moldPlacementoldPlacement);
+        map.put("moldType",moldType);
+        map.put("moldStructure",moldStructure);
+        map.put("materialType",materialType);
         return ResponseMessage.ok(map);
     }
 

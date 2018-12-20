@@ -4,6 +4,7 @@ package com.m2micro.m2mfa.base.entity;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -28,11 +29,14 @@ public class BaseMold extends BaseEntity implements Serializable {
     @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
     private String moldId;
     @ApiModelProperty(value = "编号")
+    @Size(max=32,message = "长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message="编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String code;
+    @Size(max=32,message = "长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "名称")
     @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String name;
+    @Size(max=32,message = "长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "固资编号")
     private String assdtId;
     @ApiModelProperty(value = "所属客户")
