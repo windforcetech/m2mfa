@@ -64,12 +64,12 @@ public class BaseMoldController {
     public ResponseMessage<Map> info(@PathVariable("id") String id){
         BaseMold baseMold = baseMoldService.findById(id).orElse(null);
         Map map = new HashMap();
-        List<SelectNode> moldState = baseItemsTargetService.getSelectNode("Mold_State");
-        List<SelectNode> moldPlacementoldPlacement = baseItemsTargetService.getSelectNode("Mold_Placement");
-        List<SelectNode> moldType = baseItemsTargetService.getSelectNode("Mold_Type");
-        List<SelectNode> moldStructure = baseItemsTargetService.getSelectNode("Mold_Structure");
-        List<SelectNode> materialType = baseItemsTargetService.getSelectNode("Material_Type");
-        TreeNode moldCategory = baseItemsTargetService.getTreeNode("Mold_Category");
+        List<SelectNode> moldState = baseItemsTargetService.getSelectNode("mold_state");
+        List<SelectNode> moldPlacementoldPlacement = baseItemsTargetService.getSelectNode("mold_placement");
+        List<SelectNode> moldType = baseItemsTargetService.getSelectNode("mold_type");
+        List<SelectNode> moldStructure = baseItemsTargetService.getSelectNode("mold_structure");
+        List<SelectNode> materialType = baseItemsTargetService.getSelectNode("material_type");
+        TreeNode moldCategory = baseItemsTargetService.getTreeNode("mold_category");
 
         map.put("moldState",moldState);
         map.put("moldCategory",moldCategory);
@@ -144,12 +144,12 @@ public class BaseMoldController {
     @UserOperationLog("获取模具主档添加基本信息")
     public ResponseMessage addDetails(){
         Map map = new HashMap();
-        List<SelectNode> moldState = baseItemsTargetService.getSelectNode("Mold_State");
-        List<SelectNode> moldPlacementoldPlacement = baseItemsTargetService.getSelectNode("Mold_Placement");
-        List<SelectNode> moldType = baseItemsTargetService.getSelectNode("Mold_Type");
-        List<SelectNode> moldStructure = baseItemsTargetService.getSelectNode("Mold_Structure");
-        List<SelectNode> materialType = baseItemsTargetService.getSelectNode("Material_Type");
-        TreeNode moldCategory = baseItemsTargetService.getTreeNode("Mold_Category");
+        List<SelectNode> moldState = baseItemsTargetService.getSelectNode("mold_state");
+        List<SelectNode> moldPlacementoldPlacement = baseItemsTargetService.getSelectNode("mold_placement");
+        List<SelectNode> moldType = baseItemsTargetService.getSelectNode("mold_type");
+        List<SelectNode> moldStructure = baseItemsTargetService.getSelectNode("mold_structure");
+        List<SelectNode> materialType = baseItemsTargetService.getSelectNode("material_type");
+        TreeNode moldCategory = baseItemsTargetService.getTreeNode("mold_category");
 
         map.put("moldState",moldState);
         map.put("moldCategory",moldCategory);

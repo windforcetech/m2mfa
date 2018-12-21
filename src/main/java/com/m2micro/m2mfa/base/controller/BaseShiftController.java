@@ -62,8 +62,8 @@ public class BaseShiftController {
     public ResponseMessage info(@PathVariable("id") String id){
         BaseShift baseShift = baseShiftService.findById(id).orElse(null);
         Map map = new HashMap();
-        List<SelectNode> timeCategory = baseItemsTargetService.getSelectNode("Time_Category");
-        List<SelectNode> shiftCategory = baseItemsTargetService.getSelectNode("Shift_Category");
+        List<SelectNode> timeCategory = baseItemsTargetService.getSelectNode("time_category");
+        List<SelectNode> shiftCategory = baseItemsTargetService.getSelectNode("shift_category");
         map.put("timeCategory",timeCategory);
         map.put("shiftCategory",shiftCategory);
         map.put("baseShift",baseShift);
@@ -123,8 +123,8 @@ public class BaseShiftController {
     @UserOperationLog("获取班别添加基本信息")
     public ResponseMessage addDetails(){
         Map map = new HashMap();
-        List<SelectNode> timeCategory = baseItemsTargetService.getSelectNode("Time_Category");
-        List<SelectNode> shiftCategory = baseItemsTargetService.getSelectNode("Shift_Category");
+        List<SelectNode> timeCategory = baseItemsTargetService.getSelectNode("time_category");
+        List<SelectNode> shiftCategory = baseItemsTargetService.getSelectNode("shift_category");
         map.put("timeCategory",timeCategory);
         map.put("shiftCategory",shiftCategory);
         return ResponseMessage.ok(map);

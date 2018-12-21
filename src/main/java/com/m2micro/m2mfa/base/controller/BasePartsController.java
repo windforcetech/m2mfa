@@ -65,7 +65,7 @@ public class BasePartsController {
     @UserOperationLog("料件基本资料详情")
     public ResponseMessage<Map> info(@PathVariable("id") String id){
         Map map = new HashMap();
-        List<SelectNode> partsSource = baseItemsTargetService.getSelectNode("Parts_Source");
+        List<SelectNode> partsSource = baseItemsTargetService.getSelectNode("parts_source");
         map.put("partsSource",partsSource);
         map.put("baseUnitService",baseUnitService.list());
         BaseParts baseParts = basePartsService.findById(id).orElse(null);
@@ -127,7 +127,7 @@ public class BasePartsController {
     @UserOperationLog("获取物料添加基本信息")
     public ResponseMessage addDetails(){
         Map map = new HashMap();
-        List<SelectNode> partsSource = baseItemsTargetService.getSelectNode("Parts_Source");
+        List<SelectNode> partsSource = baseItemsTargetService.getSelectNode("parts_source");
         map.put("partsSource",partsSource);
         map.put("baseUnitService",baseUnitService.list());
         return ResponseMessage.ok(map);
