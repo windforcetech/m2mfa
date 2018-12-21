@@ -101,7 +101,8 @@ public class BaseMachineServiceImpl implements BaseMachineService {
                     "LEFT JOIN organization o ON (\n" +
                     "	bm.department_id = o.uuid\n" +
                     "	AND o.typesof = '部门'\n" +
-                    ")";
+                    ")\n"+
+                    "WHERE 1 = 1 ";
 
         if(StringUtils.isNotEmpty(query.getCode())){
             sql = sql + " and bm.code like '%"+query.getCode()+"%'";
@@ -110,13 +111,13 @@ public class BaseMachineServiceImpl implements BaseMachineService {
             sql = sql + " and bm.name like '%"+query.getName()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getFlag())){
-            sql = sql + " and bi.id = '"+query.getFlag()+"'";
+            sql = sql + " and bm.flag = '"+query.getFlag()+"'";
         }
         if(StringUtils.isNotEmpty(query.getDepartmentId())){
-            sql = sql + " and o.uuid = '"+query.getDepartmentId()+"'";
+            sql = sql + " and bm.department_id = '"+query.getDepartmentId()+"'";
         }
         if(StringUtils.isNotEmpty(query.getPlacement())){
-            sql = sql + " and bi2.id = '"+query.getPlacement()+"'";
+            sql = sql + " and bm.placement= '"+query.getPlacement()+"'";
         }
         sql = sql + " order by bm.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();

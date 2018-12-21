@@ -199,7 +199,6 @@ public class BaseMoldServiceImpl implements BaseMoldService {
                     "LEFT JOIN base_items_target bi2 ON bi2.id = bm.flag\n" +
                     "LEFT JOIN base_items_target bi3 ON bi3.id = bm.placement\n" +
                     "LEFT JOIN base_customer bc ON bm.customer_id = bc.customer_id where 1=1 ";
-        BooleanBuilder condition = new BooleanBuilder();
         if(StringUtils.isNotEmpty(query.getCode())){
             sql = sql+" and bm.code like '%"+query.getCode()+"%'";
         }

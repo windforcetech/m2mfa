@@ -83,6 +83,10 @@ public class MesMoDescModel extends BaseEntity implements Serializable {
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+    @ApiModelProperty(value = "工单类型名称")
+    private String categoryName;
+    @ApiModelProperty(value = "料件编号")
+    private String partNo;
     @ApiModelProperty(value = "品名")
     private String partName;
     @ApiModelProperty(value = "规格")

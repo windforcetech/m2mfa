@@ -10,6 +10,8 @@ import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
+import com.m2micro.m2mfa.pr.entity.MesPartRoute;
+import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.query.NativeQuery;
@@ -41,6 +43,8 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     JPAQueryFactory queryFactory;
     @Autowired
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    MesPartRouteRepository mesPartRouteRepository;
 
     public MesMoDescRepository getRepository() {
         return mesMoDescRepository;
@@ -49,26 +53,98 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     @Override
     public PageUtil<MesMoDescModel> list(MesMoDescQuery query) {
 
-        String sql = "select t.mo_id moId,t.mo_number moNumber,t.category category,t.part_id partId,t.target_qty targetQty,t.revsion revsion,t.distinguish distinguish,t.parent_mo parentMo,t.bom_revsion bomRevsion,t.plan_input_date planInputDate,t.plan_close_date planCloseDate,t.actual_input_date actualInputDate,t.actualc_lose_date actualcLoseDate,t.route_id routeId,t.input_process_id inputProcessId,t.output_process_id outputProcessId,t.reach_date reachDate,t.machine_qty machineQty,t.customer_id customerId,t.order_id orderId,t.order_seq orderSeq,t.is_schedul isSchedul,t.schedul_qty schedulQty,t.input_qty inputQty,t.output_qty outputQty,t.scrapped_qty scrappedQty,t.fail_qty failQty,t.close_flag closeFlag,t.enabled enabled,t.description description,t.create_on createOn,t.create_by createBy,t.modified_on modifiedOn,t.modified_by modifiedBy,t.part_name partName,t.part_spec partSpec,t.route_name routeName,t.input_process_name inputProcessName,t.output_process_name outputProcessName,t.customer_name customerName "
-                +" from v_mes_mo_desc t where 1=1 ";
+        String sql = "SELECT\n" +
+                    "	md.mo_id moId,\n" +
+                    "	md.mo_number moNumber,\n" +
+                    "	md.category category,\n" +
+                    "	md.part_id partId,\n" +
+                    "	md.target_qty targetQty,\n" +
+                    "	md.revsion revsion,\n" +
+                    "	md.distinguish distinguish,\n" +
+                    "	md.parent_mo parentMo,\n" +
+                    "	md.bom_revsion bomRevsion,\n" +
+                    "	md.plan_input_date planInputDate,\n" +
+                    "	md.plan_close_date planCloseDate,\n" +
+                    "	md.actual_input_date actualInputDate,\n" +
+                    "	md.actualc_lose_date actualcLoseDate,\n" +
+                    "	md.route_id routeId,\n" +
+                    "	md.input_process_id inputProcessId,\n" +
+                    "	md.output_process_id outputProcessId,\n" +
+                    "	md.reach_date reachDate,\n" +
+                    "	md.machine_qty machineQty,\n" +
+                    "	md.customer_id customerId,\n" +
+                    "	md.order_id orderId,\n" +
+                    "	md.order_seq orderSeq,\n" +
+                    "	md.is_schedul isSchedul,\n" +
+                    "	md.schedul_qty schedulQty,\n" +
+                    "	md.input_qty inputQty,\n" +
+                    "	md.output_qty outputQty,\n" +
+                    "	md.scrapped_qty scrappedQty,\n" +
+                    "	md.fail_qty failQty,\n" +
+                    "	md.close_flag closeFlag,\n" +
+                    "	md.enabled enabled,\n" +
+                    "	md.description description,\n" +
+                    "	md.create_on createOn,\n" +
+                    "	md.create_by createBy,\n" +
+                    "	md.modified_on modifiedOn,\n" +
+                    "	md.modified_by modifiedBy,\n" +
+                    "	bi.item_name categoryName,\n" +
+                    "	bp.part_no partNo,\n" +
+                    "	bp.name partName,\n" +
+                    "	bp.spec partSpec,\n" +
+                    "	brd.route_name routeName,\n" +
+                    "	bpro.process_name inputProcessName,\n" +
+                    "	bpr.process_name outputProcessName,\n" +
+                    "	bc.name customerName\n" +
+                    "FROM\n" +
+                    "	mes_mo_desc md,\n" +
+                    "	base_items_target bi,\n" +
+                    "	base_parts bp,\n" +
+                    "	base_route_desc brd,\n" +
+                    "	base_process bpro,\n" +
+                    "	base_process bpr,\n" +
+                    "	base_customer bc\n" +
+                    "WHERE\n" +
+                    "	md.part_id = bp.part_id\n" +
+                    "AND bi.id = md.category\n" +
+                    "AND brd.route_id = md.route_id\n" +
+                    "AND bpro.process_id = md.input_process_id\n" +
+                    "AND bpr.process_id = md.output_process_id\n" +
+                    "AND bc.customer_id = md.customer_id ";
 
         if(StringUtils.isNotEmpty(query.getMoNumber())){
-            sql = sql+" and t.mo_number like '%"+query.getMoNumber()+"%'";
+            sql = sql+" and md.mo_number like '%"+query.getMoNumber()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getCloseFlag())){
-            sql = sql+" and t.close_flag = "+query.getCloseFlag();
+            sql = sql+" and md.close_flag = "+query.getCloseFlag();
         }
         if (query.getStartTime() != null) {
-            sql = sql+" and t.plan_input_date >= "+ "'"+DateUtil.format(query.getStartTime())+"'" ;
+            sql = sql+" and md.plan_input_date >= "+ "'"+DateUtil.format(query.getStartTime())+"'" ;
         }
         if (query.getEndTime() != null) {
-            sql = sql+" and t.plan_input_date <= "+"'"+DateUtil.format(query.getEndTime())+"'" ;
+            sql = sql+" and md.plan_input_date <= "+"'"+DateUtil.format(query.getEndTime())+"'" ;
         }
-        sql = sql + " order by t.modified_on desc";
+        sql = sql + " order by md.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDescModel.class);
         List<MesMoDescModel> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from v_mes_mo_desc";
+        String countSql =   "SELECT\n" +
+                            "	count(*)\n" +
+                            "FROM\n" +
+                            "	mes_mo_desc md,\n" +
+                            "	base_items_target bi,\n" +
+                            "	base_parts bp,\n" +
+                            "	base_route_desc brd,\n" +
+                            "	base_process bpro,\n" +
+                            "	base_process bpr,\n" +
+                            "	base_customer bc\n" +
+                            "WHERE\n" +
+                            "	md.part_id = bp.part_id\n" +
+                            "AND bi.id = md.category\n" +
+                            "AND brd.route_id = md.route_id\n" +
+                            "AND bpro.process_id = md.input_process_id\n" +
+                            "AND bpr.process_id = md.output_process_id\n" +
+                            "AND bc.customer_id = md.customer_id";
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
@@ -105,6 +181,10 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         // 当工单状态为  初始时Close_flag=0  才可以进行审核 Close_flag=1
         if(!MoStatus.INITIAL.getKey().equals(mesMoDesc.getCloseFlag())){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许审核！");
+        }
+        List<MesPartRoute> mesPartRoutes = mesPartRouteRepository.findByPartId(mesMoDesc.getPartId());
+        if(mesPartRoutes==null){
+            throw new MMException("该料件未建好途程，请建途程!");
         }
         //更改为已审待排
         mesMoDescRepository.setCloseFlagFor(MoStatus.AUDITED.getKey(),mesMoDesc.getMoId());
