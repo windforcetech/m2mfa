@@ -30,25 +30,27 @@ public class BaseMold extends BaseEntity implements Serializable {
     @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
     private String moldId;
     @ApiModelProperty(value = "编号")
-    @Size(max=32,message = "长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "编号长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message="编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String code;
-    @Size(max=32,message = "长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "名称长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "名称")
     @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String name;
-    @Size(max=32,message = "长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "固资编号长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "固资编号")
     private String assdtId;
     @ApiModelProperty(value = "所属客户")
     private String customerId;
     @Transient
+    @Size(max=32,message = "客户名称长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "客户名称")
     private String customerName;
     @ApiModelProperty(value = "分类")
     @NotEmpty(message="分类不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String categoryId;
     @Transient
+    @Size(max=32,message = "分类名称名称长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "分类名称")
     private String categoryName;
     @ApiModelProperty(value = "类型")
@@ -62,6 +64,7 @@ public class BaseMold extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "状态")
     private String flag;
     @Transient
+    @Size(max=32,message = "状态名称名称长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "状态名称")
     private String flagName;
     @ApiModelProperty(value = "归属部门")
