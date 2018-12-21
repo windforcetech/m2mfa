@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
@@ -36,6 +37,9 @@ public class BaseShift extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "类型")
     @NotEmpty(message="类型不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String category;
+    @Transient
+    @ApiModelProperty(value = "类型名称")
+    private String categoryName;
     @ApiModelProperty(value = "上班1")
     @Pattern(regexp="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]",message="日期格式不正确",groups = {AddGroup.class, UpdateGroup.class})
     private String onTime1;
@@ -235,6 +239,11 @@ public class BaseShift extends BaseEntity implements Serializable {
         this.description = description;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
 
-
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 }
