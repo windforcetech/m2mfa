@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
+import com.m2micro.m2mfa.mo.model.PartsRouteModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 
 import java.util.List;
@@ -81,4 +82,6 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      *      工单id
      */
     MesMoDescModel info(String id);
+
+    PartsRouteModel addDetails(String partId);
 }

@@ -1,7 +1,10 @@
 package com.m2micro.m2mfa.mo.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.node.SelectNode;
+import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
+import com.m2micro.m2mfa.mo.model.PartsRouteModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.framework.commons.exception.MMException;
@@ -10,6 +13,7 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -22,7 +26,9 @@ import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 工单主档 前端控制器
@@ -160,6 +166,14 @@ public class MesMoDescController {
     public ResponseMessage<MesMoDesc> forceClose(@PathVariable("id") String id){
         mesMoDescService.forceClose(id);
         return ResponseMessage.ok();
+    }
+
+
+    @RequestMapping("/addDetails")
+    @ApiOperation(value="工单添加基本信息")
+    @UserOperationLog("工单物料添加基本信息")
+    public ResponseMessage<PartsRouteModel> addDetails(@ApiParam(required = true,value = "料件ID") @RequestParam(required=true )String partId){
+        return ResponseMessage.ok(mesMoDescService.addDetails(partId));
     }
 
 }

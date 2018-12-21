@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
+import com.m2micro.m2mfa.mo.model.PartsRouteModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
@@ -319,6 +320,39 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         List<MesMoDescModel> list = jdbcTemplate.query(sql, rm);
         if(list==null||(list!=null&&list.size()!=1)){
             throw new MMException("工单不存在或者工单不唯一！");
+        }
+        return list.get(0);
+    }
+
+    @Override
+    public PartsRouteModel addDetails(String partId) {
+        String sql = "SELECT\n" +
+                "	bp.part_id partId,\n" +
+                "	bp.part_no partNo,\n" +
+                "	bp.`name` name,\n" +
+                "	bp.spec spec,\n" +
+                "	brd.route_id routeId,\n" +
+                "	brd.route_name routeName,\n" +
+                "	mpr.input_process_id inputProcessId,\n" +
+                "	bpr.process_name inputProcessName,\n" +
+                "	mpr.output_process_id outputProcessId,\n" +
+                "	bpr1.process_name outputProcessName\n" +
+                "FROM\n" +
+                "	base_parts bp,\n" +
+                "	base_route_desc brd,\n" +
+                "	mes_part_route mpr,\n" +
+                "	base_process bpr,\n" +
+                "	base_process bpr1\n" +
+                "WHERE\n" +
+                "	bp.part_id = mpr.part_id\n" +
+                "AND brd.route_id = mpr.route_id\n" +
+                "AND bpr.process_id = mpr.input_process_id\n" +
+                "AND bpr1.process_id = mpr.output_process_id\n" +
+                "AND bp.part_id = '"+ partId +"'";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(PartsRouteModel.class);
+        List<PartsRouteModel> list = jdbcTemplate.query(sql, rm);
+        if(list==null||(list!=null&&list.size()!=1)){
+            throw new MMException("料件相关数据不存在！");
         }
         return list.get(0);
     }
