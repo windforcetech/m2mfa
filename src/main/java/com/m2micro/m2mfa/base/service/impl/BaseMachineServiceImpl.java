@@ -67,6 +67,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
                     "	bm.machine_id machineId,\n" +
                     "	bm.code code,\n" +
                     "	bm.name name,\n" +
+                    "	bm.id id,\n" +
                     "	bm.assdt_id assdtId,\n" +
                     "	bm.serial_number serialNumber,\n" +
                     "	bm.category_id categoryId,\n" +

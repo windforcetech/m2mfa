@@ -33,6 +33,9 @@ public class BaseMachine extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "名称")
     @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String name;
+    @ApiModelProperty(value = "名称id")
+    @NotEmpty(message="名称id不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    private String id;
     @ApiModelProperty(value = "固资编号")
     private String assdtId;
     @ApiModelProperty(value = "出厂序列号")
@@ -265,5 +268,13 @@ public class BaseMachine extends BaseEntity implements Serializable {
 
     public void setDepartmentName(String departmentName) {
         this.departmentName = departmentName;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
