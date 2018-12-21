@@ -257,9 +257,70 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(StringUtils.isEmpty(id)){
             throw new MMException("不存在记录！");
         }
-        String sql = "select t.mo_id moId,t.mo_number moNumber,t.category category,t.part_id partId,t.target_qty targetQty,t.revsion revsion,t.distinguish distinguish,t.parent_mo parentMo,t.bom_revsion bomRevsion,t.plan_input_date planInputDate,t.plan_close_date planCloseDate,t.actual_input_date actualInputDate,t.actualc_lose_date actualcLoseDate,t.route_id routeId,t.input_process_id inputProcessId,t.output_process_id outputProcessId,t.reach_date reachDate,t.machine_qty machineQty,t.customer_id customerId,t.order_id orderId,t.order_seq orderSeq,t.is_schedul isSchedul,t.schedul_qty schedulQty,t.input_qty inputQty,t.output_qty outputQty,t.scrapped_qty scrappedQty,t.fail_qty failQty,t.close_flag closeFlag,t.enabled enabled,t.description description,t.create_on createOn,t.create_by createBy,t.modified_on modifiedOn,t.modified_by modifiedBy,t.part_name partName,t.part_spec partSpec,t.route_name routeName,t.input_process_name inputProcessName,t.output_process_name outputProcessName,t.customer_name customerName "
-                +" from v_mes_mo_desc t where t.mo_id = '"+id+"'";
-        return jdbcTemplate.queryForObject(sql,MesMoDescModel.class);
+        String sql = "SELECT\n" +
+                    "	md.mo_id moId,\n" +
+                    "	md.mo_number moNumber,\n" +
+                    "	md.category category,\n" +
+                    "	md.part_id partId,\n" +
+                    "	md.target_qty targetQty,\n" +
+                    "	md.revsion revsion,\n" +
+                    "	md.distinguish distinguish,\n" +
+                    "	md.parent_mo parentMo,\n" +
+                    "	md.bom_revsion bomRevsion,\n" +
+                    "	md.plan_input_date planInputDate,\n" +
+                    "	md.plan_close_date planCloseDate,\n" +
+                    "	md.actual_input_date actualInputDate,\n" +
+                    "	md.actualc_lose_date actualcLoseDate,\n" +
+                    "	md.route_id routeId,\n" +
+                    "	md.input_process_id inputProcessId,\n" +
+                    "	md.output_process_id outputProcessId,\n" +
+                    "	md.reach_date reachDate,\n" +
+                    "	md.machine_qty machineQty,\n" +
+                    "	md.customer_id customerId,\n" +
+                    "	md.order_id orderId,\n" +
+                    "	md.order_seq orderSeq,\n" +
+                    "	md.is_schedul isSchedul,\n" +
+                    "	md.schedul_qty schedulQty,\n" +
+                    "	md.input_qty inputQty,\n" +
+                    "	md.output_qty outputQty,\n" +
+                    "	md.scrapped_qty scrappedQty,\n" +
+                    "	md.fail_qty failQty,\n" +
+                    "	md.close_flag closeFlag,\n" +
+                    "	md.enabled enabled,\n" +
+                    "	md.description description,\n" +
+                    "	md.create_on createOn,\n" +
+                    "	md.create_by createBy,\n" +
+                    "	md.modified_on modifiedOn,\n" +
+                    "	md.modified_by modifiedBy,\n" +
+                    "	bi.item_name categoryName,\n" +
+                    "	bp.part_no partNo,\n" +
+                    "	bp.name partName,\n" +
+                    "	bp.spec partSpec,\n" +
+                    "	brd.route_name routeName,\n" +
+                    "	bpro.process_name inputProcessName,\n" +
+                    "	bpr.process_name outputProcessName,\n" +
+                    "	bc.name customerName\n" +
+                    "FROM\n" +
+                    "	mes_mo_desc md,\n" +
+                    "	base_items_target bi,\n" +
+                    "	base_parts bp,\n" +
+                    "	base_route_desc brd,\n" +
+                    "	base_process bpro,\n" +
+                    "	base_process bpr,\n" +
+                    "	base_customer bc\n" +
+                    "WHERE\n" +
+                    "	md.part_id = bp.part_id\n" +
+                    "AND bi.id = md.category\n" +
+                    "AND brd.route_id = md.route_id\n" +
+                    "AND bpro.process_id = md.input_process_id\n" +
+                    "AND bpr.process_id = md.output_process_id\n" +
+                    "AND bc.customer_id = md.customer_id where md.mo_id = '"+id+"'";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDescModel.class);
+        List<MesMoDescModel> list = jdbcTemplate.query(sql, rm);
+        if(list==null||(list!=null&&list.size()!=1)){
+            throw new MMException("工单不存在或者工单不唯一！");
+        }
+        return list.get(0);
     }
 
 }
