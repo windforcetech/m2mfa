@@ -4,6 +4,8 @@ import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.pr.vo.MesPartvo;
+
 /**
  * 料件途程设定主档 服务类
  * @author liaotao
@@ -20,4 +22,7 @@ public interface MesPartRouteService extends BaseService<MesPartRoute,String> {
 
     //根据工艺id查询业务
      String selectRouteid(String routeId);
+
+     //添加途程
+     boolean save(MesPartvo mesPartRoutevo);
 }

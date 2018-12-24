@@ -1,8 +1,11 @@
 package com.m2micro.m2mfa.pr.service.impl;
 
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
+import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -41,6 +44,14 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     @Override
     public String selectRouteid(String routeId) {
         return mesPartRouteRepository.selectRouteid(routeId);
+    }
+
+    @Override
+    public boolean save(MesPartvo mesPartRoutevo) {
+        ValidatorUtil.validateEntity(mesPartRoutevo.getMesPartRoute(), AddGroup.class);
+        ValidatorUtil.validateEntity(mesPartRoutevo.getMesPartRouteProcess(), AddGroup.class);
+        ValidatorUtil.validateEntity(mesPartRoutevo.getMesPartRouteStation(), AddGroup.class);
+        return false;
     }
 
 }

@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.repository;
 
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.framework.commons.BaseRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,4 +22,7 @@ public interface BasePartsRepository extends BaseRepository<BaseParts,String> {
      * @return
      */
     List<BaseParts> findByPartNoAndPartIdNot(String partNo,String partId);
+
+    @Query(value = "select * from base_parts  where  part_no=?1 ",nativeQuery=true)
+    BaseParts selectpartNo(String partNo);
 }

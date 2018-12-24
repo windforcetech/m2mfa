@@ -10,6 +10,8 @@ import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.query.BaseRouteQuery;
 import com.m2micro.m2mfa.base.vo.BaseRoutevo;
 
+import java.util.List;
+
 /**
  * 生产途程单头 服务类
  * @author chenshuhong
@@ -32,4 +34,7 @@ public interface BaseRouteDescService extends BaseService<BaseRouteDesc,String> 
 
     //删除工艺
     ResponseMessage delete(String routeId );
+
+    //获取对应的工序
+   List<BaseRouteDesc> getrouteDesce(String routId);
 }

@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
@@ -28,21 +29,26 @@ public class BaseProcess extends BaseEntity implements Serializable {
     @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
     private String processId;
     @NotEmpty(message="工艺编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "工艺编号长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "编号")
     private String processCode;
     @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "名称长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "名称")
     private String processName;
     @NotEmpty(message="数据采集方式不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "数据采集方式长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "数据采集方式")
     private String collection;
     @NotEmpty(message="类型",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "类型长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "类型")
     private String category;
     @NotNull(message="有效否",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
     @NotEmpty(message="描述不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "描述长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "描述")
     private String description;
 

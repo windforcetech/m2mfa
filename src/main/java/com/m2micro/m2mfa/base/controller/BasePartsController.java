@@ -14,6 +14,7 @@ import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -133,4 +134,12 @@ public class BasePartsController {
         return ResponseMessage.ok(map);
     }
 
+
+    @RequestMapping("/selectpartNo")
+    @ApiOperation(value="料件编号查询  ")
+    @UserOperationLog("料件编号查询 ")
+    public ResponseMessage<BaseParts> selectpartNo(@ApiParam(value = "partNo",required=true) @RequestParam(required = true)  String partNo){
+
+        return ResponseMessage.ok(basePartsService.selectpartNo(partNo));
+    }
 }

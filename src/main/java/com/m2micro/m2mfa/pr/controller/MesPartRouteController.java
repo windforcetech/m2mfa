@@ -1,6 +1,10 @@
 package com.m2micro.m2mfa.pr.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.entity.BaseRouteDef;
+import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
+import com.m2micro.m2mfa.base.service.BaseRouteDefService;
+import com.m2micro.m2mfa.base.service.BaseRouteDescService;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -8,6 +12,8 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.m2micro.m2mfa.pr.vo.MesPartvo;
+import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -19,6 +25,10 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 料件途程设定主档 前端控制器
@@ -32,6 +42,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class MesPartRouteController {
     @Autowired
     MesPartRouteService mesPartRouteService;
+    @Autowired
+    private BaseRouteDescService  baseRouteDescService;
+    @Autowired
+    private BaseRouteDefService baseRouteDefService;
 
     /**
      * 列表
@@ -61,10 +75,9 @@ public class MesPartRouteController {
     @RequestMapping("/save")
     @ApiOperation(value="保存料件途程设定主档")
     @UserOperationLog("保存料件途程设定主档")
-    public ResponseMessage<MesPartRoute> save(@RequestBody MesPartRoute mesPartRoute){
-        ValidatorUtil.validateEntity(mesPartRoute, AddGroup.class);
-        mesPartRoute.setPartRouteId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(mesPartRouteService.save(mesPartRoute));
+    public ResponseMessage<MesPartRoute> save(@RequestBody MesPartvo mesPartRoutevo){
+        mesPartRouteService.save(mesPartRoutevo);
+        return ResponseMessage.ok(null);
     }
 
     /**
@@ -93,17 +106,17 @@ public class MesPartRouteController {
         mesPartRouteService.deleteByIds(ids);
         return ResponseMessage.ok();
     }
-/*
-    这两个是返回给前端然后进行选择后添加到关联表的选择
-    SELECT  * from base_route_desc m
-    INNER JOIN  base_route_def  r    ON r.route_id=m.route_id
-    WHERE m.route_id='481E498831274406987045502FF3E36C'
 
+    @RequestMapping("/addDetails")
+    @ApiOperation(value="添加基本信息")
+    @UserOperationLog("途程添加基本信息")
+    public ResponseMessage addDetails(@ApiParam(value = "routId",required=true) @RequestParam(required = true) String routId){
+        Map map = new HashMap();
+        List<BaseRouteDesc> routeDescs = baseRouteDescService.getrouteDesce(routId);
+        List<BaseRouteDef> routeDefs = baseRouteDefService.getroutedef(routId);
+        map.put("routeDefs",routeDefs);
+        map.put("routeDescs",routeDescs);
+        return ResponseMessage.ok(map);
+    }
 
-     这是工序跟工艺的关联
-      SELECT  * from base_route_desc    m
-			inner join  base_route_def      l   on l.route_id=m.route_id
-      inner join base_process_station  p  on  l.process_id=p.process_id
-      where m.route_id='481e498831274406987045502ff3e36c'
- */
 }

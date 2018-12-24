@@ -36,4 +36,7 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
      * @param ids
      */
     void deleteAllByIds(String[] ids);
+
+    //料件编号获取基本数据
+    BaseParts selectpartNo(String partNo);
 }

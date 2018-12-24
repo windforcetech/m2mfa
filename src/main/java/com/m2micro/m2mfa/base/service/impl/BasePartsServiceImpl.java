@@ -173,4 +173,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         //删除Base_Bom_Substitute表
     }
 
+    @Override
+    public BaseParts selectpartNo(String partNo) {
+        return basePartsRepository.selectpartNo(partNo);
+    }
+
 }

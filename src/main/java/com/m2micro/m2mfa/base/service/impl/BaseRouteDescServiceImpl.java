@@ -18,6 +18,9 @@ import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -46,6 +49,9 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
 
     @Autowired
     JPAQueryFactory queryFactory;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     public BaseRouteDescRepository getRepository() {
         return baseRouteDescRepository;
@@ -111,6 +117,21 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         basePageElemenService.deleteById(routeId);
         baseRouteDefService.deleterouteId(routeId);
         return ResponseMessage.ok();
+    }
+
+    @Override
+    public List<BaseRouteDesc> getrouteDesce(String routId) {
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseRouteDesc.class);
+        String sql ="SELECT\n" +
+                "	*\n" +
+                "FROM\n" +
+                "	base_route_desc m\n" +
+                "INNER JOIN base_route_def l ON l.route_id = m.route_id\n" +
+                "INNER JOIN base_process_station p ON l.process_id = p.process_id\n" +
+                "WHERE\n" +
+                "	m.route_id ='"+routId+"' ";
+        List<BaseRouteDesc> list = jdbcTemplate.query(sql,rm);
+        return  list;
     }
 
 }

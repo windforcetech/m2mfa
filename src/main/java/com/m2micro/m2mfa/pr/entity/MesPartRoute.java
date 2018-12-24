@@ -3,9 +3,13 @@ package com.m2micro.m2mfa.pr.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -21,20 +25,33 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @ApiModelProperty(value = "主键")
     @Id
+    @NotNull(message="主键不能为空。",groups = {AddGroup.class, UpdateGroup.class})
     private String partRouteId;
     @ApiModelProperty(value = "料件id")
+    @NotNull(message="料件id不能为空。",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "料件id长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String partId;
     @ApiModelProperty(value = "管制方式")
+    @NotNull(message="管制方式不能为空。",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "料件id长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String controlInformation;
     @ApiModelProperty(value = "工艺主键")
+    @NotNull(message="管制方式不能为空。",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "料件id长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String routeId;
+    @NotNull(message="投入工序不能为空。",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "投入工序长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "投入工序")
     private String inputProcessId;
+    @NotNull(message="产出工序不能为空。",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "产出工序长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "产出工序")
     private String outputProcessId;
     @ApiModelProperty(value = "有效否")
     private Integer enabled;
     @ApiModelProperty(value = "描述")
+    @NotNull(message="描述不能为空。",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "描述长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String description;
 
     public String getPartRouteId() {

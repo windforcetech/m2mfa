@@ -4,6 +4,9 @@ import com.m2micro.m2mfa.base.entity.BaseRouteDef;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+
+import java.util.List;
+
 /**
  * 生产途程单身 服务类
  * @author chenshuhong
@@ -22,5 +25,7 @@ public interface BaseRouteDefService extends BaseService<BaseRouteDef,String> {
     String selectoneprocessId(String processId);
     //根据routeId删除
     void deleterouteId(String routeId);
+
+    List<BaseRouteDef> getroutedef(String routId);
 
 }

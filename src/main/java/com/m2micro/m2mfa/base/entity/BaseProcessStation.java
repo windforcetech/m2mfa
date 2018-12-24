@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
@@ -31,9 +32,11 @@ public class BaseProcessStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "工序主键")
     private String processId;
     @NotEmpty(message="行为主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "行为主键长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "行为主键")
     private String stationId;
     @NotNull(message="步骤不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "步骤长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "步骤")
     private Integer step;
     @NotNull(message="允许跳过不能为空",groups = {AddGroup.class, UpdateGroup.class})
@@ -43,6 +46,7 @@ public class BaseProcessStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
     @NotNull(message="描述不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "描述长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "描述")
     private String description;
 

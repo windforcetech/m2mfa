@@ -4,6 +4,9 @@ import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
 import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
 /**
  * 生产途程单头 Repository 接口
  * @author chenshuhong
@@ -14,4 +17,5 @@ public interface BaseRouteDescRepository extends BaseRepository<BaseRouteDesc,St
 
     @Query("select r.routeId  from BaseRouteDesc  as r where r.routeNo=?1")
     String selectRouteNo(String routeNo);
+
 }
