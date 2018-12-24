@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.mo.controller;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.service.BasePartsService;
+import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.model.PartsRouteModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
@@ -77,6 +78,7 @@ public class MesMoDescController {
         if(list!=null&&list.size()>0){
             throw new MMException("工单号码不唯一！");
         }
+        mesMoDesc.setCloseFlag(MoStatus.INITIAL.getKey());
         return ResponseMessage.ok(mesMoDescService.save(mesMoDesc));
     }
 

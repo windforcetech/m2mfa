@@ -30,14 +30,14 @@ public class BaseParts extends BaseEntity implements Serializable {
     @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
     private String partId;
     @ApiModelProperty(value = "料件编号")
-    @Size(max=32,message = "料件编号字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "料件编号不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message="料件编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String partNo;
     @ApiModelProperty(value = "品名")
-    @Size(max=32,message = "品名字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "品名不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message="品名不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String name;
-    @Size(max=32,message = "规格字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "规格不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "规格")
     @NotEmpty(message="规格不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String spec;
@@ -60,7 +60,7 @@ public class BaseParts extends BaseEntity implements Serializable {
     private String category;
     @Transient
     @ApiModelProperty(value = "类型名称")
-    @Size(max=32,message = "类型名称字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "类型名称不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String categoryName;
     @ApiModelProperty(value = "单重/净重(单位kg)")
     private BigDecimal single;
@@ -73,13 +73,13 @@ public class BaseParts extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "最高储存数量")
     private Integer maxStock;
     @ApiModelProperty(value = "主要仓库")
-    @Size(max=32,message = "主要仓库字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "主要仓库不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String mainWarehouse;
     @ApiModelProperty(value = "主要储位")
-    @Size(max=32,message = "主要储位字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "主要储位不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String mainStorage;
     @ApiModelProperty(value = "生产单位")
-    @Size(max=32,message = "生产单位字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "生产单位不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String productionUnit;
     @ApiModelProperty(value = "生产单位/库存单位换算率")
     private Integer productionConversionRate;
@@ -175,10 +175,10 @@ public class BaseParts extends BaseEntity implements Serializable {
         this.single = single;
     }
 
-    public Boolean getCheck() {
+    public Boolean getIsCheck() {
         return isCheck;
     }
-    public void setCheck(Boolean isCheck) {
+    public void setIsCheck(Boolean isCheck) {
         this.isCheck = isCheck;
     }
 
@@ -266,10 +266,10 @@ public class BaseParts extends BaseEntity implements Serializable {
         this.minSentQty = minSentQty;
     }
 
-    public Boolean getConsume() {
+    public Boolean getIsConsume() {
         return isConsume;
     }
-    public void setConsume(Boolean isConsume) {
+    public void setIsConsume(Boolean isConsume) {
         this.isConsume = isConsume;
     }
 
