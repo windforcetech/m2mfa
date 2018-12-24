@@ -43,6 +43,7 @@ public class BaseParts extends BaseEntity implements Serializable {
     private String spec;
     @ApiModelProperty(value = "目前版本号")
     @NotEmpty(message="目前版本号不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "版本字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String version;
     @ApiModelProperty(value = "物料等级")
     @Size(min=1,max=1,message="物料等级不能超过1位",groups = {AddGroup.class, UpdateGroup.class})
@@ -71,11 +72,11 @@ public class BaseParts extends BaseEntity implements Serializable {
     private Integer safetyStock;
     @ApiModelProperty(value = "最高储存数量")
     private Integer maxStock;
-    @ApiModelProperty(value = "主要仓库别")
-    @Size(max=32,message = "主要仓库别字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @ApiModelProperty(value = "主要仓库")
+    @Size(max=32,message = "主要仓库字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String mainWarehouse;
-    @ApiModelProperty(value = "主要储位别")
-    @Size(max=32,message = "主要储位别字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @ApiModelProperty(value = "主要储位")
+    @Size(max=32,message = "主要储位字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String mainStorage;
     @ApiModelProperty(value = "生产单位")
     @Size(max=32,message = "生产单位字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
