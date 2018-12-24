@@ -44,7 +44,6 @@ public class BaseParts extends BaseEntity implements Serializable {
     @Size(max=32,message = "目前版本号不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "目前版本号")
     @NotEmpty(message="目前版本号不能为空",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "版本字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String version;
     @ApiModelProperty(value = "物料等级")
     @Size(min=1,max=1,message="物料等级不能超过1位",groups = {AddGroup.class, UpdateGroup.class})
