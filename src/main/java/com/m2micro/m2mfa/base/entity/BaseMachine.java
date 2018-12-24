@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
@@ -28,33 +29,43 @@ public class BaseMachine extends BaseEntity implements Serializable {
     @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
     private String machineId;
     @ApiModelProperty(value = "编号")
+    @Size(max=32,message = "编号字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message="编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String code;
     @ApiModelProperty(value = "名称")
+    @Size(max=32,message = "名称字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String name;
     @ApiModelProperty(value = "名称id")
     @NotEmpty(message="名称id不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String id;
     @ApiModelProperty(value = "固资编号")
+    @Size(max=32,message = "固资编号字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String assdtId;
+    @Size(max=32,message = "出厂序列号字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "出厂序列号")
     private String serialNumber;
     @ApiModelProperty(value = "设备类型")
+    @Size(max=32,message = "设备类型字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String categoryId;
     @ApiModelProperty(value = "摆放位置")
+    @Size(max=32,message = "摆放位置字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String placement;
     @ApiModelProperty(value = "摆放位置名称")
+    @Size(max=32,message = "摆放位置名称字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String placementName;
     @ApiModelProperty(value = "设备状态")
+    @Size(max=32,message = "设备状态字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String flag;
     @Transient
     @ApiModelProperty(value = "设备状态名称")
+    @Size(max=32,message = "设备状态名称字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String flagName;
     @ApiModelProperty(value = "归属部门")
     private String departmentId;
     @Transient
     @ApiModelProperty(value = "归属部门名称")
+    @Size(max=32,message = "归属部门名称名称字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String departmentName;
     @ApiModelProperty(value = "购入日期")
     private Date purchaseDate;

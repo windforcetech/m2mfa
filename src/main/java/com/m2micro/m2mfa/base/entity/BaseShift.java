@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
@@ -29,16 +30,20 @@ public class BaseShift extends BaseEntity implements Serializable {
     @NotEmpty(message="主键不能为空",groups = {UpdateGroup.class})
     private String shiftId;
     @ApiModelProperty(value = "编号")
+    @Size(max=32,message = "编号字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message="编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String code;
     @ApiModelProperty(value = "名称")
+    @Size(max=32,message = "名称字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String name;
     @ApiModelProperty(value = "类型")
+    @Size(max=32,message = "类型字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message="类型不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String category;
     @Transient
     @ApiModelProperty(value = "类型名称")
+    @Size(max=32,message = "类型名称字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String categoryName;
     @ApiModelProperty(value = "上班1")
     @Pattern(regexp="([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]",message="日期格式不正确",groups = {AddGroup.class, UpdateGroup.class})
@@ -83,6 +88,7 @@ public class BaseShift extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
+    @Size(max=32,message = "描述字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String description;
 
     public String getShiftId() {
