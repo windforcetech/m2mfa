@@ -205,8 +205,8 @@ public class BaseMoldServiceImpl implements BaseMoldService {
         if(StringUtils.isNotEmpty(query.getName())){
             sql = sql+" and bm.name like '%"+query.getName()+"%'";
         }
-        if(StringUtils.isNotEmpty(query.getCustomerName())){
-            sql = sql+" and bc.name like '%"+query.getCustomerName()+"%'";
+        if(StringUtils.isNotEmpty(query.getCustomerId())){
+            sql = sql+" and bm.customer_id = '"+query.getCustomerId()+"'";
         }
         if(StringUtils.isNotEmpty(query.getFlag())){
             sql = sql+" and bm.flag = '"+query.getFlag()+"'";

@@ -20,6 +20,8 @@ public class BaseMoldQuery extends Query {
     private String name;
     @ApiModelProperty(value = "所属客户")
     private String customerName;
+    @ApiModelProperty(value = "所属客户id")
+    private String customerId;
     @ApiModelProperty(value = "模具状态")
     private String flag;
     @ApiModelProperty(value = "模具分类id")
@@ -63,5 +65,13 @@ public class BaseMoldQuery extends Query {
 
     public void setCategoryId(String categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
 }
