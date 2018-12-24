@@ -5,14 +5,20 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
+
+import com.m2micro.framework.starter.entity.validgroup.Add;
+import com.m2micro.framework.starter.entity.validgroup.Profile;
+import com.m2micro.framework.starter.entity.validgroup.Update;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.hibernate.validator.constraints.Range;
 
 /**
  * 客户基本资料档
@@ -50,7 +56,8 @@ public class BaseCustomer extends BaseEntity implements Serializable {
     @Size(max=32,message = "区域字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "区域")
     private String area;
-    @Size(max=32,message = "电话号码格式有误",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(min=11, max=11,message = "电话号码格式有误",groups = {AddGroup.class, UpdateGroup.class})
+    @Pattern(regexp = "^$|^1[3|4|5|8][0-9]\\d{8}$", message = "手机号码格式不正确", groups = {Add.class, Update.class, Profile.class})
     @ApiModelProperty(value = "电话号码")
     private String telephone;
     @ApiModelProperty(value = "传真号码")

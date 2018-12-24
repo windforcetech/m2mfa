@@ -75,7 +75,7 @@ public class BaseCustomerController {
     @ApiOperation(value="保存客户基本资料档")
     @UserOperationLog("保存客户基本资料档")
     public ResponseMessage<BaseCustomer> save(@RequestBody BaseCustomer baseCustomer){
-        //ValidatorUtil.validateEntity(baseCustomer, AddGroup.class);
+        ValidatorUtil.validateEntity(baseCustomer, AddGroup.class);
         baseCustomer.setCustomerId(UUIDUtil.getUUID());
         List<BaseCustomer> list = baseCustomerService.findByCodeAndCustomerIdNot(baseCustomer.getCode(),"");
         if(list!=null&&list.size()>0){
