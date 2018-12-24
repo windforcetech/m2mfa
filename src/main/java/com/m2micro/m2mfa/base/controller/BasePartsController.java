@@ -129,7 +129,9 @@ public class BasePartsController {
     public ResponseMessage addDetails(){
         Map map = new HashMap();
         List<SelectNode> partsSource = baseItemsTargetService.getSelectNode("parts_source");
+        TreeNode partCategory = baseItemsTargetService.getTreeNode("part_category");
         map.put("partsSource",partsSource);
+        map.put("partCategory",partCategory);
         map.put("baseUnitService",baseUnitService.list());
         return ResponseMessage.ok(map);
     }
