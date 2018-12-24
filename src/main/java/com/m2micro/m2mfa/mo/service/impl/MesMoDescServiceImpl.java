@@ -120,6 +120,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if (query.getEndTime() != null) {
             sql = sql+" and md.plan_input_date <= "+"'"+DateUtil.format(query.getEndTime())+"'" ;
         }
+
         sql = sql + " order by md.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDescModel.class);
