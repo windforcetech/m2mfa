@@ -19,10 +19,10 @@ import java.util.List;
 public interface BaseProcessService extends BaseService<BaseProcess,String> {
 
     //添加工艺
-     boolean save( BaseProcess baseProcess,  BaseProcessStation baseProcessStation,  BasePageElemen basePageElemen);
+     boolean save( BaseProcess baseProcess,  List<BaseProcessStation> baseProcessStation,  BasePageElemen basePageElemen);
 
     //修改工艺
-     boolean update( BaseProcess baseProcess,  BaseProcessStation baseProcessStation,  BasePageElemen basePageElemen);
+     boolean update( BaseProcess baseProcess,   List<BaseProcessStation>  baseProcessStations,  BasePageElemen basePageElemen);
 
     //删除工序
      ResponseMessage delete(String processId);

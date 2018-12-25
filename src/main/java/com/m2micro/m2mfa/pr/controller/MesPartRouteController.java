@@ -75,9 +75,8 @@ public class MesPartRouteController {
     @RequestMapping("/save")
     @ApiOperation(value="保存料件途程设定主档")
     @UserOperationLog("保存料件途程设定主档")
-    public ResponseMessage<MesPartRoute> save(@RequestBody MesPartvo mesPartRoutevo){
-        mesPartRouteService.save(mesPartRoutevo);
-        return ResponseMessage.ok(null);
+    public ResponseMessage<String > save(@RequestBody MesPartvo mesPartRoutevo){
+        return  mesPartRouteService.save(mesPartRoutevo.getMesPartRoute(),mesPartRoutevo.getMesPartRouteProcess(),mesPartRoutevo.getMesPartRouteStation())==true ? ResponseMessage.ok():ResponseMessage.error("添加失败。");
     }
 
     /**

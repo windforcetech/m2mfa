@@ -36,7 +36,6 @@ public class BaseProcessStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "行为主键")
     private String stationId;
     @NotNull(message="步骤不能为空",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "步骤长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "步骤")
     private Integer step;
     @NotNull(message="允许跳过不能为空",groups = {AddGroup.class, UpdateGroup.class})

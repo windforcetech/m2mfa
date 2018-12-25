@@ -4,6 +4,8 @@ import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.pr.entity.MesPartRouteProcess;
+import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 
 /**
@@ -24,5 +26,5 @@ public interface MesPartRouteService extends BaseService<MesPartRoute,String> {
      String selectRouteid(String routeId);
 
      //添加途程
-     boolean save(MesPartvo mesPartRoutevo);
+     boolean save( MesPartRoute mesPartRoute,MesPartRouteProcess mesPartRouteProcess, MesPartRouteStation mesPartRouteStation);
 }

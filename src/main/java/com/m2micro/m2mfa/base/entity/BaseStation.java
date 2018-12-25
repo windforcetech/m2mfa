@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -57,10 +58,40 @@ public class BaseStation extends BaseEntity implements Serializable {
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+    @Transient
+    @ApiModelProperty(value = "类型名称")
+    private String postCategoryName;
+
+    public BaseStation(@NotEmpty(message = "主键不能为空", groups = {UpdateGroup.class}) String stationId, @NotEmpty(message = "编号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String code, @NotEmpty(message = "名称不能为空", groups = {AddGroup.class, UpdateGroup.class}) String name, Integer leadTime, Integer waitingTime, Integer postTime, Integer jobPeoples, BigDecimal standardHours, BigDecimal coefficient, Integer controlPeoples, Integer controlMachines, String postCategory, Integer sortCode, Boolean enabled, String description, String postCategoryName) {
+        this.stationId = stationId;
+        this.code = code;
+        this.name = name;
+        this.leadTime = leadTime;
+        this.waitingTime = waitingTime;
+        this.postTime = postTime;
+        this.jobPeoples = jobPeoples;
+        this.standardHours = standardHours;
+        this.coefficient = coefficient;
+        this.controlPeoples = controlPeoples;
+        this.controlMachines = controlMachines;
+        this.postCategory = postCategory;
+        this.sortCode = sortCode;
+        this.enabled = enabled;
+        this.description = description;
+        this.postCategoryName = postCategoryName;
+    }
+
+    public BaseStation() {
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
 
     public String getStationId() {
         return stationId;
     }
+
     public void setStationId(String stationId) {
         this.stationId = stationId;
     }
@@ -68,6 +99,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public String getCode() {
         return code;
     }
+
     public void setCode(String code) {
         this.code = code;
     }
@@ -75,6 +107,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -82,6 +115,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public Integer getLeadTime() {
         return leadTime;
     }
+
     public void setLeadTime(Integer leadTime) {
         this.leadTime = leadTime;
     }
@@ -89,6 +123,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public Integer getWaitingTime() {
         return waitingTime;
     }
+
     public void setWaitingTime(Integer waitingTime) {
         this.waitingTime = waitingTime;
     }
@@ -96,6 +131,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public Integer getPostTime() {
         return postTime;
     }
+
     public void setPostTime(Integer postTime) {
         this.postTime = postTime;
     }
@@ -103,6 +139,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public Integer getJobPeoples() {
         return jobPeoples;
     }
+
     public void setJobPeoples(Integer jobPeoples) {
         this.jobPeoples = jobPeoples;
     }
@@ -110,6 +147,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public BigDecimal getStandardHours() {
         return standardHours;
     }
+
     public void setStandardHours(BigDecimal standardHours) {
         this.standardHours = standardHours;
     }
@@ -117,6 +155,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public BigDecimal getCoefficient() {
         return coefficient;
     }
+
     public void setCoefficient(BigDecimal coefficient) {
         this.coefficient = coefficient;
     }
@@ -124,6 +163,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public Integer getControlPeoples() {
         return controlPeoples;
     }
+
     public void setControlPeoples(Integer controlPeoples) {
         this.controlPeoples = controlPeoples;
     }
@@ -131,6 +171,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public Integer getControlMachines() {
         return controlMachines;
     }
+
     public void setControlMachines(Integer controlMachines) {
         this.controlMachines = controlMachines;
     }
@@ -138,6 +179,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public String getPostCategory() {
         return postCategory;
     }
+
     public void setPostCategory(String postCategory) {
         this.postCategory = postCategory;
     }
@@ -145,6 +187,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public Integer getSortCode() {
         return sortCode;
     }
+
     public void setSortCode(Integer sortCode) {
         this.sortCode = sortCode;
     }
@@ -152,6 +195,7 @@ public class BaseStation extends BaseEntity implements Serializable {
     public Boolean getEnabled() {
         return enabled;
     }
+
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
@@ -159,10 +203,16 @@ public class BaseStation extends BaseEntity implements Serializable {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
 
+    public String getPostCategoryName() {
+        return postCategoryName;
+    }
 
-
+    public void setPostCategoryName(String postCategoryName) {
+        this.postCategoryName = postCategoryName;
+    }
 }

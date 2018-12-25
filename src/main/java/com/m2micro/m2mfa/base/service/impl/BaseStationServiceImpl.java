@@ -1,9 +1,11 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.query.BaseStationQuery;
 import com.m2micro.m2mfa.base.repository.BaseStationRepository;
+import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.base.service.BaseStationService;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
@@ -42,6 +44,8 @@ public class BaseStationServiceImpl implements BaseStationService {
     JPAQueryFactory queryFactory;
     @Autowired
     MesPartRouteStationRepository mesPartRouteStationRepository;
+    @Autowired
+    private BaseItemsTargetService baseItemsTargetService;
 
     public BaseStationRepository getRepository() {
         return baseStationRepository;
@@ -49,35 +53,71 @@ public class BaseStationServiceImpl implements BaseStationService {
 
     @Override
     public PageUtil<BaseStation> list(BaseStationQuery query) {
-        QBaseStation qBaseStation = QBaseStation.baseStation;
-        JPAQuery<BaseStation> jq = queryFactory.selectFrom(qBaseStation);
+            QBaseStation qBaseStation = QBaseStation.baseStation;
+            JPAQuery<BaseStation> jq = queryFactory.selectFrom(qBaseStation);
 
-        BooleanBuilder condition = new BooleanBuilder();
-        if(StringUtils.isNotEmpty(query.getCode())){
-            condition.and(qBaseStation.code.like("%"+query.getCode()+"%"));
-        }
-        if(StringUtils.isNotEmpty(query.getName())){
-            condition.and(qBaseStation.name.like("%"+query.getName()+"%"));
-        }
-        if(StringUtils.isNotEmpty(query.getPostCategory())){
-            condition.and(qBaseStation.postCategory.like("%"+query.getPostCategory()+"%"));
-        }
-        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
+            BooleanBuilder condition = new BooleanBuilder();
+            if(StringUtils.isNotEmpty(query.getCode())){
+                condition.and(qBaseStation.code.like("%"+query.getCode()+"%"));
+            }
+            if(StringUtils.isNotEmpty(query.getName())){
+                condition.and(qBaseStation.name.like("%"+query.getName()+"%"));
+            }
+            if(StringUtils.isNotEmpty(query.getPostCategory())){
+                condition.and(qBaseStation.postCategory.eq(query.getPostCategory()));
+            }
+            jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
 
-        if (StringUtils.isEmpty(query.getOrder())||StringUtils.isEmpty(query.getDirect())){
-            jq.orderBy(qBaseStation.modifiedOn.desc());
-        }else {
-            PathBuilder<BaseStation> entityPath = new PathBuilder<>(BaseStation.class, "baseStation");
-            Order order = "ASC".equalsIgnoreCase(query.getDirect())?Order.ASC:Order.DESC;
-            OrderSpecifier orderSpecifier = new OrderSpecifier(order,entityPath.get(query.getOrder()));
-            jq.orderBy(orderSpecifier);
-        }
+            if (StringUtils.isEmpty(query.getOrder())||StringUtils.isEmpty(query.getDirect())){
+                jq.orderBy(qBaseStation.modifiedOn.desc());
+            }else {
+                PathBuilder<BaseStation> entityPath = new PathBuilder<>(BaseStation.class, "baseStation");
+                Order order = "ASC".equalsIgnoreCase(query.getDirect())?Order.ASC:Order.DESC;
+                OrderSpecifier orderSpecifier = new OrderSpecifier(order,entityPath.get(query.getOrder()));
+                jq.orderBy(orderSpecifier);
+            }
 
-        List<BaseStation> list = jq.fetch();
-        long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+            List<BaseStation> list = jq.fetch();
+            for(BaseStation baseStation :list ){
+                baseStation.setPostCategoryName(baseItemsTargetService.findById(baseStation.getPostCategory()).get().getItemName());
+            }
+            long totalCount = jq.fetchCount();
+            return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+
     }
 
+    /*
+        @Override
+        public PageUtil<BaseStation> list(BaseStationQuery query) {
+            QBaseStation qBaseStation = QBaseStation.baseStation;
+            JPAQuery<BaseStation> jq = queryFactory.selectFrom(qBaseStation);
+
+            BooleanBuilder condition = new BooleanBuilder();
+            if(StringUtils.isNotEmpty(query.getCode())){
+                condition.and(qBaseStation.code.like("%"+query.getCode()+"%"));
+            }
+            if(StringUtils.isNotEmpty(query.getName())){
+                condition.and(qBaseStation.name.like("%"+query.getName()+"%"));
+            }
+            if(StringUtils.isNotEmpty(query.getPostCategory())){
+                condition.and(qBaseStation.postCategory.like("%"+query.getPostCategory()+"%"));
+            }
+            jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
+
+            if (StringUtils.isEmpty(query.getOrder())||StringUtils.isEmpty(query.getDirect())){
+                jq.orderBy(qBaseStation.modifiedOn.desc());
+            }else {
+                PathBuilder<BaseStation> entityPath = new PathBuilder<>(BaseStation.class, "baseStation");
+                Order order = "ASC".equalsIgnoreCase(query.getDirect())?Order.ASC:Order.DESC;
+                OrderSpecifier orderSpecifier = new OrderSpecifier(order,entityPath.get(query.getOrder()));
+                jq.orderBy(orderSpecifier);
+            }
+
+            List<BaseStation> list = jq.fetch();
+            long totalCount = jq.fetchCount();
+            return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        }
+    */
     @Override
     @Transactional
     public BaseStation saveEntity(BaseStation baseStation) {

@@ -3,15 +3,13 @@ package com.m2micro.m2mfa.base.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseProcessQuery;
 import com.m2micro.m2mfa.base.repository.BasePageElemenRepository;
 import com.m2micro.m2mfa.base.repository.BaseProcessRepository;
 import com.m2micro.m2mfa.base.repository.BaseProcessStationRepository;
 import com.m2micro.m2mfa.base.repository.BaseRouteDefRepository;
-import com.m2micro.m2mfa.base.service.BasePageElemenService;
-import com.m2micro.m2mfa.base.service.BaseProcessService;
-import com.m2micro.m2mfa.base.service.BaseProcessStationService;
-import com.m2micro.m2mfa.base.service.BaseRouteDefService;
+import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
@@ -44,7 +42,10 @@ public class BaseProcessServiceImpl implements BaseProcessService {
     private BasePageElemenService basePageElemenService;
     @Autowired
     private BaseRouteDefService baseRouteDefService;
-
+    @Autowired
+    BaseItemsTargetService baseItemsTargetService;
+    @Autowired
+    private BaseStationService baseStationService;
     @Autowired
     JPAQueryFactory queryFactory;
 
@@ -55,18 +56,23 @@ public class BaseProcessServiceImpl implements BaseProcessService {
 
     @Override
     @Transactional
-    public boolean save(BaseProcess baseProcess, BaseProcessStation baseProcessStation, BasePageElemen basePageElemen) {
+    public boolean save(BaseProcess baseProcess, List<BaseProcessStation> baseProcessStations, BasePageElemen basePageElemen) {
         if(!StringUtils.isNotEmpty(baseProcessRepository.selectprocessCode(baseProcess.getProcessCode()))) {
             String uuid = UUIDUtil.getUUID();
             baseProcess.setProcessId(uuid);
-            baseProcessStation.setProcessId(uuid);
-            baseProcessStation.setPsId(UUIDUtil.getUUID());
+            for(BaseProcessStation baseProcessStation:baseProcessStations){
+                baseProcessStation.setProcessId(uuid);
+                baseProcessStation.setPsId(UUIDUtil.getUUID());
+                ValidatorUtil.validateEntity(baseProcessStation, AddGroup.class);
+                if(baseStationService.findById(baseProcessStation.getStationId()).get() ==null){
+                    throw   new MMException("行为主见检验不合格。");
+                }
+                baseProcessStationService.save(baseProcessStation);
+            }
             basePageElemen.setElemenId(uuid);
             ValidatorUtil.validateEntity(baseProcess, AddGroup.class);
-            ValidatorUtil.validateEntity(baseProcessStation, AddGroup.class);
             ValidatorUtil.validateEntity(basePageElemen, AddGroup.class);
             baseProcessRepository.save(baseProcess);
-            baseProcessStationService.save(baseProcessStation);
             basePageElemenService.save(basePageElemen);
             return true;
         }
@@ -75,12 +81,15 @@ public class BaseProcessServiceImpl implements BaseProcessService {
 
     @Override
     @Transactional
-    public boolean update(BaseProcess baseProcess, BaseProcessStation baseProcessStation, BasePageElemen basePageElemen) {
+    public boolean update(BaseProcess baseProcess, List<BaseProcessStation> baseProcessStations, BasePageElemen basePageElemen) {
 
         if(StringUtils.isNotEmpty(baseProcessRepository.selectprocessCode(baseProcess.getProcessCode()))){
             this.updateById(baseProcess.getProcessId(),baseProcess);
             basePageElemenService.updateById(basePageElemen.getElemenId(),basePageElemen);
-            baseProcessStationService.updateById(baseProcessStation.getPsId(),baseProcessStation);
+            for(BaseProcessStation baseProcessStation:baseProcessStations){
+                baseProcessStationService.updateById(baseProcessStation.getPsId(),baseProcessStation);
+            }
+
             return  true;
         }
         return false;
@@ -110,10 +119,17 @@ public class BaseProcessServiceImpl implements BaseProcessService {
             condition.and(qBaseProcess.processName.like("%"+query.getProcessName()+"%"));
         }
         if(StringUtils.isNotEmpty(query.getCategory())){
-            condition.and(qBaseProcess.category.eq(query.getCategory()));
+                condition.and(qBaseProcess.category.eq(query.getCategory()));
+        }
+        if(StringUtils.isNotEmpty(query.getCollection())){
+                condition.and(qBaseProcess.collection.eq(query.getCollection()));
         }
         jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
         List<BaseProcess> list = jq.fetch();
+        for(BaseProcess p :list){
+            p.setCollectionName(baseItemsTargetService.findById(p.getCollection()).get().getItemName());
+            p.setCategoryName(baseItemsTargetService.findById(p.getCategory()).get().getItemName());
+        }
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
