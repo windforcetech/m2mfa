@@ -56,7 +56,7 @@ public class BaseCustomer extends BaseEntity implements Serializable {
     @Size(max=32,message = "区域字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "区域")
     private String area;
-    @Size(min=11, max=11,message = "电话号码格式有误",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=32,message = "手机号码字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @Pattern(regexp = "^$|^1[3|4|5|8][0-9]\\d{8}$", message = "手机号码格式不正确", groups = {Add.class, Update.class, Profile.class})
     @ApiModelProperty(value = "电话号码")
     private String telephone;
