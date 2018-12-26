@@ -61,6 +61,7 @@ public class BaseStaffController {
         query.setSize(baseStaffQueryObj.getSize());
         query.setPage(baseStaffQueryObj.getPage());
         PageUtil<BaseStaffDetailObj> page = baseStaffService.list(query);
+        
         return ResponseMessage.ok(page);
     }
 
