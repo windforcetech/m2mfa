@@ -61,7 +61,7 @@ public class BaseStaffController {
         query.setSize(baseStaffQueryObj.getSize());
         query.setPage(baseStaffQueryObj.getPage());
         PageUtil<BaseStaffDetailObj> page = baseStaffService.list(query);
-        
+
         return ResponseMessage.ok(page);
     }
 
@@ -85,6 +85,7 @@ public class BaseStaffController {
     public ResponseMessage<BaseStaff> save(@RequestBody BaseStaff baseStaff){
         ValidatorUtil.validateEntity(baseStaff, AddGroup.class);
         baseStaff.setStaffId(UUIDUtil.getUUID());
+        baseStaff.setDeletionStateCode(false);
         List<BaseStaff> byCodeAndStaffIdNot = baseStaffService.findByCodeAndStaffIdNot(baseStaff.getCode(), "");
         if(byCodeAndStaffIdNot!=null&&byCodeAndStaffIdNot.size()>0)
         {

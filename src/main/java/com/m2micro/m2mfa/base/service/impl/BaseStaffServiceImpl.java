@@ -52,13 +52,14 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         if(query.getDutyIds()!=null&&query.getDutyIds().size()>0){
             condition.and(qBaseStaff.dutyId.in(query.getDutyIds()));
         }
-        jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
+        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
         List<BaseStaff> list = jq.fetch();
         List<BaseStaffDetailObj> rs=new ArrayList<>();
         for(BaseStaff one:list ){
             BaseStaffDetailObj item=new BaseStaffDetailObj();
             Organization duty = organizationService.findByUUID(one.getDutyId());
             Organization department = organizationService.findById(duty.getParentNode()).get();
+            item.setId(one.getStaffId());
             item.setCode(one.getCode());
             item.setDepartment(department.getDepartmentName());
             item.setDimission(one.getDimission());
