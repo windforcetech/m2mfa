@@ -1,9 +1,13 @@
 package com.m2micro.m2mfa.base.service;
 
-import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.entity.BaseStaff;
+import com.m2micro.m2mfa.base.query.BaseStaffQuery;
+import com.m2micro.m2mfa.base.vo.BaseStaffDetailObj;
+
+import java.util.List;
+
 /**
  * 员工（职员）表 服务类
  * @author liaotao
@@ -16,5 +20,11 @@ public interface BaseStaffService extends BaseService<BaseStaff,String> {
      *         查询参数
      * @return  分页信息
      */
-    PageUtil<BaseStaff> list(Query query);
+
+    PageUtil<BaseStaffDetailObj> list(BaseStaffQuery query);
+
+    List<BaseStaff> findByCodeAndStaffIdNot(String code, String staffId);
+
+   // List<BaseStaff> findByCodeOrStaffNameOrdOrDutyIdIn(String code,String staffName,List<String> dutyIds);
+
 }

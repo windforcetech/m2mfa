@@ -1,16 +1,24 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.framework.starter.entity.Organization;
+import com.m2micro.framework.starter.services.OrganizationService;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
+import com.m2micro.m2mfa.base.entity.QBaseStaff;
+import com.m2micro.m2mfa.base.query.BaseStaffQuery;
 import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
 import com.m2micro.m2mfa.base.service.BaseStaffService;
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.m2micro.m2mfa.base.vo.BaseStaffDetailObj;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBaseStaff;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
+
 /**
  * 员工（职员）表 服务实现类
  * @author liaotao
@@ -23,19 +31,56 @@ public class BaseStaffServiceImpl implements BaseStaffService {
     @Autowired
     JPAQueryFactory queryFactory;
 
+    @Autowired
+    OrganizationService organizationService;
     public BaseStaffRepository getRepository() {
         return baseStaffRepository;
     }
 
     @Override
-    public PageUtil<BaseStaff> list(Query query) {
+    public PageUtil<BaseStaffDetailObj> list(BaseStaffQuery query) {
         QBaseStaff qBaseStaff = QBaseStaff.baseStaff;
         JPAQuery<BaseStaff> jq = queryFactory.selectFrom(qBaseStaff);
-
+        BooleanBuilder condition = new BooleanBuilder();
+        if(StringUtils.isNotEmpty(query.getCode())){
+            condition.and(qBaseStaff.code.like("%"+query.getCode()+"%"));
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            condition.and(qBaseStaff.staffName.like("%"+query.getName()+"%"));
+        }
+        if(query.getDutyIds()!=null&&query.getDutyIds().size()>0){
+            condition.and(qBaseStaff.dutyId.in(query.getDutyIds()));
+        }
         jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
         List<BaseStaff> list = jq.fetch();
+        List<BaseStaffDetailObj> rs=new ArrayList<>();
+        for(BaseStaff one:list ){
+            BaseStaffDetailObj item=new BaseStaffDetailObj();
+            Organization duty = organizationService.findByUUID(one.getDutyId());
+            Organization department = organizationService.findById(duty.getParentNode()).get();
+            item.setCode(one.getCode());
+            item.setDepartment(department.getDepartmentName());
+            item.setDimission(one.getDimission());
+            item.setDuty(duty.getDepartmentName());
+            item.setEnabled(one.getEnabled());
+            item.setGender(one.getGender());
+            item.setMobile(one.getMobile());
+            item.setName(one.getStaffName());
+            item.setTelephone(one.getTelephone());
+            rs.add(item);
+        }
         long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        return PageUtil.of(rs,totalCount,query.getSize(),query.getPage());
     }
+
+    @Override
+    public List<BaseStaff> findByCodeAndStaffIdNot(String code, String staffId) {
+        return baseStaffRepository.findByCodeAndStaffIdNot(code,staffId);
+    }
+
+//    @Override
+//    public List<BaseStaff> findByCodeOrStaffNameOrdOrDutyIdIn(String code, String staffName, List<String> dutyIds) {
+//        return baseStaffRepository.findByCodeOrStaffNameOrdOrDutyIdIn(code,staffName,dutyIds);
+//    }
 
 }
