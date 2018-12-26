@@ -73,8 +73,15 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
         List<BaseRouteDesc> list = jq.fetch();
         for(BaseRouteDesc baseRouteDesc :list){
-            baseRouteDesc.setInputProcess(baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null).getProcessName());
-            baseRouteDesc.setOutputProcess(baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null).getProcessName());
+        BaseProcess iprocess =   baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null);
+        BaseProcess oprocess =   baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null);
+        if(iprocess !=null){
+            baseRouteDesc.setInputProcess(iprocess.getProcessName());
+        }
+        if(oprocess !=null){
+            baseRouteDesc.setOutputProcess(oprocess.getProcessName());
+        }
+
         }
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
