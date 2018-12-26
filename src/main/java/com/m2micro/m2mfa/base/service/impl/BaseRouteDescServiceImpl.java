@@ -162,6 +162,14 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
       BaseRouteDesc baseRouteDesc=  this.findById(routeId).orElse(null);
 
       BasePageElemen basePageElemen =  basePageElemenService.findById(routeId).orElse(null);
+        BaseProcess iprocess =   baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null);
+        BaseProcess oprocess =   baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null);
+        if(iprocess !=null){
+            baseRouteDesc.setInputProcess(iprocess.getProcessName());
+        }
+        if(oprocess !=null){
+            baseRouteDesc.setOutputProcess(oprocess.getProcessName());
+        }
         String sql ="SELECT\n" +
                 "	*\n" +
                 "FROM\n" +
