@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -44,6 +45,14 @@ public class BaseRouteDesc extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     @NotNull(message="描述不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String description;
+
+    @ApiModelProperty(value = "投入工序名称")
+    @Transient
+    private String inputProcessName;
+
+    @ApiModelProperty(value = "产出工序名称")
+    @Transient
+    private String outputProcessName;
 
     public String getRouteId() {
         return routeId;
