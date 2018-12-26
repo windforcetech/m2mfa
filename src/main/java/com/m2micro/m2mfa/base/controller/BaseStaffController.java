@@ -96,9 +96,9 @@ public class BaseStaffController {
         if(needAddUser){
          //   T t = ;
             User user = new User();
-            user.setLoginName(baseStaff.getStaffName());
+            user.setLoginName(baseStaff.getCode());
             user.setAdmin(false);
-            user.setUserName(baseStaff.getCode());
+            user.setUserName(baseStaff.getStaffName());
             user.setPassword("123");
             user.setInheritMode(true);
             user.setState(1);
@@ -137,9 +137,9 @@ public class BaseStaffController {
         Boolean needAddUser = baseStaff.getNeedAddUser();
         if(needAddUser){
             User user= iUserService.findById(baseStaffOld.getUserId()).get();
-            user.setLoginName(baseStaff.getStaffName());
+            user.setLoginName(baseStaff.getCode());
             user.setAdmin(false);
-            user.setUserName(baseStaff.getCode());
+            user.setUserName(baseStaff.getStaffName());
             user.setPassword("123");
             user.setInheritMode(true);
             user.setState(1);
