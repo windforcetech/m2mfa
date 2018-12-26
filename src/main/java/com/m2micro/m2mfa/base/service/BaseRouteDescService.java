@@ -27,13 +27,16 @@ public interface BaseRouteDescService extends BaseService<BaseRouteDesc,String> 
     PageUtil<BaseRouteDesc> list(BaseRouteQuery query);
 
     //添加
-    boolean save(BaseRouteDesc baseRouteDesc, BaseRouteDef baseRouteDef, BasePageElemen basePageElemen);
+    boolean save(BaseRouteDesc baseRouteDesc, List<BaseRouteDef> baseRouteDefs, BasePageElemen basePageElemen);
 
     //添加
-    boolean update(BaseRouteDesc baseRouteDesc, BaseRouteDef baseRouteDef, BasePageElemen basePageElemen);
+    boolean update(BaseRouteDesc baseRouteDesc, List<BaseRouteDef> baseRouteDefs, BasePageElemen basePageElemen);
 
     //删除工艺
     ResponseMessage delete(String routeId );
+
+    //详情
+    BaseRoutevo info(String routeId);
 
     //获取对应的工序
    List<BaseRouteDesc> getrouteDesce(String routId);

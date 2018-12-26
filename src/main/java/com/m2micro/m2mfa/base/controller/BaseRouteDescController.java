@@ -5,6 +5,7 @@ import com.m2micro.m2mfa.base.query.BaseRouteQuery;
 import com.m2micro.m2mfa.base.service.BaseRouteDescService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.vo.BaseRoutevo;
+import com.m2micro.m2mfa.base.vo.Processvo;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -44,7 +45,7 @@ public class BaseRouteDescController {
     @ApiOperation(value=" 添加工艺")
     @UserOperationLog("添加工艺")
     public ResponseMessage save(@RequestBody BaseRoutevo routevo){
-        return baseRouteDescService.save(routevo.getBaseRouteDesc(),routevo.getBaseRouteDef(),routevo.getBasePageElemen())==true ? ResponseMessage.ok(" 添加工艺成功。") : ResponseMessage.error(" 工艺已存在。");
+        return baseRouteDescService.save(routevo.getBaseRouteDesc(),routevo.getBaseRouteDefs(),routevo.getBasePageElemen())==true ? ResponseMessage.ok(" 添加工艺成功。") : ResponseMessage.error(" 工艺代码【"+routevo.getBaseRouteDesc().getRouteNo()+"】已存在。");
     }
 
 
@@ -56,7 +57,7 @@ public class BaseRouteDescController {
     @ApiOperation(value="修改工艺")
     @UserOperationLog("修改工艺")
     public ResponseMessage update(@RequestBody BaseRoutevo routevo){
-        return  baseRouteDescService.update(routevo.getBaseRouteDesc(),routevo.getBaseRouteDef(),routevo.getBasePageElemen()) == true ?ResponseMessage.ok("修改工艺成功。"):ResponseMessage.error("工艺编号不存在修改工艺失败。");
+        return  baseRouteDescService.update(routevo.getBaseRouteDesc(),routevo.getBaseRouteDefs(),routevo.getBasePageElemen()) == true ?ResponseMessage.ok("修改工艺成功。"):ResponseMessage.error(" 工艺代码【"+routevo.getBaseRouteDesc().getRouteNo()+"】不存在。");
     }
 
 
@@ -68,6 +69,17 @@ public class BaseRouteDescController {
     @UserOperationLog("查询工艺")
     public ResponseMessage<PageUtil<BaseRouteDesc>> list(@RequestBody BaseRouteQuery query){
         return ResponseMessage.ok(baseRouteDescService.list(query));
+    }
+
+    /**
+     * 详情
+     */
+    @PostMapping("/info")
+    @ApiOperation(value="工艺详情")
+    @UserOperationLog("工艺详情")
+    public ResponseMessage<BaseRoutevo> info(@ApiParam(value = "routeId",required=true) @RequestParam(required = true)   String routeId){
+
+        return ResponseMessage.ok();
     }
 
 

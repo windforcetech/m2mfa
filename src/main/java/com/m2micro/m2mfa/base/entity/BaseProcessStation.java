@@ -32,7 +32,6 @@ public class BaseProcessStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "工序主键")
     private String processId;
     @NotEmpty(message="行为主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "行为主键长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "行为主键")
     private String stationId;
     @NotNull(message="步骤不能为空",groups = {AddGroup.class, UpdateGroup.class})
@@ -44,7 +43,7 @@ public class BaseProcessStation extends BaseEntity implements Serializable {
     @NotNull(message="有效否不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
-    @NotNull(message="描述不能为空",groups = {AddGroup.class, UpdateGroup.class})
+
     @Size(max=32,message = "描述长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "描述")
     private String description;
