@@ -2,12 +2,11 @@ package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.m2mfa.base.entity.BasePageElemen;
-import com.m2micro.m2mfa.base.entity.BaseRouteDef;
-import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
+import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseRouteQuery;
 import com.m2micro.m2mfa.base.repository.BaseRouteDescRepository;
 import com.m2micro.m2mfa.base.service.BasePageElemenService;
+import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.base.service.BaseRouteDefService;
 import com.m2micro.m2mfa.base.service.BaseRouteDescService;
 import com.m2micro.m2mfa.base.vo.BaseRoutevo;
@@ -27,7 +26,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBaseRouteDesc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -46,6 +44,8 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
     private BasePageElemenService basePageElemenService;
     @Autowired
     private MesPartRouteService mesPartRouteService;
+    @Autowired
+    private BaseProcessService baseProcessService;
 
     @Autowired
     JPAQueryFactory queryFactory;
@@ -78,18 +78,23 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
 
     @Override
     @Transactional
-    public boolean save(BaseRouteDesc baseRouteDesc, BaseRouteDef baseRouteDef, BasePageElemen basePageElemen) {
+    public boolean save(BaseRouteDesc baseRouteDesc, List<BaseRouteDef >baseRouteDefs, BasePageElemen basePageElemen) {
         if(!StringUtils.isNotEmpty(baseRouteDescRepository.selectRouteNo(baseRouteDesc.getRouteNo()))){
             String routeuuid = UUIDUtil.getUUID();
             baseRouteDesc.setRouteId(routeuuid);
-            baseRouteDef.setRouteId(routeuuid);
             basePageElemen.setElemenId(routeuuid);
-            baseRouteDef.setRouteDefId(UUIDUtil.getUUID());
             ValidatorUtil.validateEntity(baseRouteDesc, AddGroup.class);
-            ValidatorUtil.validateEntity(baseRouteDef, AddGroup.class);
             ValidatorUtil.validateEntity(basePageElemen, AddGroup.class);
+            for(BaseRouteDef  baseRouteDef :baseRouteDefs){
+                if(baseProcessService.findById(baseRouteDef.getProcessId()).orElse(null)==null || baseProcessService.findById(baseRouteDef.getNextprocessId()).orElse(null)==null || baseProcessService.findById(baseRouteDef.getFailprocessId()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null)==null){
+                    throw  new  MMException("工序主键有误。");
+                }
+                baseRouteDef.setRouteId(routeuuid);
+                baseRouteDef.setRouteDefId(UUIDUtil.getUUID());
+                ValidatorUtil.validateEntity(baseRouteDef, AddGroup.class);
+                baseRouteDefService.save(baseRouteDef);
+            }
             baseRouteDescRepository.save(baseRouteDesc);
-            baseRouteDefService.save(baseRouteDef);
             basePageElemenService.save(basePageElemen);
             return true;
         }
@@ -97,10 +102,15 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
     }
 
     @Override
-    public boolean update(BaseRouteDesc baseRouteDesc, BaseRouteDef baseRouteDef, BasePageElemen basePageElemen) {
+    public boolean update(BaseRouteDesc baseRouteDesc, List<BaseRouteDef> baseRouteDefs, BasePageElemen basePageElemen) {
         if(StringUtils.isNotEmpty(baseRouteDescRepository.selectRouteNo(baseRouteDesc.getRouteNo()))){
             this.updateById(baseRouteDesc.getRouteId(),baseRouteDesc);
-            baseRouteDefService.updateById(baseRouteDef.getRouteDefId(),baseRouteDef);
+            for(BaseRouteDef  baseRouteDef :baseRouteDefs) {
+                if (baseProcessService.findById(baseRouteDef.getProcessId()).orElse(null) == null) {
+                    throw new MMException("工序主键有误。");
+                }
+                baseRouteDefService.updateById(baseRouteDef.getRouteDefId(), baseRouteDef);
+            }
             basePageElemenService.updateById(basePageElemen.getElemenId(),basePageElemen);
             return  true;
         }
@@ -117,6 +127,21 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         basePageElemenService.deleteById(routeId);
         baseRouteDefService.deleterouteId(routeId);
         return ResponseMessage.ok();
+    }
+
+    @Override
+    public BaseRoutevo info(String routeId) {
+      BaseRouteDesc baseRouteDesc=  this.findById(routeId).orElse(null);
+      BasePageElemen basePageElemen =  basePageElemenService.findById(routeId).orElse(null);
+        String sql ="SELECT\n" +
+                "	*\n" +
+                "FROM\n" +
+                "	base_route_def\n" +
+                "WHERE\n" +
+                "	route_id='"+routeId+"'";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseRouteDef.class);
+        List<BaseRouteDef> baseRouteDefs = jdbcTemplate.query(sql,rm);
+        return BaseRoutevo.builder().baseRouteDesc(baseRouteDesc).basePageElemen(basePageElemen).baseRouteDefs(baseRouteDefs).build();
     }
 
     @Override

@@ -95,11 +95,12 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         if(baseStationService.findById(mesPartRouteStation.getStationId()).get()==null){
             throw new MMException("工位id不合格。");
         }
+
+        ValidatorUtil.validateEntity(mesPartRouteProcess, AddGroup.class);
+        ValidatorUtil.validateEntity(mesPartRouteStation, AddGroup.class);
         this.save(mesPartRoute);
         mesPartRouteProcessService.save(mesPartRouteProcess);
         mesPartRouteStationService .save(mesPartRouteStation);
-        ValidatorUtil.validateEntity(mesPartRouteProcess, AddGroup.class);
-        ValidatorUtil.validateEntity(mesPartRouteStation, AddGroup.class);
         return true;
     }
 

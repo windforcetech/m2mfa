@@ -10,12 +10,16 @@ import com.m2micro.m2mfa.base.repository.BaseProcessRepository;
 import com.m2micro.m2mfa.base.repository.BaseProcessStationRepository;
 import com.m2micro.m2mfa.base.repository.BaseRouteDefRepository;
 import com.m2micro.m2mfa.base.service.*;
+import com.m2micro.m2mfa.base.vo.Processvo;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.querydsl.core.BooleanBuilder;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -47,6 +51,8 @@ public class BaseProcessServiceImpl implements BaseProcessService {
     @Autowired
     private BaseStationService baseStationService;
     @Autowired
+    JdbcTemplate jdbcTemplate;
+    @Autowired
     JPAQueryFactory queryFactory;
 
     public BaseProcessRepository getRepository() {
@@ -64,7 +70,7 @@ public class BaseProcessServiceImpl implements BaseProcessService {
                 baseProcessStation.setProcessId(uuid);
                 baseProcessStation.setPsId(UUIDUtil.getUUID());
                 ValidatorUtil.validateEntity(baseProcessStation, AddGroup.class);
-                if(baseStationService.findById(baseProcessStation.getStationId()).get() ==null){
+                if(baseStationService.findById(baseProcessStation.getStationId()).orElse(null) ==null){
                     throw   new MMException("行为主见检验不合格。");
                 }
                 baseProcessStationService.save(baseProcessStation);
@@ -87,6 +93,9 @@ public class BaseProcessServiceImpl implements BaseProcessService {
             this.updateById(baseProcess.getProcessId(),baseProcess);
             basePageElemenService.updateById(basePageElemen.getElemenId(),basePageElemen);
             for(BaseProcessStation baseProcessStation:baseProcessStations){
+                if(baseStationService.findById(baseProcessStation.getStationId()).orElse(null) ==null){
+                    throw   new MMException("行为主见检验不合格。");
+                }
                 baseProcessStationService.updateById(baseProcessStation.getPsId(),baseProcessStation);
             }
 
@@ -132,6 +141,17 @@ public class BaseProcessServiceImpl implements BaseProcessService {
         }
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    @Override
+    public Processvo info(String processId) {
+     BaseProcess p =   baseProcessRepository.findById(processId).orElse(null);
+        p.setCollectionName(baseItemsTargetService.findById(p.getCollection()).get().getItemName());
+        p.setCategoryName(baseItemsTargetService.findById(p.getCategory()).get().getItemName());
+         String sql ="	SELECT * from  base_process_station  WHERE 	process_id='"+processId+"'";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseProcessStation.class);
+        List<BaseProcessStation> baseProcessStations = jdbcTemplate.query(sql,rm);
+        return   Processvo.builder().baseProcess(p).baseProcessStations(baseProcessStations).basePageElemen(basePageElemenService.findById(processId).orElse(null)).build();
     }
 
 }

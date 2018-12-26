@@ -50,7 +50,7 @@ public class BaseProcess extends BaseEntity implements Serializable {
     @NotNull(message="有效否",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
-    @NotEmpty(message="描述不能为空",groups = {AddGroup.class, UpdateGroup.class})
+
     @Size(max=32,message = "描述长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "描述")
     private String description;
