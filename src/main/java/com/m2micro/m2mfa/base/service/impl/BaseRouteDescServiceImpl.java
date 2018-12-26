@@ -81,7 +81,6 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         if(oprocess !=null){
             baseRouteDesc.setOutputProcessName(oprocess.getProcessName());
         }
-
         }
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
@@ -96,7 +95,6 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
             basePageElemen.setElemenId(routeuuid);
             ValidatorUtil.validateEntity(baseRouteDesc, AddGroup.class);
             ValidatorUtil.validateEntity(basePageElemen, AddGroup.class);
-
             for(BaseRouteDef  baseRouteDef :baseRouteDefs){
                 if(baseRouteDef.getNextprocessId()!=null && !baseRouteDef.getNextprocessId().trim().equals("")){
                     if( baseProcessService.findById(baseRouteDef.getNextprocessId()).orElse(null)==null ){
@@ -108,7 +106,6 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
                         throw  new  MMException("工序主键有误。");
                     }
                 }
-
                 if(baseProcessService.findById(baseRouteDef.getProcessId()).orElse(null)==null  || baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null)==null){
                     throw  new  MMException("工序主键有误。");
                 }
@@ -141,7 +138,6 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
                         throw  new  MMException("工序主键有误。");
                     }
                 }
-
                 if(baseProcessService.findById(baseRouteDef.getProcessId()).orElse(null)==null  || baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null)==null){
                     throw  new  MMException("工序主键有误。");
                 }
@@ -171,7 +167,6 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
     @Override
     public BaseRoutevo info(String routeId) {
       BaseRouteDesc baseRouteDesc=  this.findById(routeId).orElse(null);
-
       BasePageElemen basePageElemen =  basePageElemenService.findById(routeId).orElse(null);
         BaseProcess iprocess =   baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null);
         BaseProcess oprocess =   baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null);
@@ -179,7 +174,7 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
             baseRouteDesc.setInputProcessName(iprocess.getProcessName());
         }
         if(oprocess !=null){
-            baseRouteDesc.setInputProcessName(oprocess.getProcessName());
+            baseRouteDesc.setOutputProcessName(oprocess.getProcessName());
         }
         String sql ="SELECT\n" +
                 "	*\n" +
