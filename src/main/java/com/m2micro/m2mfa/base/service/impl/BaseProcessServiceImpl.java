@@ -71,7 +71,7 @@ public class BaseProcessServiceImpl implements BaseProcessService {
                 baseProcessStation.setPsId(UUIDUtil.getUUID());
                 ValidatorUtil.validateEntity(baseProcessStation, AddGroup.class);
                 if(baseStationService.findById(baseProcessStation.getStationId()).orElse(null) ==null){
-                    throw   new MMException("行为主见检验不合格。");
+                    throw   new MMException("工位主键检验不合格。");
                 }
                 baseProcessStationService.save(baseProcessStation);
             }
@@ -90,13 +90,17 @@ public class BaseProcessServiceImpl implements BaseProcessService {
     public boolean update(BaseProcess baseProcess, List<BaseProcessStation> baseProcessStations, BasePageElemen basePageElemen) {
 
         if(StringUtils.isNotEmpty(baseProcessRepository.selectprocessCode(baseProcess.getProcessCode()))){
+            baseProcessStationService.deleteprocessId(baseProcess.getProcessId());
             this.updateById(baseProcess.getProcessId(),baseProcess);
             basePageElemenService.updateById(basePageElemen.getElemenId(),basePageElemen);
             for(BaseProcessStation baseProcessStation:baseProcessStations){
+                baseProcessStation.setProcessId(baseProcess.getProcessId());
+                baseProcessStation.setPsId(UUIDUtil.getUUID());
+                ValidatorUtil.validateEntity(baseProcessStation, AddGroup.class);
                 if(baseStationService.findById(baseProcessStation.getStationId()).orElse(null) ==null){
-                    throw   new MMException("行为主见检验不合格。");
+                    throw   new MMException("工位主键检验不合格。");
                 }
-                baseProcessStationService.updateById(baseProcessStation.getPsId(),baseProcessStation);
+                baseProcessStationService.save(baseProcessStation);
             }
 
             return  true;

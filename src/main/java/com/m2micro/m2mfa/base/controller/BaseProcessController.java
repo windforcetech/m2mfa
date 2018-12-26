@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.base.vo.Processvo;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import io.swagger.annotations.ApiParam;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -86,8 +87,12 @@ public class BaseProcessController {
     @PostMapping("/delete")
     @ApiOperation(value="删除工序")
     @UserOperationLog("删除工序")
-    public ResponseMessage delete(@ApiParam(required = true,value = "工序Id")  @RequestParam(required = true) String processId ){
-        return baseProcessService.delete(processId);
+    @Transactional
+    public ResponseMessage delete(@RequestBody String[] ids ){
+        for(int i =0;i<ids.length;i++){
+            baseProcessService.delete(ids[i]);
+        }
+        return  ResponseMessage.ok();
     }
 
 }

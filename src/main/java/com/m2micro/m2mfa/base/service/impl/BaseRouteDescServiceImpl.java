@@ -104,12 +104,16 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
     @Override
     public boolean update(BaseRouteDesc baseRouteDesc, List<BaseRouteDef> baseRouteDefs, BasePageElemen basePageElemen) {
         if(StringUtils.isNotEmpty(baseRouteDescRepository.selectRouteNo(baseRouteDesc.getRouteNo()))){
+            baseRouteDefService.deleterouteId(baseRouteDesc.getRouteId());
             this.updateById(baseRouteDesc.getRouteId(),baseRouteDesc);
-            for(BaseRouteDef  baseRouteDef :baseRouteDefs) {
-                if (baseProcessService.findById(baseRouteDef.getProcessId()).orElse(null) == null) {
-                    throw new MMException("工序主键有误。");
+            for(BaseRouteDef  baseRouteDef :baseRouteDefs){
+                if(baseProcessService.findById(baseRouteDef.getProcessId()).orElse(null)==null || baseProcessService.findById(baseRouteDef.getNextprocessId()).orElse(null)==null || baseProcessService.findById(baseRouteDef.getFailprocessId()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null)==null){
+                    throw  new  MMException("工序主键有误。");
                 }
-                baseRouteDefService.updateById(baseRouteDef.getRouteDefId(), baseRouteDef);
+                baseRouteDef.setRouteId(baseRouteDesc.getRouteId());
+                baseRouteDef.setRouteDefId(UUIDUtil.getUUID());
+                ValidatorUtil.validateEntity(baseRouteDef, AddGroup.class);
+                baseRouteDefService.save(baseRouteDef);
             }
             basePageElemenService.updateById(basePageElemen.getElemenId(),basePageElemen);
             return  true;
