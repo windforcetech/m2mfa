@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 员工（职员）表 前端控制器
@@ -95,9 +96,9 @@ public class BaseStaffController {
         if(needAddUser){
          //   T t = ;
             User user = new User();
-            user.setLoginName(baseStaff.getStaffName());
+            user.setLoginName(baseStaff.getCode());
             user.setAdmin(false);
-            user.setUserName(baseStaff.getCode());
+            user.setUserName(baseStaff.getStaffName());
             user.setPassword("123");
             user.setInheritMode(true);
             user.setState(1);
@@ -107,7 +108,8 @@ public class BaseStaffController {
             user.setOrgIds(orgIds);
             user.setId(UUIDUtil.getUUID());
             ResponseMessage responseMessage = iUserService.saveUser(user);
-            baseStaff.setUserId(user.getId());
+            User user1 = iUserService.findByLoginNameOrTelOrEmail(user.getLoginName()).get();
+            baseStaff.setUserId(user1.getId());
             if (responseMessage.getStatus()!=200){
                 return  responseMessage;
             }
@@ -135,9 +137,9 @@ public class BaseStaffController {
         Boolean needAddUser = baseStaff.getNeedAddUser();
         if(needAddUser){
             User user= iUserService.findById(baseStaffOld.getUserId()).get();
-            user.setLoginName(baseStaff.getStaffName());
+            user.setLoginName(baseStaff.getCode());
             user.setAdmin(false);
-            user.setUserName(baseStaff.getCode());
+            user.setUserName(baseStaff.getStaffName());
             user.setPassword("123");
             user.setInheritMode(true);
             user.setState(1);
