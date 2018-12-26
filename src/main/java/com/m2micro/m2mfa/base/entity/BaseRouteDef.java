@@ -31,7 +31,6 @@ public class BaseRouteDef extends BaseEntity implements Serializable {
     @NotNull(message="工艺主表id不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String routeId;
     @ApiModelProperty(value = "步骤")
-    @NotNull(message="步骤不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private Integer setp;
     @ApiModelProperty(value = "工序")
     @NotNull(message="工序不能为空",groups = {AddGroup.class, UpdateGroup.class})
