@@ -45,7 +45,6 @@ public class BaseRouteDef extends BaseEntity implements Serializable {
     @NotNull(message="有效否",groups = {AddGroup.class, UpdateGroup.class})
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
-    @NotNull(message="描述",groups = {AddGroup.class, UpdateGroup.class})
     private String description;
 
     public String getRouteDefId() {
