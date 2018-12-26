@@ -74,12 +74,12 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         List<BaseRouteDesc> list = jq.fetch();
         for(BaseRouteDesc baseRouteDesc :list){
         BaseProcess iprocess =   baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null);
-        BaseProcess oprocess =   baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null);
+        BaseProcess oprocess =   baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null);
         if(iprocess !=null){
-            baseRouteDesc.setInputProcess(iprocess.getProcessName());
+            baseRouteDesc.setInputProcessName(iprocess.getProcessName());
         }
         if(oprocess !=null){
-            baseRouteDesc.setOutputProcess(oprocess.getProcessName());
+            baseRouteDesc.setOutputProcessName(oprocess.getProcessName());
         }
 
         }
@@ -174,12 +174,12 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
 
       BasePageElemen basePageElemen =  basePageElemenService.findById(routeId).orElse(null);
         BaseProcess iprocess =   baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null);
-        BaseProcess oprocess =   baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null);
+        BaseProcess oprocess =   baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null);
         if(iprocess !=null){
-            baseRouteDesc.setInputProcess(iprocess.getProcessName());
+            baseRouteDesc.setInputProcessName(iprocess.getProcessName());
         }
         if(oprocess !=null){
-            baseRouteDesc.setOutputProcess(oprocess.getProcessName());
+            baseRouteDesc.setInputProcessName(oprocess.getProcessName());
         }
         String sql ="SELECT\n" +
                 "	*\n" +
