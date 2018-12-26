@@ -25,7 +25,7 @@ public interface BaseRouteDefService extends BaseService<BaseRouteDef,String> {
     String selectoneprocessId(String processId);
     //根据routeId删除
     void deleterouteId(String routeId);
-
-    List<BaseRouteDef> getroutedef(String routId);
+    //获取对应的工序
+    List<BaseRouteDef> findroutedef(String routId);
 
 }

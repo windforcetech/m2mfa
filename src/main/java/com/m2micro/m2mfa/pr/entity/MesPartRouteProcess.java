@@ -30,7 +30,6 @@ public class MesPartRouteProcess extends BaseEntity implements Serializable {
     private String partrouteid;
     @ApiModelProperty(value = "步骤")
     @NotNull(message="步骤不能为空。",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "步骤长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private Integer setp;
     @ApiModelProperty(value = "工序")
     @NotNull(message="工序不能为空。",groups = {AddGroup.class, UpdateGroup.class})
@@ -51,7 +50,6 @@ public class MesPartRouteProcess extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "检验配置档")
     private String qualitysolutionid;
     @NotNull(message="排序码不能为空。",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "排序码长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "排序码")
     private Integer sortcode;
     @ApiModelProperty(value = "有效否")

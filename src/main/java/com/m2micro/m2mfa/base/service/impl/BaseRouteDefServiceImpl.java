@@ -58,7 +58,7 @@ public class BaseRouteDefServiceImpl implements BaseRouteDefService {
     }
 
     @Override
-    public List<BaseRouteDef> getroutedef(String routId) {
+    public List<BaseRouteDef> findroutedef(String routId) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseRouteDef.class);
         String sql = "SELECT\n" +
                 "	*\n" +

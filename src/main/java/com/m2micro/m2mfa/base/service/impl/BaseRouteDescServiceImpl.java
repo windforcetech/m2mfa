@@ -149,8 +149,8 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
     }
 
     @Override
-    public List<BaseRouteDesc> getrouteDesce(String routId) {
-        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseRouteDesc.class);
+    public List<BaseProcessStation> findbaseProcessStations(String routId) {
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseProcessStation.class);
         String sql ="SELECT\n" +
                 "	*\n" +
                 "FROM\n" +
@@ -159,7 +159,7 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
                 "INNER JOIN base_process_station p ON l.process_id = p.process_id\n" +
                 "WHERE\n" +
                 "	m.route_id ='"+routId+"' ";
-        List<BaseRouteDesc> list = jdbcTemplate.query(sql,rm);
+        List<BaseProcessStation> list = jdbcTemplate.query(sql,rm);
         return  list;
     }
 

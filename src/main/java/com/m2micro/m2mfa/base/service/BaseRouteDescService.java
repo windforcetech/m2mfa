@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.service;
 
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BasePageElemen;
+import com.m2micro.m2mfa.base.entity.BaseProcessStation;
 import com.m2micro.m2mfa.base.entity.BaseRouteDef;
 import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
 import com.m2micro.framework.commons.BaseService;
@@ -38,6 +39,6 @@ public interface BaseRouteDescService extends BaseService<BaseRouteDesc,String> 
     //详情
     BaseRoutevo info(String routeId);
 
-    //获取对应的工序
-   List<BaseRouteDesc> getrouteDesce(String routId);
+    //获取对应的工位
+   List<BaseProcessStation> findbaseProcessStations(String routId);
 }

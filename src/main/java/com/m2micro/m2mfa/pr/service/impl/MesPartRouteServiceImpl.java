@@ -83,21 +83,21 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         mesPartRouteStation.setId(UUIDUtil.getUUID());
         mesPartRouteStation.setPartRouteId(partRouteid);
         ValidatorUtil.validateEntity(mesPartRoute, AddGroup.class);
-        if(basePartsService.findById(mesPartRoute.getPartId()).orElse(null)==null){
-            throw new MMException("料件ID不合格。");
-        }
-        if(baseRouteDescService.findById(mesPartRoute.getPartId()).orElse(null)==null){
-            throw  new MMException("工艺id不合格。");
-        }
-        if(baseProcessService.findById(mesPartRoute.getPartId()).orElse(null)==null || baseProcessService.findById(mesPartRouteProcess.getProcessid()).orElse(null)==null  ||  baseProcessService.findById(mesPartRouteStation.getProcessId()).orElse(null)==null){
-            throw  new MMException("工序id不合格。");
-        }
-        if(baseStationService.findById(mesPartRouteStation.getStationId()).get()==null){
-            throw new MMException("工位id不合格。");
-        }
-
         ValidatorUtil.validateEntity(mesPartRouteProcess, AddGroup.class);
         ValidatorUtil.validateEntity(mesPartRouteStation, AddGroup.class);
+        if(basePartsService.findById(mesPartRoute.getPartId()).orElse(null)==null){
+            throw new MMException("料件ID有误。");
+        }
+        if(baseRouteDescService.findById(mesPartRoute.getRouteId()).orElse(null)==null){
+            throw  new MMException("工艺ID有误。");
+        }
+        if(baseProcessService.findById(mesPartRoute.getInputProcessId()).orElse(null)==null || baseProcessService.findById(mesPartRoute.getOutputProcessId()).orElse(null)==null || baseProcessService.findById(mesPartRouteProcess.getProcessid()).orElse(null)==null || baseProcessService.findById(mesPartRouteProcess.getNextprocessid()).orElse(null)==null || baseProcessService.findById(mesPartRouteProcess.getFailprocessid()).orElse(null)==null || baseProcessService.findById(mesPartRouteStation.getProcessId()).orElse(null)==null ){
+            throw  new MMException("工序ID有误。");
+        }
+        if(baseStationService.findById(mesPartRouteStation.getStationId()).orElse(null)==null){
+            throw new MMException("工位ID有误。");
+        }
+
         this.save(mesPartRoute);
         mesPartRouteProcessService.save(mesPartRouteProcess);
         mesPartRouteStationService .save(mesPartRouteStation);

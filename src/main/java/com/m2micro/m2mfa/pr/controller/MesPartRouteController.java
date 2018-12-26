@@ -1,8 +1,11 @@
 package com.m2micro.m2mfa.pr.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.m2mfa.base.entity.BaseProcessStation;
 import com.m2micro.m2mfa.base.entity.BaseRouteDef;
 import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
+import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.base.service.BaseRouteDefService;
 import com.m2micro.m2mfa.base.service.BaseRouteDescService;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
@@ -46,75 +49,79 @@ public class MesPartRouteController {
     private BaseRouteDescService  baseRouteDescService;
     @Autowired
     private BaseRouteDefService baseRouteDefService;
+    @Autowired
+    private BasePartsService basePartsService;
 
-    /**
-     * 列表
-     */
-    @RequestMapping("/list")
-    @ApiOperation(value="料件途程设定主档列表")
-    @UserOperationLog("料件途程设定主档列表")
-    public ResponseMessage<PageUtil<MesPartRoute>> list(Query query){
-        PageUtil<MesPartRoute> page = mesPartRouteService.list(query);
-        return ResponseMessage.ok(page);
-    }
-
-    /**
-     * 详情
-     */
-    @RequestMapping("/info/{id}")
-    @ApiOperation(value="料件途程设定主档详情")
-    @UserOperationLog("料件途程设定主档详情")
-    public ResponseMessage<MesPartRoute> info(@PathVariable("id") String id){
-        MesPartRoute mesPartRoute = mesPartRouteService.findById(id).orElse(null);
-        return ResponseMessage.ok(mesPartRoute);
-    }
+//    /**
+//     * 列表
+//     */
+//    @RequestMapping("/list")
+//    @ApiOperation(value="料件途程设定主档列表")
+//    @UserOperationLog("料件途程设定主档列表")
+//    public ResponseMessage<PageUtil<MesPartRoute>> list(Query query){
+//        PageUtil<MesPartRoute> page = mesPartRouteService.list(query);
+//        return ResponseMessage.ok(page);
+//    }
+//
+//    /**
+//     * 详情
+//     */
+//    @RequestMapping("/info/{id}")
+//    @ApiOperation(value="料件途程设定主档详情")
+//    @UserOperationLog("料件途程设定主档详情")
+//    public ResponseMessage<MesPartRoute> info(@PathVariable("id") String id){
+//        MesPartRoute mesPartRoute = mesPartRouteService.findById(id).orElse(null);
+//        return ResponseMessage.ok(mesPartRoute);
+//    }
 
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ApiOperation(value="保存料件途程设定主档")
     @UserOperationLog("保存料件途程设定主档")
     public ResponseMessage<String > save(@RequestBody MesPartvo mesPartRoutevo){
         return  mesPartRouteService.save(mesPartRoutevo.getMesPartRoute(),mesPartRoutevo.getMesPartRouteProcess(),mesPartRoutevo.getMesPartRouteStation())==true ? ResponseMessage.ok():ResponseMessage.error("添加失败。");
     }
 
-    /**
-     * 更新
-     */
-    @RequestMapping("/update")
-    @ApiOperation(value="更新料件途程设定主档")
-    @UserOperationLog("更新料件途程设定主档")
-    public ResponseMessage<MesPartRoute> update(@RequestBody MesPartRoute mesPartRoute){
-        ValidatorUtil.validateEntity(mesPartRoute, UpdateGroup.class);
-        MesPartRoute mesPartRouteOld = mesPartRouteService.findById(mesPartRoute.getPartRouteId()).orElse(null);
-        if(mesPartRouteOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        PropertyUtil.copy(mesPartRoute,mesPartRouteOld);
-        return ResponseMessage.ok(mesPartRouteService.save(mesPartRouteOld));
-    }
+//    /**
+//     * 更新
+//     */
+//    @RequestMapping("/update")
+//    @ApiOperation(value="更新料件途程设定主档")
+//    @UserOperationLog("更新料件途程设定主档")
+//    public ResponseMessage<MesPartRoute> update(@RequestBody MesPartRoute mesPartRoute){
+//        ValidatorUtil.validateEntity(mesPartRoute, UpdateGroup.class);
+//        MesPartRoute mesPartRouteOld = mesPartRouteService.findById(mesPartRoute.getPartRouteId()).orElse(null);
+//        if(mesPartRouteOld==null){
+//            throw new MMException("数据库不存在该记录");
+//        }
+//        PropertyUtil.copy(mesPartRoute,mesPartRouteOld);
+//        return ResponseMessage.ok(mesPartRouteService.save(mesPartRouteOld));
+//    }
+//
+//    /**
+//     * 删除
+//     */
+//    @RequestMapping("/delete")
+//    @ApiOperation(value="删除料件途程设定主档")
+//    @UserOperationLog("删除料件途程设定主档")
+//    public ResponseMessage delete(@RequestBody String[] ids){
+//        mesPartRouteService.deleteByIds(ids);
+//        return ResponseMessage.ok();
+//    }
 
-    /**
-     * 删除
-     */
-    @RequestMapping("/delete")
-    @ApiOperation(value="删除料件途程设定主档")
-    @UserOperationLog("删除料件途程设定主档")
-    public ResponseMessage delete(@RequestBody String[] ids){
-        mesPartRouteService.deleteByIds(ids);
-        return ResponseMessage.ok();
-    }
-
-    @RequestMapping("/addDetails")
+    @PostMapping("/addDetails")
     @ApiOperation(value="添加基本信息")
     @UserOperationLog("途程添加基本信息")
     public ResponseMessage addDetails(@ApiParam(value = "routId",required=true) @RequestParam(required = true) String routId){
         Map map = new HashMap();
-        List<BaseRouteDesc> routeDescs = baseRouteDescService.getrouteDesce(routId);
-        List<BaseRouteDef> routeDefs = baseRouteDefService.getroutedef(routId);
+        List<BaseProcessStation> baseProcessStations = baseRouteDescService.findbaseProcessStations(routId);
+        List<BaseRouteDef> routeDefs = baseRouteDefService.findroutedef(routId);
+        List<BaseParts> baseparts= basePartsService.findAll();
         map.put("routeDefs",routeDefs);
-        map.put("routeDescs",routeDescs);
+        map.put("baseProcessStations",baseProcessStations);
+        map.put("baseparts",baseparts);
         return ResponseMessage.ok(map);
     }
 
