@@ -131,7 +131,18 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
             baseRouteDefService.deleterouteId(baseRouteDesc.getRouteId());
             this.updateById(baseRouteDesc.getRouteId(),baseRouteDesc);
             for(BaseRouteDef  baseRouteDef :baseRouteDefs){
-                if(baseProcessService.findById(baseRouteDef.getProcessId()).orElse(null)==null || baseProcessService.findById(baseRouteDef.getNextprocessId()).orElse(null)==null || baseProcessService.findById(baseRouteDef.getFailprocessId()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null)==null){
+                if(baseRouteDef.getNextprocessId()!=null && !baseRouteDef.getNextprocessId().trim().equals("")){
+                    if( baseProcessService.findById(baseRouteDef.getNextprocessId()).orElse(null)==null ){
+                        throw  new  MMException("工序主键有误。");
+                    }
+                }
+                if(baseRouteDef.getFailprocessId() !=null && !baseRouteDef.getFailprocessId().trim().equals("")){
+                    if(baseProcessService.findById(baseRouteDef.getFailprocessId()).orElse(null)==null){
+                        throw  new  MMException("工序主键有误。");
+                    }
+                }
+
+                if(baseProcessService.findById(baseRouteDef.getProcessId()).orElse(null)==null  || baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null)==null){
                     throw  new  MMException("工序主键有误。");
                 }
                 baseRouteDef.setRouteId(baseRouteDesc.getRouteId());
