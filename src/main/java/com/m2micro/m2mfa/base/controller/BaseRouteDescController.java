@@ -45,7 +45,10 @@ public class BaseRouteDescController {
     @ApiOperation(value=" 添加工艺")
     @UserOperationLog("添加工艺")
     public ResponseMessage save(@RequestBody BaseRoutevo routevo){
-        return baseRouteDescService.save(routevo.getBaseRouteDesc(),routevo.getBaseRouteDefs(),routevo.getBasePageElemen())==true ? ResponseMessage.ok(" 添加工艺成功。") : ResponseMessage.error(" 工艺代码【"+routevo.getBaseRouteDesc().getRouteNo()+"】已存在。");
+
+       return baseRouteDescService.save(routevo.getBaseRouteDesc(),routevo.getBaseRouteDefs(),routevo.getBasePageElemen())==true ? ResponseMessage.ok(" 添加工艺成功。") : ResponseMessage.error(" 工艺代码【"+routevo.getBaseRouteDesc().getRouteNo()+"】已存在。");
+
+
     }
 
 
