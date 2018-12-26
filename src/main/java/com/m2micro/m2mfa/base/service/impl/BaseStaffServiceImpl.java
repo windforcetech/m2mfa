@@ -42,6 +42,7 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         QBaseStaff qBaseStaff = QBaseStaff.baseStaff;
         JPAQuery<BaseStaff> jq = queryFactory.selectFrom(qBaseStaff);
         BooleanBuilder condition = new BooleanBuilder();
+        condition.and(qBaseStaff.deletionStateCode.isFalse());
         if(StringUtils.isNotEmpty(query.getCode())){
             condition.and(qBaseStaff.code.like("%"+query.getCode()+"%"));
         }

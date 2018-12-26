@@ -76,11 +76,11 @@ public class BaseStaffController {
     }
 
     /**
-     * 保存
+     * 添加
      */
     @RequestMapping(value = "/save",method = RequestMethod.POST)
-    @ApiOperation(value="保存员工（职员）表")
-    @UserOperationLog("保存员工（职员）表")
+    @ApiOperation(value="添加员工（职员）表")
+    @UserOperationLog("添加员工（职员）表")
     public ResponseMessage<BaseStaff> save(@RequestBody BaseStaff baseStaff){
         ValidatorUtil.validateEntity(baseStaff, AddGroup.class);
         baseStaff.setStaffId(UUIDUtil.getUUID());
@@ -96,7 +96,7 @@ public class BaseStaffController {
             user.setLoginName(baseStaff.getStaffName());
             user.setAdmin(false);
             user.setUserName(baseStaff.getCode());
-            user.setPassword("123456");
+            user.setPassword("123");
             user.setInheritMode(true);
             user.setState(1);
             user.setShowIndex(9999);
