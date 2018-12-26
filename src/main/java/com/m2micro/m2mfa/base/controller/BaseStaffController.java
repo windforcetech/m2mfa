@@ -47,7 +47,7 @@ public class BaseStaffController {
     /**
      * 列表
      */
-    @RequestMapping(value = "/list",method = RequestMethod.GET)
+    @RequestMapping(value = "/list",method = RequestMethod.POST)
     @ApiOperation(value="员工（职员）表列表")
     @UserOperationLog("员工（职员）表列表")
     public ResponseMessage<PageUtil<BaseStaffDetailObj>> list(@RequestBody BaseStaffQueryObj baseStaffQueryObj){
