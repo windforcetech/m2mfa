@@ -79,7 +79,7 @@ public class BaseRouteDescController {
     @UserOperationLog("工艺详情")
     public ResponseMessage<BaseRoutevo> info(@ApiParam(value = "routeId",required=true) @RequestParam(required = true)   String routeId){
 
-        return ResponseMessage.ok();
+        return ResponseMessage.ok(baseRouteDescService.info(routeId));
     }
 
 
@@ -89,8 +89,11 @@ public class BaseRouteDescController {
     @PostMapping("/delete")
     @ApiOperation(value=" 删除工艺")
     @UserOperationLog("删除工艺")
-    public ResponseMessage delete(@ApiParam(required = true,value = "工艺Id")  @RequestParam(required = true) String routeId  ){
-        return baseRouteDescService.delete(routeId);
+    public ResponseMessage delete(@RequestBody String[] ids ){
+        for(int i =0;i<ids.length;i++){
+            baseRouteDescService.delete(ids[i]);
+        }
+        return ResponseMessage.ok();
     }
 
 
