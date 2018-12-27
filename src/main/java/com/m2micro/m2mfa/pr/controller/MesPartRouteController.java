@@ -85,32 +85,27 @@ public class MesPartRouteController {
         return  mesPartRouteService.save(mesPartRoutevo.getMesPartRoute(),mesPartRoutevo.getMesPartRouteProcesss(),mesPartRoutevo.getMesPartRouteStations())==true ? ResponseMessage.ok():ResponseMessage.error("添加失败。");
     }
 
-//    /**
-//     * 更新
-//     */
-//    @RequestMapping("/update")
-//    @ApiOperation(value="更新料件途程设定主档")
-//    @UserOperationLog("更新料件途程设定主档")
-//    public ResponseMessage<MesPartRoute> update(@RequestBody MesPartRoute mesPartRoute){
-//        ValidatorUtil.validateEntity(mesPartRoute, UpdateGroup.class);
-//        MesPartRoute mesPartRouteOld = mesPartRouteService.findById(mesPartRoute.getPartRouteId()).orElse(null);
-//        if(mesPartRouteOld==null){
-//            throw new MMException("数据库不存在该记录");
-//        }
-//        PropertyUtil.copy(mesPartRoute,mesPartRouteOld);
-//        return ResponseMessage.ok(mesPartRouteService.save(mesPartRouteOld));
-//    }
-//
-//    /**
-//     * 删除
-//     */
-//    @RequestMapping("/delete")
-//    @ApiOperation(value="删除料件途程设定主档")
-//    @UserOperationLog("删除料件途程设定主档")
-//    public ResponseMessage delete(@RequestBody String[] ids){
-//        mesPartRouteService.deleteByIds(ids);
-//        return ResponseMessage.ok();
-//    }
+    /**
+     * 更新
+     */
+    @PostMapping("/update")
+    @ApiOperation(value="更新料件途程设定主档")
+    @UserOperationLog("更新料件途程设定主档")
+    public ResponseMessage<MesPartRoute> update(@RequestBody MesPartvo mesPartRoutevo){
+
+        return ResponseMessage.ok();
+    }
+
+    /**
+     * 删除
+     */
+    @PostMapping("/delete")
+    @ApiOperation(value="删除料件途程设定主档")
+    @UserOperationLog("删除料件途程设定主档")
+    public ResponseMessage delete(@RequestBody String[] ids){
+        mesPartRouteService.deleteByIds(ids);
+        return ResponseMessage.ok();
+    }
 
     @PostMapping("/addDetails")
     @ApiOperation(value="添加基本信息")

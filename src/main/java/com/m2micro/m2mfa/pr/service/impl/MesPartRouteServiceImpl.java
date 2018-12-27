@@ -172,6 +172,59 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         return true;
     }
 
+    @Transactional
+    @Override
+    public boolean update(MesPartRoute mesPartRoute, List<MesPartRouteProcess> mesPartRouteProcesss, List<MesPartRouteStation> mesPartRouteStations) {
+
+        if(basePartsService.findById(mesPartRoute.getPartId()).orElse(null)==null){
+            throw new MMException("料件ID有误。");
+        }
+        if(baseRouteDescService.findById(mesPartRoute.getRouteId()).orElse(null)==null){
+            throw  new MMException("工艺ID有误。");
+        }
+        if(mesPartRoute.getInputProcessId()!=null && !mesPartRoute.getInputProcessId().trim().equals("")){
+            if( baseProcessService.findById(mesPartRoute.getInputProcessId()).orElse(null)==null ){
+                throw  new  MMException("投入工序工序主键有误。");
+            }
+        }
+        if(mesPartRoute.getOutputProcessId()!=null && !mesPartRoute.getOutputProcessId().trim().equals("")){
+            if( baseProcessService.findById(mesPartRoute.getOutputProcessId()).orElse(null)==null ){
+                throw  new  MMException("产出工序工序主键有误。");
+            }
+        }
+        for(MesPartRouteStation mesPartRouteStation :mesPartRouteStations){
+            if(baseStationService.findById(mesPartRouteStation.getStationId()).orElse(null)==null){
+                throw new MMException("工位ID有误。");
+            }
+            mesPartRouteStation.setId(UUIDUtil.getUUID());
+            mesPartRouteStation.setPartRouteId(mesPartRoute.getPartRouteId());
+            ValidatorUtil.validateEntity(mesPartRouteStation, AddGroup.class);
+            mesPartRouteStationService .save(mesPartRouteStation);
+        }
+           for(MesPartRouteProcess mesPartRouteProcess :mesPartRouteProcesss){
+            if(  baseProcessService.findById(mesPartRouteProcess.getProcessid()).orElse(null)==null  ){
+                throw  new MMException("工序ID有误。");
+            }
+            if(mesPartRouteProcess.getFailprocessid() !=null && !mesPartRouteProcess.getFailprocessid().trim().equals("")){
+                if(baseProcessService.findById(mesPartRouteProcess.getFailprocessid()).orElse(null)==null){
+                    throw  new  MMException("不良工序主键有误。");
+                }
+            }
+            if(mesPartRouteProcess.getNextprocessid()!=null && !mesPartRouteProcess.getNextprocessid().trim().equals("")){
+                if( baseProcessService.findById(mesPartRouteProcess.getNextprocessid()).orElse(null)==null ){
+                    throw  new  MMException("下一个工序主键有误。");
+                }
+            }
+            mesPartRouteProcess.setId(UUIDUtil.getUUID());
+            mesPartRouteProcess.setPartrouteid(mesPartRoute.getPartRouteId());
+            ValidatorUtil.validateEntity(mesPartRouteProcess, AddGroup.class);
+            mesPartRouteProcessService.save(mesPartRouteProcess);
+        }
+        ValidatorUtil.validateEntity(mesPartRoute, AddGroup.class);
+        this.save(mesPartRoute);
+        return true;
+    }
+
     @Override
     public MesPartvo info(String partRouteId) {
         MesPartRoute mesPartRoute =  this.findById(partRouteId).orElse(null);
@@ -198,6 +251,13 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         List<MesPartRouteProcess> mesPartRouteProcesses = jdbcTemplate.query(sql,rm);
         List<MesPartRouteStation> mesPartRouteStations = jdbcTemplate.query(mesPartRouteStationsql,mesPartRouteStationrm);
         return MesPartvo.builder().mesPartRouteProcesss(mesPartRouteProcesses).mesPartRoute(mesPartRoute).mesPartRouteStations(mesPartRouteStations).build();
+    }
+
+    @Override
+    public String delete(String id) {
+       MesPartRoute mesPartRoute = this.findById(id).orElse(null);
+
+        return null;
     }
 
 }

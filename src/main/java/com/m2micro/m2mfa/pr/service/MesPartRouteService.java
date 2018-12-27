@@ -29,7 +29,11 @@ public interface MesPartRouteService extends BaseService<MesPartRoute,String> {
     List<String> selectRouteid(String routeId);
 
      //添加途程
-     boolean save( MesPartRoute mesPartRoute,List<MesPartRouteProcess >mesPartRouteProcess, List<MesPartRouteStation> mesPartRouteStation);
+     boolean save( MesPartRoute mesPartRoute,List<MesPartRouteProcess >mesPartRouteProcesss, List<MesPartRouteStation> mesPartRouteStations);
+
+     boolean update( MesPartRoute mesPartRoute,List<MesPartRouteProcess >mesPartRouteProcesss, List<MesPartRouteStation> mesPartRouteStations);
 
      MesPartvo info(String partRouteId);
+
+     String  delete(String id);
 }
