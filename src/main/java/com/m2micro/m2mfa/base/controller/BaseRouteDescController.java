@@ -3,23 +3,15 @@ package com.m2micro.m2mfa.base.controller;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.query.BaseRouteQuery;
 import com.m2micro.m2mfa.base.service.BaseRouteDescService;
-import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.base.vo.BaseRoutevo;
-import com.m2micro.m2mfa.base.vo.Processvo;
-import com.m2micro.m2mfa.common.util.ValidatorUtil;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import com.m2micro.m2mfa.base.vo.BaseRoutevo;;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
-import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,10 +37,7 @@ public class BaseRouteDescController {
     @ApiOperation(value=" 添加工艺")
     @UserOperationLog("添加工艺")
     public ResponseMessage save(@RequestBody BaseRoutevo routevo){
-
        return baseRouteDescService.save(routevo.getBaseRouteDesc(),routevo.getBaseRouteDefs(),routevo.getBasePageElemen())==true ? ResponseMessage.ok(" 添加工艺成功。") : ResponseMessage.error(" 工艺代码【"+routevo.getBaseRouteDesc().getRouteNo()+"】已存在。");
-
-
     }
 
 
@@ -74,6 +63,8 @@ public class BaseRouteDescController {
         return ResponseMessage.ok(baseRouteDescService.list(query));
     }
 
+
+
     /**
      * 详情
      */
@@ -81,9 +72,10 @@ public class BaseRouteDescController {
     @ApiOperation(value="工艺详情")
     @UserOperationLog("工艺详情")
     public ResponseMessage<BaseRoutevo> info(@ApiParam(value = "routeId",required=true) @RequestParam(required = true)   String routeId){
-
         return ResponseMessage.ok(baseRouteDescService.info(routeId));
     }
+
+
 
 
     /**
@@ -98,6 +90,7 @@ public class BaseRouteDescController {
         }
         return ResponseMessage.ok();
     }
+
 
 
 

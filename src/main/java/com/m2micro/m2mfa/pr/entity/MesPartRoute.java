@@ -39,19 +39,16 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     @NotNull(message="管制方式不能为空。",groups = {AddGroup.class, UpdateGroup.class})
     @Size(max=32,message = "料件id长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String routeId;
-    @NotNull(message="投入工序不能为空。",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "投入工序长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+
     @ApiModelProperty(value = "投入工序")
     private String inputProcessId;
-    @NotNull(message="产出工序不能为空。",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "产出工序长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+
     @ApiModelProperty(value = "产出工序")
     private String outputProcessId;
     @ApiModelProperty(value = "有效否")
     private Integer enabled;
     @ApiModelProperty(value = "描述")
-    @NotNull(message="描述不能为空。",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "描述长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+
     private String description;
 
     public String getPartRouteId() {

@@ -13,7 +13,6 @@ import com.m2micro.m2mfa.base.vo.BaseRoutevo;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -25,9 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 /**
  * 生产途程单头 服务实现类
@@ -46,10 +43,8 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
     private MesPartRouteService mesPartRouteService;
     @Autowired
     private BaseProcessService baseProcessService;
-
     @Autowired
     JPAQueryFactory queryFactory;
-
     @Autowired
     JdbcTemplate jdbcTemplate;
 
@@ -69,7 +64,6 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         if(StringUtils.isNotEmpty(query.getRouteName())){
             condition.and(qBaseRouteDesc.routeName.like("%"+query.getRouteName()+"%"));
         }
-
         jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
         List<BaseRouteDesc> list = jq.fetch();
         for(BaseRouteDesc baseRouteDesc :list){
@@ -77,10 +71,10 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         BaseProcess oprocess =   baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null);
         if(iprocess !=null){
             baseRouteDesc.setInputProcessName(iprocess.getProcessName());
-        }
+         }
         if(oprocess !=null){
             baseRouteDesc.setOutputProcessName(oprocess.getProcessName());
-        }
+         }
         }
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
@@ -98,16 +92,16 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
             for(BaseRouteDef  baseRouteDef :baseRouteDefs){
                 if(baseRouteDef.getNextprocessId()!=null && !baseRouteDef.getNextprocessId().trim().equals("")){
                     if( baseProcessService.findById(baseRouteDef.getNextprocessId()).orElse(null)==null ){
-                        throw  new  MMException("工序主键有误。");
+                        throw  new  MMException("下一个工序主键有误。");
                     }
                 }
                 if(baseRouteDef.getFailprocessId() !=null && !baseRouteDef.getFailprocessId().trim().equals("")){
                     if(baseProcessService.findById(baseRouteDef.getFailprocessId()).orElse(null)==null){
-                        throw  new  MMException("工序主键有误。");
+                        throw  new  MMException("不良工序主键有误。");
                     }
                 }
                 if(baseProcessService.findById(baseRouteDef.getProcessId()).orElse(null)==null  || baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null)==null){
-                    throw  new  MMException("工序主键有误。");
+                       throw  new  MMException("工序主键有误。");
                 }
                 baseRouteDef.setRouteId(routeuuid);
                 baseRouteDef.setRouteDefId(UUIDUtil.getUUID());
@@ -116,7 +110,6 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
             }
             baseRouteDescRepository.save(baseRouteDesc);
             basePageElemenService.save(basePageElemen);
-            System.out.println("完成");
             return true;
         }
       return false ;
@@ -130,12 +123,12 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
             for(BaseRouteDef  baseRouteDef :baseRouteDefs){
                 if(baseRouteDef.getNextprocessId()!=null && !baseRouteDef.getNextprocessId().trim().equals("")){
                     if( baseProcessService.findById(baseRouteDef.getNextprocessId()).orElse(null)==null ){
-                        throw  new  MMException("工序主键有误。");
+                        throw  new  MMException("下一个工序主键有误。");
                     }
                 }
                 if(baseRouteDef.getFailprocessId() !=null && !baseRouteDef.getFailprocessId().trim().equals("")){
                     if(baseProcessService.findById(baseRouteDef.getFailprocessId()).orElse(null)==null){
-                        throw  new  MMException("工序主键有误。");
+                        throw  new  MMException("不良工序主键有误。");
                     }
                 }
                 if(baseProcessService.findById(baseRouteDef.getProcessId()).orElse(null)==null  || baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null)==null || baseProcessService.findById(baseRouteDesc.getOutputProcess()).orElse(null)==null){
@@ -164,6 +157,8 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         return ResponseMessage.ok();
     }
 
+
+
     @Override
     public BaseRoutevo info(String routeId) {
       BaseRouteDesc baseRouteDesc=  this.findById(routeId).orElse(null);
@@ -186,6 +181,8 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         List<BaseRouteDef> baseRouteDefs = jdbcTemplate.query(sql,rm);
         return BaseRoutevo.builder().baseRouteDesc(baseRouteDesc).basePageElemen(basePageElemen).baseRouteDefs(baseRouteDefs).build();
     }
+
+
 
     @Override
     public List<BaseProcessStation> findbaseProcessStations(String routId) {

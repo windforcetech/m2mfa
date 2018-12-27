@@ -36,6 +36,7 @@ public class BaseRouteDef extends BaseEntity implements Serializable {
     private String processId;
     @ApiModelProperty(value = "下一工序")
     private String nextprocessId;
+    @ApiModelProperty(value = "不良工序工序")
     private String failprocessId;
     @ApiModelProperty(value = "允许跳过")
     private Integer jump;
