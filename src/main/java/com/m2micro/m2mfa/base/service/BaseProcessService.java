@@ -26,7 +26,7 @@ public interface BaseProcessService extends BaseService<BaseProcess,String> {
      boolean update( BaseProcess baseProcess,   List<BaseProcessStation>  baseProcessStations,  BasePageElemen basePageElemen);
 
     //删除工序
-     ResponseMessage delete(String processId);
+     String  delete(String processId);
 
      //查询
       PageUtil<BaseProcess> list(BaseProcessQuery  query);

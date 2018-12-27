@@ -34,7 +34,7 @@ public interface BaseRouteDescService extends BaseService<BaseRouteDesc,String> 
     boolean update(BaseRouteDesc baseRouteDesc, List<BaseRouteDef> baseRouteDefs, BasePageElemen basePageElemen);
 
     //删除工艺
-    ResponseMessage delete(String routeId );
+    String  delete(String routeId );
 
     //详情
     BaseRoutevo info(String routeId);

@@ -89,10 +89,14 @@ public class BaseProcessController {
     @UserOperationLog("删除工序")
     @Transactional
     public ResponseMessage delete(@RequestBody String[] ids ){
+        String msgs="";
         for(int i =0;i<ids.length;i++){
-            baseProcessService.delete(ids[i]);
+           String  msg= baseProcessService.delete(ids[i]);
+           if(!msg.trim().equals("")){
+               msgs+=msg;
+            }
         }
-        return  ResponseMessage.ok();
+        return  msgs.trim()==""? ResponseMessage.ok():  ResponseMessage.ok(msgs.trim()+"已产生工艺业务。");
     }
 
 }

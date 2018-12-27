@@ -110,15 +110,16 @@ public class BaseProcessServiceImpl implements BaseProcessService {
 
     @Override
     @Transactional
-    public ResponseMessage delete(String processId) {
+    public String  delete(String processId) {
+        String msg="";
        List<String> list =baseRouteDefService.selectoneprocessId(processId);
         if(list!= null && !list.isEmpty()){
-            throw new MMException("产生业务不允许删除.");
-        }
+            msg+=   this.findById(processId).orElse(null).getProcessName()+",";
+         }
         baseProcessRepository.deleteById(processId);
         baseProcessStationService.deleteprocessId(processId);
         basePageElemenService.deleteById(processId);
-        return ResponseMessage.ok();
+        return msg;
     }
 
     @Override

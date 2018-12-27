@@ -85,10 +85,14 @@ public class BaseRouteDescController {
     @ApiOperation(value=" 删除工艺")
     @UserOperationLog("删除工艺")
     public ResponseMessage delete(@RequestBody String[] ids ){
+        String msgs="";
         for(int i =0;i<ids.length;i++){
-            baseRouteDescService.delete(ids[i]);
+         String msg=   baseRouteDescService.delete(ids[i]);
+            if(!msg.trim().equals("")){
+                msgs+=msg;
+            }
         }
-        return ResponseMessage.ok();
+        return  msgs.trim()==""? ResponseMessage.ok():  ResponseMessage.ok(msgs.trim()+"已产生途程业务。");
     }
 
 
