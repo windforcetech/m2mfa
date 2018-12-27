@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.mo.controller;
 
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -115,6 +116,17 @@ public class MesMoScheduleController {
     @UserOperationLog("获取待处理的工位")
     public ResponseMessage<List<BaseStation>> getPendingStations(String staffId, String scheduleId){
         return ResponseMessage.ok(mesMoScheduleService.getPendingStations(staffId, scheduleId));
+    }
+
+
+    /**
+     * 获取操作栏相关信息
+     */
+    @RequestMapping("/getOperationInfo")
+    @ApiOperation(value="获取操作栏相关信息")
+    @UserOperationLog("获取操作栏相关信息")
+    public ResponseMessage<OperationInfo> getOperationInfo(String staffId, String scheduleId, String stationId){
+        return ResponseMessage.ok(mesMoScheduleService.getOperationInfo(staffId, scheduleId,stationId));
     }
 
 }

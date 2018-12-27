@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @Entity
 @ApiModel(value="MesRecordWork对象", description="上工记录表")
-public class MesRecordWork extends BaseEntity implements Serializable {
+public class MesRecordWork implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @ApiModelProperty(value = "主键")

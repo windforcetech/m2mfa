@@ -6,6 +6,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.mo.model.OperationInfo;
 
 import java.util.List;
 
@@ -40,6 +41,14 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      * @return
      */
     List<BaseStation> getPendingStations(String staffId, String scheduleId);
+
+    /**
+     * 获取操作栏相关信息
+     * @param staffId
+     * @param scheduleId
+     * @param stationId
+     */
+    OperationInfo getOperationInfo(String staffId, String scheduleId, String stationId);
 
     List<MesMoSchedule> findpartID(String partID);
 }
