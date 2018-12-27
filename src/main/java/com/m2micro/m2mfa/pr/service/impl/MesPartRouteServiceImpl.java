@@ -18,6 +18,9 @@ import com.m2micro.m2mfa.pr.service.MesPartRouteProcessService;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.service.MesPartRouteStationService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -49,7 +52,8 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     private BaseStationService baseStationService;
     @Autowired
     private MesPartRouteStationService mesPartRouteStationService;
-
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Autowired
     JPAQueryFactory queryFactory;
 
@@ -75,16 +79,9 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
 
     @Override
     @Transactional
-    public boolean save(MesPartRoute mesPartRoute, MesPartRouteProcess mesPartRouteProcess, MesPartRouteStation mesPartRouteStation) {
+    public boolean save(MesPartRoute mesPartRoute, List<MesPartRouteProcess> mesPartRouteProcesss,List< MesPartRouteStation>  mesPartRouteStations) {
         String partRouteid =  UUIDUtil.getUUID();
         mesPartRoute.setPartRouteId(partRouteid);
-        mesPartRouteProcess.setId(UUIDUtil.getUUID());
-        mesPartRouteProcess.setPartrouteid(partRouteid);
-        mesPartRouteStation.setId(UUIDUtil.getUUID());
-        mesPartRouteStation.setPartRouteId(partRouteid);
-        ValidatorUtil.validateEntity(mesPartRoute, AddGroup.class);
-        ValidatorUtil.validateEntity(mesPartRouteProcess, AddGroup.class);
-        ValidatorUtil.validateEntity(mesPartRouteStation, AddGroup.class);
         if(basePartsService.findById(mesPartRoute.getPartId()).orElse(null)==null){
             throw new MMException("料件ID有误。");
         }
@@ -101,34 +98,45 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
                 throw  new  MMException("产出工序工序主键有误。");
             }
         }
-        if(mesPartRouteProcess.getNextprocessid()!=null && !mesPartRouteProcess.getNextprocessid().trim().equals("")){
-            if( baseProcessService.findById(mesPartRouteProcess.getNextprocessid()).orElse(null)==null ){
-                throw  new  MMException("下一个工序主键有误。");
+        for(MesPartRouteStation mesPartRouteStation :mesPartRouteStations){
+            if(baseStationService.findById(mesPartRouteStation.getStationId()).orElse(null)==null){
+                throw new MMException("工位ID有误。");
             }
+            mesPartRouteStation.setId(UUIDUtil.getUUID());
+            mesPartRouteStation.setPartRouteId(partRouteid);
+            ValidatorUtil.validateEntity(mesPartRouteStation, AddGroup.class);
+            mesPartRouteStationService .save(mesPartRouteStation);
         }
-        if(mesPartRouteProcess.getFailprocessid() !=null && !mesPartRouteProcess.getFailprocessid().trim().equals("")){
-            if(baseProcessService.findById(mesPartRouteProcess.getFailprocessid()).orElse(null)==null){
-                throw  new  MMException("不良工序主键有误。");
+           for(MesPartRouteProcess mesPartRouteProcess :mesPartRouteProcesss){
+             if(  baseProcessService.findById(mesPartRouteProcess.getProcessid()).orElse(null)==null  ){
+                throw  new MMException("工序ID有误。");
+             }
+            if(mesPartRouteProcess.getFailprocessid() !=null && !mesPartRouteProcess.getFailprocessid().trim().equals("")){
+                if(baseProcessService.findById(mesPartRouteProcess.getFailprocessid()).orElse(null)==null){
+                    throw  new  MMException("不良工序主键有误。");
+                }
             }
+            if(mesPartRouteProcess.getNextprocessid()!=null && !mesPartRouteProcess.getNextprocessid().trim().equals("")){
+                if( baseProcessService.findById(mesPartRouteProcess.getNextprocessid()).orElse(null)==null ){
+                    throw  new  MMException("下一个工序主键有误。");
+                }
+            }
+            mesPartRouteProcess.setId(UUIDUtil.getUUID());
+            mesPartRouteProcess.setPartrouteid(partRouteid);
+            ValidatorUtil.validateEntity(mesPartRouteProcess, AddGroup.class);
+            mesPartRouteProcessService.save(mesPartRouteProcess);
         }
-        if(  baseProcessService.findById(mesPartRouteProcess.getProcessid()).orElse(null)==null ||  baseProcessService.findById(mesPartRouteStation.getProcessId()).orElse(null)==null ){
-            throw  new MMException("工序ID有误。");
-        }
-        if(baseStationService.findById(mesPartRouteStation.getStationId()).orElse(null)==null){
-            throw new MMException("工位ID有误。");
-        }
+        ValidatorUtil.validateEntity(mesPartRoute, AddGroup.class);
         this.save(mesPartRoute);
-        mesPartRouteProcessService.save(mesPartRouteProcess);
-        mesPartRouteStationService .save(mesPartRouteStation);
         return true;
     }
 
     @Override
     public MesPartvo info(String partRouteId) {
-//      MesPartRoute mesPartRoute =  this.findById(partRouteId).orElse(null);
-//        String sql ="select * from mes_part_route_process where partrouteid ='"+partRouteId+"'";
-//        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseProcessStation.class);
-//        List<BaseProcessStation> baseProcessStations = jdbcTemplate.query(sql,rm);
+        MesPartRoute mesPartRoute =  this.findById(partRouteId).orElse(null);
+        String sql ="select * from mes_part_route_process where partrouteid ='"+partRouteId+"'";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(MesPartRouteProcess.class);
+        List<MesPartRouteProcess> baseProcessStations = jdbcTemplate.query(sql,rm);
         return null;
     }
 

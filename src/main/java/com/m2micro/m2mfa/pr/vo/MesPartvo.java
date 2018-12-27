@@ -6,13 +6,14 @@ import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class MesPartvo {
-
     private MesPartRoute mesPartRoute;
-    private MesPartRouteProcess mesPartRouteProcess;
-    private MesPartRouteStation mesPartRouteStation;
+    private List<MesPartRouteProcess> mesPartRouteProcesss;
+    private List<MesPartRouteStation> mesPartRouteStations;
 
 
 }

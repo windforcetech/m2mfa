@@ -28,7 +28,7 @@ public interface MesPartRouteService extends BaseService<MesPartRoute,String> {
     List<String> selectRouteid(String routeId);
 
      //添加途程
-     boolean save( MesPartRoute mesPartRoute,MesPartRouteProcess mesPartRouteProcess, MesPartRouteStation mesPartRouteStation);
+     boolean save( MesPartRoute mesPartRoute,List<MesPartRouteProcess >mesPartRouteProcess, List<MesPartRouteStation> mesPartRouteStation);
 
-    MesPartvo info(String partRouteId);
+     MesPartvo info(String partRouteId);
 }
