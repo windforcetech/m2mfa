@@ -41,6 +41,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @Autowired
     MesRecordWorkRepository mesRecordWorkRepository;
 
+    @SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
         return mesMoScheduleRepository;
     }
@@ -70,10 +71,10 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 "	AND ms.flag = 1 \n" +
                 "	AND mss.staff_id = '" + staffId + "'\n" +
                 "GROUP BY ms.schedule_id";
-        RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
+        RowMapper<MesMoSchedule> rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
         List<MesMoSchedule> production = jdbcTemplate.query(sqlProduction, rm);
-        if (production != null && production.size() > 0) {
-            return mesMoScheduleRepository.findById(production.get(0).getScheduleId()).get();
+        if (production.size() > 0) {
+            return mesMoScheduleRepository.findById(production.get(0).getScheduleId()).orElseThrow(() -> new MMException("排产单数据异常！"));
         }
 
         // 查找员工已审待产排产单优先级最高的排产单id
@@ -88,10 +89,10 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                             "	AND ms.flag = 2 \n" +
                             "	AND mss.staff_id = '" + staffId + "'\n" +
                             "GROUP BY ms.schedule_id";
-        RowMapper rowMapper = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
+        RowMapper<MesMoSchedule> rowMapper = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
         List<MesMoSchedule> audited = jdbcTemplate.query(sqlAudited, rowMapper);
-        if (audited != null && audited.size() > 0) {
-            return mesMoScheduleRepository.findById(audited.get(0).getScheduleId()).get();
+        if (audited.size() > 0) {
+            return mesMoScheduleRepository.findById(audited.get(0).getScheduleId()).orElseThrow(() -> new MMException("排产单数据异常！"));
         }
         return null;
     }
@@ -140,7 +141,9 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     /**
      * 设置提报异常标志
      * @param recordAbnormals
+     *
      * @param operationInfo
+     *
      * @return
      */
     private OperationInfo setAbnormalInfo(List<OperationInfo> recordAbnormals,OperationInfo operationInfo) {
@@ -223,7 +226,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                     "AND mrw.station_id = '" + stationId + "'"+
                     "ORDER BY mra.start_time DESC\n"+
                     "LIMIT 1";
-        RowMapper rowMapper = BeanPropertyRowMapper.newInstance(OperationInfo.class);
+        RowMapper<OperationInfo> rowMapper = BeanPropertyRowMapper.newInstance(OperationInfo.class);
         return jdbcTemplate.query(sql, rowMapper);
     }
 
@@ -247,7 +250,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                         "AND mrw.station_id = '" + stationId + "'" +
                         "ORDER BY mrs.start_time DESC\n"+
                         "LIMIT 1";
-        RowMapper rowMapper = BeanPropertyRowMapper.newInstance(OperationInfo.class);
+        RowMapper<OperationInfo> rowMapper = BeanPropertyRowMapper.newInstance(OperationInfo.class);
         return jdbcTemplate.query(sql, rowMapper);
     }
 
@@ -259,6 +262,52 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @return
      */
     private List<BaseStation> getAllBaseStations(String staffId, String scheduleId) {
+        String sqlStation = "SELECT\n" +
+                "	bs.station_id stationId,\n" +
+                "	bs.code code,\n" +
+                "	bs.name name,\n" +
+                "	bs.lead_time leadTime,\n" +
+                "	bs.waiting_time waitingTime,\n" +
+                "	bs.post_time postTime,\n" +
+                "	bs.job_peoples jobPeoples,\n" +
+                "	bs.standard_hours standardHours,\n" +
+                "	bs.coefficient coefficient,\n" +
+                "	bs.control_peoples controlPeoples,\n" +
+                "	bs.control_machines controlMachines,\n" +
+                "	bs.post_category postCategory,\n" +
+                "	bs.sort_code sortCode,\n" +
+                "	bs.enabled enabled,\n" +
+                "	bs.description description,\n" +
+                "	bs.create_on createOn,\n" +
+                "	bs.create_by createBy,\n" +
+                "	bs.modified_on modifiedOn,\n" +
+                "	bs.modified_by modifiedBy,\n" +
+                "	MIN(mps.step) step\n" +
+                "FROM\n" +
+                "	base_station bs,\n" +
+                "	mes_mo_schedule_staff mss,\n" +
+                "	base_process_station mps\n" +
+                "WHERE\n" +
+                "	mss.station_id = bs.station_id\n" +
+                "AND mss.actual_end_time IS NULL\n" +
+                "AND mss.schedule_id = '" + scheduleId + "'\n" +
+                "AND mss.staff_id = '" + staffId + "'\n" +
+                "AND mps.station_id = mss.station_id\n" +
+                "AND mps.process_id=mss.process_id\n" +
+                "GROUP BY\n" +
+                "	mss.process_id";
+        RowMapper<BaseStation> rowMapper = BeanPropertyRowMapper.newInstance(BaseStation.class);
+        return jdbcTemplate.query(sqlStation, rowMapper);
+    }
+
+    /**
+     * 获取待处理的所有已排除跳过的工位
+     *
+     * @param staffId
+     * @param scheduleId
+     * @return
+     */
+    private List<BaseStation> getAllExcludedBaseStations(String staffId, String scheduleId) {
         String sqlStation = "SELECT\n" +
                             "	bs.station_id stationId,\n" +
                             "	bs.code code,\n" +
@@ -278,51 +327,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                             "	bs.create_on createOn,\n" +
                             "	bs.create_by createBy,\n" +
                             "	bs.modified_on modifiedOn,\n" +
-                            "	bs.modified_by modifiedBy\n" +
-                            "FROM\n" +
-                            "	base_station bs,\n" +
-                            "	mes_mo_schedule_staff mss\n" +
-                            "WHERE\n" +
-                            "	mss.station_id = bs.station_id\n" +
-                            "AND mss.actual_end_time IS NULL\n" +
-                            "AND mss.schedule_id = '" + scheduleId + "'\n" +
-                            "AND mss.staff_id = '" + staffId + "'\n";
-        RowMapper rowMapper = BeanPropertyRowMapper.newInstance(BaseStation.class);
-        return jdbcTemplate.query(sqlStation, rowMapper);
-    }
-
-    /**
-     * 获取待处理的所有已排除跳过的工位
-     *
-     * @param staffId
-     * @param scheduleId
-     * @return
-     */
-    private List<BaseStation> getAllExcludedBaseStations(String staffId, String scheduleId) {
-        String sqlStation = "SELECT\n" +
-                            "	bs.station_id stationId,\n" +
-                            "	bs. CODE CODE,\n" +
-                            "	bs. NAME NAME,\n" +
-                            "	bs.lead_time leadTime,\n" +
-                            "	bs.waiting_time waitingTime,\n" +
-                            "	bs.post_time postTime,\n" +
-                            "	bs.job_peoples jobPeoples,\n" +
-                            "	bs.standard_hours standardHours,\n" +
-                            "	bs.coefficient coefficient,\n" +
-                            "	bs.control_peoples controlPeoples,\n" +
-                            "	bs.control_machines controlMachines,\n" +
-                            "	bs.post_category postCategory,\n" +
-                            "	bs.sort_code sortCode,\n" +
-                            "	bs.enabled enabled,\n" +
-                            "	bs.description description,\n" +
-                            "	bs.create_on createOn,\n" +
-                            "	bs.create_by createBy,\n" +
-                            "	bs.modified_on modifiedOn,\n" +
-                            "	bs.modified_by modifiedBy\n" +
+                            "	bs.modified_by modifiedBy,\n" +
+                            "   MIN(mps.step) step\n" +
                             "FROM\n" +
                             "	base_station bs,\n" +
                             "	mes_mo_schedule_staff mss,\n" +
-                            "	mes_mo_schedule_station mmss\n" +
+                            "	mes_mo_schedule_station mmss,\n" +
+                            "	base_process_station mps\n" +
                             "WHERE\n" +
                             "	mss.station_id = bs.station_id\n" +
                             "AND mss.schedule_id = mmss.schedule_id\n" +
@@ -330,15 +341,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                             "AND mss.actual_end_time IS NULL\n" +
                             "AND mss.schedule_id = '" + scheduleId + "'\n" +
                             "AND mss.staff_id = '" + staffId + "'\n" +
-                            "AND mmss.jump=0";
-        RowMapper rowMapper = BeanPropertyRowMapper.newInstance(BaseStation.class);
+                            "AND mmss.jump=0\n" +
+                            "AND mps.station_id = mss.station_id\n" +
+                            "AND mps.process_id = mss.process_id\n" +
+                            "GROUP BY\n" +
+                            "	mss.process_id";
+        RowMapper<BaseStation> rowMapper = BeanPropertyRowMapper.newInstance(BaseStation.class);
         return jdbcTemplate.query(sqlStation, rowMapper);
     }
 
     @Override
     public List<MesMoSchedule> findpartID(String partID) {
         String sql ="select * from mes_mo_schedule where part_id='"+partID+"'";
-        RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
+        RowMapper<MesMoSchedule> rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
         return jdbcTemplate.query(sql,rm);
     }
 
