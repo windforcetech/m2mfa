@@ -115,10 +115,11 @@ public class BaseProcessServiceImpl implements BaseProcessService {
        List<String> list =baseRouteDefService.selectoneprocessId(processId);
         if(list!= null && !list.isEmpty()){
             msg+=   this.findById(processId).orElse(null).getProcessName()+",";
-         }
-        baseProcessRepository.deleteById(processId);
-        baseProcessStationService.deleteprocessId(processId);
-        basePageElemenService.deleteById(processId);
+         }else {
+            baseProcessRepository.deleteById(processId);
+            baseProcessStationService.deleteprocessId(processId);
+            basePageElemenService.deleteById(processId);
+        }
         return msg;
     }
 

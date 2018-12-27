@@ -152,10 +152,11 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
        List<String>list= mesPartRouteService.selectRouteid(routeId);
         if(list!= null && !list.isEmpty()){
             msg+=   this.findById(routeId).orElse(null).getRouteName()+",";
+        }else {
+            baseRouteDescRepository.deleteById(routeId);
+            basePageElemenService.deleteById(routeId);
+            baseRouteDefService.deleterouteId(routeId);
         }
-        baseRouteDescRepository.deleteById(routeId);
-        basePageElemenService.deleteById(routeId);
-        baseRouteDefService.deleterouteId(routeId);
         return msg;
     }
 
