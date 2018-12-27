@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.base.service.BaseRouteDefService;
 import com.m2micro.m2mfa.base.service.BaseRouteDescService;
+import com.m2micro.m2mfa.pr.query.MesPartRouteQuery;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -52,17 +53,17 @@ public class MesPartRouteController {
     @Autowired
     private BasePartsService basePartsService;
 
-//    /**
-//     * 列表
-//     */
-//    @RequestMapping("/list")
-//    @ApiOperation(value="料件途程设定主档列表")
-//    @UserOperationLog("料件途程设定主档列表")
-//    public ResponseMessage<PageUtil<MesPartRoute>> list(Query query){
-//        PageUtil<MesPartRoute> page = mesPartRouteService.list(query);
-//        return ResponseMessage.ok(page);
-//    }
-//
+    /**
+     * 列表
+     */
+    @PostMapping("/list")
+    @ApiOperation(value="料件途程设定主档列表")
+    @UserOperationLog("料件途程设定主档列表")
+    public ResponseMessage<PageUtil<MesPartRoute>> list(@RequestBody  MesPartRouteQuery query){
+        PageUtil<MesPartRoute> page = mesPartRouteService.list(query);
+        return ResponseMessage.ok(page);
+    }
+
     /**
      * 详情
      */

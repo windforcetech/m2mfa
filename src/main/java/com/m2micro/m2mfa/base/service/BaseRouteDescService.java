@@ -41,4 +41,7 @@ public interface BaseRouteDescService extends BaseService<BaseRouteDesc,String> 
 
     //获取对应的工位
    List<BaseProcessStation> findbaseProcessStations(String routId);
+
+   //根据工艺名称获取途程数据
+   BaseRouteDesc findName(String routName);
 }

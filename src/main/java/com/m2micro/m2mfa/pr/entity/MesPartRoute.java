@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.pr.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
@@ -45,15 +46,55 @@ public class MesPartRoute extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "产出工序")
     private String outputProcessId;
+
     @ApiModelProperty(value = "有效否")
     private Integer enabled;
-    @ApiModelProperty(value = "描述")
 
+    @ApiModelProperty(value = "描述")
     private String description;
+
+    @Transient
+    @ApiModelProperty(value = "途程名称")
+    private String touteName;
+
+    @Transient
+    @ApiModelProperty(value = "料件编号")
+    private String partNo;
+
+    @Transient
+    @ApiModelProperty(value = "投入工序名称")
+    private String inputProcessIdName;
+
+    @Transient
+    @ApiModelProperty(value = "产出工序名称")
+    private String outputProcessIdName;
+
+    public MesPartRoute(@NotNull(message = "主键不能为空。", groups = {AddGroup.class, UpdateGroup.class}) String partRouteId, @NotNull(message = "料件id不能为空。", groups = {AddGroup.class, UpdateGroup.class}) @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String partId, @NotNull(message = "管制方式不能为空。", groups = {AddGroup.class, UpdateGroup.class}) @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String controlInformation, @NotNull(message = "管制方式不能为空。", groups = {AddGroup.class, UpdateGroup.class}) @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String routeId, String inputProcessId, String outputProcessId, Integer enabled, String description, String touteName, String partNo, String inputProcessIdName, String outputProcessIdName) {
+        this.partRouteId = partRouteId;
+        this.partId = partId;
+        this.controlInformation = controlInformation;
+        this.routeId = routeId;
+        this.inputProcessId = inputProcessId;
+        this.outputProcessId = outputProcessId;
+        this.enabled = enabled;
+        this.description = description;
+        this.touteName = touteName;
+        this.partNo = partNo;
+        this.inputProcessIdName = inputProcessIdName;
+        this.outputProcessIdName = outputProcessIdName;
+    }
+
+    public MesPartRoute() {
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
 
     public String getPartRouteId() {
         return partRouteId;
     }
+
     public void setPartRouteId(String partRouteId) {
         this.partRouteId = partRouteId;
     }
@@ -61,6 +102,7 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     public String getPartId() {
         return partId;
     }
+
     public void setPartId(String partId) {
         this.partId = partId;
     }
@@ -68,6 +110,7 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     public String getControlInformation() {
         return controlInformation;
     }
+
     public void setControlInformation(String controlInformation) {
         this.controlInformation = controlInformation;
     }
@@ -75,6 +118,7 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     public String getRouteId() {
         return routeId;
     }
+
     public void setRouteId(String routeId) {
         this.routeId = routeId;
     }
@@ -82,6 +126,7 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     public String getInputProcessId() {
         return inputProcessId;
     }
+
     public void setInputProcessId(String inputProcessId) {
         this.inputProcessId = inputProcessId;
     }
@@ -89,6 +134,7 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     public String getOutputProcessId() {
         return outputProcessId;
     }
+
     public void setOutputProcessId(String outputProcessId) {
         this.outputProcessId = outputProcessId;
     }
@@ -96,6 +142,7 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     public Integer getEnabled() {
         return enabled;
     }
+
     public void setEnabled(Integer enabled) {
         this.enabled = enabled;
     }
@@ -103,10 +150,40 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
 
+    public String getTouteName() {
+        return touteName;
+    }
 
+    public void setTouteName(String touteName) {
+        this.touteName = touteName;
+    }
 
+    public String getPartNo() {
+        return partNo;
+    }
+
+    public void setPartNo(String partNo) {
+        this.partNo = partNo;
+    }
+
+    public String getInputProcessIdName() {
+        return inputProcessIdName;
+    }
+
+    public void setInputProcessIdName(String inputProcessIdName) {
+        this.inputProcessIdName = inputProcessIdName;
+    }
+
+    public String getOutputProcessIdName() {
+        return outputProcessIdName;
+    }
+
+    public void setOutputProcessIdName(String outputProcessIdName) {
+        this.outputProcessIdName = outputProcessIdName;
+    }
 }

@@ -202,4 +202,15 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         return  list;
     }
 
+    @Override
+    public BaseRouteDesc findName(String routName) {
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseRouteDesc.class);
+        String sql ="select * from base_route_desc where route_name='"+routName+"' ";
+       List<BaseRouteDesc> list= jdbcTemplate.query(sql,rm);
+        if(list!= null && !list.isEmpty()){
+            return  list.get(0);
+        }
+        return  null;
+    }
+
 }
