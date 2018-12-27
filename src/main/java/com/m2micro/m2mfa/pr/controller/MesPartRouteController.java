@@ -91,9 +91,9 @@ public class MesPartRouteController {
     @PostMapping("/update")
     @ApiOperation(value="更新料件途程设定主档")
     @UserOperationLog("更新料件途程设定主档")
-    public ResponseMessage<MesPartRoute> update(@RequestBody MesPartvo mesPartRoutevo){
+    public ResponseMessage update(@RequestBody MesPartvo mesPartRoutevo){
 
-        return ResponseMessage.ok();
+         return    mesPartRouteService.update(mesPartRoutevo.getMesPartRoute(),mesPartRoutevo.getMesPartRouteProcesss(),mesPartRoutevo.getMesPartRouteStations())==true ? ResponseMessage.ok():ResponseMessage.error("更新失败。");
     }
 
     /**
@@ -103,8 +103,14 @@ public class MesPartRouteController {
     @ApiOperation(value="删除料件途程设定主档")
     @UserOperationLog("删除料件途程设定主档")
     public ResponseMessage delete(@RequestBody String[] ids){
-        mesPartRouteService.deleteByIds(ids);
-        return ResponseMessage.ok();
+        String msgs="";
+        for(int i =0;i<ids.length;i++){
+            String  msg= mesPartRouteService.delete(ids[i]);
+            if(!msg.trim().equals("")){
+                msgs+=msg;
+            }
+        }
+        return  msgs.trim()==""? ResponseMessage.ok():  ResponseMessage.ok(msgs.trim()+"该料件途程已经安排生产，不允许删除。");
     }
 
     @PostMapping("/addDetails")

@@ -147,4 +147,11 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return baseStations;
     }
 
+    @Override
+    public List<MesMoSchedule> findpartID(String partID) {
+        String sql ="select * from mes_mo_schedule where part_id='"+partID+"'";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
+        return jdbcTemplate.query(sql,rm);
+    }
+
 }

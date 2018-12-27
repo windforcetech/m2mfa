@@ -11,6 +11,8 @@ import com.m2micro.m2mfa.base.service.BaseStationService;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteProcess;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
@@ -56,6 +58,8 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     private BaseStationService baseStationService;
     @Autowired
     private MesPartRouteStationService mesPartRouteStationService;
+    @Autowired
+    MesMoScheduleService mesMoScheduleService;
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
@@ -175,7 +179,9 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     @Transactional
     @Override
     public boolean update(MesPartRoute mesPartRoute, List<MesPartRouteProcess> mesPartRouteProcesss, List<MesPartRouteStation> mesPartRouteStations) {
-
+        mesPartRouteStationService.deletemesParRouteID(mesPartRoute.getPartRouteId());
+        mesPartRouteProcessService.deleteParRouteID(mesPartRoute.getPartRouteId());
+        this.updateById(mesPartRoute.getPartRouteId(),mesPartRoute);
         if(basePartsService.findById(mesPartRoute.getPartId()).orElse(null)==null){
             throw new MMException("料件ID有误。");
         }
@@ -254,10 +260,21 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     }
 
     @Override
+    @Transactional
     public String delete(String id) {
        MesPartRoute mesPartRoute = this.findById(id).orElse(null);
-
-        return null;
+       List<MesMoSchedule> list=  mesMoScheduleService.findpartID(mesPartRoute.getPartId());
+        String msg="";
+        if(list!= null && !list.isEmpty()){
+            BaseRouteDesc baseRouteDesc =baseRouteDescService.findById(mesPartRoute.getRouteId()).orElse(null);
+            if(baseRouteDesc !=null){
+                msg+= baseRouteDesc.getRouteName()+",";
+            }
+        }else {
+            this.deleteById(id);
+            mesPartRouteStationService.deletemesParRouteID(id);
+            mesPartRouteProcessService.deleteParRouteID(id);
+        }
+        return msg;
     }
-
 }

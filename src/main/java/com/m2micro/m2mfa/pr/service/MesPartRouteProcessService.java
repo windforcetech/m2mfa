@@ -17,4 +17,7 @@ public interface MesPartRouteProcessService extends BaseService<MesPartRouteProc
      * @return  分页信息
      */
     PageUtil<MesPartRouteProcess> list(Query query);
+
+    //途程id删除关联数据
+    void deleteParRouteID(String parrouteid);
 }

@@ -40,4 +40,6 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      * @return
      */
     List<BaseStation> getPendingStations(String staffId, String scheduleId);
+
+    List<MesMoSchedule> findpartID(String partID);
 }

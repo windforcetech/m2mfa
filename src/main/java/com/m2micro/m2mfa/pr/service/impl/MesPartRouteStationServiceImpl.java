@@ -38,4 +38,9 @@ public class MesPartRouteStationServiceImpl implements MesPartRouteStationServic
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 
+    @Override
+    public void deletemesParRouteID(String partrouteid) {
+        mesPartRouteStationRepository.deletemesParRouteID(partrouteid);
+    }
+
 }

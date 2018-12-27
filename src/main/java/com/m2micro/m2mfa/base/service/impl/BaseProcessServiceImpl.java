@@ -145,6 +145,7 @@ public class BaseProcessServiceImpl implements BaseProcessService {
         for(BaseProcess p :list){
             p.setCollectionName(baseItemsTargetService.findById(p.getCollection()).get().getItemName());
             p.setCategoryName(baseItemsTargetService.findById(p.getCategory()).get().getItemName());
+
         }
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
@@ -152,12 +153,20 @@ public class BaseProcessServiceImpl implements BaseProcessService {
 
     @Override
     public Processvo info(String processId) {
-     BaseProcess p =   baseProcessRepository.findById(processId).orElse(null);
+        BaseProcess p =   baseProcessRepository.findById(processId).orElse(null);
         p.setCollectionName(baseItemsTargetService.findById(p.getCollection()).get().getItemName());
         p.setCategoryName(baseItemsTargetService.findById(p.getCategory()).get().getItemName());
          String sql ="	SELECT * from  base_process_station  WHERE 	process_id='"+processId+"'";
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseProcessStation.class);
         List<BaseProcessStation> baseProcessStations = jdbcTemplate.query(sql,rm);
+        for(BaseProcessStation baseProcessStation : baseProcessStations){
+         BaseStation baseStation =   baseStationService.findById(baseProcessStation.getStationId()).orElse(null);
+         if(baseStation!=null){
+             baseProcessStation.setBaseStation(baseStation);
+         }
+             baseProcessStation.setProcessIdName(p.getProcessName());
+        }
+
         return   Processvo.builder().baseProcess(p).baseProcessStations(baseProcessStations).basePageElemen(basePageElemenService.findById(processId).orElse(null)).build();
     }
 

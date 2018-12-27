@@ -38,4 +38,9 @@ public class MesPartRouteProcessServiceImpl implements MesPartRouteProcessServic
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 
+    @Override
+    public void deleteParRouteID(String parrouteid) {
+        mesPartRouteProcessRepository.deleteParRouteID( parrouteid);
+    }
+
 }
