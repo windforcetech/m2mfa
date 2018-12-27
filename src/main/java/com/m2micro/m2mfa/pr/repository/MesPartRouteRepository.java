@@ -16,7 +16,7 @@ import java.util.List;
 @Repository
 public interface MesPartRouteRepository extends BaseRepository<MesPartRoute,String> {
     @Query("select r.partRouteId  from  MesPartRoute  as r  where r.routeId =?1 ")
-    String selectRouteid(String routeId);
+    List<String> selectRouteid(String routeId);
 
     /**
      * 查找涂程

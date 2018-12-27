@@ -148,7 +148,8 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
     @Override
     @Transactional
     public ResponseMessage delete(String routeId) {
-        if(StringUtils.isNotEmpty(mesPartRouteService.selectRouteid(routeId))){
+       List<String>list= mesPartRouteService.selectRouteid(routeId);
+        if(list!= null && !list.isEmpty()){
             throw   new MMException("工艺已经产生业务，无法删除.");
         }
         baseRouteDescRepository.deleteById(routeId);

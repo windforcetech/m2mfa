@@ -63,16 +63,16 @@ public class MesPartRouteController {
 //        return ResponseMessage.ok(page);
 //    }
 //
-//    /**
-//     * 详情
-//     */
-//    @RequestMapping("/info/{id}")
-//    @ApiOperation(value="料件途程设定主档详情")
-//    @UserOperationLog("料件途程设定主档详情")
-//    public ResponseMessage<MesPartRoute> info(@PathVariable("id") String id){
-//        MesPartRoute mesPartRoute = mesPartRouteService.findById(id).orElse(null);
-//        return ResponseMessage.ok(mesPartRoute);
-//    }
+    /**
+     * 详情
+     */
+    @PostMapping("/info")
+    @ApiOperation(value="料件途程设定主档详情")
+    @UserOperationLog("料件途程设定主档详情")
+    public ResponseMessage<MesPartvo> info(@ApiParam(value = "partRouteId",required=true) @RequestParam(required = true)   String  partRouteId){
+        MesPartvo mesPartRoute = mesPartRouteService.info(partRouteId);
+        return ResponseMessage.ok(mesPartRoute);
+    }
 
     /**
      * 保存

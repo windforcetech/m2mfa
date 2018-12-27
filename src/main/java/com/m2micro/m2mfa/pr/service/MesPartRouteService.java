@@ -8,6 +8,8 @@ import com.m2micro.m2mfa.pr.entity.MesPartRouteProcess;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 
+import java.util.List;
+
 /**
  * 料件途程设定主档 服务类
  * @author liaotao
@@ -23,8 +25,10 @@ public interface MesPartRouteService extends BaseService<MesPartRoute,String> {
     PageUtil<MesPartRoute> list(Query query);
 
     //根据工艺id查询业务
-     String selectRouteid(String routeId);
+    List<String> selectRouteid(String routeId);
 
      //添加途程
      boolean save( MesPartRoute mesPartRoute,MesPartRouteProcess mesPartRouteProcess, MesPartRouteStation mesPartRouteStation);
+
+    MesPartvo info(String partRouteId);
 }

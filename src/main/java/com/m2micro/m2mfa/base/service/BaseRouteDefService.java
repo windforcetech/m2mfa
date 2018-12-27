@@ -22,7 +22,7 @@ public interface BaseRouteDefService extends BaseService<BaseRouteDef,String> {
     PageUtil<BaseRouteDef> list(Query query);
 
     //根据process查找
-    String selectoneprocessId(String processId);
+   List< String> selectoneprocessId(String processId);
     //根据routeId删除
     void deleterouteId(String routeId);
     //获取对应的工序

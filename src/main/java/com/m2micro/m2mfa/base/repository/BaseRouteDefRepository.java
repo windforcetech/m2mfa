@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 生产途程单身 Repository 接口
  * @author chenshuhong
@@ -17,7 +19,7 @@ public interface BaseRouteDefRepository extends BaseRepository<BaseRouteDef,Stri
 
 
     @Query("select r.routeDefId  from  BaseRouteDef  as r  where r.processId =?1 ")
-     String  selectoneprocessId(String processId);
+    List<String> selectoneprocessId(String processId);
 
     @Transactional
     @Modifying

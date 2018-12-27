@@ -69,7 +69,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     }
 
     @Override
-    public String selectRouteid(String routeId) {
+    public List<String> selectRouteid(String routeId) {
         return mesPartRouteRepository.selectRouteid(routeId);
     }
 
@@ -121,6 +121,15 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         mesPartRouteProcessService.save(mesPartRouteProcess);
         mesPartRouteStationService .save(mesPartRouteStation);
         return true;
+    }
+
+    @Override
+    public MesPartvo info(String partRouteId) {
+//      MesPartRoute mesPartRoute =  this.findById(partRouteId).orElse(null);
+//        String sql ="select * from mes_part_route_process where partrouteid ='"+partRouteId+"'";
+//        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseProcessStation.class);
+//        List<BaseProcessStation> baseProcessStations = jdbcTemplate.query(sql,rm);
+        return null;
     }
 
 }

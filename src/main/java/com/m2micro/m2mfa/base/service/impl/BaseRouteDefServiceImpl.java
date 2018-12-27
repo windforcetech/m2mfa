@@ -48,7 +48,7 @@ public class BaseRouteDefServiceImpl implements BaseRouteDefService {
 
 
     @Override
-    public String selectoneprocessId(String processId) {
+    public List<String> selectoneprocessId(String processId) {
         return baseRouteDefRepository.selectoneprocessId(processId);
     }
 
