@@ -45,6 +45,7 @@ public class BaseStaffController {
 
     @Autowired
     OrganizationService organizationService;
+    private String defaultPassword="123456";
     /**
      * 列表
      */
@@ -99,7 +100,8 @@ public class BaseStaffController {
             user.setLoginName(baseStaff.getCode());
             user.setAdmin(false);
             user.setUserName(baseStaff.getStaffName());
-            user.setPassword("123");
+            user.setModifyPassword(defaultPassword);
+            //user.setPassword("123");
             user.setInheritMode(true);
             user.setState(1);
             user.setShowIndex(9999);
@@ -140,7 +142,7 @@ public class BaseStaffController {
             user.setLoginName(baseStaff.getCode());
             user.setAdmin(false);
             user.setUserName(baseStaff.getStaffName());
-            user.setPassword("123");
+            user.setModifyPassword(defaultPassword);
             user.setInheritMode(true);
             user.setState(1);
             user.setShowIndex(9999);

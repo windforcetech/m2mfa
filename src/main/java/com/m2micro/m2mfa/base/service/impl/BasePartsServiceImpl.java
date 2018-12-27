@@ -178,4 +178,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         return basePartsRepository.selectpartNo(partNo);
     }
 
+    @Override
+    public int countByPartNo(String partNo) {
+        return basePartsRepository.countByPartNo(partNo);
+    }
+
 }
