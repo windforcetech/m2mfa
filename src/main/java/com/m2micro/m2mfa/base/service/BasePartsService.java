@@ -39,4 +39,6 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
 
     //料件编号获取基本数据
     BaseParts selectpartNo(String partNo);
+
+    int countByPartNo(String partNo);
 }

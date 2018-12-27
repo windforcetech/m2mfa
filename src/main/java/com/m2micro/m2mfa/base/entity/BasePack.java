@@ -16,7 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @since 2018-12-27
  */
 @Entity
-@ApiModel(value="BasePack对象", description="包装")
+@ApiModel(value="包装", description="包装")
 public class BasePack extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
