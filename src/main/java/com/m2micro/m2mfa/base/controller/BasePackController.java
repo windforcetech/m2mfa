@@ -47,7 +47,7 @@ public class BasePackController {
     /**
      * 列表
      */
-    @RequestMapping(value = "/list", method = RequestMethod.POST)
+    @RequestMapping(value = "/list",method = RequestMethod.GET)
     @ApiOperation(value = "获取包装列表")
     @UserOperationLog("获取包装列表")
     public ResponseMessage<PageUtil<BasePack>> list(BasePackQuery query) {
