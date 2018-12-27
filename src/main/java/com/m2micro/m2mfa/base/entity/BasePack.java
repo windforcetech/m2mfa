@@ -3,10 +3,13 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -23,15 +26,18 @@ public class BasePack extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "主键")
     @Id
     private String id;
+    @Size(max=50,message = "料件编号长度不能大于50位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "料件编号")
     private String partId;
     @ApiModelProperty(value = "类型(0单品,1盒,2箱,3板)")
     private Integer category;
+    @Size(max=50,message = "包装条件长度不能大于50位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "包装条件")
     private String packMode;
     @ApiModelProperty(value = "容量")
     private BigDecimal qty;
     @ApiModelProperty(value = "标签打印方式")
+    @Size(max=50,message = "标签打印方式长度不能大于50位",groups = {AddGroup.class, UpdateGroup.class})
     private String printMode;
     @ApiModelProperty(value = "标签打印份数")
     private Integer printPage;
@@ -50,6 +56,7 @@ public class BasePack extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "材积")
     private BigDecimal cuft;
     @ApiModelProperty(value = "图档")
+    @Size(max=200,message = "图档长度不能大于200位",groups = {AddGroup.class, UpdateGroup.class})
     private String imageUrl;
 
     public String getId() {
