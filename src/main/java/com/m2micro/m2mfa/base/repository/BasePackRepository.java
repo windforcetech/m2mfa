@@ -19,7 +19,6 @@ public interface BasePackRepository extends BaseRepository<BasePack,String> {
     int countByPartIdAndCategory(String partId,Integer category);
     int countByIdNotAndPartIdAndCategory(String id,String partId,Integer category);
     List<BasePack> findByPartId(String partId);
-//    void deleteByPartIdIn(List<String> partIds);
     List<BasePack> findByPartIdIn(List<String> partIds);
 
 }

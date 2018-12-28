@@ -75,13 +75,4 @@ public class BasePackServiceImpl implements BasePackService {
         return ids;
     }
 
-//    @Override
-//    public List<BaseParts> findAllNotUsedParts() {
-//      //  List<BaseParts> rs=new ArrayList<>();
-//        BaseParts[] allNotUsedParts = basePackRepository.findAllNotUsedParts();
-//        System.out.println(allNotUsedParts);
-//        List<BaseParts> baseParts = Arrays.asList(allNotUsedParts);
-//        return baseParts;
-//    }
-
 }
