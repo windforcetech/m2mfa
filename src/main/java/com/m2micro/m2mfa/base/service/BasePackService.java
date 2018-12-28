@@ -4,6 +4,7 @@ import com.m2micro.m2mfa.base.entity.BasePack;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.query.BasePackQuery;
 
 import java.util.List;
@@ -25,4 +26,5 @@ public interface BasePackService extends BaseService<BasePack,String> {
     int countByIdNotAndPartIdAndCategory(String id,String partId,Integer category);
     List<BasePack> findByPartId(String partId);
     List<String> findByPartIdIn(List<String> partIds);
+  //  List<BaseParts> findAllNotUsedParts();
 }

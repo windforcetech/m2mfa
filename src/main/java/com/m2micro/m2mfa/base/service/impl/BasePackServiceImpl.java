@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BasePack;
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.QBasePack;
 import com.m2micro.m2mfa.base.query.BasePackQuery;
 import com.m2micro.m2mfa.base.repository.BasePackRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -72,5 +74,14 @@ public class BasePackServiceImpl implements BasePackService {
         }
         return ids;
     }
+
+//    @Override
+//    public List<BaseParts> findAllNotUsedParts() {
+//      //  List<BaseParts> rs=new ArrayList<>();
+//        BaseParts[] allNotUsedParts = basePackRepository.findAllNotUsedParts();
+//        System.out.println(allNotUsedParts);
+//        List<BaseParts> baseParts = Arrays.asList(allNotUsedParts);
+//        return baseParts;
+//    }
 
 }
