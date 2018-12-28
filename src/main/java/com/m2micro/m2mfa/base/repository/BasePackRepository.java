@@ -2,6 +2,8 @@ package com.m2micro.m2mfa.base.repository;
 
 import com.m2micro.m2mfa.base.entity.BasePack;
 import com.m2micro.framework.commons.BaseRepository;
+import com.m2micro.m2mfa.base.entity.BaseParts;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,4 +21,5 @@ public interface BasePackRepository extends BaseRepository<BasePack,String> {
     List<BasePack> findByPartId(String partId);
 //    void deleteByPartIdIn(List<String> partIds);
     List<BasePack> findByPartIdIn(List<String> partIds);
+
 }

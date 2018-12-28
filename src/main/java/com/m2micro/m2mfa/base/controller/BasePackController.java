@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.query.BasePackQuery;
 import com.m2micro.m2mfa.base.service.BasePackService;
 import com.m2micro.framework.commons.exception.MMException;
@@ -53,6 +54,17 @@ public class BasePackController {
     public ResponseMessage<PageUtil<BasePack>> list(BasePackQuery query) {
         PageUtil<BasePack> page = basePackService.list(query);
         return ResponseMessage.ok(page);
+    }
+
+    /**
+     * 获取所有未使用的料件
+     */
+    @RequestMapping(value = "/allNotUsedParts",method = RequestMethod.GET)
+    @ApiOperation(value = "获取所有未使用的料件")
+    @UserOperationLog("获取所有未使用的料件")
+    public ResponseMessage<List<BaseParts>> allParts() {
+        List<BaseParts> allNotUsedParts = basePartsService.findAllNotUsedParts();
+        return ResponseMessage.ok(allNotUsedParts);
     }
 
     /**

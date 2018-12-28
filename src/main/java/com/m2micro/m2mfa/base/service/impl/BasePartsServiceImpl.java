@@ -183,4 +183,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         return basePartsRepository.countByPartNo(partNo);
     }
 
+    @Override
+    public List<BaseParts> findAllNotUsedParts() {
+        return basePartsRepository.findAllNotUsedParts();
+    }
+
 }

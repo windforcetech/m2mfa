@@ -26,4 +26,7 @@ public interface BasePartsRepository extends BaseRepository<BaseParts,String> {
     @Query(value = "select * from base_parts  where  part_no=?1 ",nativeQuery=true)
     BaseParts selectpartNo(String partNo);
     int countByPartNo(String partNo);
+
+    @Query(value = "SELECT t.* FROM factory_application.base_parts t where t.part_no not in(select distinct part_id from factory_application.base_pack)",nativeQuery = true)
+    List<BaseParts> findAllNotUsedParts();
 }
