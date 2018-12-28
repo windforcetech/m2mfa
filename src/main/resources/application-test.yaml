@@ -13,3 +13,6 @@ spring:
     user: admin
     password: admin
     broker-url: tcp://192.168.1.132:61616
+  m2miot:
+    client:
+      url: http://192.168.1.196:8080
