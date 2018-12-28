@@ -56,6 +56,11 @@ public class MesPartRouteStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "工序名称")
     private String processName;
 
+    @Transient
+    @ApiModelProperty(value = "工位名称")
+    private String stationName;
+
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
@@ -188,10 +193,18 @@ public class MesPartRouteStation extends BaseEntity implements Serializable {
         this.processName = processName;
     }
 
+    public String getStationName() {
+        return stationName;
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
+    }
+
     public MesPartRouteStation() {
     }
 
-    public MesPartRouteStation(String id, String partRouteId, String processId, Integer jump, String stationId, Integer leadTime, Integer waitingTime, Integer postTime, Integer jobPeoples, BigDecimal standardHours, BigDecimal coefficient, Integer controlPeoples, Integer controlMachines, Integer enabled, String description, String processName) {
+    public MesPartRouteStation(String id, String partRouteId, String processId, Integer jump, String stationId, Integer leadTime, Integer waitingTime, Integer postTime, Integer jobPeoples, BigDecimal standardHours, BigDecimal coefficient, Integer controlPeoples, Integer controlMachines, Integer enabled, String description, String processName, String stationName) {
         this.id = id;
         this.partRouteId = partRouteId;
         this.processId = processId;
@@ -208,5 +221,6 @@ public class MesPartRouteStation extends BaseEntity implements Serializable {
         this.enabled = enabled;
         this.description = description;
         this.processName = processName;
+        this.stationName = stationName;
     }
 }
