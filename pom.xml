@@ -162,6 +162,11 @@
             <artifactId>m2mfa-ui</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.m2micro.iot</groupId>
+            <artifactId>m2miot-client</artifactId>
+            <version>0.2.0-SNAPSHOT</version>
+        </dependency>
 
     </dependencies>
 
