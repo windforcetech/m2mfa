@@ -57,17 +57,6 @@ public class BasePackController {
     }
 
     /**
-     * 获取所有未使用的料件
-     */
-    @RequestMapping(value = "/allNotUsedParts",method = RequestMethod.GET)
-    @ApiOperation(value = "获取所有未使用的料件")
-    @UserOperationLog("获取所有未使用的料件")
-    public ResponseMessage<List<BaseParts>> allParts() {
-        List<BaseParts> allNotUsedParts = basePartsService.findAllNotUsedParts();
-        return ResponseMessage.ok(allNotUsedParts);
-    }
-
-    /**
      * 详情
      */
     @RequestMapping(value = "/info/{partId}", method = RequestMethod.GET)

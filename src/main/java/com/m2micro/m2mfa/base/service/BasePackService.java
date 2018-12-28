@@ -26,5 +26,4 @@ public interface BasePackService extends BaseService<BasePack,String> {
     int countByIdNotAndPartIdAndCategory(String id,String partId,Integer category);
     List<BasePack> findByPartId(String partId);
     List<String> findByPartIdIn(List<String> partIds);
-  //  List<BaseParts> findAllNotUsedParts();
 }

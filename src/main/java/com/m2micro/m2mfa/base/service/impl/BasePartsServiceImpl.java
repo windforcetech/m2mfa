@@ -183,9 +183,17 @@ public class BasePartsServiceImpl implements BasePartsService {
         return basePartsRepository.countByPartNo(partNo);
     }
 
+
     @Override
-    public List<BaseParts> findAllNotUsedParts() {
-        return basePartsRepository.findAllNotUsedParts();
+    public PageUtil<BaseParts> findByNotUsedForPack(BasePartsQuery query) {
+        String sql ="SELECT t.* FROM factory_application.base_parts t where t.part_no not in(select distinct part_id from factory_application.base_pack) order by t.part_id ";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
+        List<BaseParts> list = jdbcTemplate.query(sql,rm);
+        String countSql = "Select count(*) FROM factory_application.base_parts t where t.part_no not in(select distinct part_id from factory_application.base_pack) ";
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 
 }
