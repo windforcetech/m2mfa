@@ -1,9 +1,8 @@
 package com.m2micro.m2mfa.pr.service;
 
-import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteProcess;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import com.m2micro.m2mfa.pr.query.MesPartRouteQuery;
