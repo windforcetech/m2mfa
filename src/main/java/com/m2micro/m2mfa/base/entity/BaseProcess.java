@@ -39,7 +39,7 @@ public class BaseProcess extends BaseEntity implements Serializable {
     @Size(max=32,message = "名称长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "名称")
     private String processName;
-    @NotEmpty(message="数据采集方式不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @NotEmpty(message="",groups = {AddGroup.class, UpdateGroup.class})
     @Size(max=32,message = "数据采集方式长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "数据采集方式")
     private String collection;

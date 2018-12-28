@@ -36,7 +36,7 @@ public class MesPartRouteProcess extends BaseEntity implements Serializable {
     @Size(max=32,message = "工序长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String processid;
     @ApiModelProperty(value = "数据采集方式")
-    @NotNull(message="数据采集方式不能为空。",groups = {AddGroup.class, UpdateGroup.class})
+
     @Size(max=32,message = "数据采集方式长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String collection;
     @ApiModelProperty(value = "下一工序")
@@ -49,14 +49,13 @@ public class MesPartRouteProcess extends BaseEntity implements Serializable {
     private String packid;
     @ApiModelProperty(value = "检验配置档")
     private String qualitysolutionid;
-    @NotNull(message="排序码不能为空。",groups = {AddGroup.class, UpdateGroup.class})
+
     @ApiModelProperty(value = "排序码")
     private Integer sortcode;
     @ApiModelProperty(value = "有效否")
     private Integer enabled;
     @ApiModelProperty(value = "描述")
-    @NotNull(message="描述不能为空。",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "描述长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+
     private String description;
 
 
