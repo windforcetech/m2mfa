@@ -256,6 +256,16 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         RowMapper mesPartRouteStationrm = BeanPropertyRowMapper.newInstance(MesPartRouteStation.class);
         List<MesPartRouteProcess> mesPartRouteProcesses = jdbcTemplate.query(sql,rm);
         List<MesPartRouteStation> mesPartRouteStations = jdbcTemplate.query(mesPartRouteStationsql,mesPartRouteStationrm);
+        for(MesPartRouteProcess mesPartRouteProcess:  mesPartRouteProcesses){
+            if(StringUtils.isNotEmpty(mesPartRouteProcess.getFailprocessid())){
+                mesPartRouteProcess.setFailprocessName(baseProcessService.findById(mesPartRouteProcess.getFailprocessid()).orElse(null).getProcessName());
+            }
+            mesPartRouteProcess.setProcessidName(baseProcessService.findById(mesPartRouteProcess.getProcessid()).orElse(null).getProcessName());
+        }
+
+        for(MesPartRouteStation mesPartRouteStation :mesPartRouteStations){
+            mesPartRouteStation.setProcessName(baseProcessService.findById(mesPartRouteStation.getProcessId()).orElse(null).getProcessName());
+        }
         return MesPartvo.builder().mesPartRouteProcesss(mesPartRouteProcesses).mesPartRoute(mesPartRoute).mesPartRouteStations(mesPartRouteStations).build();
     }
 
