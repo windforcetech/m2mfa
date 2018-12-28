@@ -42,10 +42,10 @@ public class BasePackServiceImpl implements BasePackService {
         if (StringUtils.isNotEmpty(query.getPartId())) {
             condition.and(qBasePack.partId.like("%" + query.getPartId() + "%"));
         }
-        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
+        jq.where(condition).offset((query.getPage() - 1) * query.getSize()*4).limit(query.getSize()*4);
         List<BasePack> list = jq.fetch();
         long totalCount = jq.fetchCount();
-        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+        return PageUtil.of(list, totalCount/4, query.getSize(), query.getPage());
     }
 
     @Override
