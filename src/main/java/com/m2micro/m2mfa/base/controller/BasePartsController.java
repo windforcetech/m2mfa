@@ -144,4 +144,16 @@ public class BasePartsController {
 
         return ResponseMessage.ok(basePartsService.selectpartNo(partNo));
     }
+
+
+    /**
+     * 列表
+     */
+    @RequestMapping("/listNotUsed")
+    @ApiOperation(value="获取未使用的料件基本资料列表")
+    @UserOperationLog("获取未使用的料件基本资料列表")
+    public ResponseMessage<PageUtil<BaseParts>> listNotUsed(BasePartsQuery query){
+        PageUtil<BaseParts> page = basePartsService.findByNotUsedForPack(query);
+        return ResponseMessage.ok(page);
+    }
 }

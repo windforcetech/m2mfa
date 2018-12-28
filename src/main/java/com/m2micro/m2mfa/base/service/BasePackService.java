@@ -4,6 +4,7 @@ import com.m2micro.m2mfa.base.entity.BasePack;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.query.BasePackQuery;
 
 import java.util.List;

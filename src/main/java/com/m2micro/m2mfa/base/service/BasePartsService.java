@@ -41,4 +41,7 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
     BaseParts selectpartNo(String partNo);
 
     int countByPartNo(String partNo);
+
+
+    PageUtil<BaseParts> findByNotUsedForPack(BasePartsQuery query);
 }

@@ -1,15 +1,15 @@
 package com.m2micro.m2mfa.mo.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.base.entity.BaseMold;
 import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
-import com.m2micro.m2mfa.mo.entity.QMesMoScheduleStaff;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,7 +22,6 @@ import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.mo.entity.QMesMoSchedule;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 生产排程表表头 服务实现类
@@ -59,6 +58,9 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     @Override
     public MesMoSchedule getMesMoScheduleByStaffId(String staffId) {
+        if(StringUtils.isEmpty(staffId)){
+            throw new MMException("请重新登录或刷新！");
+        }
         // 查找员工生产中排产单优先级最高的排产单id
         String sqlProduction = "SELECT\n" +
                 "		ms.schedule_id scheduleId,\n" +
@@ -68,7 +70,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 "		mes_mo_schedule_staff mss\n" +
                 "	WHERE\n" +
                 "		mss.schedule_id = ms.schedule_id\n" +
-                "	AND ms.flag = 1 \n" +
+                "	AND ms.flag = " + MoScheduleStatus.PRODUCTION.getKey()+ "\n" +
                 "	AND mss.staff_id = '" + staffId + "'\n" +
                 "GROUP BY ms.schedule_id";
         RowMapper<MesMoSchedule> rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
@@ -86,7 +88,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                             "		mes_mo_schedule_staff mss\n" +
                             "	WHERE\n" +
                             "		mss.schedule_id = ms.schedule_id\n" +
-                            "	AND ms.flag = 2 \n" +
+                            "	AND ms.flag = " + MoScheduleStatus.AUDITED.getKey()+ "\n" +
                             "	AND mss.staff_id = '" + staffId + "'\n" +
                             "GROUP BY ms.schedule_id";
         RowMapper<MesMoSchedule> rowMapper = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
@@ -99,6 +101,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     @Override
     public List<BaseStation> getPendingStations(String staffId, String scheduleId) {
+        if(StringUtils.isEmpty(staffId)){
+            throw new MMException("请重新登录或刷新！");
+        }
+        if(StringUtils.isEmpty(scheduleId)){
+            throw new MMException("当前没有可处理的排产单！");
+        }
         //获取待处理的所有工位
         List<BaseStation> baseStations = getAllBaseStations(staffId, scheduleId);
         //获取待处理的所有已排除跳过的工位
@@ -126,6 +134,15 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     @Override
     public OperationInfo getOperationInfo(String staffId, String scheduleId, String stationId) {
+        if(StringUtils.isEmpty(staffId)){
+            throw new MMException("请重新登录或刷新！");
+        }
+        if(StringUtils.isEmpty(scheduleId)){
+            throw new MMException("当前没有可处理的排产单！");
+        }
+        if(StringUtils.isEmpty(stationId)){
+            throw new MMException("当前岗位为空，请刷新！");
+        }
         //获取当前员工在当前排产单的当前岗位上的上工最新时间信息
         List<OperationInfo> recordWorks = getOperationInfoForRecordWork(staffId, scheduleId, stationId);
         //获取在当前排产单的当前岗位上的提报异常最新信息

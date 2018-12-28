@@ -250,12 +250,22 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         if(baseParts !=null){
             mesPartRoute.setPartNo(baseParts.getPartNo());
         }
-        String sql ="select * from mes_part_route_process where partrouteid ='"+partRouteId+"'";
+        String sql ="select * from mes_part_route_process where partrouteid ='"+partRouteId+"'  ORDER BY setp ";
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesPartRouteProcess.class);
-        String mesPartRouteStationsql ="select* from mes_part_route_station where part_route_id ='"+partRouteId+"'";
+        String mesPartRouteStationsql ="select* from mes_part_route_station where part_route_id ='"+partRouteId+"'   ORDER BY process_id  ,station_id";
         RowMapper mesPartRouteStationrm = BeanPropertyRowMapper.newInstance(MesPartRouteStation.class);
         List<MesPartRouteProcess> mesPartRouteProcesses = jdbcTemplate.query(sql,rm);
         List<MesPartRouteStation> mesPartRouteStations = jdbcTemplate.query(mesPartRouteStationsql,mesPartRouteStationrm);
+        for(MesPartRouteProcess mesPartRouteProcess:  mesPartRouteProcesses){
+            if(StringUtils.isNotEmpty(mesPartRouteProcess.getFailprocessid())){
+                mesPartRouteProcess.setFailprocessName(baseProcessService.findById(mesPartRouteProcess.getFailprocessid()).orElse(null).getProcessName());
+            }
+            mesPartRouteProcess.setProcessidName(baseProcessService.findById(mesPartRouteProcess.getProcessid()).orElse(null).getProcessName());
+        }
+
+        for(MesPartRouteStation mesPartRouteStation :mesPartRouteStations){
+            mesPartRouteStation.setProcessName(baseProcessService.findById(mesPartRouteStation.getProcessId()).orElse(null).getProcessName());
+        }
         return MesPartvo.builder().mesPartRouteProcesss(mesPartRouteProcesses).mesPartRoute(mesPartRoute).mesPartRouteStations(mesPartRouteStations).build();
     }
 

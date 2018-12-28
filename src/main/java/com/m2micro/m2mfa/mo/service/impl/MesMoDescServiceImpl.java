@@ -1,8 +1,6 @@
 package com.m2micro.m2mfa.mo.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.framework.commons.util.SpringContextUtil;
-import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
@@ -13,23 +11,15 @@ import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
-import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.query.NativeQuery;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.m2mfa.mo.entity.QMesMoDesc;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import java.math.BigInteger;
 import java.util.List;
 /**
  * 工单主档 服务实现类
