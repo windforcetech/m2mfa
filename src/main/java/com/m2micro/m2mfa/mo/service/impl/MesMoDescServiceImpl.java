@@ -188,6 +188,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(!MoStatus.AUDITED.getKey().equals(mesMoDesc.getCloseFlag())){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许反审！");
         }
+
         //更改为初始状态
         mesMoDescRepository.setCloseFlagFor(MoStatus.INITIAL.getKey(),mesMoDesc.getMoId());
     }
