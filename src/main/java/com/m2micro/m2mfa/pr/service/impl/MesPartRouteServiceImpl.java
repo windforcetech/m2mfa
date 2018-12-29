@@ -252,7 +252,8 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         }
         String sql ="select * from mes_part_route_process where partrouteid ='"+partRouteId+"'  ORDER BY setp ASC  ";
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesPartRouteProcess.class);
-        String mesPartRouteStationsql ="select* from mes_part_route_station where part_route_id ='"+partRouteId+"'   ORDER BY process_id   ,station_id  ASC";
+        String mesPartRouteStationsql ="select m.*,p.*  from  mes_part_route_station  m  left join  base_process_station   p  on  m.process_id=p.process_id  where m.part_route_id ='"+partRouteId+"'  ORDER BY p.process_id,  p.step ASC  ";
+     //   String mesPartRouteStationsql ="select* from mes_part_route_station where part_route_id ='"+partRouteId+"'   ORDER BY process_id   ,station_id  ASC";
         RowMapper mesPartRouteStationrm = BeanPropertyRowMapper.newInstance(MesPartRouteStation.class);
         List<MesPartRouteProcess> mesPartRouteProcesses = jdbcTemplate.query(sql,rm);
         List<MesPartRouteStation> mesPartRouteStations = jdbcTemplate.query(mesPartRouteStationsql,mesPartRouteStationrm);
