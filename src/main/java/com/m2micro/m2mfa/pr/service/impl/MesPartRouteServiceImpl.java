@@ -275,11 +275,13 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             RowMapper rms= BeanPropertyRowMapper.newInstance(BaseProcessStation.class);
             List<BaseProcessStation> baseProcessStation = jdbcTemplate.query(sqls,rms);
             mesPartRouteStation.setStationStep(baseProcessStation.get(0).getStep());
+            for(MesPartRouteProcess ps :mesPartRouteProcesses ){
+                if(ps.getProcessid().equals(mesPartRouteStation.getProcessId())){
+                    mesPartRouteStation.setProcessStep(ps.getSetp());
+                }
+            }
 
-            String sqld ="select * from base_route_def where process_id ='"+mesPartRouteStation.getProcessId()+"'  ORDER BY setp ASC  ";
-            RowMapper rmd= BeanPropertyRowMapper.newInstance(BaseRouteDef.class);
-            List<BaseRouteDef> baseRouteDef = jdbcTemplate.query(sqld,rmd);
-            mesPartRouteStation.setProcessStep(baseRouteDef.get(0).getSetp());
+
         }
         return MesPartvo.builder().mesPartRouteProcesss(mesPartRouteProcesses).mesPartRoute(mesPartRoute).mesPartRouteStations(mesPartRouteStations).build();
     }
