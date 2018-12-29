@@ -117,10 +117,6 @@
             <version>${joda}</version>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
             <scope>provided</scope>
@@ -133,39 +129,18 @@
         </dependency>
 
 
-
-
-
-        <!--<dependency>
-            <groupId>com.m2micro</groupId>
-            <artifactId>commons</artifactId>
-            <version>${project.version}</version>
-        </dependency>-->
-
         <dependency>
             <groupId>com.m2micro</groupId>
             <artifactId>starter</artifactId>
-            <version>${m2micro.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>com.m2micro</groupId>
             <artifactId>logging</artifactId>
-            <version>${m2micro.framework.version}</version>
-            <!--<exclusions>
-                <exclusion>
-                    <groupId>com.m2micro</groupId>
-                    <artifactId>authorization</artifactId>
-                </exclusion>
-            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>com.m2micro</groupId>
             <artifactId>m2mfa-ui</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.m2micro.iot</groupId>
-            <artifactId>m2miot-client</artifactId>
         </dependency>
 
     </dependencies>
