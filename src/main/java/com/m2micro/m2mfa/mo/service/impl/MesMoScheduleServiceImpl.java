@@ -179,12 +179,14 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         //有一个正在提报异常,不允许提报异常
         if(operationInfoAbnormal.getEndTime()==null){
             operationInfo.setAbnormalFlag("0");
+            operationInfo.setRecordAbnormalId(operationInfoAbnormal.getRecordAbnormalId());
             operationInfo.setAbnormalId(operationInfoAbnormal.getAbnormalId());
             operationInfo.setAbnormalName(operationInfoAbnormal.getAbnormalName());
             return operationInfo;
         }
         //提报的异常都完成，可以进行下次提报
         operationInfo.setWorkFlag("1");
+        operationInfo.setRecordAbnormalId(operationInfoAbnormal.getRecordAbnormalId());
         operationInfo.setAbnormalId(operationInfoAbnormal.getAbnormalId());
         operationInfo.setAbnormalName(operationInfoAbnormal.getAbnormalName());
         return operationInfo;
@@ -212,11 +214,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         //正在上工，可以下工
         if(operationInfoWork.getEndTime()==null){
             operationInfo.setWorkFlag("0");//下工
+            operationInfo.setRecordStaffId(operationInfoWork.getRecordStaffId());
             operationInfo.setStartTime(operationInfoWork.getStartTime());
             return operationInfo;
         }
         //上下工都完成，可以进行下次上工
         operationInfo.setWorkFlag("1");//上工
+        operationInfo.setRecordStaffId(operationInfoWork.getRecordStaffId());
         operationInfo.setStartTime(operationInfoWork.getStartTime());
         operationInfo.setEndTime(operationInfoWork.getEndTime());
         return operationInfo;
@@ -230,6 +234,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      */
     private List<OperationInfo> getOperationInfoForRecordAbnormal(String scheduleId, String stationId) {
         String sql = "SELECT\n" +
+                    "   mra.id recordAbnormalId,\n" +
                     "   mra.abnormal_id abnormalId,\n" +
                     "	ma.abnormal_name abnormalName\n"+
                     "FROM\n" +
@@ -256,6 +261,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      */
     private List<OperationInfo> getOperationInfoForRecordWork(String staffId, String scheduleId, String stationId) {
         String sql = "SELECT\n" +
+                        "	mrs.id recordStaffId,\n" +
                         "	mrs.start_time startTime,\n" +
                         "	mrs.end_time endTime\n" +
                         "FROM\n" +
