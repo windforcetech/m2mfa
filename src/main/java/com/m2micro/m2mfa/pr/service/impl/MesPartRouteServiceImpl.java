@@ -227,7 +227,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             mesPartRouteProcessService.save(mesPartRouteProcess);
         }
         ValidatorUtil.validateEntity(mesPartRoute, AddGroup.class);
-        this.save(mesPartRoute);
+
         return true;
     }
 
