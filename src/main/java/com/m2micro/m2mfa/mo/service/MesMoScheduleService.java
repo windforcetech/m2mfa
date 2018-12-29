@@ -51,4 +51,47 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
     OperationInfo getOperationInfo(String staffId, String scheduleId, String stationId);
 
     List<MesMoSchedule> findpartID(String partID);
+
+    /**
+     * 根据工单id排产单状态获取排产单信息
+     * @param moId
+     * @param flags
+     * @return
+     */
+    List<MesMoSchedule> findByMoIdAndFlag(String moId,List<Integer> flags);
+
+    /**
+     * 审核工单
+     * @param id
+     *      工单id
+     */
+    void auditing(String id);
+
+    /**
+     * 取消审核工单
+     * @param id
+     *      工单id
+     */
+    void cancel(String id);
+
+    /**
+     * 冻结工单
+     * @param id
+     *      工单id
+     */
+    void frozen(String id);
+
+    /**
+     * 解冻工单
+     * @param id
+     *      工单id
+     */
+    void unfreeze(String id);
+
+    /**
+     * 强制结案
+     * @param id
+     *      工单id
+     */
+    void forceClose(String id);
 }

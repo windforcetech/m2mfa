@@ -9,6 +9,7 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
+import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -378,6 +379,52 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         String sql ="select * from mes_mo_schedule where part_id='"+partID+"'";
         RowMapper<MesMoSchedule> rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
         return jdbcTemplate.query(sql,rm);
+    }
+
+    @Override
+    public List<MesMoSchedule> findByMoIdAndFlag(String moId, List<Integer> flags) {
+
+        QMesMoSchedule qMesMoSchedule = QMesMoSchedule.mesMoSchedule;
+        JPAQuery<MesMoSchedule> jq = queryFactory.selectFrom(qMesMoSchedule);
+        BooleanBuilder condition = new BooleanBuilder();
+        if(StringUtils.isNotEmpty(moId)){
+            condition.and(qMesMoSchedule.moId.eq(moId));
+        }
+        if(flags!=null&&flags.size()>0){
+            BooleanBuilder conditionFlag = new BooleanBuilder();
+            for (Integer flag:flags){
+                conditionFlag.or(qMesMoSchedule.flag.eq(flag));
+            }
+            condition.and(conditionFlag);
+        }
+        jq.where(condition);
+        List<MesMoSchedule> list = jq.fetch();
+        return list;
+    }
+
+    @Override
+    public void auditing(String id) {
+
+    }
+
+    @Override
+    public void cancel(String id) {
+
+    }
+
+    @Override
+    public void frozen(String id) {
+
+    }
+
+    @Override
+    public void unfreeze(String id) {
+
+    }
+
+    @Override
+    public void forceClose(String id) {
+
     }
 
 }
