@@ -10,6 +10,7 @@ import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.models.auth.In;
 
 /**
  * 料件途程设定工位
@@ -60,6 +61,38 @@ public class MesPartRouteStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "工位名称")
     private String stationName;
 
+    @Transient
+    @ApiModelProperty(value = "工序步骤")
+    private Integer processStep;
+
+    @Transient
+    @ApiModelProperty(value = "工位步骤")
+    private Integer stationStep;
+
+    public MesPartRouteStation() {
+    }
+
+    public MesPartRouteStation(String id, String partRouteId, String processId, Integer jump, String stationId, Integer leadTime, Integer waitingTime, Integer postTime, Integer jobPeoples, BigDecimal standardHours, BigDecimal coefficient, Integer controlPeoples, Integer controlMachines, Integer enabled, String description, String processName, String stationName, Integer processStep, Integer stationStep) {
+        this.id = id;
+        this.partRouteId = partRouteId;
+        this.processId = processId;
+        this.jump = jump;
+        this.stationId = stationId;
+        this.leadTime = leadTime;
+        this.waitingTime = waitingTime;
+        this.postTime = postTime;
+        this.jobPeoples = jobPeoples;
+        this.standardHours = standardHours;
+        this.coefficient = coefficient;
+        this.controlPeoples = controlPeoples;
+        this.controlMachines = controlMachines;
+        this.enabled = enabled;
+        this.description = description;
+        this.processName = processName;
+        this.stationName = stationName;
+        this.processStep = processStep;
+        this.stationStep = stationStep;
+    }
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -201,26 +234,19 @@ public class MesPartRouteStation extends BaseEntity implements Serializable {
         this.stationName = stationName;
     }
 
-    public MesPartRouteStation() {
+    public Integer getProcessStep() {
+        return processStep;
     }
 
-    public MesPartRouteStation(String id, String partRouteId, String processId, Integer jump, String stationId, Integer leadTime, Integer waitingTime, Integer postTime, Integer jobPeoples, BigDecimal standardHours, BigDecimal coefficient, Integer controlPeoples, Integer controlMachines, Integer enabled, String description, String processName, String stationName) {
-        this.id = id;
-        this.partRouteId = partRouteId;
-        this.processId = processId;
-        this.jump = jump;
-        this.stationId = stationId;
-        this.leadTime = leadTime;
-        this.waitingTime = waitingTime;
-        this.postTime = postTime;
-        this.jobPeoples = jobPeoples;
-        this.standardHours = standardHours;
-        this.coefficient = coefficient;
-        this.controlPeoples = controlPeoples;
-        this.controlMachines = controlMachines;
-        this.enabled = enabled;
-        this.description = description;
-        this.processName = processName;
-        this.stationName = stationName;
+    public void setProcessStep(Integer processStep) {
+        this.processStep = processStep;
+    }
+
+    public Integer getStationStep() {
+        return stationStep;
+    }
+
+    public void setStationStep(Integer stationStep) {
+        this.stationStep = stationStep;
     }
 }
