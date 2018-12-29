@@ -2,7 +2,10 @@ package com.m2micro.m2mfa.pr.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.*;
-import com.m2micro.m2mfa.base.service.*;
+import com.m2micro.m2mfa.base.service.BasePartsService;
+import com.m2micro.m2mfa.base.service.BaseProcessService;
+import com.m2micro.m2mfa.base.service.BaseRouteDescService;
+import com.m2micro.m2mfa.base.service.BaseStationService;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
@@ -58,9 +61,6 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     private MesPartRouteStationService mesPartRouteStationService;
     @Autowired
     MesMoScheduleService mesMoScheduleService;
-
-
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
@@ -253,10 +253,10 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         }
         String sql ="select * from mes_part_route_process where partrouteid ='"+partRouteId+"'  ORDER BY setp ASC  ";
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesPartRouteProcess.class);
-//        String mesPartRouteStationsql =" select * from mes_part_route_station mmrrss where mmrrss.id in(\n" +
-//                "   select DISTINCT mps.id from   base_route_def  brd , mes_part_route_station mps    left   join    base_process_station p ON mps.station_id  = p.station_id  where mps.part_route_id ='EF17A033197242D9B621A4549F06093D' and brd.process_id= mps.process_id  ORDER BY p.step ASC  ,brd.setp ASC\n" +
+//        String mesPartRouteStationsql ="select * from mes_part_route_station mmrrss where mmrrss.id in( \n" +
+//                "select distinct mps.id   from  base_route_def  brd , mes_part_route_station mps    left   join    base_process_station p ON mps.station_id  = p.station_id  where mps.part_route_id ='EF17A033197242D9B621A4549F06093D' ORDER BY brd.setp ASC\n" +
 //                ")";
-        String mesPartRouteStationsql ="select* from mes_part_route_station where part_route_id ='"+partRouteId+"'   ORDER BY process_id   ,station_id  ASC";
+         String mesPartRouteStationsql ="select* from mes_part_route_station where part_route_id ='"+partRouteId+"' ";
         RowMapper mesPartRouteStationrm = BeanPropertyRowMapper.newInstance(MesPartRouteStation.class);
         List<MesPartRouteProcess> mesPartRouteProcesses = jdbcTemplate.query(sql,rm);
         List<MesPartRouteStation> mesPartRouteStations = jdbcTemplate.query(mesPartRouteStationsql,mesPartRouteStationrm);
@@ -271,7 +271,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         for(MesPartRouteStation mesPartRouteStation :mesPartRouteStations){
             mesPartRouteStation.setProcessName(baseProcessService.findById(mesPartRouteStation.getProcessId()).orElse(null).getProcessName());
             mesPartRouteStation.setStationName(baseStationService.findById(mesPartRouteStation.getStationId()).orElse(null).getName());
-            String sqls ="select * from base_process_station where station_id ='"+mesPartRouteStation.getStationId()+"'  ";
+            String sqls ="select * from base_process_station where station_id ='"+mesPartRouteStation.getStationId()+"' and process_id='"+mesPartRouteStation.getProcessId()+"'  ";
             RowMapper rms= BeanPropertyRowMapper.newInstance(BaseProcessStation.class);
             List<BaseProcessStation> baseProcessStation = jdbcTemplate.query(sqls,rms);
             mesPartRouteStation.setStationStep(baseProcessStation.get(0).getStep());
@@ -280,7 +280,6 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             RowMapper rmd= BeanPropertyRowMapper.newInstance(BaseRouteDef.class);
             List<BaseRouteDef> baseRouteDef = jdbcTemplate.query(sqld,rmd);
             mesPartRouteStation.setProcessStep(baseRouteDef.get(0).getSetp());
-
         }
         return MesPartvo.builder().mesPartRouteProcesss(mesPartRouteProcesses).mesPartRoute(mesPartRoute).mesPartRouteStations(mesPartRouteStations).build();
     }
