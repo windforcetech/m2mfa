@@ -62,8 +62,8 @@ public class BasePartsController {
      * 列表
      */
     @RequestMapping("/listFilter")
-    @ApiOperation(value="料件基本资料列表")
-    @UserOperationLog("料件基本资料列表")
+    @ApiOperation(value="料件基本资料列表(过滤已关联的涂程)")
+    @UserOperationLog("料件基本资料列表(过滤已关联的涂程)")
     public ResponseMessage<PageUtil<BaseParts>> listFilter(BasePartsQuery query){
         PageUtil<BaseParts> page = basePartsService.listFilter(query);
         return ResponseMessage.ok(page);
