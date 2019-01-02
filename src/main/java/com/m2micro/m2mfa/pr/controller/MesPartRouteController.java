@@ -111,6 +111,15 @@ public class MesPartRouteController {
         List<BaseProcessStation> baseProcessStations = baseRouteDescService.findbaseProcessStations(routId);
         List<BaseRouteDef> routeDefs = baseRouteDefService.findroutedef(routId);
         List<BaseParts> baseparts= basePartsService.findAll();
+        List<MesPartRoute> mesPartRoutes =mesPartRouteService.findAll();
+        for(int i=0;i<baseparts.size();i++ ){
+            for(MesPartRoute m: mesPartRoutes){
+                if(m.getPartId().equals(baseparts.get(i).getPartId())){
+                    baseparts.remove(i);
+                }
+            }
+        }
+
         map.put("routeDefs",routeDefs);
         map.put("baseProcessStations",baseProcessStations);
         map.put("baseparts",baseparts);
