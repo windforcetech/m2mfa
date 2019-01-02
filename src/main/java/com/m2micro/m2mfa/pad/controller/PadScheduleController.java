@@ -32,7 +32,7 @@ import java.util.List;
  * @since 2018-12-26
  */
 @RestController
-@RequestMapping("/pad/PadSchedule")
+@RequestMapping("/pad/padSchedule")
 @Api(value="pad生产排程  前端控制器")
 public class PadScheduleController {
     @Autowired
