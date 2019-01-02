@@ -89,11 +89,21 @@ public class MesMoDesc extends BaseEntity implements Serializable {
     private Integer failQty;
     @ApiModelProperty(value = "状态")
     private Integer closeFlag;
+    @ApiModelProperty(value = "冻结前状态")
+    private Integer prefreezingState;
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
     @Size(max=32,message = "描述信息不能大于200位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "描述")
     private String description;
+
+    public Integer getPrefreezingState() {
+        return prefreezingState;
+    }
+
+    public void setPrefreezingState(Integer prefreezingState) {
+        this.prefreezingState = prefreezingState;
+    }
 
     public String getMoId() {
         return moId;

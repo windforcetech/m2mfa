@@ -2,13 +2,16 @@ package com.m2micro.m2mfa.mo.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.DateUtil;
+import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
+import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.model.PartsRouteModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.m2micro.framework.commons.util.PageUtil;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 import java.util.List;
 /**
  * 工单主档 服务实现类
@@ -36,6 +41,8 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesPartRouteRepository mesPartRouteRepository;
+    @Autowired
+    MesMoScheduleService mesMoScheduleService;
 
     public MesMoDescRepository getRepository() {
         return mesMoDescRepository;
@@ -177,11 +184,11 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(mesMoDesc==null){
             throw new MMException("不存在该工单");
         }
-        //工单状态【Close_Flag】为：已审待排=1  已排产=2  时允许取消审核  SET Close_Flag=0
-        if(!(MoStatus.AUDITED.getKey().equals(mesMoDesc.getCloseFlag())||
-                MoStatus.SCHEDULED.getKey().equals(mesMoDesc.getCloseFlag()))){
+        //工单状态【Close_Flag】为：已审待排=1  时允许取消审核  SET Close_Flag=0
+        if(!MoStatus.AUDITED.getKey().equals(mesMoDesc.getCloseFlag())){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许反审！");
         }
+
         //更改为初始状态
         mesMoDescRepository.setCloseFlagFor(MoStatus.INITIAL.getKey(),mesMoDesc.getMoId());
     }
@@ -193,12 +200,37 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(mesMoDesc==null){
             throw new MMException("不存在该工单");
         }
-        //只有工单状态 close_flag=3时 ， 才可以冻结  SET close_flag=12
-        if(!MoStatus.PRODUCTION.getKey().equals(mesMoDesc.getCloseFlag())){
+        //只有工单状态 close_flag=1,2,3时 ， 才可以冻结  SET close_flag=12
+        if(!(MoStatus.AUDITED.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.SCHEDULED.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.PRODUCTION.getKey().equals(mesMoDesc.getCloseFlag()))){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许冻结！");
         }
-        //更改为冻结状态
-        mesMoDescRepository.setCloseFlagFor(MoStatus.FROZEN.getKey(),mesMoDesc.getMoId());
+        //更改为冻结状态及冻结前状态
+        mesMoDescRepository.setCloseFlagAndPrefreezingStateFor(MoStatus.FROZEN.getKey(),mesMoDesc.getCloseFlag(),mesMoDesc.getMoId());
+        //冻结工单相关的排产单
+        frozenSchedules(mesMoDesc);
+
+    }
+
+    /**
+     * 冻结工单相关的排产单
+     * @param mesMoDesc
+     *          工单
+     */
+    private void frozenSchedules(MesMoDesc mesMoDesc) {
+        //通过工单id获取能够冻结的排产单（排产单处于初始，已审待产，生产中的可以冻结）
+        List<Integer> flags = new ArrayList<>();
+        flags.add(MoScheduleStatus.INITIAL.getKey());
+        flags.add(MoScheduleStatus.AUDITED.getKey());
+        flags.add(MoScheduleStatus.PRODUCTION.getKey());
+        List<MesMoSchedule> mesMoSchedules = mesMoScheduleService.findByMoIdAndFlag(mesMoDesc.getMoId(), flags);
+        if(mesMoSchedules!=null&&mesMoSchedules.size()>0){
+            //调用排产单冻结接口
+            for(MesMoSchedule mesMoSchedule:mesMoSchedules){
+                mesMoScheduleService.frozen(mesMoSchedule.getScheduleId());
+            }
+        }
     }
 
     @Override
@@ -211,8 +243,29 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(!MoStatus.FROZEN.getKey().equals(mesMoDesc.getCloseFlag())){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不需要解冻！");
         }
-        //更改为生产状态
-        mesMoDescRepository.setCloseFlagFor(MoStatus.PRODUCTION.getKey(),mesMoDesc.getMoId());
+        //更改为冻结前状态
+        //mesMoDescRepository.setCloseFlagFor(mesMoDesc.getPrefreezingState(),mesMoDesc.getMoId());
+        mesMoDescRepository.setCloseFlagAndPrefreezingStateFor(mesMoDesc.getPrefreezingState(),null,mesMoDesc.getMoId());
+        //解冻工单相关的排产单
+        unfreezeSchedules(mesMoDesc);
+    }
+
+    /**
+     * 解冻工单相关的排产单
+     * @param mesMoDesc
+     *         工单
+     */
+    private void unfreezeSchedules(MesMoDesc mesMoDesc) {
+        //通过工单id获取能够解冻的排产单（排产单处于解冻）
+        List<Integer> flags = new ArrayList<>();
+        flags.add(MoScheduleStatus.FROZEN.getKey());
+        List<MesMoSchedule> mesMoSchedules = mesMoScheduleService.findByMoIdAndFlag(mesMoDesc.getMoId(), flags);
+        if(mesMoSchedules!=null&&mesMoSchedules.size()>0){
+            //调用排产单冻解冻接口
+            for(MesMoSchedule mesMoSchedule:mesMoSchedules){
+                mesMoScheduleService.unfreeze(mesMoSchedule.getScheduleId());
+            }
+        }
     }
 
     @Override
@@ -222,14 +275,37 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(mesMoDesc==null){
             throw new MMException("不存在该工单");
         }
-        //工单状态  若Close_Flag >=10 （结案10，强制结案11，冻结12） 不允许强制结案。
-        if(MoStatus.CLOSE.getKey().equals(mesMoDesc.getCloseFlag())||
-                MoStatus.FORCECLOSE.getKey().equals(mesMoDesc.getCloseFlag())||
-                MoStatus.FROZEN.getKey().equals(mesMoDesc.getCloseFlag())){
+        //工单状态  若Close_Flag != 2,3,12 不允许强制结案。
+        if(!(MoStatus.SCHEDULED.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.PRODUCTION.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.FROZEN.getKey().equals(mesMoDesc.getCloseFlag()))){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许强制结案！");
         }
         //更改为强制结案状态
         mesMoDescRepository.setCloseFlagFor(MoStatus.FORCECLOSE.getKey(),mesMoDesc.getMoId());
+        //强制结案工单相关的排产单
+        forceCloseSchedules(mesMoDesc);
+    }
+
+    /**
+     * 强制结案工单相关的排产单
+     * @param mesMoDesc
+     *          工单
+     */
+    private void forceCloseSchedules(MesMoDesc mesMoDesc) {
+        //通过工单id获取能够强制结案的排产单（排产单处于初始，已审待产，生产中，冻结）
+        List<Integer> flags = new ArrayList<>();
+        flags.add(MoScheduleStatus.INITIAL.getKey());
+        flags.add(MoScheduleStatus.AUDITED.getKey());
+        flags.add(MoScheduleStatus.PRODUCTION.getKey());
+        flags.add(MoScheduleStatus.FROZEN.getKey());
+        List<MesMoSchedule> mesMoSchedules = mesMoScheduleService.findByMoIdAndFlag(mesMoDesc.getMoId(), flags);
+        if(mesMoSchedules!=null&&mesMoSchedules.size()>0){
+            //调用排产单强制结案接口
+            for(MesMoSchedule mesMoSchedule:mesMoSchedules){
+                mesMoScheduleService.forceClose(mesMoSchedule.getScheduleId());
+            }
+        }
     }
 
     @Override

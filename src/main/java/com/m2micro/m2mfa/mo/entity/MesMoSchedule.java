@@ -22,6 +22,8 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "主键")
     @Id
     private String scheduleId;
+    @ApiModelProperty(value = "排产单号")
+    private String scheduleNo;
     @ApiModelProperty(value = "排程日期")
     private Date scheduleDate;
     @ApiModelProperty(value = "版本号")
@@ -62,10 +64,28 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     private String checkBy;
     @ApiModelProperty(value = "生产状态")
     private Integer flag;
+    @ApiModelProperty(value = "冻结前状态")
+    private Integer prefreezingState;
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+
+    public String getScheduleNo() {
+        return scheduleNo;
+    }
+
+    public void setScheduleNo(String scheduleNo) {
+        this.scheduleNo = scheduleNo;
+    }
+
+    public Integer getPrefreezingState() {
+        return prefreezingState;
+    }
+
+    public void setPrefreezingState(Integer prefreezingState) {
+        this.prefreezingState = prefreezingState;
+    }
 
     public String getScheduleId() {
         return scheduleId;
