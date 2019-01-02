@@ -141,6 +141,77 @@ public class BasePartsServiceImpl implements BasePartsService {
     }
 
     @Override
+    public PageUtil<BaseParts> listFilter(BasePartsQuery query) {
+        String sql = "SELECT\n" +
+                "	bp.part_id partId,\n" +
+                "	bp.part_no partNo,\n" +
+                "	bp.name name,\n" +
+                "	bp.spec spec,\n" +
+                "	bp.version version,\n" +
+                "	bp.grade grade,\n" +
+                "	bp.source source,\n" +
+                "	bp.category category,\n" +
+                "	bp.single single,\n" +
+                "	bp.is_check isCheck,\n" +
+                "	bp.stock_unit stockUnit,\n" +
+                "	bp.safety_stock safetyStock,\n" +
+                "	bp.max_stock maxStock,\n" +
+                "	bp.main_warehouse mainWarehouse,\n" +
+                "	bp.main_storage mainStorage,\n" +
+                "	bp.production_unit productionUnit,\n" +
+                "	bp.production_conversion_rate productionConversionRate,\n" +
+                "	bp.min_production_qty minProductionQty,\n" +
+                "	bp.production_loss_rate productionLossRate,\n" +
+                "	bp.sent_unit sentUnit,\n" +
+                "	bp.sent_conversion_rate sentConversionRate,\n" +
+                "	bp.min_sent_qty minSentQty,\n" +
+                "	bp.is_consume isConsume,\n" +
+                "	bp.validity_days validityDays,\n" +
+                "	bp.main_line_warehouse mainLineWarehouse,\n" +
+                "	bp.main_line_storage mainLineStorage,\n" +
+                "	bp.positive_image_url positiveImageUrl,\n" +
+                "	bp.negative_image negativeImage,\n" +
+                "	bp.enabled enabled,\n" +
+                "	bp.description description,\n" +
+                "	bp.create_on createOn,\n" +
+                "	bp.create_by createBy,\n" +
+                "	bp.modified_on modifiedOn,\n" +
+                "	bp.modified_by modifiedBy,\n" +
+                "	bi.item_name categoryName,\n" +
+                "	bi2.item_name sourceName\n" +
+                "FROM\n" +
+                "	base_parts bp\n" +
+                "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
+                "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
+                "WHERE 1 = 1\n" +
+                "AND not EXISTS (SELECT mpr.part_id part_id from mes_part_route mpr where mpr.part_id=bp.part_id)\n";
+
+        if(StringUtils.isNotEmpty(query.getPartNo())){
+            sql = sql+" and bp.part_no like '%"+query.getPartNo()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            sql = sql+" and bp.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSpec())){
+            sql = sql+" and bp.spec like '%"+query.getSpec()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSource())){
+            sql = sql+" and bp.source = '"+query.getSource()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            sql = sql+" and bp.category = '"+query.getCategory()+"'";
+        }
+        sql = sql + " order by bp.modified_on desc";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
+        List<BaseParts> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select count(*) from base_parts";
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    @Override
     public List<BaseParts> findByPartNoAndPartIdNot(String partNo, String partId) {
         return basePartsRepository.findByPartNoAndPartIdNot(partNo, partId);
     }
