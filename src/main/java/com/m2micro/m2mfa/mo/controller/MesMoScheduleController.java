@@ -1,28 +1,31 @@
 package com.m2micro.m2mfa.mo.controller;
 
 import com.m2micro.framework.authorization.Authorize;
-import com.m2micro.m2mfa.base.entity.BaseStation;
-import com.m2micro.m2mfa.mo.model.OperationInfo;
-import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
-import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.common.util.ValidatorUtil;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
-import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.Api;
+import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
-import io.swagger.annotations.ApiOperation;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
-import org.springframework.web.bind.annotation.RestController;
+import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.service.MesMoDescService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 生产排程表表头 前端控制器
@@ -36,6 +39,8 @@ import java.util.List;
 public class MesMoScheduleController {
     @Autowired
     MesMoScheduleService mesMoScheduleService;
+    @Autowired
+    private MesMoDescService mesMoDescService;
 
     /**
      * 列表
@@ -127,6 +132,16 @@ public class MesMoScheduleController {
     @UserOperationLog("获取操作栏相关信息")
     public ResponseMessage<OperationInfo> getOperationInfo(String staffId, String scheduleId, String stationId){
         return ResponseMessage.ok(mesMoScheduleService.getOperationInfo(staffId, scheduleId,stationId));
+    }
+
+    @PostMapping("/addDetails")
+    @ApiOperation(value="排产单添加基本信息")
+    @UserOperationLog("排产单添加基本信息")
+    public ResponseMessage<Map> addDetails(){
+        Map m = new HashMap();
+       List<MesMoDesc> mesMoDescs  =   mesMoDescService.schedulingDetails();
+       m.put("mesMoDescs",mesMoDescs);
+        return ResponseMessage.ok(m);
     }
 
 }

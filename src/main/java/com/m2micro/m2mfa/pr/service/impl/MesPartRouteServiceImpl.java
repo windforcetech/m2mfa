@@ -2,10 +2,7 @@ package com.m2micro.m2mfa.pr.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.*;
-import com.m2micro.m2mfa.base.service.BasePartsService;
-import com.m2micro.m2mfa.base.service.BaseProcessService;
-import com.m2micro.m2mfa.base.service.BaseRouteDescService;
-import com.m2micro.m2mfa.base.service.BaseStationService;
+import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
@@ -45,6 +42,8 @@ import java.util.Set;
  */
 @Service
 public class MesPartRouteServiceImpl implements MesPartRouteService {
+    @Autowired
+    private BaseItemsTargetService baseItemsTargetService;
     @Autowired
     MesPartRouteRepository mesPartRouteRepository;
     @Autowired
@@ -101,6 +100,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             BaseProcess oprocess =   baseProcessService.findById(mesPartRoute.getOutputProcessId()).orElse(null);
             BaseRouteDesc baseRouteDesc =baseRouteDescService.findById(mesPartRoute.getRouteId()).orElse(null);
             BaseParts baseParts = basePartsService.findById(mesPartRoute.getPartId()).orElse(null);
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(mesPartRoute.getControlInformation()).orElse(null);
             if(iprocess !=null){
                 mesPartRoute.setInputProcessIdName(iprocess.getProcessName());
             }
@@ -112,6 +112,9 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             }
             if(baseParts !=null){
                 mesPartRoute.setPartNo(baseParts.getPartNo());
+            }
+            if(baseItemsTarget !=null ){
+                mesPartRoute.setControlInformationName(baseItemsTarget.getItemName());
             }
         }
         long totalCount = jq.fetchCount();

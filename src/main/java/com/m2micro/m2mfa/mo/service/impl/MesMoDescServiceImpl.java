@@ -1,6 +1,8 @@
 package com.m2micro.m2mfa.mo.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
@@ -43,6 +45,8 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     MesPartRouteRepository mesPartRouteRepository;
     @Autowired
     MesMoScheduleService mesMoScheduleService;
+    @Autowired
+    private BasePartsService basePartsService;
 
     public MesMoDescRepository getRepository() {
         return mesMoDescRepository;
@@ -406,6 +410,30 @@ public class MesMoDescServiceImpl implements MesMoDescService {
             throw new MMException("料件相关数据不存在！");
         }
         return list.get(0);
+    }
+
+    @Override
+    public List<MesMoDesc> schedulingDetails() {
+            String sql ="select a.mo_id  moId ,a.mo_number moNumber ,a.category category,a.part_id partId ,a.target_qty targetQty,a.revsion revsion,\n" +
+                    "a.distinguish distinguish,a.parent_mo parentMo, a.bom_revsion bomRevsion,a.plan_input_date planInputDate, a.plan_close_date planCloseDate,\n" +
+                    "a.actual_input_date actualInputDate  , a.actualc_lose_date actualcLoseDate  , a.route_id routeId  ,\n" +
+                    "a.input_process_id inputProcessId,a.output_process_id outputProcessId , a.reach_date reachDate ,a.machine_qty machineQty ,\n" +
+                    "a.customer_id customerId, a.order_id orderId ,a.order_seq orderSeq, a.is_schedul isSchedul  ,a.schedul_qty schedulQty,\n" +
+                    "a.input_qty inputQty,a.output_qty outputQty, a.scrapped_qty scrappedQty , a.fail_qty failQty,a.close_flag closeFlag,a.prefreezing_state prefreezingState,\n" +
+                    "a.enabled enabled ,a.description description from  mes_mo_desc a LEFT JOIN  base_parts b on a.part_id  = b.part_id  and   close_flag  IN(1,2,3)  and is_schedul=0";
+            RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDesc.class);
+            List<MesMoDesc> mesMoDescs = jdbcTemplate.query(sql,rm);
+            for(MesMoDesc moDesc:  mesMoDescs){
+                if(StringUtils.isNotEmpty(moDesc.getPartId())){
+                    BaseParts baseParts = basePartsService.findById(moDesc.getPartId()).orElse(null);
+                    if(baseParts!=null){
+                        moDesc.setPartName(baseParts.getName());
+                    }
+                }
+
+
+            }
+            return  mesMoDescs;
     }
 
 }

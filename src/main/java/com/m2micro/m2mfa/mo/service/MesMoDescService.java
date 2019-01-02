@@ -4,6 +4,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.model.PartsRouteModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
@@ -84,4 +85,7 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
     MesMoDescModel info(String id);
 
     PartsRouteModel addDetails(String partId);
+
+    //获取添加的基本信息
+    List<MesMoDesc>schedulingDetails();
 }

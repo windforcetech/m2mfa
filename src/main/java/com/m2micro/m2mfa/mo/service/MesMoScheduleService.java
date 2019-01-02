@@ -94,4 +94,6 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      *      工单id
      */
     void forceClose(String id);
+
+
 }
