@@ -17,6 +17,8 @@ import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.pr.service.MesPartRouteService;
+import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 生产排程表表头 前端控制器
@@ -41,6 +44,8 @@ public class MesMoScheduleController {
     MesMoScheduleService mesMoScheduleService;
     @Autowired
     private MesMoDescService mesMoDescService;
+    @Autowired
+    private MesPartRouteService mesPartRouteService;
 
     /**
      * 列表
@@ -144,4 +149,14 @@ public class MesMoScheduleController {
         return ResponseMessage.ok(m);
     }
 
+    @PostMapping("/findbyparId")
+    @ApiOperation(value="通过料件ID获取关联的图程数据")
+    @UserOperationLog("通过料件ID获取关联的图程数据")
+    public ResponseMessage<Set<MesPartvo>> addDetails(@ApiParam(value = "partId",required=true) @RequestParam(required = true) String partId){
+        Set<MesPartvo>  mesPartvos =mesPartRouteService.findparId(partId);
+        if(mesPartvos.isEmpty()){
+            return ResponseMessage.error("料件没有关联的图程数据。");
+        }
+        return ResponseMessage.ok(mesPartvos);
+    }
 }

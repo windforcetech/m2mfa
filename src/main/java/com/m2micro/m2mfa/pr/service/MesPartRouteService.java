@@ -9,6 +9,7 @@ import com.m2micro.m2mfa.pr.query.MesPartRouteQuery;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 料件途程设定主档 服务类
@@ -35,4 +36,7 @@ public interface MesPartRouteService extends BaseService<MesPartRoute,String> {
      MesPartvo info(String partRouteId);
 
      String  delete(String id);
+
+     //通过料件查找图程数据
+     Set<MesPartvo> findparId(String  partId);
 }

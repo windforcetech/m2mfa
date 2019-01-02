@@ -129,6 +129,9 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     @Override
     @Transactional
     public boolean save(MesPartRoute mesPartRoute, List<MesPartRouteProcess> mesPartRouteProcesss,List< MesPartRouteStation>  mesPartRouteStations) {
+        if(mesPartRouteRepository.is_experience(mesPartRoute.getRouteId(),mesPartRoute.getPartId())!=null){
+            throw new MMException("该图程信息已经存在。");
+        }
         String partRouteid =  UUIDUtil.getUUID();
         mesPartRoute.setPartRouteId(partRouteid);
          if(basePartsService.findById(mesPartRoute.getPartId()).orElse(null)==null){
@@ -242,6 +245,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         BaseProcess oprocess =   baseProcessService.findById(mesPartRoute.getOutputProcessId()).orElse(null);
         BaseRouteDesc baseRouteDesc =baseRouteDescService.findById(mesPartRoute.getRouteId()).orElse(null);
         BaseParts baseParts = basePartsService.findById(mesPartRoute.getPartId()).orElse(null);
+        BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(mesPartRoute.getControlInformation()).orElse(null);
         if(iprocess !=null){
             mesPartRoute.setInputProcessIdName(iprocess.getProcessName());
         }
@@ -253,6 +257,9 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         }
         if(baseParts !=null){
             mesPartRoute.setPartNo(baseParts.getPartNo());
+        }
+        if(baseItemsTarget !=null ){
+            mesPartRoute.setControlInformationName(baseItemsTarget.getItemName());
         }
         String sql ="select * from mes_part_route_process where partrouteid ='"+partRouteId+"'  ORDER BY setp ASC  ";
          RowMapper rm = BeanPropertyRowMapper.newInstance(MesPartRouteProcess.class);
@@ -301,5 +308,17 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             mesPartRouteProcessService.deleteParRouteID(id);
         }
         return msg;
+    }
+
+    @Override
+    public Set<MesPartvo> findparId(String partId) {
+        Set<MesPartvo>ls= new HashSet();
+        String sql ="select * from mes_part_route where part_id ='"+partId+"'";
+        RowMapper rms= BeanPropertyRowMapper.newInstance(MesPartRoute.class);
+        List<MesPartRoute> mesPartRoutes  = jdbcTemplate.query(sql ,rms);
+        for(MesPartRoute mesPartRoute :mesPartRoutes){
+            ls.add(info(mesPartRoute.getPartRouteId()));
+        }
+        return ls;
     }
 }

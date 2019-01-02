@@ -25,4 +25,7 @@ public interface MesPartRouteRepository extends BaseRepository<MesPartRoute,Stri
      * @return 涂程
      */
     List<MesPartRoute> findByPartId(String partId);
+
+    @Query("select r.partRouteId  from  MesPartRoute  as r  where r.routeId =?1  and  r.partId=?2")
+    String  is_experience( String routeId,String partId );
 }
