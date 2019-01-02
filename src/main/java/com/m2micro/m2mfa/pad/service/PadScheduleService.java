@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @Auther: liaotao
  * @Date: 2018/12/28 15:03
- * @Description:
+ * @Description: 排产单
  */
 public interface PadScheduleService {
     /**
