@@ -311,14 +311,14 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     }
 
     @Override
-    public Set<MesPartvo> findparId(String partId) {
-        Set<MesPartvo>ls= new HashSet();
+    public MesPartvo findparId(String partId) {
+
         String sql ="select * from mes_part_route where part_id ='"+partId+"'";
         RowMapper rms= BeanPropertyRowMapper.newInstance(MesPartRoute.class);
         List<MesPartRoute> mesPartRoutes  = jdbcTemplate.query(sql ,rms);
-        for(MesPartRoute mesPartRoute :mesPartRoutes){
-            ls.add(info(mesPartRoute.getPartRouteId()));
-        }
-        return ls;
+
+
+
+        return  info(mesPartRoutes.get(0).getPartRouteId());
     }
 }
