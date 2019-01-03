@@ -414,26 +414,59 @@ public class MesMoDescServiceImpl implements MesMoDescService {
 
     @Override
     public List<MesMoDesc> schedulingDetails() {
-            String sql ="select a.mo_id  moId ,a.mo_number moNumber ,a.category category,a.part_id partId ,a.target_qty targetQty,a.revsion revsion,\n" +
-                    "a.distinguish distinguish,a.parent_mo parentMo, a.bom_revsion bomRevsion,a.plan_input_date planInputDate, a.plan_close_date planCloseDate,\n" +
-                    "a.actual_input_date actualInputDate  , a.actualc_lose_date actualcLoseDate  , a.route_id routeId  ,\n" +
-                    "a.input_process_id inputProcessId,a.output_process_id outputProcessId , a.reach_date reachDate ,a.machine_qty machineQty ,\n" +
-                    "a.customer_id customerId, a.order_id orderId ,a.order_seq orderSeq, a.is_schedul isSchedul  ,a.schedul_qty schedulQty,\n" +
-                    "a.input_qty inputQty,a.output_qty outputQty, a.scrapped_qty scrappedQty , a.fail_qty failQty,a.close_flag closeFlag,a.prefreezing_state prefreezingState,\n" +
-                    "a.enabled enabled ,a.description description from  mes_mo_desc a LEFT JOIN  base_parts b on a.part_id  = b.part_id  and   close_flag  IN(1,2,3)  and is_schedul=0";
+            String sql ="SELECT\n" +
+                        "	mmd.mo_id moId,\n" +
+                        "	mmd.mo_number moNumber,\n" +
+                        "	mmd.category category,\n" +
+                        "	mmd.part_id partId,\n" +
+                        "	mmd.target_qty targetQty,\n" +
+                        "	mmd.revsion revsion,\n" +
+                        "	mmd.distinguish distinguish,\n" +
+                        "	mmd.parent_mo parentMo,\n" +
+                        "	mmd.bom_revsion bomRevsion,\n" +
+                        "	mmd.plan_input_date planInputDate,\n" +
+                        "	mmd.plan_close_date planCloseDate,\n" +
+                        "	mmd.actual_input_date actualInputDate,\n" +
+                        "	mmd.actualc_lose_date actualcLoseDate,\n" +
+                        "	mmd.route_id routeId,\n" +
+                        "	mmd.input_process_id inputProcessId,\n" +
+                        "	mmd.output_process_id outputProcessId,\n" +
+                        "	mmd.reach_date reachDate,\n" +
+                        "	mmd.machine_qty machineQty,\n" +
+                        "	mmd.customer_id customerId,\n" +
+                        "	mmd.order_id orderId,\n" +
+                        "	mmd.order_seq orderSeq,\n" +
+                        "	mmd.is_schedul isSchedul,\n" +
+                        "	mmd.schedul_qty schedulQty,\n" +
+                        "	mmd.input_qty inputQty,\n" +
+                        "	mmd.output_qty outputQty,\n" +
+                        "	mmd.scrapped_qty scrappedQty,\n" +
+                        "	mmd.fail_qty failQty,\n" +
+                        "	mmd.close_flag closeFlag,\n" +
+                        "	mmd.prefreezing_state prefreezingState,\n" +
+                        "	mmd.enabled enabled,\n" +
+                        "	mmd.description description,\n" +
+                        "	mmd.create_on createOn,\n" +
+                        "	mmd.create_by createBy,\n" +
+                        "	mmd.modified_on modifiedOn,\n" +
+                        "	mmd.modified_by modifiedBy,\n" +
+                        "	mmd.part_name partName,\n" +
+                        "	mmd.part_no partNo,\n" +
+                        "	bp.part_id partId,\n" +
+                        "	bp. NAME NAME,\n" +
+                        "	mmd.target_qty - mmd.schedul_qty notQty\n" +
+                        "FROM\n" +
+                        "	mes_mo_desc mmd\n" +
+                        "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id\n" +
+                        "WHERE\n" +
+                        "	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" +
+                        "OR mmd.close_flag = " + MoStatus.SCHEDULED.getKey() + "\n" +
+                        "OR (\n" +
+                        "	mmd.close_flag = " + MoStatus.PRODUCTION.getKey() + "\n" +
+                        "	AND mmd.is_schedul = 0\n" +
+                        ")";
             RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDesc.class);
-            List<MesMoDesc> mesMoDescs = jdbcTemplate.query(sql,rm);
-            for(MesMoDesc moDesc:  mesMoDescs){
-                if(StringUtils.isNotEmpty(moDesc.getPartId())){
-                    BaseParts baseParts = basePartsService.findById(moDesc.getPartId()).orElse(null);
-                    if(baseParts!=null){
-                        moDesc.setPartName(baseParts.getName());
-                    }
-                }
-
-
-            }
-            return  mesMoDescs;
+            return  jdbcTemplate.query(sql,rm);
     }
 
 }
