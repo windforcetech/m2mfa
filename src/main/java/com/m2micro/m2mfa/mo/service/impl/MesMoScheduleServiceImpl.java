@@ -4,11 +4,15 @@ import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.QMesMoSchedule;
+import com.m2micro.m2mfa.mo.model.MesMoDescModel;
+import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
@@ -48,13 +52,60 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     @Override
-    public PageUtil<MesMoSchedule> list(Query query) {
-        QMesMoSchedule qMesMoSchedule = QMesMoSchedule.mesMoSchedule;
-        JPAQuery<MesMoSchedule> jq = queryFactory.selectFrom(qMesMoSchedule);
+    public PageUtil<MesMoScheduleModel> list(MesMoScheduleQuery query) {
 
-        jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-        List<MesMoSchedule> list = jq.fetch();
-        long totalCount = jq.fetchCount();
+        String sql = "SELECT\n" +
+                        "	mms.schedule_id scheduleId,\n" +
+                        "	mms.schedule_no scheduleNo,\n" +
+                        "	mms.flag flag,\n" +
+                        "	mms.enabled enabled,\n" +
+                        "	bp.part_no partNo,\n" +
+                        "	bp.name partName,\n" +
+                        "	bm.name machineName,\n" +
+                        "	mms.schedule_qty schedulQty,\n" +
+                        "	msp.output_qty outputQty\n" +
+                        "FROM\n" +
+                        "	mes_mo_schedule mms,\n" +
+                        "	base_parts bp,\n" +
+                        "	base_machine bm,\n" +
+                        "	mes_part_route mpr,\n" +
+                        "	mes_mo_schedule_process msp\n" +
+                        "WHERE\n" +
+                        "	mms.part_id = bp.part_id\n" +
+                        "AND mms.machine_id = bm.machine_id\n" +
+                        "AND mms.part_id = mpr.part_id\n" +
+                        "AND msp.process_id = mpr.output_process_id\n" +
+                        "AND msp.schedule_id = mms.schedule_id\n";
+
+        if(StringUtils.isNotEmpty(query.getFlag())){
+            sql = sql+" AND mms.flag = " + Integer.valueOf(query.getFlag())+ "\n";
+        }
+        if(query.getStartTime()!=null){
+            sql = sql+" AND mms.create_on >= "+ "'"+ DateUtil.format(query.getStartTime())+"'\n" ;
+        }
+        if(query.getEndTime()!=null){
+            sql = sql+" AND mms.create_on <= "+ "'"+ DateUtil.format(query.getEndTime())+"'\n" ;
+        }
+        sql = sql + " order by mms.modified_on desc";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoScheduleModel.class);
+        List<MesMoScheduleModel> list = jdbcTemplate.query(sql,rm);
+
+        String countSql =   "SELECT\n" +
+                            "	count(*)\n" +
+                            "FROM\n" +
+                            "	mes_mo_schedule mms,\n" +
+                            "	base_parts bp,\n" +
+                            "	base_machine bm,\n" +
+                            "	mes_part_route mpr,\n" +
+                            "	mes_mo_schedule_process msp\n" +
+                            "WHERE\n" +
+                            "	mms.part_id = bp.part_id\n" +
+                            "AND mms.machine_id = bm.machine_id\n" +
+                            "AND mms.part_id = mpr.part_id\n" +
+                            "AND msp.process_id = mpr.output_process_id\n" +
+                            "AND msp.schedule_id = mms.schedule_id";
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
 

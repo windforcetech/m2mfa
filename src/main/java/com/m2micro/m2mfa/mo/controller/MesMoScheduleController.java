@@ -14,7 +14,9 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
@@ -54,8 +56,8 @@ public class MesMoScheduleController {
     @RequestMapping("/list")
     @ApiOperation(value="生产排程表表头列表")
     @UserOperationLog("生产排程表表头列表")
-    public ResponseMessage<PageUtil<MesMoSchedule>> list(Query query){
-        PageUtil<MesMoSchedule> page = mesMoScheduleService.list(query);
+    public ResponseMessage<PageUtil<MesMoScheduleModel>> list(MesMoScheduleQuery query){
+        PageUtil<MesMoScheduleModel> page = mesMoScheduleService.list(query);
         return ResponseMessage.ok(page);
     }
 

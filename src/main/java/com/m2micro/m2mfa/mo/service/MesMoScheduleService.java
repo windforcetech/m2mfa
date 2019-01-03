@@ -6,7 +6,9 @@ import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      *         查询参数
      * @return  分页信息
      */
-    PageUtil<MesMoSchedule> list(Query query);
+    PageUtil<MesMoScheduleModel> list(MesMoScheduleQuery query);
 
     /**
      * 获取当前用户下的排产单
