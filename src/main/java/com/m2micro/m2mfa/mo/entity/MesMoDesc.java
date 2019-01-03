@@ -43,6 +43,9 @@ public class MesMoDesc extends BaseEntity implements Serializable {
     @Transient
     @ApiModelProperty(value = "料件品名")
     private String partName;
+    @Transient
+    @ApiModelProperty(value = "料件编号")
+    private String partNo;
     @ApiModelProperty(value = "目标量")
     @NotNull(message="目标量不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private Integer targetQty;
@@ -87,6 +90,11 @@ public class MesMoDesc extends BaseEntity implements Serializable {
     private Integer inputQty;
     @ApiModelProperty(value = "已产出数量")
     private Integer outputQty;
+
+    @Transient
+    @ApiModelProperty(value = "未排量")
+    private Integer notQty;
+
     @ApiModelProperty(value = "报废数量")
     private Integer scrappedQty;
     @ApiModelProperty(value = "不良数量")
@@ -101,12 +109,13 @@ public class MesMoDesc extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     private String description;
 
-    public MesMoDesc(@NotEmpty(message = "主键不能为空", groups = {UpdateGroup.class}) String moId, @Size(max = 32, message = "工单号码不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) @NotEmpty(message = "工单号码不能为空", groups = {AddGroup.class, UpdateGroup.class}) String moNumber, @NotEmpty(message = "工单类型不能为空", groups = {AddGroup.class, UpdateGroup.class}) String category, @NotEmpty(message = "料件id不能为空", groups = {AddGroup.class, UpdateGroup.class}) String partId, String partName, @NotNull(message = "目标量不能为空", groups = {AddGroup.class, UpdateGroup.class}) Integer targetQty, @Max(value = 32, message = "工单版本不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) Integer revsion, String distinguish, String parentMo, Integer bomRevsion, Date planInputDate, Date planCloseDate, Date actualInputDate, Date actualcLoseDate, String routeId, String inputProcessId, String outputProcessId, Date reachDate, Integer machineQty, String customerId, String orderId, Integer orderSeq, Integer isSchedul, Integer schedulQty, Integer inputQty, Integer outputQty, Integer scrappedQty, Integer failQty, Integer closeFlag, Integer prefreezingState, Boolean enabled, @Size(max = 32, message = "描述信息不能大于200位", groups = {AddGroup.class, UpdateGroup.class}) String description) {
+    public MesMoDesc(@NotEmpty(message = "主键不能为空", groups = {UpdateGroup.class}) String moId, @Size(max = 32, message = "工单号码不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) @NotEmpty(message = "工单号码不能为空", groups = {AddGroup.class, UpdateGroup.class}) String moNumber, @NotEmpty(message = "工单类型不能为空", groups = {AddGroup.class, UpdateGroup.class}) String category, @NotEmpty(message = "料件id不能为空", groups = {AddGroup.class, UpdateGroup.class}) String partId, String partName, String partNo, @NotNull(message = "目标量不能为空", groups = {AddGroup.class, UpdateGroup.class}) Integer targetQty, @Max(value = 32, message = "工单版本不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) Integer revsion, String distinguish, String parentMo, Integer bomRevsion, Date planInputDate, Date planCloseDate, Date actualInputDate, Date actualcLoseDate, String routeId, String inputProcessId, String outputProcessId, Date reachDate, Integer machineQty, String customerId, String orderId, Integer orderSeq, Integer isSchedul, Integer schedulQty, Integer inputQty, Integer outputQty, Integer notQty, Integer scrappedQty, Integer failQty, Integer closeFlag, Integer prefreezingState, Boolean enabled, @Size(max = 32, message = "描述信息不能大于200位", groups = {AddGroup.class, UpdateGroup.class}) String description) {
         this.moId = moId;
         this.moNumber = moNumber;
         this.category = category;
         this.partId = partId;
         this.partName = partName;
+        this.partNo = partNo;
         this.targetQty = targetQty;
         this.revsion = revsion;
         this.distinguish = distinguish;
@@ -128,6 +137,7 @@ public class MesMoDesc extends BaseEntity implements Serializable {
         this.schedulQty = schedulQty;
         this.inputQty = inputQty;
         this.outputQty = outputQty;
+        this.notQty = notQty;
         this.scrappedQty = scrappedQty;
         this.failQty = failQty;
         this.closeFlag = closeFlag;
@@ -181,6 +191,14 @@ public class MesMoDesc extends BaseEntity implements Serializable {
 
     public void setPartName(String partName) {
         this.partName = partName;
+    }
+
+    public String getPartNo() {
+        return partNo;
+    }
+
+    public void setPartNo(String partNo) {
+        this.partNo = partNo;
     }
 
     public Integer getTargetQty() {
@@ -349,6 +367,14 @@ public class MesMoDesc extends BaseEntity implements Serializable {
 
     public void setOutputQty(Integer outputQty) {
         this.outputQty = outputQty;
+    }
+
+    public Integer getNotQty() {
+        return notQty;
+    }
+
+    public void setNotQty(Integer notQty) {
+        this.notQty = notQty;
     }
 
     public Integer getScrappedQty() {

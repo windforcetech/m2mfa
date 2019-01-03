@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.model.PartsRouteModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
+import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 
 import java.util.List;
 
@@ -87,5 +88,5 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
     PartsRouteModel addDetails(String partId);
 
     //获取添加的基本信息
-    List<MesMoDesc>schedulingDetails();
+    PageUtil<MesMoDesc> schedulingDetails(ModescandpartsQuery modescandpartsQuery);
 }

@@ -15,6 +15,7 @@ import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
@@ -139,14 +140,11 @@ public class MesMoScheduleController {
         return ResponseMessage.ok(mesMoScheduleService.getOperationInfo(staffId, scheduleId,stationId));
     }
 
-    @PostMapping("/addDetails")
-    @ApiOperation(value="排产单添加基本信息")
-    @UserOperationLog("排产单添加基本信息")
-    public ResponseMessage<Map> addDetails(){
-        Map m = new HashMap();
-       List<MesMoDesc> mesMoDescs  =   mesMoDescService.schedulingDetails();
-       m.put("mesMoDescs",mesMoDescs);
-        return ResponseMessage.ok(m);
+    @PostMapping("/schedulingDetails")
+    @ApiOperation(value="工单信息")
+    @UserOperationLog("工单信息")
+    public ResponseMessage<PageUtil<MesMoDesc>> schedulingDetails(@RequestBody ModescandpartsQuery modescandpartsQuery){
+        return ResponseMessage.ok(  mesMoDescService.schedulingDetails(modescandpartsQuery));
     }
 
     @PostMapping("/findbyparId")

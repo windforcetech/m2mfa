@@ -11,6 +11,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.model.PartsRouteModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
+import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
@@ -413,7 +414,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     }
 
     @Override
-    public List<MesMoDesc> schedulingDetails() {
+    public PageUtil<MesMoDesc>  schedulingDetails(ModescandpartsQuery query) {
             String sql ="SELECT\n" +
                         "	mmd.mo_id moId,\n" +
                         "	mmd.mo_number moNumber,\n" +
@@ -450,23 +451,38 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                         "	mmd.create_by createBy,\n" +
                         "	mmd.modified_on modifiedOn,\n" +
                         "	mmd.modified_by modifiedBy,\n" +
-                        "	mmd.part_name partName,\n" +
-                        "	mmd.part_no partNo,\n" +
+                        "	bp.name partName,\n" +
+                        "	bp.part_no partNo,\n" +
                         "	bp.part_id partId,\n" +
                         "	bp. NAME NAME,\n" +
                         "	mmd.target_qty - mmd.schedul_qty notQty\n" +
                         "FROM\n" +
                         "	mes_mo_desc mmd\n" +
-                        "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id\n" +
-                        "WHERE\n" +
-                        "	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" +
-                        "OR mmd.close_flag = " + MoStatus.SCHEDULED.getKey() + "\n" +
-                        "OR (\n" +
-                        "	mmd.close_flag = " + MoStatus.PRODUCTION.getKey() + "\n" +
-                        "	AND mmd.is_schedul = 0\n" +
-                        ")";
-            RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDesc.class);
-            return  jdbcTemplate.query(sql,rm);
+                        "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id WHERE\n" ;
+               if(StringUtils.isNotEmpty(query.getPartNo())){
+                    sql +=" bp.part_no LIKE '%"+query.getPartNo()+"%'" ;
+                }
+              if(StringUtils.isNotEmpty(query.getMoNumber()) && StringUtils.isNotEmpty(query.getPartNo())){
+                    sql +="  and mmd.mo_number LIKE'%"+query.getMoNumber()+"%' " ;
+               }
+              if(StringUtils.isNotEmpty(query.getMoNumber()) && !StringUtils.isNotEmpty(query.getPartNo())){
+                   sql +="   mmd.mo_number LIKE'%"+query.getMoNumber()+"%' " ;
+              }
+             if(StringUtils.isNotEmpty(query.getMoNumber()) ||  StringUtils.isNotEmpty(query.getPartNo())){
+                   sql += " and ( 	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" ;
+              }else {
+                  sql += " ( 	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" ;
+              }
+              sql += "OR mmd.close_flag = " + MoStatus.SCHEDULED.getKey() + "\n" +
+                 "OR (\n" +
+                 "	mmd.close_flag = " + MoStatus.PRODUCTION.getKey() + "\n" +
+                 "	AND mmd.is_schedul = 0\n" +
+                 ") ) ";
+              RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDesc.class);
+              List<MesMoDesc>listcount = jdbcTemplate.query(sql,rm);
+             sql += "limit  " + (query.getPage() - 1) *query.getSize()+" , "+query.getSize();
+             List<MesMoDesc>list = jdbcTemplate.query(sql,rm);
+            return PageUtil.of(list,listcount.size(),query.getSize(),query.getPage());
     }
 
 }
