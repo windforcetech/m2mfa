@@ -1,16 +1,17 @@
 package com.m2micro.m2mfa.mo.constant;
 
 /**
- * 工单状态
+ * 排产单状态
  */
 public enum MoScheduleStatus {
-    INITIAL(0,"初始"),
+    INITIAL(0,"未开始"),
     AUDITED(1,"已审待产"),
-    //SCHEDULED(2,"已排产"),
-    PRODUCTION(2,"生产中"),
-    CLOSE(10,"结案"),
-    FORCECLOSE(11,"强制结案"),
-    FROZEN(12,"冻结");
+    PRODUCTION(2,"执行中"),
+    CLOSE(3,"已完成"),
+    EXCEEDED(4,"已超量"),
+    FROZEN(5,"冻结"),
+    FORCECLOSE(10,"强制结束");
+
 
     private final Integer key;
     private final String value;
@@ -36,20 +37,20 @@ public enum MoScheduleStatus {
             case 1:
                 ms = MoScheduleStatus.AUDITED;
                 break;
-            /*case 2:
-                ms = MoScheduleStatus.SCHEDULED;
-                break;*/
-            case 3:
+            case 2:
                 ms = MoScheduleStatus.PRODUCTION;
                 break;
-            case 10:
+            case 3:
                 ms = MoScheduleStatus.CLOSE;
                 break;
-            case 11:
-                ms = MoScheduleStatus.FORCECLOSE;
+            case 4:
+                ms = MoScheduleStatus.EXCEEDED;
                 break;
-            case 12:
+            case 5:
                 ms = MoScheduleStatus.FROZEN;
+                break;
+            case 10:
+                ms = MoScheduleStatus.FORCECLOSE;
                 break;
             default:
                 ms = MoScheduleStatus.INITIAL;

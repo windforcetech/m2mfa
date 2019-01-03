@@ -454,7 +454,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                         "	bp.name partName,\n" +
                         "	bp.part_no partNo,\n" +
                         "	bp.part_id partId,\n" +
-                        "	bp. NAME NAME,\n" +
+                        "	bp.name name,\n" +
                         "	mmd.target_qty - mmd.schedul_qty notQty\n" +
                         "FROM\n" +
                         "	mes_mo_desc mmd\n" +
