@@ -9,6 +9,7 @@ import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
+import com.m2micro.m2mfa.pr.vo.MesPartvo;
 
 import java.util.List;
 
@@ -97,5 +98,5 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     void forceClose(String id);
 
-
+    MesPartvo findbymoId(String moId  );
 }

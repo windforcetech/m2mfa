@@ -1,8 +1,7 @@
 package com.m2micro.m2mfa.mo.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.base.entity.BaseParts;
-import com.m2micro.m2mfa.base.service.BasePartsService;
+import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
@@ -17,14 +16,13 @@ import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.m2micro.framework.commons.util.PageUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -36,6 +34,7 @@ import java.util.List;
  */
 @Service
 public class MesMoDescServiceImpl implements MesMoDescService {
+
     @Autowired
     MesMoDescRepository mesMoDescRepository;
     @Autowired
@@ -46,8 +45,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     MesPartRouteRepository mesPartRouteRepository;
     @Autowired
     MesMoScheduleService mesMoScheduleService;
-    @Autowired
-    private BasePartsService basePartsService;
+
 
     public MesMoDescRepository getRepository() {
         return mesMoDescRepository;
@@ -484,5 +482,6 @@ public class MesMoDescServiceImpl implements MesMoDescService {
              List<MesMoDesc>list = jdbcTemplate.query(sql,rm);
             return PageUtil.of(list,listcount.size(),query.getSize(),query.getPage());
     }
+
 
 }

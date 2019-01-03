@@ -14,7 +14,11 @@ import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
+import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.pr.entity.MesPartRoute;
+import com.m2micro.m2mfa.pr.service.MesPartRouteService;
+import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
 import com.querydsl.core.BooleanBuilder;
@@ -37,6 +41,10 @@ import java.util.List;
  */
 @Service
 public class MesMoScheduleServiceImpl implements MesMoScheduleService {
+    @Autowired
+    private MesMoDescService mesMoDescService;
+    @Autowired
+    private MesPartRouteService mesPartRouteService;
     @Autowired
     MesMoScheduleRepository mesMoScheduleRepository;
     @Autowired
@@ -477,6 +485,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @Override
     public void forceClose(String id) {
 
+    }
+
+    @Override
+    public MesPartvo findbymoId(String moId) {
+        MesMoDesc moDesc = mesMoDescService.findById(moId).orElse(null);
+        if(moDesc == null){
+            throw  new MMException("工单ID有误。");
+        }
+        MesPartvo  mesPartvos =mesPartRouteService.findparId(moDesc.getPartId());
+        if(mesPartvos==null){
+            throw  new MMException("未找到关联的图程数据。");
+        }
+        return mesPartvos;
     }
 
 

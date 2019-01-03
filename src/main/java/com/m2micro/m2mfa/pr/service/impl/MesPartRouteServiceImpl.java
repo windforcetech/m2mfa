@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.pr.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
@@ -11,6 +12,7 @@ import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteProcess;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
+import com.m2micro.m2mfa.pr.entity.QMesPartRoute;
 import com.m2micro.m2mfa.pr.query.MesPartRouteQuery;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import com.m2micro.m2mfa.pr.service.MesPartRouteProcessService;
@@ -18,22 +20,17 @@ import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.service.MesPartRouteStationService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.pr.entity.QMesPartRoute;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 料件途程设定主档 服务实现类
@@ -42,6 +39,7 @@ import java.util.Set;
  */
 @Service
 public class MesPartRouteServiceImpl implements MesPartRouteService {
+
     @Autowired
     private BaseItemsTargetService baseItemsTargetService;
     @Autowired

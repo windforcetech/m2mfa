@@ -48,8 +48,7 @@ public class MesMoScheduleController {
     MesMoScheduleService mesMoScheduleService;
     @Autowired
     private MesMoDescService mesMoDescService;
-    @Autowired
-    private MesPartRouteService mesPartRouteService;
+
 
     /**
      * 列表
@@ -153,15 +152,8 @@ public class MesMoScheduleController {
     @PostMapping("/findbymoId")
     @ApiOperation(value="通过工单ID获取关联的图程数据")
     @UserOperationLog("通过工单ID获取关联的图程数据")
-    public ResponseMessage<MesPartvo> addDetails(@ApiParam(value = "moId",required=true) @RequestParam(required = true) String moId){
-       MesMoDesc moDesc = mesMoDescService.findById(moId).orElse(null);
-       if(moDesc == null){
-           return ResponseMessage.error("工单ID有误。");
-       }
-        MesPartvo  mesPartvos =mesPartRouteService.findparId(moDesc.getPartId());
-        if(mesPartvos==null){
-            return ResponseMessage.error("未找到关联的图程数据。");
-        }
-        return ResponseMessage.ok(mesPartvos);
+    public ResponseMessage<MesPartvo> findbymoId(@ApiParam(value = "moId",required=true) @RequestParam(required = true) String moId){
+
+        return ResponseMessage.ok(mesMoScheduleService.findbymoId(moId));
     }
 }
