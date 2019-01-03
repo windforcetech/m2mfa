@@ -161,10 +161,5 @@ public class MesMoScheduleController {
         return ResponseMessage.ok(mesMoScheduleService.findbymoId(moId));
     }
 
-    @PostMapping("/findbyMachine")
-    @ApiOperation(value="机台信息")
-    @UserOperationLog("机台信息")
-    public ResponseMessage<List<BaseMachine>> findbyMachine(){
-        return ResponseMessage.ok(baseMachineService.findbyMachine());
-    }
+
 }

@@ -140,15 +140,6 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         return baseMachineRepository.findByCodeAndMachineIdNot(code,machineId);
     }
 
-    @Override
-    public List<BaseMachine> findbyMachine() {
-        String sql ="select o.department_name  department_name,bm.*  from base_machine bm LEFT JOIN  organization  o  on  bm.department_id = o.uuid";
-        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
-        List<BaseMachine> list = jdbcTemplate.query(sql,rm);
-        if(list.isEmpty()){
-            throw  new MMException("未找到机台信息。");
-        }
-        return list;
-    }
+
 
 }
