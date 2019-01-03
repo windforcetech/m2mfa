@@ -38,5 +38,5 @@ public interface MesPartRouteService extends BaseService<MesPartRoute,String> {
      String  delete(String id);
 
      //通过料件查找图程数据
-     Set<MesPartvo> findparId(String  partId);
+     MesPartvo findparId(String  partId);
 }

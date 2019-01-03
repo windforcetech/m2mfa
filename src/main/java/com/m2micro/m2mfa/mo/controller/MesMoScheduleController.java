@@ -152,9 +152,9 @@ public class MesMoScheduleController {
     @PostMapping("/findbyparId")
     @ApiOperation(value="通过料件ID获取关联的图程数据")
     @UserOperationLog("通过料件ID获取关联的图程数据")
-    public ResponseMessage<Set<MesPartvo>> addDetails(@ApiParam(value = "partId",required=true) @RequestParam(required = true) String partId){
-        Set<MesPartvo>  mesPartvos =mesPartRouteService.findparId(partId);
-        if(mesPartvos.isEmpty()){
+    public ResponseMessage<MesPartvo> addDetails(@ApiParam(value = "partId",required=true) @RequestParam(required = true) String partId){
+        MesPartvo  mesPartvos =mesPartRouteService.findparId(partId);
+        if(mesPartvos==null){
             return ResponseMessage.error("料件没有关联的图程数据。");
         }
         return ResponseMessage.ok(mesPartvos);
