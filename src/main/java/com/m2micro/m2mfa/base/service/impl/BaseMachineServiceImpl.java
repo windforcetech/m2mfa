@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
@@ -137,6 +138,17 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     @Override
     public List<BaseMachine> findByCodeAndMachineIdNot(String code, String machineId) {
         return baseMachineRepository.findByCodeAndMachineIdNot(code,machineId);
+    }
+
+    @Override
+    public List<BaseMachine> findbyMachine() {
+        String sql ="select o.department_name  department_name,bm.*  from base_machine bm LEFT JOIN  organization  o  on  bm.department_id = o.uuid";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
+        List<BaseMachine> list = jdbcTemplate.query(sql,rm);
+        if(list.isEmpty()){
+            throw  new MMException("未找到机台信息。");
+        }
+        return list;
     }
 
 }

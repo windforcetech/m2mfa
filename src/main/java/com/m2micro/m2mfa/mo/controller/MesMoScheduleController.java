@@ -6,7 +6,9 @@ import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.base.service.BaseMachineService;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -28,6 +30,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import sun.nio.cs.ext.MacHebrew;
 
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +51,8 @@ public class MesMoScheduleController {
     MesMoScheduleService mesMoScheduleService;
     @Autowired
     private MesMoDescService mesMoDescService;
-
+    @Autowired
+    private BaseMachineService baseMachineService;
 
     /**
      * 列表
@@ -155,5 +159,12 @@ public class MesMoScheduleController {
     public ResponseMessage<MesPartvo> findbymoId(@ApiParam(value = "moId",required=true) @RequestParam(required = true) String moId){
 
         return ResponseMessage.ok(mesMoScheduleService.findbymoId(moId));
+    }
+
+    @PostMapping("/findbyMachine")
+    @ApiOperation(value="机台信息")
+    @UserOperationLog("机台信息")
+    public ResponseMessage<List<BaseMachine>> findbyMachine(){
+        return ResponseMessage.ok(baseMachineService.findbyMachine());
     }
 }
