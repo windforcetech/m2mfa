@@ -316,9 +316,11 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         String sql ="select * from mes_part_route where part_id ='"+partId+"'";
         RowMapper rms= BeanPropertyRowMapper.newInstance(MesPartRoute.class);
         List<MesPartRoute> mesPartRoutes  = jdbcTemplate.query(sql ,rms);
+        if(!mesPartRoutes.isEmpty()){
+            return  info(mesPartRoutes.get(0).getPartRouteId());
+        }
 
+        return null;
 
-
-        return  info(mesPartRoutes.get(0).getPartRouteId());
     }
 }

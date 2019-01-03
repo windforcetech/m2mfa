@@ -18,6 +18,7 @@ import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import io.swagger.annotations.Api;
@@ -147,13 +148,17 @@ public class MesMoScheduleController {
         return ResponseMessage.ok(  mesMoDescService.schedulingDetails(modescandpartsQuery));
     }
 
-    @PostMapping("/findbyparId")
-    @ApiOperation(value="通过料件ID获取关联的图程数据")
-    @UserOperationLog("通过料件ID获取关联的图程数据")
-    public ResponseMessage<MesPartvo> addDetails(@ApiParam(value = "partId",required=true) @RequestParam(required = true) String partId){
-        MesPartvo  mesPartvos =mesPartRouteService.findparId(partId);
+    @PostMapping("/findbymoId")
+    @ApiOperation(value="通过工单ID获取关联的图程数据")
+    @UserOperationLog("通过工单ID获取关联的图程数据")
+    public ResponseMessage<MesPartvo> addDetails(@ApiParam(value = "moId",required=true) @RequestParam(required = true) String moId){
+       MesMoDesc moDesc = mesMoDescService.findById(moId).orElse(null);
+       if(moDesc == null){
+           return ResponseMessage.error("工单ID有误。");
+       }
+        MesPartvo  mesPartvos =mesPartRouteService.findparId(moDesc.getPartId());
         if(mesPartvos==null){
-            return ResponseMessage.error("料件没有关联的图程数据。");
+            return ResponseMessage.error("未找到关联的图程数据。");
         }
         return ResponseMessage.ok(mesPartvos);
     }
