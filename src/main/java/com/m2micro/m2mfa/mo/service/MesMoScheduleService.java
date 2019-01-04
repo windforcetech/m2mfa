@@ -102,5 +102,7 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
     void forceClose(String id);
 
     MesPartvo findbymoId(String moId  );
-    public void save(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations)
+
+
+     void save(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations);
 }

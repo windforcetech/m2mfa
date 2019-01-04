@@ -38,7 +38,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @NotEmpty(message="排产单任务主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "任务主键")
     private String jobid;
-    @NotEmpty(message="排产单产线主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
+
     @ApiModelProperty(value = "产线主键")
     private Integer lineId;
 

@@ -70,6 +70,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private MesMoScheduleProcessService mesMoScheduleProcessService;
     @Autowired
     private MesMoScheduleStationService mesMoScheduleStationService;
+    @Autowired
+    private BaseShiftService baseShiftService;
 
     @SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
@@ -529,7 +531,9 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(basePartsService.findById(mesMoSchedule.getPartId()).orElse(null) == null){
             throw  new MMException("料件ID有误。");
         }
-
+        if( baseShiftService.findById(mesMoSchedule.getShiftId()).orElse(null)==null){
+            throw  new MMException("班别ID有误。");
+        }
         this.save(mesMoSchedule);
 
 
