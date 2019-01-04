@@ -3,6 +3,11 @@ spring:
     url: jdbc:mysql://192.168.1.132:3306/factory_application?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
     username: root
     password:
+    druid:
+      max-active: 10
+      min-idle: 1
+      max-wait: 60000
+      initial-size: 5
 
   cache:
     type: redis
