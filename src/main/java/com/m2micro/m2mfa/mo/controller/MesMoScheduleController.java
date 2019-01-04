@@ -68,7 +68,7 @@ public class MesMoScheduleController {
     /**
      * 详情
      */
-    @RequestMapping("/info/{id}")
+    @PostMapping("/info/{id}")
     @ApiOperation(value="生产排程表表头详情")
     @UserOperationLog("生产排程表表头详情")
     public ResponseMessage<MesMoSchedule> info(@PathVariable("id") String id){

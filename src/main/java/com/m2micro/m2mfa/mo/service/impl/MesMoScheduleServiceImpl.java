@@ -81,6 +81,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     BaseShiftRepository baseShiftRepository;
     @Autowired
     private BaseShiftService baseShiftService;
+    @Autowired
+    private MesMoScheduleShiftService mesMoScheduleShiftService;
 
     @SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
@@ -553,17 +555,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @Transactional
     public void save(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations) {
         String ScheduleId  = UUIDUtil.getUUID();
-        mesMoSchedule.setScheduleId(ScheduleId);
-        ValidatorUtil.validateEntity(mesMoSchedule, AddGroup.class);
-        if(mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null)==null){
-            throw  new MMException("工单ID有误。");
-        }
-        if(basePartsService.findById(mesMoSchedule.getPartId()).orElse(null) == null){
-            throw  new MMException("料件ID有误。");
-        }
-        if( baseShiftService.findById(mesMoSchedule.getShiftId()).orElse(null)==null){
-            throw  new MMException("班别ID有误。");
-        }
+        checkschedule(mesMoSchedule, ScheduleId);
         //保存排产单
         this.save(mesMoSchedule);
         //保存职员
@@ -572,6 +564,29 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         saveScheduleProcess(mesMoScheduleProcesses, ScheduleId);
         //保持共位
         saveScheduleStation(mesMoScheduleStations, ScheduleId);
+    }
+
+    private void checkschedule(MesMoSchedule mesMoSchedule, String scheduleId) {
+        mesMoSchedule.setScheduleId(scheduleId);
+        ValidatorUtil.validateEntity(mesMoSchedule, AddGroup.class);
+        if(mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null)==null){
+            throw  new MMException("工单ID有误。");
+        }
+        if(basePartsService.findById(mesMoSchedule.getPartId()).orElse(null) == null){
+            throw  new MMException("料件ID有误。");
+        }
+        String []shifts=mesMoSchedule.getShiftId().split(",");
+        for(int i=0 ;i<shifts.length;i++){
+            if( baseShiftService.findById(shifts[i]).orElse(null)==null){
+                throw  new MMException("班别ID有误。");
+            }
+            MesMoScheduleShift mesMoScheduleShift=  new MesMoScheduleShift();
+            mesMoScheduleShift .setId(UUIDUtil.getUUID());
+            mesMoScheduleShift.setScheduleId(scheduleId);
+            mesMoScheduleShift.setShiftId(shifts[i]);
+            mesMoScheduleShiftService.save(mesMoScheduleShift);
+        }
+        mesMoSchedule.setShiftId("班别");
     }
 
     private void saveScheduleStation(List<MesMoScheduleStation> mesMoScheduleStations, String scheduleId) {

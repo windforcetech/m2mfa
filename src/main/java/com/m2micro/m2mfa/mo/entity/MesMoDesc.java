@@ -374,7 +374,7 @@ public class MesMoDesc extends BaseEntity implements Serializable {
     }
 
     public void setNotQty(Integer notQty) {
-        this.notQty = notQty;
+        this.notQty = notQty==null ? 0 :notQty ;
     }
 
     public Integer getScrappedQty() {
