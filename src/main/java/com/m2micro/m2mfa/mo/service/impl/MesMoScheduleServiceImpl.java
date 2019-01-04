@@ -3,15 +3,15 @@ package com.m2micro.m2mfa.mo.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.base.repository.BaseShiftRepository;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.QMesMoSchedule;
-import com.m2micro.m2mfa.mo.model.MesMoDescModel;
-import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
-import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.model.*;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
@@ -31,6 +31,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,6 +55,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesRecordWorkRepository mesRecordWorkRepository;
+    @Autowired
+    BaseShiftRepository baseShiftRepository;
 
     @SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
@@ -497,7 +501,25 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(mesPartvos==null){
             throw  new MMException("未找到关联的图程数据。");
         }
+
+        BigDecimal scheduleTime = mesMoScheduleRepository.getScheduleTime(moId);
+        mesPartvos.setScheduleTime(scheduleTime);
         return mesPartvos;
+    }
+
+    @Override
+    public MesMoScheduleInfoModel addDetails() {
+        List<BaseShift> all = baseShiftRepository.findAll();
+        List<BaseShiftModel> baseShiftModels = new ArrayList<>();
+        all.stream().forEach(baseShift->{
+            BaseShiftModel baseShiftModel = new BaseShiftModel();
+            baseShiftModel.setShiftId(baseShift.getShiftId());
+            baseShiftModel.setName(baseShift.getName());
+            baseShiftModel.setCode(baseShift.getCode());
+
+
+        });
+        return null;
     }
 
 
