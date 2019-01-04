@@ -38,6 +38,8 @@ public class MesMoScheduleStaff extends BaseEntity implements Serializable {
     @NotEmpty(message="员工ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "员工id")
     private String staffId;
+    @ApiModelProperty(value = "班别id")
+    private String shiftId;
     @ApiModelProperty(value = "预计开始时间")
     private Date planStartTime;
     @ApiModelProperty(value = "预计结束时间")
@@ -50,6 +52,14 @@ public class MesMoScheduleStaff extends BaseEntity implements Serializable {
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+
+    public String getShiftId() {
+        return shiftId;
+    }
+
+    public void setShiftId(String shiftId) {
+        this.shiftId = shiftId;
+    }
 
     public String getId() {
         return id;
