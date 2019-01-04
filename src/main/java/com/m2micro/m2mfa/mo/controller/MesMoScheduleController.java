@@ -31,7 +31,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import sun.nio.cs.ext.MacHebrew;
 
 import java.util.HashMap;
 import java.util.List;
@@ -158,6 +157,14 @@ public class MesMoScheduleController {
     public ResponseMessage<MesPartvo> findbymoId(@ApiParam(value = "moId",required=true) @RequestParam(required = true) String moId){
 
         return ResponseMessage.ok(mesMoScheduleService.findbymoId(moId));
+    }
+
+    @PostMapping("/addDetails")
+    @ApiOperation(value="排产单新增要返回的数据")
+    @UserOperationLog("排产单新增要返回的数据")
+    public ResponseMessage<MesPartvo> addDetails(){
+
+        return ResponseMessage.ok();
     }
 
 
