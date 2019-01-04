@@ -9,6 +9,7 @@ import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleStaff;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleStation;
+import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
@@ -104,5 +105,12 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
     MesPartvo findbymoId(String moId  );
 
 
-     void save(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations);
+    void save(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations);
+
+    /**
+     * 排产单新增要返回的数据
+     * @return  排产单新增要返回的数据
+     */
+    MesMoScheduleInfoModel addDetails();
+
 }

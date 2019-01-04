@@ -16,6 +16,7 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
@@ -162,9 +163,8 @@ public class MesMoScheduleController {
     @PostMapping("/addDetails")
     @ApiOperation(value="排产单新增要返回的数据")
     @UserOperationLog("排产单新增要返回的数据")
-    public ResponseMessage<MesPartvo> addDetails(){
-
-        return ResponseMessage.ok();
+    public ResponseMessage<MesMoScheduleInfoModel> addDetails(){
+        return ResponseMessage.ok(mesMoScheduleService.addDetails());
     }
 
 

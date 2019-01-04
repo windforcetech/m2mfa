@@ -2,7 +2,9 @@ package com.m2micro.m2mfa.mo.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.base.repository.BaseShiftRepository;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
@@ -10,6 +12,8 @@ import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.*;
+import com.m2micro.m2mfa.mo.model.BaseShiftModel;
+import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
@@ -30,6 +34,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -70,6 +77,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private MesMoScheduleProcessService mesMoScheduleProcessService;
     @Autowired
     private MesMoScheduleStationService mesMoScheduleStationService;
+    @Autowired
+    BaseShiftRepository baseShiftRepository;
     @Autowired
     private BaseShiftService baseShiftService;
 
@@ -516,7 +525,28 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(mesPartvos==null){
             throw  new MMException("未找到关联的图程数据。");
         }
+        BigDecimal scheduleTime = mesMoScheduleRepository.getScheduleTime(moId);
+        mesPartvos.setScheduleTime(scheduleTime);
         return mesPartvos;
+    }
+
+
+
+    @Override
+    public MesMoScheduleInfoModel addDetails() {
+        List<BaseShift> all = baseShiftRepository.findAll();
+        List<BaseShiftModel> baseShiftModels = new ArrayList<>();
+        all.stream().forEach(baseShift->{
+            BaseShiftModel baseShiftModel = new BaseShiftModel();
+            baseShiftModel.setShiftId(baseShift.getShiftId());
+            baseShiftModel.setName(baseShift.getName());
+            baseShiftModel.setCode(baseShift.getCode());
+            baseShiftModel.setEffectiveTime(getSumEffectiveTime(baseShift));
+            baseShiftModels.add(baseShiftModel);
+        });
+        MesMoScheduleInfoModel mesMoScheduleInfoModel = new MesMoScheduleInfoModel();
+        mesMoScheduleInfoModel.setBaseShiftModels(baseShiftModels);
+        return mesMoScheduleInfoModel;
     }
 
     @Override
@@ -580,7 +610,6 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoScheduleProcessService.save(mesMoScheduleProcess);
         }
 
-
         for(MesMoScheduleStation mesMoScheduleStation : mesMoScheduleStations){
             String  schedulestation  = UUIDUtil.getUUID();
             mesMoScheduleStation.setId(schedulestation);
@@ -596,5 +625,49 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoScheduleStationService.save(mesMoScheduleStation);
         }
 
+
+
+
     }
+
+    /**
+     * 获取班别的有效时间
+     * @param baseShift
+     *          班别信息
+     * @return 获取班别的有效时间
+     */
+    private long getSumEffectiveTime(BaseShift baseShift) {
+        long time1 = getEffectiveTime(baseShift.getOffTime1(),baseShift.getOnTime1(),baseShift.getRestTime1());
+        long time2 = getEffectiveTime(baseShift.getOffTime2(),baseShift.getOnTime2(),baseShift.getRestTime2());
+        long time3 = getEffectiveTime(baseShift.getOffTime3(),baseShift.getOnTime3(),baseShift.getRestTime3());
+        long time4 = getEffectiveTime(baseShift.getOffTime4(),baseShift.getOnTime4(),baseShift.getRestTime4());
+        return time1+time2+time3+time4;
+    }
+
+    /**
+     * 获取上下班的有效时间
+     * @param offTime
+     *          下班时间
+     * @param onTime
+     *          上班时间
+     * @param restTime
+     *          休息时间
+     * @return  获取上下班的有效时间
+     */
+    private long getEffectiveTime (String offTime,String onTime,Integer restTime) {
+        if(StringUtils.isEmpty(offTime)||StringUtils.isEmpty(onTime)){
+            throw new MMException("无法获取有效时间");
+        }
+        Date offDate = DateUtil.stringToDate(offTime, DateUtil.TIME_PATTERN);
+        Date onDate = DateUtil.stringToDate(onTime, DateUtil.TIME_PATTERN);
+        //上班时间大于下班时间
+        if(offDate.compareTo(onDate)<0){
+            offDate = DateUtil.addDateDays(offDate, 1);
+        }
+        if(restTime==null){
+            restTime=0;
+        }
+        return offDate.getTime()-onDate.getTime()-restTime*60*1000;
+    }
+
 }

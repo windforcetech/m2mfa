@@ -25,4 +25,6 @@ public class BaseShiftModel {
     private String code;
     @ApiModelProperty(value = "名称")
     private String name;
+    @ApiModelProperty(value = "有效时间")
+    private Long effectiveTime;
 }
