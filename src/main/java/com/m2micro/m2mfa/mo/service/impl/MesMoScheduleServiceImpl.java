@@ -153,7 +153,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         // 查找员工生产中排产单优先级最高的排产单id
         String sqlProduction = "SELECT\n" +
                 "		ms.schedule_id scheduleId,\n" +
-                "		max(ms.sequence) sequence\n" +
+                "		min(ms.sequence) sequence\n" +
                 "	FROM\n" +
                 "		mes_mo_schedule ms,\n" +
                 "		mes_mo_schedule_staff mss\n" +
@@ -171,7 +171,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         // 查找员工已审待产排产单优先级最高的排产单id
         String sqlAudited = "SELECT\n" +
                             "		ms.schedule_id scheduleId,\n" +
-                            "		max(ms.sequence) sequence\n" +
+                            "		min(ms.sequence) sequence\n" +
                             "	FROM\n" +
                             "		mes_mo_schedule ms,\n" +
                             "		mes_mo_schedule_staff mss\n" +
