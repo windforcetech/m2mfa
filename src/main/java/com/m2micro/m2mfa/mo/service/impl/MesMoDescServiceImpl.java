@@ -386,7 +386,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                     "	bp.part_no partNo,\n" +
                     "	bp.`name` NAME,\n" +
                     "	bp.spec spec,\n" +
-                    "	brd.route_id routeId,\n" +
+                    "	brd.part_route_id routeId,\n" +
                     "	brd.route_name routeName,\n" +
                     "	mpr.input_process_id inputProcessId,\n" +
                     "	bpr.process_name inputProcessName,\n" +
