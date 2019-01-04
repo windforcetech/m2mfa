@@ -176,4 +176,16 @@ public class BaseStaffController {
         return ResponseMessage.ok();
     }
 
+    /**
+     * 列表
+     */
+    @RequestMapping(value = "/productionlist",method = RequestMethod.POST)
+    @ApiOperation(value="排产单员工（职员）表列表")
+    @UserOperationLog("排产单员工（职员）表列表")
+    public ResponseMessage<PageUtil<BaseStaffDetailObj>> productionlist(@RequestBody BaseStaffQueryObj baseStaffQueryObj){
+
+        PageUtil<BaseStaffDetailObj> page = baseStaffService.productionlist(baseStaffQueryObj);
+
+        return ResponseMessage.ok(page);
+    }
 }

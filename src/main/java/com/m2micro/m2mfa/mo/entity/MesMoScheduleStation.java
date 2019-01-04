@@ -3,10 +3,13 @@ package com.m2micro.m2mfa.mo.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -20,15 +23,20 @@ import io.swagger.annotations.ApiModelProperty;
 public class MesMoScheduleStation extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    @NotEmpty(message="生产排程工位主键不能为空",groups = {UpdateGroup.class})
     @ApiModelProperty(value = "主键")
     @Id
     private String id;
+    @NotEmpty(message="排程主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "排程主键")
     private String scheduleId;
+    @NotEmpty(message="工序主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "工序")
     private String processId;
+    @NotEmpty(message="工位主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "工位")
     private String stationId;
+
     @ApiModelProperty(value = "行为")
     private String behaviorId;
     @ApiModelProperty(value = "前置时间")

@@ -22,6 +22,7 @@ import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
@@ -51,8 +52,7 @@ public class MesMoScheduleController {
     MesMoScheduleService mesMoScheduleService;
     @Autowired
     private MesMoDescService mesMoDescService;
-    @Autowired
-    private BaseMachineService baseMachineService;
+
 
     /**
      * 列表
@@ -79,13 +79,12 @@ public class MesMoScheduleController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ApiOperation(value="保存生产排程表表头")
     @UserOperationLog("保存生产排程表表头")
-    public ResponseMessage<MesMoSchedule> save(@RequestBody MesMoSchedule mesMoSchedule){
-        ValidatorUtil.validateEntity(mesMoSchedule, AddGroup.class);
-        mesMoSchedule.setScheduleId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(mesMoScheduleService.save(mesMoSchedule));
+    public ResponseMessage save(@RequestBody Productionorder productionorder){
+        mesMoScheduleService.save(productionorder.getMesMoSchedule(),productionorder.getMesMoScheduleStaffs(),productionorder.getMesMoScheduleProcesses(),productionorder.getMesMoScheduleStations());
+        return ResponseMessage.ok();
     }
 
     /**

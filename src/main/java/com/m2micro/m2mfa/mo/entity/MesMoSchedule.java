@@ -3,9 +3,12 @@ package com.m2micro.m2mfa.mo.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -19,9 +22,11 @@ import io.swagger.annotations.ApiModelProperty;
 public class MesMoSchedule extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    @NotEmpty(message="排产单主键不能为空",groups = {UpdateGroup.class})
     @ApiModelProperty(value = "主键")
     @Id
     private String scheduleId;
+    @NotEmpty(message="排产单号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "排产单号")
     private String scheduleNo;
     @ApiModelProperty(value = "排程日期")
@@ -30,16 +35,22 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     private String revsion;
     @ApiModelProperty(value = "来源")
     private Integer source;
+    @NotEmpty(message="排产单任务主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "任务主键")
     private String jobid;
+    @NotEmpty(message="排产单产线主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "产线主键")
     private Integer lineId;
+
     @ApiModelProperty(value = "工作群组")
     private String machineId;
+    @NotEmpty(message="工单ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "工单id")
     private String moId;
+    @NotEmpty(message="料件编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "料件编号")
     private String partId;
+    @NotEmpty(message="版本不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "班别")
     private String shiftId;
     @ApiModelProperty(value = "生产顺序")

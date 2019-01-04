@@ -9,6 +9,7 @@ import com.m2micro.m2mfa.base.query.BaseStaffQuery;
 import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
 import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.m2mfa.base.vo.BaseStaffDetailObj;
+import com.m2micro.m2mfa.base.vo.BaseStaffQueryObj;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -76,8 +77,28 @@ public class BaseStaffServiceImpl implements BaseStaffService {
     }
 
     @Override
+    public PageUtil<BaseStaffDetailObj> productionlist(BaseStaffQueryObj baseStaffQueryObj) {
+        BaseStaffQuery query=new BaseStaffQuery();
+        query.setCode(baseStaffQueryObj.getCode());
+        query.setName(baseStaffQueryObj.getName());
+        if(StringUtils.isNotEmpty(baseStaffQueryObj.getDepartmentId())){
+            List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
+            query.setDutyIds(obtainpost);
+        }
+        query.setSize(baseStaffQueryObj.getSize());
+        query.setPage(baseStaffQueryObj.getPage());
+       return  this.list(query);
+    }
+
+    @Override
     public List<BaseStaff> findByCodeAndStaffIdNot(String code, String staffId) {
         return baseStaffRepository.findByCodeAndStaffIdNot(code,staffId);
+    }
+
+    @Override
+    public BaseStaff finydbStaffNo(String code) {
+
+        return baseStaffRepository.finydbStaffNo(code);
     }
 
 //    @Override

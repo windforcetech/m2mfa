@@ -3,19 +3,22 @@ package com.m2micro.m2mfa.mo.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
-import com.m2micro.m2mfa.mo.entity.MesMoDesc;
-import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
-import com.m2micro.m2mfa.mo.entity.QMesMoSchedule;
+import com.m2micro.m2mfa.mo.entity.*;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
-import com.m2micro.m2mfa.mo.service.MesMoDescService;
-import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.mo.service.*;
+import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
@@ -30,6 +33,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -53,6 +57,24 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesRecordWorkRepository mesRecordWorkRepository;
+    @Autowired
+    private BasePartsService basePartsService;
+    @Autowired
+    private BaseProcessService baseProcessService;
+    @Autowired
+    private BaseStationService baseStationService;
+    @Autowired
+    private BaseStaffService baseStaffService;
+    @Autowired
+    private MesMoScheduleStaffService mesMoScheduleStaffService;
+    @Autowired
+    private BasePackService basePackService;
+    @Autowired
+    private BaseMoldService baseMoldService;
+    @Autowired
+    private MesMoScheduleProcessService mesMoScheduleProcessService;
+    @Autowired
+    private MesMoScheduleStationService mesMoScheduleStationService;
 
     @SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
@@ -498,6 +520,83 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             throw  new MMException("未找到关联的图程数据。");
         }
         return mesPartvos;
+    }
+
+    @Override
+    @Transactional
+    public void save( MesMoSchedule mesMoSchedule,List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses,List<MesMoScheduleStation> mesMoScheduleStations) {
+        String ScheduleId  = UUIDUtil.getUUID();
+        mesMoSchedule.setScheduleId(ScheduleId);
+        ValidatorUtil.validateEntity(mesMoSchedule, AddGroup.class);
+       if(mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null)==null){
+           throw  new MMException("工单ID有误。");
+       }
+      if(basePartsService.findById(mesMoSchedule.getPartId()).orElse(null) == null){
+          throw  new MMException("料件ID有误。");
+      }
+
+      this.save(mesMoSchedule);
+
+
+      for(MesMoScheduleStaff mesMoScheduleStaff : mesMoScheduleStaffs){
+          String  staffId = UUIDUtil.getUUID();
+          mesMoScheduleStaff.setId(staffId);
+          mesMoScheduleStaff.setScheduleId(ScheduleId);
+
+          ValidatorUtil.validateEntity(mesMoScheduleStaff, AddGroup.class);
+
+          if(baseProcessService.findById(mesMoScheduleStaff.getProcessId()).orElse(null)==null){
+              throw  new MMException("排程人员工序ID有误。");
+          }
+          if(baseStationService.findById(mesMoScheduleStaff.getStationId()).orElse(null)== null){
+              throw  new MMException("排程人员工位ID有误。");
+          }
+         if(baseStaffService.finydbStaffNo(mesMoScheduleStaff.getStaffId())==null){
+             throw  new MMException("排程人员,员工工号有误。");
+         }
+          mesMoScheduleStaffService.save(mesMoScheduleStaff);
+      }
+
+
+      for(MesMoScheduleProcess mesMoScheduleProcess : mesMoScheduleProcesses){
+          String  scheduleprocessId = UUIDUtil.getUUID();
+          mesMoScheduleProcess.setId(scheduleprocessId);
+          mesMoScheduleProcess.setScheduleId(ScheduleId);
+          ValidatorUtil.validateEntity(mesMoScheduleProcess, AddGroup.class);
+
+          if(baseProcessService.findById(mesMoScheduleProcess.getProcessId()).orElse(null)==null){
+              throw  new MMException("生产排程工序ID有误。");
+          }
+          if(baseStationService.findById(mesMoScheduleProcess.getStationId()).orElse(null)== null){
+              throw  new MMException("生产排程工位ID有误。");
+          }
+
+         if(basePackService.findById(mesMoScheduleProcess.getPackId()).orElse(null)==null){
+             throw  new MMException("生产排程包装配置档ID有误。");
+         }
+
+         if( baseMoldService.findById(mesMoScheduleProcess.getMoldId()).orElse(null)==null){
+             throw  new MMException("生产排程模具ID有误。");
+         }
+          mesMoScheduleProcessService.save(mesMoScheduleProcess);
+      }
+
+
+      for(MesMoScheduleStation mesMoScheduleStation : mesMoScheduleStations){
+          String  schedulestation  = UUIDUtil.getUUID();
+          mesMoScheduleStation.setId(schedulestation);
+          mesMoScheduleStation.setScheduleId(ScheduleId);
+          ValidatorUtil.validateEntity(mesMoScheduleStation, AddGroup.class);
+          if(baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null)==null){
+              throw  new MMException("生产排程工序ID有误。");
+          }
+          if(baseStationService.findById(mesMoScheduleStation.getStationId()).orElse(null)== null){
+              throw  new MMException("生产排程工位ID有误。");
+          }
+
+          mesMoScheduleStationService.save(mesMoScheduleStation);
+      }
+
     }
 
 

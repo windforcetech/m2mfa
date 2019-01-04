@@ -3,9 +3,12 @@ package com.m2micro.m2mfa.mo.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -19,13 +22,17 @@ import io.swagger.annotations.ApiModelProperty;
 public class MesMoScheduleProcess extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    @NotEmpty(message="生产排程工序主键不能为空",groups = {UpdateGroup.class})
     @ApiModelProperty(value = "主键")
     @Id
     private String id;
+    @NotEmpty(message="排程主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "排程主键")
     private String scheduleId;
+    @NotEmpty(message="工序主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "工序")
     private String processId;
+    @NotEmpty(message="作业工位主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "作业工位")
     private String stationId;
     @ApiModelProperty(value = "预计开始时间")
@@ -36,6 +43,7 @@ public class MesMoScheduleProcess extends BaseEntity implements Serializable {
     private Date actualStartTime;
     @ApiModelProperty(value = "实际结束时间")
     private Date actualEndTime;
+    @NotEmpty(message="包装配置档不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "包装配置档")
     private String packId;
     @ApiModelProperty(value = "检验配置档")
@@ -44,8 +52,10 @@ public class MesMoScheduleProcess extends BaseEntity implements Serializable {
     private Integer beerQty;
     @ApiModelProperty(value = "产出数")
     private Integer outputQty;
+    @NotEmpty(message="模具主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "模具主键")
     private String moldId;
+
     @ApiModelProperty(value = "模仁主键")
     private String mandrelId;
     @ApiModelProperty(value = "有效否")
