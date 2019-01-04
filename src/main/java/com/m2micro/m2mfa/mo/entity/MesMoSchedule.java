@@ -42,6 +42,9 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "产线主键")
     private Integer lineId;
 
+    @ApiModelProperty(value = "计划天数")
+    private Integer planDay;
+
     @ApiModelProperty(value = "工作群组")
     private String machineId;
     @NotEmpty(message="工单ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
@@ -82,6 +85,50 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     private String description;
 
+    public MesMoSchedule(@NotEmpty(message = "排产单主键不能为空", groups = {UpdateGroup.class}) String scheduleId, @NotEmpty(message = "排产单号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String scheduleNo, Date scheduleDate, String revsion, Integer source, @NotEmpty(message = "排产单任务主键不能为空", groups = {AddGroup.class, UpdateGroup.class}) String jobid, Integer lineId, Integer planDay, String machineId, @NotEmpty(message = "工单ID不能为空", groups = {AddGroup.class, UpdateGroup.class}) String moId, @NotEmpty(message = "料件编号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String partId, @NotEmpty(message = "版本不能为空", groups = {AddGroup.class, UpdateGroup.class}) String shiftId, Integer sequence, Date planStartTime, Date planEndTime, Integer scheduleQty, Date actualStartTime, Date actualEndTime, Integer isActivated, Integer checkFlag, Date checkOn, String checkBy, Integer flag, Integer prefreezingState, Boolean enabled, String description) {
+        this.scheduleId = scheduleId;
+        this.scheduleNo = scheduleNo;
+        this.scheduleDate = scheduleDate;
+        this.revsion = revsion;
+        this.source = source;
+        this.jobid = jobid;
+        this.lineId = lineId;
+        this.planDay = planDay;
+        this.machineId = machineId;
+        this.moId = moId;
+        this.partId = partId;
+        this.shiftId = shiftId;
+        this.sequence = sequence;
+        this.planStartTime = planStartTime;
+        this.planEndTime = planEndTime;
+        this.scheduleQty = scheduleQty;
+        this.actualStartTime = actualStartTime;
+        this.actualEndTime = actualEndTime;
+        this.isActivated = isActivated;
+        this.checkFlag = checkFlag;
+        this.checkOn = checkOn;
+        this.checkBy = checkBy;
+        this.flag = flag;
+        this.prefreezingState = prefreezingState;
+        this.enabled = enabled;
+        this.description = description;
+    }
+
+    public MesMoSchedule() {
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public String getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(String scheduleId) {
+        this.scheduleId = scheduleId;
+    }
+
     public String getScheduleNo() {
         return scheduleNo;
     }
@@ -90,24 +137,10 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
         this.scheduleNo = scheduleNo;
     }
 
-    public Integer getPrefreezingState() {
-        return prefreezingState;
-    }
-
-    public void setPrefreezingState(Integer prefreezingState) {
-        this.prefreezingState = prefreezingState;
-    }
-
-    public String getScheduleId() {
-        return scheduleId;
-    }
-    public void setScheduleId(String scheduleId) {
-        this.scheduleId = scheduleId;
-    }
-
     public Date getScheduleDate() {
         return scheduleDate;
     }
+
     public void setScheduleDate(Date scheduleDate) {
         this.scheduleDate = scheduleDate;
     }
@@ -115,6 +148,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public String getRevsion() {
         return revsion;
     }
+
     public void setRevsion(String revsion) {
         this.revsion = revsion;
     }
@@ -122,6 +156,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Integer getSource() {
         return source;
     }
+
     public void setSource(Integer source) {
         this.source = source;
     }
@@ -129,6 +164,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public String getJobid() {
         return jobid;
     }
+
     public void setJobid(String jobid) {
         this.jobid = jobid;
     }
@@ -136,8 +172,17 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Integer getLineId() {
         return lineId;
     }
+
     public void setLineId(Integer lineId) {
         this.lineId = lineId;
+    }
+
+    public Integer getPlanDay() {
+        return planDay;
+    }
+
+    public void setPlanDay(Integer planDay) {
+        this.planDay = planDay;
     }
 
     public String getMachineId() {
@@ -151,6 +196,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public String getMoId() {
         return moId;
     }
+
     public void setMoId(String moId) {
         this.moId = moId;
     }
@@ -158,6 +204,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public String getPartId() {
         return partId;
     }
+
     public void setPartId(String partId) {
         this.partId = partId;
     }
@@ -165,6 +212,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public String getShiftId() {
         return shiftId;
     }
+
     public void setShiftId(String shiftId) {
         this.shiftId = shiftId;
     }
@@ -172,6 +220,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Integer getSequence() {
         return sequence;
     }
+
     public void setSequence(Integer sequence) {
         this.sequence = sequence;
     }
@@ -179,6 +228,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Date getPlanStartTime() {
         return planStartTime;
     }
+
     public void setPlanStartTime(Date planStartTime) {
         this.planStartTime = planStartTime;
     }
@@ -186,6 +236,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Date getPlanEndTime() {
         return planEndTime;
     }
+
     public void setPlanEndTime(Date planEndTime) {
         this.planEndTime = planEndTime;
     }
@@ -193,6 +244,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Integer getScheduleQty() {
         return scheduleQty;
     }
+
     public void setScheduleQty(Integer scheduleQty) {
         this.scheduleQty = scheduleQty;
     }
@@ -200,6 +252,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Date getActualStartTime() {
         return actualStartTime;
     }
+
     public void setActualStartTime(Date actualStartTime) {
         this.actualStartTime = actualStartTime;
     }
@@ -207,6 +260,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Date getActualEndTime() {
         return actualEndTime;
     }
+
     public void setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
     }
@@ -214,6 +268,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Integer getIsActivated() {
         return isActivated;
     }
+
     public void setIsActivated(Integer isActivated) {
         this.isActivated = isActivated;
     }
@@ -221,6 +276,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Integer getCheckFlag() {
         return checkFlag;
     }
+
     public void setCheckFlag(Integer checkFlag) {
         this.checkFlag = checkFlag;
     }
@@ -228,6 +284,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Date getCheckOn() {
         return checkOn;
     }
+
     public void setCheckOn(Date checkOn) {
         this.checkOn = checkOn;
     }
@@ -235,6 +292,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public String getCheckBy() {
         return checkBy;
     }
+
     public void setCheckBy(String checkBy) {
         this.checkBy = checkBy;
     }
@@ -242,13 +300,23 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public Integer getFlag() {
         return flag;
     }
+
     public void setFlag(Integer flag) {
         this.flag = flag;
+    }
+
+    public Integer getPrefreezingState() {
+        return prefreezingState;
+    }
+
+    public void setPrefreezingState(Integer prefreezingState) {
+        this.prefreezingState = prefreezingState;
     }
 
     public Boolean getEnabled() {
         return enabled;
     }
+
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
@@ -256,10 +324,8 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
-
-
-
 }
