@@ -157,7 +157,7 @@ public class MesMoScheduleController {
     @UserOperationLog("通过工单ID获取关联的图程数据")
     public ResponseMessage<MesPartvo> findbymoId(@ApiParam(value = "moId",required=true) @RequestParam(required = true) String moId){
 
-        return ResponseMessage.ok(mesMoScheduleService.findbymoId(moId));
+        return ResponseMessage.ok(mesMoScheduleService.findbyMoId(moId));
     }
 
     @PostMapping("/addDetails")

@@ -516,7 +516,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     @Override
-    public MesPartvo findbymoId(String moId) {
+    public MesPartvo findbyMoId(String moId) {
         MesMoDesc moDesc = mesMoDescService.findById(moId).orElse(null);
         if(moDesc == null){
             throw  new MMException("工单ID有误。");
@@ -633,6 +633,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             if(baseStaffService.findById(mesMoScheduleStaff.getStaffId())==null){
                 throw  new MMException("排程人员,员工工号有误。");
             }
+            if(  baseShiftRepository.findById( mesMoScheduleStaff.getShiftId()).orElse(null)==null){
+                throw  new MMException("排程人员,班别有误。");
+            }
+
+
+
+
             mesMoScheduleStaffService.save(mesMoScheduleStaff);
         }
     }

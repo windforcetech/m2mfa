@@ -38,6 +38,7 @@ public class MesMoScheduleStaff extends BaseEntity implements Serializable {
     @NotEmpty(message="员工ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "员工id")
     private String staffId;
+    @NotEmpty(message="班别ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "班别id")
     private String shiftId;
     @ApiModelProperty(value = "预计开始时间")

@@ -57,6 +57,11 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     OperationInfo getOperationInfo(String staffId, String scheduleId, String stationId);
 
+    /**
+     * 通过料件获取图称信息
+     * @param partID
+     * @return
+     */
     List<MesMoSchedule> findpartID(String partID);
 
     /**
@@ -102,9 +107,20 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     void forceClose(String id);
 
-    MesPartvo findbymoId(String moId  );
+    /**
+     * 根据工单获取图称
+     * @param moId
+     * @return
+     */
+    MesPartvo findbyMoId(String moId  );
 
-
+    /**
+     * 排产单添加
+     * @param mesMoSchedule
+     * @param mesMoScheduleStaffs
+     * @param mesMoScheduleProcesses
+     * @param mesMoScheduleStations
+     */
     void save(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations);
 
     /**

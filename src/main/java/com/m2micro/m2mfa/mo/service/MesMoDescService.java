@@ -86,9 +86,18 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      */
     MesMoDescModel info(String id);
 
+    /**
+     * 根据料件获取基本信息
+     * @param partId
+     * @return
+     */
     PartsRouteModel addDetails(String partId);
 
-    //获取添加的基本信息
+    /**
+     * 获取添加的基本信息
+     * @param modescandpartsQuery
+     * @return
+     */
     PageUtil<MesMoDesc> schedulingDetails(ModescandpartsQuery modescandpartsQuery);
 
 
