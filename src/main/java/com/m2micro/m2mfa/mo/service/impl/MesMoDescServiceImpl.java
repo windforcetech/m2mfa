@@ -59,7 +59,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                     "	md.mo_number moNumber,\n" +
                     "	md.category category,\n" +
                     "	md.part_id partId,\n" +
-                    "	md.target_qty targetQty,\n" +
+                    "	 IFNULL(mmd.target_qty,0)  targetQty,\n" +
                     "	md.revsion revsion,\n" +
                     "	md.distinguish distinguish,\n" +
                     "	md.parent_mo parentMo,\n" +
@@ -77,7 +77,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                     "	md.order_id orderId,\n" +
                     "	md.order_seq orderSeq,\n" +
                     "	md.is_schedul isSchedul,\n" +
-                    "	md.schedul_qty schedulQty,\n" +
+                    "	 IFNULL( mmd.schedul_qty,0)  schedulQty,\n" +
                     "	md.input_qty inputQty,\n" +
                     "	md.output_qty outputQty,\n" +
                     "	md.scrapped_qty scrappedQty,\n" +
@@ -453,7 +453,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                         "	bp.part_no partNo,\n" +
                         "	bp.part_id partId,\n" +
                         "	bp.name name,\n" +
-                        "	mmd.target_qty - mmd.schedul_qty notQty\n" +
+                        " ( IFNULL(mmd.target_qty,0)  -  IFNULL(mmd.schedul_qty ,0) )    notQty \n" +
                         "FROM\n" +
                         "	mes_mo_desc mmd\n" +
                         "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id WHERE\n" ;
