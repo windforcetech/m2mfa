@@ -692,22 +692,24 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     private void saveScheduleStation(List<MesMoScheduleStation> mesMoScheduleStations, String scheduleId) {
+    if(mesMoScheduleStations !=null){
 
-            for(MesMoScheduleStation mesMoScheduleStation : mesMoScheduleStations){
-                String  schedulestation  = UUIDUtil.getUUID();
-                mesMoScheduleStation.setId(schedulestation);
-                mesMoScheduleStation.setScheduleId(scheduleId);
-                ValidatorUtil.validateEntity(mesMoScheduleStation, AddGroup.class);
-                if(baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null)==null){
-                    throw  new MMException("生产排程工序ID有误。");
-                }
-                if(baseStationService.findById(mesMoScheduleStation.getStationId()).orElse(null)== null){
-                    throw  new MMException("生产排程工位ID有误。");
-                }
+        for(MesMoScheduleStation mesMoScheduleStation : mesMoScheduleStations){
+            String  schedulestation  = UUIDUtil.getUUID();
+            mesMoScheduleStation.setId(schedulestation);
+            mesMoScheduleStation.setScheduleId(scheduleId);
+            ValidatorUtil.validateEntity(mesMoScheduleStation, AddGroup.class);
+            if(baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null)==null){
+                throw  new MMException("生产排程工序ID有误。");
+            }
+            if(baseStationService.findById(mesMoScheduleStation.getStationId()).orElse(null)== null){
+                throw  new MMException("生产排程工位ID有误。");
+            }
 
-                mesMoScheduleStationService.save(mesMoScheduleStation);
+            mesMoScheduleStationService.save(mesMoScheduleStation);
 
         }
+    }
     }
 
     private void saveScheduleProcess(List<MesMoScheduleProcess> mesMoScheduleProcesses, String scheduleId) {
