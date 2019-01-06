@@ -71,6 +71,8 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     private String description;
 
+
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }

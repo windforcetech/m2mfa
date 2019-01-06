@@ -3,9 +3,12 @@ package com.m2micro.m2mfa.mo.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
+
+import com.m2micro.m2mfa.base.entity.Staffmember;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -56,24 +59,9 @@ public class MesMoScheduleStaff extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     private String description;
 
-    public MesMoScheduleStaff() {
-    }
-
-    public MesMoScheduleStaff(@NotEmpty(message = "生产排程人员主键不能为空", groups = {UpdateGroup.class}) String id, @NotEmpty(message = "排称主键不能为空", groups = {AddGroup.class, UpdateGroup.class}) String scheduleId, @NotEmpty(message = "工序不能为空", groups = {AddGroup.class, UpdateGroup.class}) String processId, @NotEmpty(message = "工位主键不能为空", groups = {AddGroup.class, UpdateGroup.class}) String stationId, String staffId, String shiftId, Date planStartTime, Date planEndTime, Date actualStartTime, Date actualEndTime, Boolean enabled, Boolean isStation, String description) {
-        this.id = id;
-        this.scheduleId = scheduleId;
-        this.processId = processId;
-        this.stationId = stationId;
-        this.staffId = staffId;
-        this.shiftId = shiftId;
-        this.planStartTime = planStartTime;
-        this.planEndTime = planEndTime;
-        this.actualStartTime = actualStartTime;
-        this.actualEndTime = actualEndTime;
-        this.enabled = enabled;
-        this.isStation = isStation;
-        this.description = description;
-    }
+    @ApiModelProperty(value = "工位人员信息")
+    @Transient
+    private Staffmember staffmember;
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -181,5 +169,13 @@ public class MesMoScheduleStaff extends BaseEntity implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Staffmember getStaffmember() {
+        return staffmember;
+    }
+
+    public void setStaffmember(Staffmember staffmember) {
+        this.staffmember = staffmember;
     }
 }

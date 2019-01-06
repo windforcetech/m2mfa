@@ -3,8 +3,11 @@ package com.m2micro.m2mfa.mo.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.starter.entity.Organization;
+import com.m2micro.framework.starter.repository.OrganizationRepository;
 import com.m2micro.m2mfa.base.entity.BaseShift;
+import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.base.entity.Staffmember;
 import com.m2micro.m2mfa.base.repository.BaseShiftRepository;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
@@ -85,6 +88,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private BaseShiftService baseShiftService;
     @Autowired
     private MesMoScheduleShiftService mesMoScheduleShiftService;
+    @Autowired
+    private OrganizationRepository organizationRepository;
 
     @SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
@@ -618,7 +623,6 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     private List<MesMoScheduleStaff> getMesMoScheduleStaffs(String scheduleId, MesMoSchedule mesMoSchedule) {
-
         String sqlShifts ="SELECT\n" +
                 "	mmss.*, bs.`name` shiftName\n" +
                 "FROM\n" +
@@ -629,15 +633,43 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         RowMapper rmShifts = BeanPropertyRowMapper.newInstance(MesMoScheduleShift.class);
         List<MesMoScheduleShift> mesMoScheduleShifts = jdbcTemplate.query(sqlShifts,rmShifts);
         mesMoSchedule.setMesMoScheduleShifts(mesMoScheduleShifts);
-        String sqlstaff ="select * from mes_mo_schedule_staff  where schedule_id='"+scheduleId+"'";
+        String sqlstaff ="SELECT DISTINCT\n" +
+                "	shift_id,is_station\n" +
+                "FROM\n" +
+                "	mes_mo_schedule_staff\n" +
+                "WHERE\n" +
+                "	schedule_id = '"+scheduleId+"'";
         RowMapper rmstaff = BeanPropertyRowMapper.newInstance(MesMoScheduleStaff.class);
         List<MesMoScheduleStaff>mesMoScheduleStaffs = jdbcTemplate.query(sqlstaff,rmstaff);
+        List<MesMoScheduleStaff>list= new ArrayList<>();
         for(MesMoScheduleStaff mesMoScheduleStaff : mesMoScheduleStaffs){
+            String staffsql="select * from mes_mo_schedule_staff where shift_id='"+mesMoScheduleStaff.getShiftId()+"'";
+            List<MesMoScheduleStaff>stff= jdbcTemplate.query(staffsql,rmstaff);
+            List<BaseStaff> lss= new ArrayList<>();
+            List<BaseStation> stations=new ArrayList<>();
+            List<Organization>o= new ArrayList<>();
             if(mesMoScheduleStaff.getIsStation()){
-              // dd
+                staffsql="select * from mes_mo_schedule_staff where shift_id='"+mesMoScheduleStaff.getShiftId()+"' and is_station=1";
+                List<MesMoScheduleStaff>staffs = jdbcTemplate.query(staffsql,rmstaff);
+                for(MesMoScheduleStaff staff : staffs){
+                    o.add(organizationRepository.obtainuuidorg(staff.getStaffId()));
+                }
+                MesMoScheduleStaff newaffs =staffs.get(0);
+                newaffs.setStaffmember(  Staffmember.builder().departments(o).build());
+                list.add(newaffs);
+            }else {
+                staffsql="select * from mes_mo_schedule_staff where shift_id='"+mesMoScheduleStaff.getShiftId()+"' and is_station=0";
+                List<MesMoScheduleStaff>staffs = jdbcTemplate.query(staffsql,rmstaff);
+                for(MesMoScheduleStaff staff : staffs){
+                    lss.add(baseStaffService.findById(staff.getStaffId()).orElse(null));
+                    stations.add(baseStationService.findById(staff.getStationId()).orElse(null));
+                }
+                MesMoScheduleStaff newaffs =staffs.get(0);
+                newaffs.setStaffmember(  Staffmember.builder().shift( baseShiftRepository.findById(mesMoScheduleStaff.getShiftId()).orElse(null)).staffs(lss).build());
+                list.add(newaffs);
             }
         }
-        return mesMoScheduleStaffs;
+        return list;
 
     }
 
@@ -748,12 +780,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 throw  new MMException("排程人员工序ID有误。");
             }
             if(mesMoScheduleStaff.getIsStation()){
-//                String sql ="select * from organization where typesof='岗位'  and uuid='"+mesMoScheduleStaff.getStationId()+"'";
-//                RowMapper rm = BeanPropertyRowMapper.newInstance(Organization.class);
-//                List<Organization> list = jdbcTemplate.query(sql,rm);
-//                if( list.isEmpty()){
-//                    throw  new MMException("岗位有误。");
-//                }
+                String sql ="select * from organization where typesof='岗位'  and uuid='"+mesMoScheduleStaff.getStaffId()+"'";
+                RowMapper rm = BeanPropertyRowMapper.newInstance(Organization.class);
+                List<Organization> list = jdbcTemplate.query(sql,rm);
+                if( list.isEmpty()){
+                    throw  new MMException("岗位有误。");
+                }
             }else {
 
                 if(baseStationService.findById(mesMoScheduleStaff.getStationId()).orElse(null)== null){
