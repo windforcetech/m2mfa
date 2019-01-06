@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.mo.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseShiftRepository;
@@ -19,6 +20,7 @@ import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.*;
+import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
@@ -552,6 +554,41 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     @Override
+    public Productionorder info(String scheduleId) {
+        MesMoSchedule  mesMoSchedule = mesMoScheduleRepository.findById(scheduleId).orElse(null);
+        if(mesMoSchedule==null){
+            throw  new MMException("排产单ID非法。");
+        }
+
+        String sqlstaff ="select * from mes_mo_schedule_staff  where schedule_id='"+scheduleId+"'";
+        RowMapper rmstaff = BeanPropertyRowMapper.newInstance(MesMoScheduleStaff.class);
+        List<MesMoScheduleStaff> mesMoScheduleStaffs = jdbcTemplate.query(sqlstaff,rmstaff);
+
+
+        String sqlprocesses ="select * from  mes_mo_schedule_process  where schedule_id='"+scheduleId+"'";
+        RowMapper rmprocesses = BeanPropertyRowMapper.newInstance(MesMoScheduleProcess.class);
+        List<MesMoScheduleProcess> mesMoScheduleProcesses = jdbcTemplate.query(sqlprocesses,rmprocesses);
+
+
+        String sqlstation ="select * from  mes_mo_schedule_station  where schedule_id='"+scheduleId+"'";
+        RowMapper rmstation = BeanPropertyRowMapper.newInstance(MesMoScheduleStation.class);
+        List<MesMoScheduleStation> mesMoScheduleStations = jdbcTemplate.query(sqlstation,rmstation);
+
+        return Productionorder.builder().mesMoSchedule(mesMoSchedule).mesMoScheduleStaffs(mesMoScheduleStaffs).mesMoScheduleProcesses(mesMoScheduleProcesses).mesMoScheduleStations(mesMoScheduleStations).build();
+    }
+
+    @Override
+    public List<Organization> findbPosition() {
+        String sql ="select * from organization where typesof='岗位'";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(Organization.class);
+        List<Organization> list = jdbcTemplate.query(sql,rm);
+        if( list.isEmpty()){
+            throw  new MMException("未找到岗位信息。");
+        }
+        return list;
+    }
+
+    @Override
     @Transactional
     public void save(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations) {
         String ScheduleId  = UUIDUtil.getUUID();
@@ -586,7 +623,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoScheduleShift.setShiftId(shifts[i]);
             mesMoScheduleShiftService.save(mesMoScheduleShift);
         }
-        mesMoSchedule.setShiftId("班别");
+        mesMoSchedule.setShiftId(mesMoSchedule.getShiftId());
     }
 
     private void saveScheduleStation(List<MesMoScheduleStation> mesMoScheduleStations, String scheduleId) {

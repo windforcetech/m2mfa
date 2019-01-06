@@ -3,9 +3,12 @@ package com.m2micro.m2mfa.mo.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -56,6 +59,11 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @NotEmpty(message="版本不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "班别")
     private String shiftId;
+
+    @Transient
+    @ApiModelProperty(value = "班别信息")
+    private List<MesMoScheduleShift> MesMoScheduleShifts;
+
     @ApiModelProperty(value = "生产顺序")
     private Integer sequence;
     @ApiModelProperty(value = "预计开始时间")
@@ -85,7 +93,10 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     private String description;
 
-    public MesMoSchedule(@NotEmpty(message = "排产单主键不能为空", groups = {UpdateGroup.class}) String scheduleId, @NotEmpty(message = "排产单号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String scheduleNo, Date scheduleDate, String revsion, Integer source, @NotEmpty(message = "排产单任务主键不能为空", groups = {AddGroup.class, UpdateGroup.class}) String jobid, Integer lineId, Integer planDay, String machineId, @NotEmpty(message = "工单ID不能为空", groups = {AddGroup.class, UpdateGroup.class}) String moId, @NotEmpty(message = "料件编号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String partId, @NotEmpty(message = "版本不能为空", groups = {AddGroup.class, UpdateGroup.class}) String shiftId, Integer sequence, Date planStartTime, Date planEndTime, Integer scheduleQty, Date actualStartTime, Date actualEndTime, Integer isActivated, Integer checkFlag, Date checkOn, String checkBy, Integer flag, Integer prefreezingState, Boolean enabled, String description) {
+    public MesMoSchedule() {
+    }
+
+    public MesMoSchedule(@NotEmpty(message = "排产单主键不能为空", groups = {UpdateGroup.class}) String scheduleId, @NotEmpty(message = "排产单号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String scheduleNo, Date scheduleDate, String revsion, Integer source, @NotEmpty(message = "排产单任务主键不能为空", groups = {AddGroup.class, UpdateGroup.class}) String jobid, Integer lineId, Integer planDay, String machineId, @NotEmpty(message = "工单ID不能为空", groups = {AddGroup.class, UpdateGroup.class}) String moId, @NotEmpty(message = "料件编号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String partId, @NotEmpty(message = "版本不能为空", groups = {AddGroup.class, UpdateGroup.class}) String shiftId, List<MesMoScheduleShift> mesMoScheduleShifts, Integer sequence, Date planStartTime, Date planEndTime, Integer scheduleQty, Date actualStartTime, Date actualEndTime, Integer isActivated, Integer checkFlag, Date checkOn, String checkBy, Integer flag, Integer prefreezingState, Boolean enabled, String description) {
         this.scheduleId = scheduleId;
         this.scheduleNo = scheduleNo;
         this.scheduleDate = scheduleDate;
@@ -98,6 +109,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
         this.moId = moId;
         this.partId = partId;
         this.shiftId = shiftId;
+        MesMoScheduleShifts = mesMoScheduleShifts;
         this.sequence = sequence;
         this.planStartTime = planStartTime;
         this.planEndTime = planEndTime;
@@ -112,9 +124,6 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
         this.prefreezingState = prefreezingState;
         this.enabled = enabled;
         this.description = description;
-    }
-
-    public MesMoSchedule() {
     }
 
     public static long getSerialVersionUID() {
@@ -215,6 +224,14 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
 
     public void setShiftId(String shiftId) {
         this.shiftId = shiftId;
+    }
+
+    public List<MesMoScheduleShift> getMesMoScheduleShifts() {
+        return MesMoScheduleShifts;
+    }
+
+    public void setMesMoScheduleShifts(List<MesMoScheduleShift> mesMoScheduleShifts) {
+        MesMoScheduleShifts = mesMoScheduleShifts;
     }
 
     public Integer getSequence() {

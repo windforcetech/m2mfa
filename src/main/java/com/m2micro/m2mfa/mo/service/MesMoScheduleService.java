@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.mo.service;
 
 import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.framework.commons.BaseService;
@@ -13,6 +14,7 @@ import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
+import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 
 import java.util.List;
@@ -128,5 +130,18 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      * @return  排产单新增要返回的数据
      */
     MesMoScheduleInfoModel addDetails();
+
+    /**
+     * 排产单获取
+     * @param scheduleId
+     * @return
+     */
+    Productionorder info(String scheduleId );
+
+    /**
+     * 获取所有岗位信息
+     * @return
+     */
+    List<Organization>findbPosition();
 
 }

@@ -6,6 +6,7 @@ import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
@@ -68,12 +69,12 @@ public class MesMoScheduleController {
     /**
      * 详情
      */
-    @PostMapping("/info/{id}")
+    @PostMapping("/info")
     @ApiOperation(value="生产排程表表头详情")
     @UserOperationLog("生产排程表表头详情")
-    public ResponseMessage<MesMoSchedule> info(@PathVariable("id") String id){
-        MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(id).orElse(null);
-        return ResponseMessage.ok(mesMoSchedule);
+    public ResponseMessage<Productionorder> info(@ApiParam(value = "scheduleId",required=true) @RequestParam(required = true) String scheduleId){
+
+        return ResponseMessage.ok(mesMoScheduleService.info(scheduleId));
     }
 
     /**
@@ -166,6 +167,15 @@ public class MesMoScheduleController {
     public ResponseMessage<MesMoScheduleInfoModel> addDetails(){
         return ResponseMessage.ok(mesMoScheduleService.addDetails());
     }
+
+    @PostMapping("/findbPosition")
+    @ApiOperation(value="岗位信息")
+    @UserOperationLog("岗位信息")
+    public ResponseMessage<List<Organization>> findbPosition(){
+
+        return ResponseMessage.ok(mesMoScheduleService.findbPosition());
+    }
+
 
 
 }
