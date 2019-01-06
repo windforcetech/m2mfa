@@ -32,4 +32,6 @@ public class MesMoScheduleModel {
     private String partName;
     @ApiModelProperty(value = "作业机台")
     private String machineName;
+    @ApiModelProperty(value = "生产顺序")
+    private Integer sequence;
 }
