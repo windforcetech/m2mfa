@@ -136,9 +136,9 @@ public class MesMoDescController {
         return ResponseMessage.ok();
     }
 
-    /**
+   /* *//**
      * 冻结
-     */
+     *//*
     @RequestMapping("/frozen/{id}")
     @ApiOperation(value="冻结工单")
     @UserOperationLog("冻结工单")
@@ -147,16 +147,16 @@ public class MesMoDescController {
         return ResponseMessage.ok();
     }
 
-    /**
+    *//**
      * 解冻
-     */
+     *//*
     @RequestMapping("/unfreeze/{id}")
     @ApiOperation(value="解冻工单")
     @UserOperationLog("解冻工单")
     public ResponseMessage<MesMoDesc> unfreeze(@PathVariable("id") String id){
         mesMoDescService.unfreeze(id);
         return ResponseMessage.ok();
-    }
+    }*/
 
 
     /**
