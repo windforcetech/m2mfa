@@ -5,14 +5,14 @@ spring:
     password:
     druid:
       max-active: 10
-      min-idle: 1
+      min-idle: 2
       max-wait: 60000
       initial-size: 5
 
   cache:
     type: redis
   redis:
-    host: 192.168.2.20
+    host: 192.168.1.111
     port: 6379
 
 m2miot:
