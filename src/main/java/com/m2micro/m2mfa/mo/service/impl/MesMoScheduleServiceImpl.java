@@ -12,6 +12,7 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
+import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.*;
 import com.m2micro.m2mfa.mo.model.BaseShiftModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
@@ -495,27 +496,81 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     @Override
+    @Transactional
     public void auditing(String id) {
-
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
+        if(mesMoSchedule==null){
+            throw new MMException("不存在该排产单！");
+        }
+        // 当排产单状态为  初始时flag=0  才可以进行审核 flag=1
+        if(!MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())){
+            throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许审核！");
+        }
+        mesMoScheduleRepository.setFlagFor(MoScheduleStatus.AUDITED.getKey(),mesMoSchedule.getScheduleId());
     }
 
     @Override
+    @Transactional
     public void cancel(String id) {
-
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
+        if(mesMoSchedule==null){
+            throw new MMException("不存在该排产单！");
+        }
+        // 排产单状态【Flag】为：已审待排=1  时允许取消审核  SET Flag=0
+        if(!MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())){
+            throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许反审！");
+        }
+        mesMoScheduleRepository.setFlagFor(MoScheduleStatus.INITIAL.getKey(),mesMoSchedule.getScheduleId());
     }
 
     @Override
+    @Transactional
     public void frozen(String id) {
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
+        if(mesMoSchedule==null){
+            throw new MMException("不存在该排产单！");
+        }
+        //只有工单状态 close_flag=1,2时 ， 才可以冻结  SET close_flag=12
+        if(!(MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())||
+                MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag()))){
+            throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许冻结！");
+        }
+        //更改为冻结状态及冻结前状态
+        mesMoScheduleRepository.setFlagAndPrefreezingStateFor(MoScheduleStatus.FROZEN.getKey(),mesMoSchedule.getFlag(),mesMoSchedule.getScheduleId());
+        //做冻结额外业务逻辑操作
 
     }
 
     @Override
+    @Transactional
     public void unfreeze(String id) {
-
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
+        if(mesMoSchedule==null){
+            throw new MMException("不存在该排产单！");
+        }
+        if(!MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag())){
+            throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许解冻！");
+        }
+        mesMoScheduleRepository.setFlagAndPrefreezingStateFor(mesMoSchedule.getPrefreezingState(),null,mesMoSchedule.getScheduleId());
     }
 
     @Override
+    @Transactional
     public void forceClose(String id) {
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
+        if(mesMoSchedule==null){
+            throw new MMException("不存在该排产单！");
+        }
+        //只有工单状态 close_flag=0,1,2,5时 ， 才可以强制结案  SET close_flag=10
+        if(!(MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())||
+                MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())||
+                MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag())||
+                MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag()))){
+            throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许强制结案！");
+        }
+        //更改为强制结案状态
+        mesMoScheduleRepository.setFlagFor(MoStatus.FORCECLOSE.getKey(),mesMoSchedule.getScheduleId());
+        //做强制结案的额外业务逻辑操作
 
     }
 
