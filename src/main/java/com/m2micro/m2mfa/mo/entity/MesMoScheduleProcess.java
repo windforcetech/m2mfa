@@ -56,7 +56,7 @@ public class MesMoScheduleProcess extends BaseEntity implements Serializable {
     private Date actualStartTime;
     @ApiModelProperty(value = "实际结束时间")
     private Date actualEndTime;
-    @NotEmpty(message="包装配置档不能为空",groups = {AddGroup.class, UpdateGroup.class})
+
     @ApiModelProperty(value = "包装配置档")
     private String packId;
     @ApiModelProperty(value = "检验配置档")
