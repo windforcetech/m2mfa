@@ -688,7 +688,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoScheduleShift.setShiftId(shifts[i]);
             mesMoScheduleShiftService.save(mesMoScheduleShift);
         }
-        mesMoSchedule.setShiftId(mesMoSchedule.getShiftId());
+        mesMoSchedule.setShiftId("-");
     }
 
     private void saveScheduleStation(List<MesMoScheduleStation> mesMoScheduleStations, String scheduleId) {
