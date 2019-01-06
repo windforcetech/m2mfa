@@ -36,5 +36,10 @@ public interface BaseMachineService extends BaseService<BaseMachine,String> {
      */
     List<BaseMachine> findByCodeAndMachineIdNot(String code ,String machineId);
 
+    /**
+     * 获取排产单的机台信息
+     * @return
+     */
+    List<BaseMachine>   findbyMachine();
 
 }

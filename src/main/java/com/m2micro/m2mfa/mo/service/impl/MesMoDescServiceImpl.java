@@ -418,7 +418,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                         "	mmd.mo_number moNumber,\n" +
                         "	mmd.category category,\n" +
                         "	mmd.part_id partId,\n" +
-                        "	mmd.target_qty targetQty,\n" +
+                        "	IFNULL(mmd.target_qty,0) targetQty,\n" +
                         "	mmd.revsion revsion,\n" +
                         "	mmd.distinguish distinguish,\n" +
                         "	mmd.parent_mo parentMo,\n" +
@@ -436,7 +436,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                         "	mmd.order_id orderId,\n" +
                         "	mmd.order_seq orderSeq,\n" +
                         "	mmd.is_schedul isSchedul,\n" +
-                        "	mmd.schedul_qty schedulQty,\n" +
+                        "	IFNULL(mmd.schedul_qty,0)  schedulQty,\n" +
                         "	mmd.input_qty inputQty,\n" +
                         "	mmd.output_qty outputQty,\n" +
                         "	mmd.scrapped_qty scrappedQty,\n" +

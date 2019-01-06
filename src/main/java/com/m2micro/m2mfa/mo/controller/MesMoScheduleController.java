@@ -5,15 +5,12 @@ import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
 import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
-import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
-import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
@@ -25,8 +22,6 @@ import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.mo.vo.Productionorder;
-import com.m2micro.m2mfa.pr.entity.MesPartRoute;
-import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,10 +29,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * 生产排程表表头 前端控制器
@@ -53,6 +45,8 @@ public class MesMoScheduleController {
     MesMoScheduleService mesMoScheduleService;
     @Autowired
     private MesMoDescService mesMoDescService;
+    @Autowired
+    private BaseMachineService baseMachineService;
 
 
     /**
@@ -176,6 +170,14 @@ public class MesMoScheduleController {
         return ResponseMessage.ok(mesMoScheduleService.findbPosition());
     }
 
+
+    @PostMapping("/findbyMachine")
+    @ApiOperation(value="机台信息")
+    @UserOperationLog("岗位信息")
+    public ResponseMessage<List<BaseMachine>> findbyMachine(){
+
+        return ResponseMessage.ok(baseMachineService.findbyMachine());
+    }
 
 
 }
