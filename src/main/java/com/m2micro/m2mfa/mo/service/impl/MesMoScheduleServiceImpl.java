@@ -675,19 +675,29 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoScheduleStaff.setScheduleId(scheduleId);
 
             ValidatorUtil.validateEntity(mesMoScheduleStaff, AddGroup.class);
-
             if(baseProcessService.findById(mesMoScheduleStaff.getProcessId()).orElse(null)==null){
                 throw  new MMException("排程人员工序ID有误。");
             }
-            if(baseStationService.findById(mesMoScheduleStaff.getStationId()).orElse(null)== null){
-                throw  new MMException("排程人员工位ID有误。");
+            if(mesMoScheduleStaff.getIsStation()){
+
+                if(baseStationService.findById(mesMoScheduleStaff.getStationId()).orElse(null)== null){
+                    throw  new MMException("排程人员工位ID有误。");
+                }
+                if(baseStaffService.findById(mesMoScheduleStaff.getStaffId())==null){
+                    throw  new MMException("排程人员,员工工号有误。");
+                }
+                if(  baseShiftRepository.findById( mesMoScheduleStaff.getShiftId()).orElse(null)==null){
+                    throw  new MMException("排程人员,班别有误。");
+                }
+            }else {
+                String sql ="select * from organization where typesof='岗位'  and uuid='"+mesMoScheduleStaff.getStationId()+"'";
+                RowMapper rm = BeanPropertyRowMapper.newInstance(Organization.class);
+                List<Organization> list = jdbcTemplate.query(sql,rm);
+                if( list.isEmpty()){
+                    throw  new MMException("岗位有误。");
+                }
             }
-            if(baseStaffService.findById(mesMoScheduleStaff.getStaffId())==null){
-                throw  new MMException("排程人员,员工工号有误。");
-            }
-            if(  baseShiftRepository.findById( mesMoScheduleStaff.getShiftId()).orElse(null)==null){
-                throw  new MMException("排程人员,班别有误。");
-            }
+
 
 
 
