@@ -39,7 +39,7 @@ public class MesMoScheduleProcess extends BaseEntity implements Serializable {
     private String processName;
 
 
-    @NotEmpty(message="作业工位主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
+
     @ApiModelProperty(value = "作业工位")
     private String stationId;
 

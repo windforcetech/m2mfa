@@ -663,8 +663,9 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         saveScheduleStaff(mesMoScheduleStaffs, ScheduleId);
         //保存工序
         saveScheduleProcess(mesMoScheduleProcesses, ScheduleId);
-        //保持共位
+            //保持工位
         saveScheduleStation(mesMoScheduleStations, ScheduleId);
+
     }
 
     private void checkschedule(MesMoSchedule mesMoSchedule, String scheduleId) {
@@ -691,19 +692,21 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     private void saveScheduleStation(List<MesMoScheduleStation> mesMoScheduleStations, String scheduleId) {
-        for(MesMoScheduleStation mesMoScheduleStation : mesMoScheduleStations){
-            String  schedulestation  = UUIDUtil.getUUID();
-            mesMoScheduleStation.setId(schedulestation);
-            mesMoScheduleStation.setScheduleId(scheduleId);
-            ValidatorUtil.validateEntity(mesMoScheduleStation, AddGroup.class);
-            if(baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null)==null){
-                throw  new MMException("生产排程工序ID有误。");
-            }
-            if(baseStationService.findById(mesMoScheduleStation.getStationId()).orElse(null)== null){
-                throw  new MMException("生产排程工位ID有误。");
-            }
 
-            mesMoScheduleStationService.save(mesMoScheduleStation);
+            for(MesMoScheduleStation mesMoScheduleStation : mesMoScheduleStations){
+                String  schedulestation  = UUIDUtil.getUUID();
+                mesMoScheduleStation.setId(schedulestation);
+                mesMoScheduleStation.setScheduleId(scheduleId);
+                ValidatorUtil.validateEntity(mesMoScheduleStation, AddGroup.class);
+                if(baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null)==null){
+                    throw  new MMException("生产排程工序ID有误。");
+                }
+                if(baseStationService.findById(mesMoScheduleStation.getStationId()).orElse(null)== null){
+                    throw  new MMException("生产排程工位ID有误。");
+                }
+
+                mesMoScheduleStationService.save(mesMoScheduleStation);
+
         }
     }
 
@@ -717,13 +720,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             if(baseProcessService.findById(mesMoScheduleProcess.getProcessId()).orElse(null)==null){
                 throw  new MMException("生产排程工序ID有误。");
             }
-            if(baseStationService.findById(mesMoScheduleProcess.getStationId()).orElse(null)== null){
-                throw  new MMException("生产排程工位ID有误。");
-            }
+//            if(baseStationService.findById(mesMoScheduleProcess.getStationId()).orElse(null)== null){
+//                throw  new MMException("生产排程工位ID有误。");
+//            }
 
-            if(basePackService.findById(mesMoScheduleProcess.getPackId()).orElse(null)==null){
-                throw  new MMException("生产排程包装配置档ID有误。");
-            }
+//            if(basePackService.findById(mesMoScheduleProcess.getPackId()).orElse(null)==null){
+//                throw  new MMException("生产排程包装配置档ID有误。");
+//            }
 
             if( baseMoldService.findById(mesMoScheduleProcess.getMoldId()).orElse(null)==null){
                 throw  new MMException("生产排程模具ID有误。");
