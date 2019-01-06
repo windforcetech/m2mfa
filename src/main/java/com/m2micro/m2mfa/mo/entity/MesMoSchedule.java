@@ -29,7 +29,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "主键")
     @Id
     private String scheduleId;
-    @NotEmpty(message="排产单号不能为空",groups = {AddGroup.class, UpdateGroup.class})
+
     @ApiModelProperty(value = "排产单号")
     private String scheduleNo;
     @ApiModelProperty(value = "排程日期")
@@ -38,7 +38,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     private String revsion;
     @ApiModelProperty(value = "来源")
     private Integer source;
-    @NotEmpty(message="排产单任务主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
+
     @ApiModelProperty(value = "任务主键")
     private String jobid;
 
@@ -61,16 +61,19 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     private String moId;
 
     @Transient
-    @ApiModelProperty(value = "工单名称")
-    private String moName;
+    @ApiModelProperty(value = "工单号码")
+    private String moNumber;
 
     @NotEmpty(message="料件编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "料件编号")
     private String partId;
 
+
+
     @Transient
-    @ApiModelProperty(value = "料件名称")
-    private String partName;
+    @ApiModelProperty(value = "料件编号")
+    private String partNo;
+
 
     @NotEmpty(message="版本不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "班别")
@@ -108,39 +111,6 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
-
-    public MesMoSchedule() {
-    }
-
-    public MesMoSchedule(@NotEmpty(message = "排产单主键不能为空", groups = {UpdateGroup.class}) String scheduleId, @NotEmpty(message = "排产单号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String scheduleNo, Date scheduleDate, String revsion, Integer source, @NotEmpty(message = "排产单任务主键不能为空", groups = {AddGroup.class, UpdateGroup.class}) String jobid, Integer lineId, Integer planDay, String machineId, @NotEmpty(message = "工单ID不能为空", groups = {AddGroup.class, UpdateGroup.class}) String moId, @NotEmpty(message = "料件编号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String partId, @NotEmpty(message = "版本不能为空", groups = {AddGroup.class, UpdateGroup.class}) String shiftId, List<MesMoScheduleShift> mesMoScheduleShifts, Integer sequence, Date planStartTime, Date planEndTime, Integer scheduleQty, Date actualStartTime, Date actualEndTime, Integer isActivated, Integer checkFlag, Date checkOn, String checkBy, Integer flag, Integer prefreezingState, Boolean enabled, String description) {
-        this.scheduleId = scheduleId;
-        this.scheduleNo = scheduleNo;
-        this.scheduleDate = scheduleDate;
-        this.revsion = revsion;
-        this.source = source;
-        this.jobid = jobid;
-        this.lineId = lineId;
-        this.planDay = planDay;
-        this.machineId = machineId;
-        this.moId = moId;
-        this.partId = partId;
-        this.shiftId = shiftId;
-        MesMoScheduleShifts = mesMoScheduleShifts;
-        this.sequence = sequence;
-        this.planStartTime = planStartTime;
-        this.planEndTime = planEndTime;
-        this.scheduleQty = scheduleQty;
-        this.actualStartTime = actualStartTime;
-        this.actualEndTime = actualEndTime;
-        this.isActivated = isActivated;
-        this.checkFlag = checkFlag;
-        this.checkOn = checkOn;
-        this.checkBy = checkBy;
-        this.flag = flag;
-        this.prefreezingState = prefreezingState;
-        this.enabled = enabled;
-        this.description = description;
-    }
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -226,12 +196,28 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
         this.moId = moId;
     }
 
+    public String getMoNumber() {
+        return moNumber;
+    }
+
+    public void setMoNumber(String moNumber) {
+        this.moNumber = moNumber;
+    }
+
     public String getPartId() {
         return partId;
     }
 
     public void setPartId(String partId) {
         this.partId = partId;
+    }
+
+    public String getPartNo() {
+        return partNo;
+    }
+
+    public void setPartNo(String partNo) {
+        this.partNo = partNo;
     }
 
     public String getShiftId() {

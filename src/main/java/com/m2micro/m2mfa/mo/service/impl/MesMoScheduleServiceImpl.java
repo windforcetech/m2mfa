@@ -555,22 +555,50 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     @Override
     public Productionorder info(String scheduleId) {
-        MesMoSchedule  mesMoSchedule = mesMoScheduleRepository.findById(scheduleId).orElse(null);
-        if(mesMoSchedule==null){
-            throw  new MMException("排产单ID非法。");
-        }
+
+        MesMoSchedule mesMoSchedule = getMesMoSchedule(scheduleId);
 
         List<MesMoScheduleStaff> mesMoScheduleStaffs = getMesMoScheduleStaffs(scheduleId, mesMoSchedule);
 
-
         List<MesMoScheduleProcess> mesMoScheduleProcesses = getMesMoScheduleProcesses(scheduleId);
 
-
-        String sqlstation ="select * from  mes_mo_schedule_station  where schedule_id='"+scheduleId+"'";
-        RowMapper rmstation = BeanPropertyRowMapper.newInstance(MesMoScheduleStation.class);
-        List<MesMoScheduleStation> mesMoScheduleStations = jdbcTemplate.query(sqlstation,rmstation);
+        List<MesMoScheduleStation> mesMoScheduleStations = getMesMoScheduleStations(scheduleId);
 
         return Productionorder.builder().mesMoSchedule(mesMoSchedule).mesMoScheduleStaffs(mesMoScheduleStaffs).mesMoScheduleProcesses(mesMoScheduleProcesses).mesMoScheduleStations(mesMoScheduleStations).build();
+    }
+
+    private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
+        String sqlstation ="SELECT\n" +
+                "	mss.*, bp.process_name processName,\n" +
+                "	bs.`name` stationName\n" +
+                "FROM\n" +
+                "	mes_mo_schedule_station mss\n" +
+                "LEFT JOIN base_process bp ON mss.process_id = bp.process_id\n" +
+                "LEFT JOIN base_station bs ON mss.station_id = bs.station_id\n" +
+                "WHERE\n" +
+                "	schedule_id = '"+scheduleId+"'";
+        RowMapper rmstation = BeanPropertyRowMapper.newInstance(MesMoScheduleStation.class);
+
+        return jdbcTemplate.query(sqlstation,rmstation);
+    }
+
+    private MesMoSchedule getMesMoSchedule(String scheduleId) {
+        String sqlmesMoSchedule ="SELECT\n" +
+                "	mms.*, bp.part_no partNo,\n" +
+                "	bp.`name` partName,\n" +
+                "	mmd.mo_number moNumber\n" +
+                "FROM\n" +
+                "	mes_mo_schedule mms\n" +
+                "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
+                "LEFT JOIN mes_mo_desc mmd ON mms.mo_id = mmd.mo_id\n" +
+                "WHERE\n" +
+                "	mms.schedule_id ='"+scheduleId+"'";
+        RowMapper rmmesMoSchedule = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
+        List<MesMoSchedule> mesMoSchedules = jdbcTemplate.query(sqlmesMoSchedule,rmmesMoSchedule);
+        if(mesMoSchedules.isEmpty()){
+            throw  new MMException("排产单ID非法。");
+        }
+        return mesMoSchedules.get(0);
     }
 
     private List<MesMoScheduleProcess> getMesMoScheduleProcesses(String scheduleId) {
@@ -603,7 +631,14 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesMoSchedule.setMesMoScheduleShifts(mesMoScheduleShifts);
         String sqlstaff ="select * from mes_mo_schedule_staff  where schedule_id='"+scheduleId+"'";
         RowMapper rmstaff = BeanPropertyRowMapper.newInstance(MesMoScheduleStaff.class);
-        return jdbcTemplate.query(sqlstaff,rmstaff);
+        List<MesMoScheduleStaff>mesMoScheduleStaffs = jdbcTemplate.query(sqlstaff,rmstaff);
+        for(MesMoScheduleStaff mesMoScheduleStaff : mesMoScheduleStaffs){
+            if(mesMoScheduleStaff.getIsStation()){
+              // dd
+            }
+        }
+        return mesMoScheduleStaffs;
+
     }
 
     @Override
@@ -708,6 +743,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 throw  new MMException("排程人员工序ID有误。");
             }
             if(mesMoScheduleStaff.getIsStation()){
+                String sql ="select * from organization where typesof='岗位'  and uuid='"+mesMoScheduleStaff.getStationId()+"'";
+                RowMapper rm = BeanPropertyRowMapper.newInstance(Organization.class);
+                List<Organization> list = jdbcTemplate.query(sql,rm);
+                if( list.isEmpty()){
+                    throw  new MMException("岗位有误。");
+                }
+            }else {
 
                 if(baseStationService.findById(mesMoScheduleStaff.getStationId()).orElse(null)== null){
                     throw  new MMException("排程人员工位ID有误。");
@@ -718,13 +760,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 if(  baseShiftRepository.findById( mesMoScheduleStaff.getShiftId()).orElse(null)==null){
                     throw  new MMException("排程人员,班别有误。");
                 }
-            }else {
-                String sql ="select * from organization where typesof='岗位'  and uuid='"+mesMoScheduleStaff.getStationId()+"'";
-                RowMapper rm = BeanPropertyRowMapper.newInstance(Organization.class);
-                List<Organization> list = jdbcTemplate.query(sql,rm);
-                if( list.isEmpty()){
-                    throw  new MMException("岗位有误。");
-                }
+
             }
 
 

@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.mo.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -37,6 +38,14 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "工位")
     private String stationId;
 
+    @Transient
+    @ApiModelProperty(value = "工序名称")
+    private String processName;
+    @Transient
+    @ApiModelProperty(value = "工位名称")
+    private String stationName;
+
+
     @ApiModelProperty(value = "行为")
     private String behaviorId;
     @ApiModelProperty(value = "前置时间")
@@ -62,9 +71,14 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     private String description;
 
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
     public String getId() {
         return id;
     }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -72,6 +86,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public String getScheduleId() {
         return scheduleId;
     }
+
     public void setScheduleId(String scheduleId) {
         this.scheduleId = scheduleId;
     }
@@ -79,6 +94,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public String getProcessId() {
         return processId;
     }
+
     public void setProcessId(String processId) {
         this.processId = processId;
     }
@@ -86,13 +102,31 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public String getStationId() {
         return stationId;
     }
+
     public void setStationId(String stationId) {
         this.stationId = stationId;
+    }
+
+    public String getProcessName() {
+        return processName;
+    }
+
+    public void setProcessName(String processName) {
+        this.processName = processName;
+    }
+
+    public String getStationName() {
+        return stationName;
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
     }
 
     public String getBehaviorId() {
         return behaviorId;
     }
+
     public void setBehaviorId(String behaviorId) {
         this.behaviorId = behaviorId;
     }
@@ -100,6 +134,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public Integer getLeadTime() {
         return leadTime;
     }
+
     public void setLeadTime(Integer leadTime) {
         this.leadTime = leadTime;
     }
@@ -107,6 +142,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public Integer getWaitingTime() {
         return waitingTime;
     }
+
     public void setWaitingTime(Integer waitingTime) {
         this.waitingTime = waitingTime;
     }
@@ -114,6 +150,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public Integer getPostTime() {
         return postTime;
     }
+
     public void setPostTime(Integer postTime) {
         this.postTime = postTime;
     }
@@ -121,6 +158,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public Integer getJump() {
         return jump;
     }
+
     public void setJump(Integer jump) {
         this.jump = jump;
     }
@@ -128,6 +166,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public Integer getJobPeoples() {
         return jobPeoples;
     }
+
     public void setJobPeoples(Integer jobPeoples) {
         this.jobPeoples = jobPeoples;
     }
@@ -135,6 +174,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public Integer getStandardHours() {
         return standardHours;
     }
+
     public void setStandardHours(Integer standardHours) {
         this.standardHours = standardHours;
     }
@@ -142,6 +182,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public BigDecimal getCoefficient() {
         return coefficient;
     }
+
     public void setCoefficient(BigDecimal coefficient) {
         this.coefficient = coefficient;
     }
@@ -149,6 +190,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public Integer getControlPeoples() {
         return controlPeoples;
     }
+
     public void setControlPeoples(Integer controlPeoples) {
         this.controlPeoples = controlPeoples;
     }
@@ -156,6 +198,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public Integer getControlMachines() {
         return controlMachines;
     }
+
     public void setControlMachines(Integer controlMachines) {
         this.controlMachines = controlMachines;
     }
@@ -163,6 +206,7 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public Boolean getEnabled() {
         return enabled;
     }
+
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
@@ -170,10 +214,8 @@ public class MesMoScheduleStation extends BaseEntity implements Serializable {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
-
-
-
 }
