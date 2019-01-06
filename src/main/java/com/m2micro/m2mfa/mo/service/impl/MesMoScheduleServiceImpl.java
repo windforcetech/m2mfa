@@ -560,14 +560,10 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             throw  new MMException("排产单ID非法。");
         }
 
-        String sqlstaff ="select * from mes_mo_schedule_staff  where schedule_id='"+scheduleId+"'";
-        RowMapper rmstaff = BeanPropertyRowMapper.newInstance(MesMoScheduleStaff.class);
-        List<MesMoScheduleStaff> mesMoScheduleStaffs = jdbcTemplate.query(sqlstaff,rmstaff);
+        List<MesMoScheduleStaff> mesMoScheduleStaffs = getMesMoScheduleStaffs(scheduleId, mesMoSchedule);
 
 
-        String sqlprocesses ="select * from  mes_mo_schedule_process  where schedule_id='"+scheduleId+"'";
-        RowMapper rmprocesses = BeanPropertyRowMapper.newInstance(MesMoScheduleProcess.class);
-        List<MesMoScheduleProcess> mesMoScheduleProcesses = jdbcTemplate.query(sqlprocesses,rmprocesses);
+        List<MesMoScheduleProcess> mesMoScheduleProcesses = getMesMoScheduleProcesses(scheduleId);
 
 
         String sqlstation ="select * from  mes_mo_schedule_station  where schedule_id='"+scheduleId+"'";
@@ -575,6 +571,39 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         List<MesMoScheduleStation> mesMoScheduleStations = jdbcTemplate.query(sqlstation,rmstation);
 
         return Productionorder.builder().mesMoSchedule(mesMoSchedule).mesMoScheduleStaffs(mesMoScheduleStaffs).mesMoScheduleProcesses(mesMoScheduleProcesses).mesMoScheduleStations(mesMoScheduleStations).build();
+    }
+
+    private List<MesMoScheduleProcess> getMesMoScheduleProcesses(String scheduleId) {
+        String sqlprocesses ="SELECT\n" +
+                "	msp.*, bp.process_name processName,\n" +
+                "	bs.`name` stationName,\n" +
+                "	bm.`name` moldName\n" +
+                "FROM\n" +
+                "	mes_mo_schedule_process msp\n" +
+                "LEFT JOIN base_process bp ON msp.process_id = bp.process_id\n" +
+                "LEFT JOIN base_station bs ON msp.station_id = bs.station_id\n" +
+                "LEFT JOIN base_mold bm ON msp.mold_id = bm.mold_id\n" +
+                "WHERE\n" +
+                "	msp.schedule_id='"+scheduleId+"'";
+        RowMapper rmprocesses = BeanPropertyRowMapper.newInstance(MesMoScheduleProcess.class);
+        return jdbcTemplate.query(sqlprocesses,rmprocesses);
+    }
+
+    private List<MesMoScheduleStaff> getMesMoScheduleStaffs(String scheduleId, MesMoSchedule mesMoSchedule) {
+
+        String sqlShifts ="SELECT\n" +
+                "	mmss.*, bs.`name` shiftName\n" +
+                "FROM\n" +
+                "	mes_mo_schedule_shift  mmss\n" +
+                "LEFT JOIN base_shift bs ON mmss.shift_id = bs.shift_id\n" +
+                "WHERE\n" +
+                "	mmss.schedule_id ='"+scheduleId+"'";
+        RowMapper rmShifts = BeanPropertyRowMapper.newInstance(MesMoScheduleShift.class);
+        List<MesMoScheduleShift> mesMoScheduleShifts = jdbcTemplate.query(sqlShifts,rmShifts);
+        mesMoSchedule.setMesMoScheduleShifts(mesMoScheduleShifts);
+        String sqlstaff ="select * from mes_mo_schedule_staff  where schedule_id='"+scheduleId+"'";
+        RowMapper rmstaff = BeanPropertyRowMapper.newInstance(MesMoScheduleStaff.class);
+        return jdbcTemplate.query(sqlstaff,rmstaff);
     }
 
     @Override

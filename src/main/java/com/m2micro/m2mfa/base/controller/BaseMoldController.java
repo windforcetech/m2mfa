@@ -160,4 +160,20 @@ public class BaseMoldController {
         return ResponseMessage.ok(map);
     }
 
+
+    /**
+     * 排产单需要的模具 列表
+     */
+    @PostMapping("/mesMoScheduleMolds")
+    @ApiOperation(value="排产单需要的模具列表")
+    @UserOperationLog("排产单需要的模具列表")
+    public ResponseMessage<List<BaseMold>> mesMoScheduleMolds(){
+      List<BaseMold>molds = baseMoldService.findAll();
+      if(molds.isEmpty()){
+          throw  new MMException("模具信息不存在。");
+      }
+        return ResponseMessage.ok(molds);
+    }
+
+
 }

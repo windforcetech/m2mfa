@@ -48,14 +48,30 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "计划天数")
     private Integer planDay;
 
+    @NotEmpty(message="工单ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "工作群组")
     private String machineId;
+
+//    @Transient
+//    @ApiModelProperty(value = "工作群组名称")
+//    private String machineName;
+
     @NotEmpty(message="工单ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "工单id")
     private String moId;
+
+    @Transient
+    @ApiModelProperty(value = "工单名称")
+    private String moName;
+
     @NotEmpty(message="料件编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "料件编号")
     private String partId;
+
+    @Transient
+    @ApiModelProperty(value = "料件名称")
+    private String partName;
+
     @NotEmpty(message="版本不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "班别")
     private String shiftId;
