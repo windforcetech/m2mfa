@@ -748,12 +748,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 throw  new MMException("排程人员工序ID有误。");
             }
             if(mesMoScheduleStaff.getIsStation()){
-                String sql ="select * from organization where typesof='岗位'  and uuid='"+mesMoScheduleStaff.getStationId()+"'";
-                RowMapper rm = BeanPropertyRowMapper.newInstance(Organization.class);
-                List<Organization> list = jdbcTemplate.query(sql,rm);
-                if( list.isEmpty()){
-                    throw  new MMException("岗位有误。");
-                }
+//                String sql ="select * from organization where typesof='岗位'  and uuid='"+mesMoScheduleStaff.getStationId()+"'";
+//                RowMapper rm = BeanPropertyRowMapper.newInstance(Organization.class);
+//                List<Organization> list = jdbcTemplate.query(sql,rm);
+//                if( list.isEmpty()){
+//                    throw  new MMException("岗位有误。");
+//                }
             }else {
 
                 if(baseStationService.findById(mesMoScheduleStaff.getStationId()).orElse(null)== null){
