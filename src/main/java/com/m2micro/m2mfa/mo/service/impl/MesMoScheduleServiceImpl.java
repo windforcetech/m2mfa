@@ -24,6 +24,7 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleStaffRepository;
 import com.m2micro.m2mfa.mo.service.*;
+import com.m2micro.m2mfa.mo.vo.ProductionProcess;
 import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
@@ -628,17 +629,16 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     @Override
-    public Productionorder info(String scheduleId) {
-
+    public ProductionProcess info(String scheduleId) {
         MesMoSchedule mesMoSchedule = getMesMoSchedule(scheduleId);
 
-        List<MesMoScheduleStaff> mesMoScheduleStaffs = getMesMoScheduleStaffs(scheduleId, mesMoSchedule);
+        List<BaseProcess> mesMoScheduleStaffs = getMesMoScheduleStaffs(scheduleId, mesMoSchedule);
 
         List<MesMoScheduleProcess> mesMoScheduleProcesses = getMesMoScheduleProcesses(scheduleId);
 
         List<MesMoScheduleStation> mesMoScheduleStations = getMesMoScheduleStations(scheduleId);
 
-        return Productionorder.builder().mesMoSchedule(mesMoSchedule).mesMoScheduleStaffs(mesMoScheduleStaffs).mesMoScheduleProcesses(mesMoScheduleProcesses).mesMoScheduleStations(mesMoScheduleStations).build();
+        return ProductionProcess.builder().mesMoSchedule(mesMoSchedule).baseProcesses(mesMoScheduleStaffs).mesMoScheduleProcesses(mesMoScheduleProcesses).mesMoScheduleStations(mesMoScheduleStations).build();
     }
 
     private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
@@ -691,7 +691,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return jdbcTemplate.query(sqlprocesses,rmprocesses);
     }
 
-    private List<MesMoScheduleStaff> getMesMoScheduleStaffs(String scheduleId, MesMoSchedule mesMoSchedule) {
+    private List<BaseProcess> getMesMoScheduleStaffs(String scheduleId, MesMoSchedule mesMoSchedule) {
         String sqlShifts ="SELECT\n" +
                 "	mmss.*, bs.`name` shiftName\n" +
                 "FROM\n" +
@@ -786,16 +786,9 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
 
         }
-        for(MesMoScheduleStaff  mesMoScheduleStaff :mesMoScheduleStaffs){
-            for(BaseProcess process :  baseProcesses){
-                if (mesMoScheduleStaff.getProcessId().equals(process.getProcessId())) {
-                    mesMoScheduleStaff.setBaseProcess(process);
-                }
-              }
 
-        }
 
-        return mesMoScheduleStaffs;
+        return baseProcesses;
 
     }
 

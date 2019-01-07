@@ -14,6 +14,7 @@ import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
+import com.m2micro.m2mfa.mo.vo.ProductionProcess;
 import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 
@@ -136,7 +137,7 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      * @param scheduleId
      * @return
      */
-    Productionorder info(String scheduleId );
+    ProductionProcess info(String scheduleId );
 
     /**
      * 获取所有岗位信息

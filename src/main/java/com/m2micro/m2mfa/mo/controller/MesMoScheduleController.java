@@ -21,6 +21,7 @@ import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.mo.vo.ProductionProcess;
 import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import io.swagger.annotations.Api;
@@ -66,7 +67,7 @@ public class MesMoScheduleController {
     @PostMapping("/info")
     @ApiOperation(value="生产排程表表头详情")
     @UserOperationLog("生产排程表表头详情")
-    public ResponseMessage<Productionorder> info(@ApiParam(value = "scheduleId",required=true) @RequestParam(required = true) String scheduleId){
+    public ResponseMessage<ProductionProcess> info(@ApiParam(value = "scheduleId",required=true) @RequestParam(required = true) String scheduleId){
 
         return ResponseMessage.ok(mesMoScheduleService.info(scheduleId));
     }

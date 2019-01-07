@@ -67,6 +67,9 @@ public class BaseStation extends BaseEntity implements Serializable {
     private String postCategoryName;
 
 
+    @ApiModelProperty(value = "是否岗位")
+    private Boolean isStation;
+
     @Transient
     @ApiModelProperty("班别")
     private List<BaseShift> shifts;
@@ -77,11 +80,6 @@ public class BaseStation extends BaseEntity implements Serializable {
     @Transient
     @ApiModelProperty("岗位")
     private List<Organization> organization;
-
-
-
-    @ApiModelProperty(value = "是否岗位")
-    private Boolean isStation;
 
 
     public static long getSerialVersionUID() {
@@ -216,6 +214,14 @@ public class BaseStation extends BaseEntity implements Serializable {
         this.postCategoryName = postCategoryName;
     }
 
+    public Boolean getIsStation() {
+        return isStation;
+    }
+
+    public void setIsStation(Boolean station) {
+        isStation = station;
+    }
+
     public List<BaseShift> getShifts() {
         return shifts;
     }
@@ -230,13 +236,5 @@ public class BaseStation extends BaseEntity implements Serializable {
 
     public void setOrganization(List<Organization> organization) {
         this.organization = organization;
-    }
-
-    public Boolean getIsStation() {
-        return isStation;
-    }
-
-    public void setIsStation(Boolean station) {
-        isStation = station;
     }
 }
