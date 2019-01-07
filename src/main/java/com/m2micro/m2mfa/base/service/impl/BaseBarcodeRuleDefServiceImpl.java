@@ -59,5 +59,10 @@ public class BaseBarcodeRuleDefServiceImpl implements BaseBarcodeRuleDefService 
         return baseBarcodeRuleDefRepository.findByBarcodeId(barcodeId);
     }
 
+    @Override
+    public void deleteByBarcodeIdAndIdNotIn(String barCodeId, List<String> ids) {
+        baseBarcodeRuleDefRepository.deleteByBarcodeIdAndIdNotIn(barCodeId,ids);
+    }
+
 
 }

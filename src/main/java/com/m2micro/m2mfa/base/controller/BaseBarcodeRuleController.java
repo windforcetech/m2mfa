@@ -100,6 +100,16 @@ public class BaseBarcodeRuleController {
         return ResponseMessage.ok();
     }
 
+    /**
+     * 删除变量
+     */
+    @RequestMapping(value = "/deleteVar",method = RequestMethod.POST)
+    @ApiOperation(value="批量删除条形码规则变量")
+    @UserOperationLog("批量删除条形码变量")
+    public ResponseMessage deleteVar(@RequestBody List<String> ids){
+        baseBarcodeRuleService.deleteVal(ids);
+        return ResponseMessage.ok();
+    }
 
     /**
      * 添加或修改条形码规则

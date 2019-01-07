@@ -6,7 +6,6 @@ import javax.persistence.Id;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import com.m2micro.m2mfa.common.entity.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -23,6 +22,8 @@ public class MesRecordStaff implements Serializable {
     @ApiModelProperty(value = "主键")
     @Id
     private String id;
+    @ApiModelProperty(value = "排产单id")
+    private String scheduleId;
     @ApiModelProperty(value = "上工索引")
     private String rwId;
     @ApiModelProperty(value = "员工id")
@@ -39,6 +40,14 @@ public class MesRecordStaff implements Serializable {
     private BigDecimal startMolds;
     @ApiModelProperty(value = "结束模数")
     private BigDecimal endMolds;
+
+    public String getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(String scheduleId) {
+        this.scheduleId = scheduleId;
+    }
 
     public String getId() {
         return id;

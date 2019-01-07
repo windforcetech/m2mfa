@@ -55,7 +55,7 @@ public class MesMoScheduleController {
     @PostMapping("/list")
     @ApiOperation(value="生产排程表表头列表")
     @UserOperationLog("生产排程表表头列表")
-    public ResponseMessage<PageUtil<MesMoScheduleModel>> list(MesMoScheduleQuery query){
+    public ResponseMessage<PageUtil<MesMoScheduleModel>> list(@RequestBody MesMoScheduleQuery query){
         PageUtil<MesMoScheduleModel> page = mesMoScheduleService.list(query);
         return ResponseMessage.ok(page);
     }

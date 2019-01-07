@@ -73,12 +73,15 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
         List<BaseBarcodeRuleDef> defs = baseBarcodeRuleObj.copyBaseBarcodeRuleDef();
         BaseBarcodeRule rule = this.addOrUpdateBaseBarcodeRule(barcodeRule);
         List<BaseBarcodeRuleDef> defrs = new ArrayList<>();
+        List<String> defIds=new ArrayList<>();
         for (BaseBarcodeRuleDef one : defs) {
             one.setBarcodeId(rule.getId());
             BaseBarcodeRuleDef a = this.addOrUpdateBaseBarcodeRuleDef(one);
             defrs.add(a);
+            defIds.add(a.getId());
         }
         BaseBarcodeRuleObj self = BaseBarcodeRuleObj.createSelf(rule, defrs);
+        baseBarcodeRuleDefService.deleteByBarcodeIdAndIdNotIn(rule.getId(),defIds);
         return self;
     }
 
@@ -94,6 +97,14 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
         BaseBarcodeRule rule = this.findById(ruleId).get();
         List<BaseBarcodeRuleDef> ones = baseBarcodeRuleDefService.findByBarcodeId(rule.getId());
         return BaseBarcodeRuleObj.createSelf(rule,ones);
+    }
+
+    @Transactional
+    @Override
+    public void deleteVal(List<String> varIds) {
+        for(String one:varIds){
+        baseBarcodeRuleDefService.deleteById(one);
+        }
     }
 
 

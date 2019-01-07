@@ -71,24 +71,23 @@ public class MesMoScheduleDispatchServiceImpl implements MesMoScheduleDispatchSe
                     "	mms.schedule_no scheduleNo,\n" +
                     "	mms.flag flag,\n" +
                     "	mms.enabled enabled,\n" +
-                    "	mms.schedule_qty schedulQty,\n" +
                     "	mms.sequence sequence,\n" +
                     "	bp.part_no partNo,\n" +
-                    "	bp.name partName,\n" +
-                    "	bm.name machineName,\n" +
-                    "	msp.output_qty outputQty\n" +
+                    "	bp. NAME partName,\n" +
+                    "	bm. NAME machineName,\n" +
+                    "	IFNULL(mms.schedule_qty, 0) scheduleQty,\n" +
+                    "	IFNULL(msp.output_qty, 0) outputQty\n" +
                     "FROM\n" +
-                    "	mes_mo_schedule mms,\n" +
-                    "	base_parts bp,\n" +
-                    "	base_machine bm,\n" +
-                    "	mes_part_route mpr,\n" +
-                    "	mes_mo_schedule_process msp\n" +
+                    "	mes_mo_schedule mms\n" +
+                    "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
+                    "LEFT JOIN base_machine bm ON mms.machine_id = bm.machine_id\n" +
+                    "LEFT JOIN mes_part_route mpr ON mms.part_id = mpr.part_id\n" +
+                    "LEFT JOIN mes_mo_schedule_process msp ON (\n" +
+                    "	msp.process_id = mpr.output_process_id\n" +
+                    "	AND msp.schedule_id = mms.schedule_id\n" +
+                    ")\n" +
                     "WHERE\n" +
-                    "	mms.part_id = bp.part_id\n" +
-                    "AND mms.machine_id = bm.machine_id\n" +
-                    "AND mms.part_id = mpr.part_id\n" +
-                    "AND msp.process_id = mpr.output_process_id\n" +
-                    "AND msp.schedule_id = mms.schedule_id\n" +
+                    "	1 = 1\n" +
                     "AND (mms.flag = "+ MoScheduleStatus.AUDITED.getKey() + " OR mms.flag = "+ MoScheduleStatus.FROZEN.getKey() + ")\n";
         if(StringUtils.isNotEmpty(machineId)){
             sql = sql + " AND mms.machine_id = '" + machineId + "'\n";
