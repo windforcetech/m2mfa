@@ -8,9 +8,13 @@ import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+
+import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import com.m2micro.m2mfa.pr.vo.OrganizationalStation;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -62,27 +66,23 @@ public class BaseStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "类型名称")
     private String postCategoryName;
 
-    public BaseStation(@NotEmpty(message = "主键不能为空", groups = {UpdateGroup.class}) String stationId, @NotEmpty(message = "编号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String code, @NotEmpty(message = "名称不能为空", groups = {AddGroup.class, UpdateGroup.class}) String name, Integer leadTime, Integer waitingTime, Integer postTime, Integer jobPeoples, BigDecimal standardHours, BigDecimal coefficient, Integer controlPeoples, Integer controlMachines, String postCategory, Integer sortCode, Boolean enabled, String description, String postCategoryName) {
-        this.stationId = stationId;
-        this.code = code;
-        this.name = name;
-        this.leadTime = leadTime;
-        this.waitingTime = waitingTime;
-        this.postTime = postTime;
-        this.jobPeoples = jobPeoples;
-        this.standardHours = standardHours;
-        this.coefficient = coefficient;
-        this.controlPeoples = controlPeoples;
-        this.controlMachines = controlMachines;
-        this.postCategory = postCategory;
-        this.sortCode = sortCode;
-        this.enabled = enabled;
-        this.description = description;
-        this.postCategoryName = postCategoryName;
-    }
 
-    public BaseStation() {
-    }
+    @Transient
+    @ApiModelProperty("班别")
+    private List<BaseShift> shifts;
+
+
+
+
+    @Transient
+    @ApiModelProperty("岗位")
+    private List<Organization> organization;
+
+
+
+    @ApiModelProperty(value = "是否岗位")
+    private Boolean isStation;
+
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -214,5 +214,29 @@ public class BaseStation extends BaseEntity implements Serializable {
 
     public void setPostCategoryName(String postCategoryName) {
         this.postCategoryName = postCategoryName;
+    }
+
+    public List<BaseShift> getShifts() {
+        return shifts;
+    }
+
+    public void setShifts(List<BaseShift> shifts) {
+        this.shifts = shifts;
+    }
+
+    public List<Organization> getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(List<Organization> organization) {
+        this.organization = organization;
+    }
+
+    public Boolean getIsStation() {
+        return isStation;
+    }
+
+    public void setIsStation(Boolean station) {
+        isStation = station;
     }
 }

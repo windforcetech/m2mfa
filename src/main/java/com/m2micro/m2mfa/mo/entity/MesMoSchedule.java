@@ -74,6 +74,10 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "料件编号")
     private String partNo;
 
+    @Transient
+    @ApiModelProperty(value = "料件名称")
+    private String partName;
+
 
     @NotEmpty(message="版本不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "班别")
@@ -218,6 +222,14 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
 
     public void setPartNo(String partNo) {
         this.partNo = partNo;
+    }
+
+    public String getPartName() {
+        return partName;
+    }
+
+    public void setPartName(String partName) {
+        this.partName = partName;
     }
 
     public String getShiftId() {

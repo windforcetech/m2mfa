@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.mo.repository;
 
+import com.m2micro.framework.starter.entity.Organization;
+import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -7,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 生产排程表表头 Repository 接口
@@ -45,6 +48,16 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
     @Query("update MesMoSchedule m set m.flag = ?1 , m.prefreezingState = ?2 where m.scheduleId = ?3")
     Integer setFlagAndPrefreezingStateFor(Integer flag,Integer prefreezingState, String scheduleId);
 
-    @Query(value = "select  MAX(sequence)  from mes_mo_schedule where  machine_id=?1 and flag !=3 and flag !=10",nativeQuery = true)
+    @Query(value = "select MAX(sequence)  from mes_mo_schedule where  machine_id=?1 and flag !=3 and flag !=10",nativeQuery = true)
     Integer  maxSequence(String machineId );
+
+
+
+
+    @Query(value = " SELECT uuid  FROM organization o WHERE uuid  IN ( SELECT DISTINCT staff_id FROM mes_mo_schedule_staff WHERE schedule_id = ?1  AND station_id = ?2 AND is_station = 1 )",nativeQuery = true)
+    List<String> findborganizationschduleId (String scheduleId, String  stationId);
+
+
+
+
 }

@@ -8,6 +8,8 @@ import java.util.List;
 @Data
 @Builder
 public class Staffmember {
+
+    private BaseProcess baseProcess;
     private BaseShift shift;
     private List<BaseStaff> staffs;
     private List<OrganizationalStation> organizationalStations;

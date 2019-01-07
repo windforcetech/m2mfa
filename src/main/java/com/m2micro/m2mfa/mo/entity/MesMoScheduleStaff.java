@@ -8,6 +8,7 @@ import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.base.entity.Staffmember;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
@@ -59,9 +60,9 @@ public class MesMoScheduleStaff extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     private String description;
 
-    @ApiModelProperty(value = "工位人员信息")
+    @ApiModelProperty(value = "工序")
     @Transient
-    private Staffmember staffmember;
+    private BaseProcess baseProcess;
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -171,11 +172,11 @@ public class MesMoScheduleStaff extends BaseEntity implements Serializable {
         this.description = description;
     }
 
-    public Staffmember getStaffmember() {
-        return staffmember;
+    public BaseProcess getBaseProcess() {
+        return baseProcess;
     }
 
-    public void setStaffmember(Staffmember staffmember) {
-        this.staffmember = staffmember;
+    public void setBaseProcess(BaseProcess baseProcess) {
+        this.baseProcess = baseProcess;
     }
 }
