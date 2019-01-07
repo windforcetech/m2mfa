@@ -156,6 +156,42 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.mybatis</groupId>
+                            <artifactId>mybatis</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>org.mybatis</groupId>
+                            <artifactId>mybatis-spring</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus-annotation</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus-core</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus-boot-starter</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus-extension</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus-generator</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.mysema.maven</groupId>
@@ -204,7 +240,28 @@
                     </buildArgs>
                 </configuration>
             </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <excludes>
+                        <!--<exclude>**/com/m2micro/m2mfa/common/util/CodeGenerator*</exclude>-->
+                        <exclude>**/CodeGeneratorUtil*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
         </plugins>
+        <!--<resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/java/com/m2micro/m2mfa/common/util</directory>
+                <excludes>
+                    <exclude>CodeGenerator*.class</exclude>
+                </excludes>
+            </resource>
+        </resources>-->
     </build>
 
     <repositories>
