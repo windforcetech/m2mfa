@@ -703,13 +703,16 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             String staffsql="select * from mes_mo_schedule_staff where shift_id='"+mesMoScheduleStaff.getShiftId()+"'";
             List<MesMoScheduleStaff>stff= jdbcTemplate.query(staffsql,rmstaff);
             List<BaseStaff> lss= new ArrayList<>();
-            List<BaseStation> stations=new ArrayList<>();
             List<Organization>o= new ArrayList<>();
             if(mesMoScheduleStaff.getIsStation()){
                 staffsql="select * from mes_mo_schedule_staff where shift_id='"+mesMoScheduleStaff.getShiftId()+"' and is_station=1";
                 List<MesMoScheduleStaff>staffs = jdbcTemplate.query(staffsql,rmstaff);
                 for(MesMoScheduleStaff staff : staffs){
-                    o.add(organizationRepository.obtainuuidorg(staff.getStaffId()));
+                   Organization organization =   organizationRepository.obtainuuidorg(staff.getStaffId());
+                    BaseStation baseStation =  baseStationService.findById(staff.getStationId()).orElse(null);
+                    organization.setStationId(baseStation.getStationId());
+                    organization.setStationName(baseStation.getName());
+                    o.add(organization);
                 }
                 MesMoScheduleStaff newaffs = isRepeat(list, staffs.get(0));
                 if(newaffs==null){
@@ -724,8 +727,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 staffsql="select * from mes_mo_schedule_staff where shift_id='"+mesMoScheduleStaff.getShiftId()+"' and is_station=0";
                 List<MesMoScheduleStaff>staffs = jdbcTemplate.query(staffsql,rmstaff);
                 for(MesMoScheduleStaff staff : staffs){
-                    lss.add(baseStaffService.findById(staff.getStaffId()).orElse(null));
-                    stations.add(baseStationService.findById(staff.getStationId()).orElse(null));
+                   BaseStaff baseStaff = baseStaffService.findById(staff.getStaffId()).orElse(null);
+                   BaseStation baseStation =  baseStationService.findById(staff.getStationId()).orElse(null);
+                    baseStaff.setStationId(baseStation.getStationId());
+                    baseStaff.setStationName(baseStation.getName());
+                    lss.add(baseStaff);
+
                 }
                 MesMoScheduleStaff newaffs = isRepeat(list, staffs.get(0));
                 if(newaffs==null){
@@ -804,7 +811,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesMoSchedule.setFlag(0);
         mesMoSchedule.setShiftId("-");
         Integer sequence= mesMoScheduleRepository.maxSequence(mesMoSchedule.getMachineId());
-        mesMoSchedule.setSequence(sequence==null ? 0 :sequence+1);
+        mesMoSchedule.setSequence(sequence==null ? 1 :sequence+1);
     }
 
     private void saveScheduleStation(List<MesMoScheduleStation> mesMoScheduleStations, String scheduleId) {

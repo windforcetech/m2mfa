@@ -10,6 +10,5 @@ import java.util.List;
 public class Staffmember {
     private BaseShift shift;
     private List<BaseStaff> staffs;
-    private List<BaseStation> stations;
     private List<Organization> departments;
 }

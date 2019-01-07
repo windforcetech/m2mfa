@@ -75,6 +75,30 @@ public class BaseStaff extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "删除标识")
     private Boolean deletionStateCode;
 
+    @Transient
+    @ApiModelProperty(value = "所属工位ID")
+    private String stationId;
+
+    @Transient
+    @ApiModelProperty(value = "工位名称")
+    private String  stationName;
+
+    public String getStationId() {
+        return stationId;
+    }
+
+    public void setStationId(String stationId) {
+        this.stationId = stationId;
+    }
+
+    public String getStationName() {
+        return stationName;
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
+    }
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
