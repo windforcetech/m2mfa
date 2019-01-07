@@ -44,4 +44,7 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
     @Modifying
     @Query("update MesMoSchedule m set m.flag = ?1 , m.prefreezingState = ?2 where m.scheduleId = ?3")
     Integer setFlagAndPrefreezingStateFor(Integer flag,Integer prefreezingState, String scheduleId);
+
+    @Query(value = "select  MAX(sequence)  from mes_mo_schedule where  machine_id=?1 and flag !=3 and flag !=10",nativeQuery = true)
+    Integer  maxSequence(String machineId );
 }

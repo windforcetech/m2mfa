@@ -92,6 +92,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @Autowired
     private OrganizationRepository organizationRepository;
 
+
+
     @SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
         return mesMoScheduleRepository;
@@ -709,9 +711,15 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 for(MesMoScheduleStaff staff : staffs){
                     o.add(organizationRepository.obtainuuidorg(staff.getStaffId()));
                 }
-                MesMoScheduleStaff newaffs =staffs.get(0);
-                newaffs.setStaffmember(  Staffmember.builder().departments(o).build());
+                MesMoScheduleStaff newaffs = isRepeat(list, staffs.get(0));
+                if(newaffs==null){
+                    newaffs= staffs.get(0);
+                    newaffs.setStaffmember(  Staffmember.builder().departments(o).build());
+                }else {
+                    newaffs.getStaffmember().setDepartments(o);
+                }
                 list.add(newaffs);
+
             }else {
                 staffsql="select * from mes_mo_schedule_staff where shift_id='"+mesMoScheduleStaff.getShiftId()+"' and is_station=0";
                 List<MesMoScheduleStaff>staffs = jdbcTemplate.query(staffsql,rmstaff);
@@ -719,13 +727,31 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                     lss.add(baseStaffService.findById(staff.getStaffId()).orElse(null));
                     stations.add(baseStationService.findById(staff.getStationId()).orElse(null));
                 }
-                MesMoScheduleStaff newaffs =staffs.get(0);
-                newaffs.setStaffmember(  Staffmember.builder().shift( baseShiftRepository.findById(mesMoScheduleStaff.getShiftId()).orElse(null)).staffs(lss).build());
+                MesMoScheduleStaff newaffs = isRepeat(list, staffs.get(0));
+                if(newaffs==null){
+                    newaffs= staffs.get(0);
+                    newaffs.setStaffmember(Staffmember.builder().shift( baseShiftRepository.findById(mesMoScheduleStaff.getShiftId()).orElse(null)).staffs(lss).build());
+                }else {
+                    newaffs.getStaffmember().setStaffs(lss);
+                    newaffs.getStaffmember().setShift( baseShiftRepository.findById(mesMoScheduleStaff.getShiftId()).orElse(null));
+                }
                 list.add(newaffs);
             }
         }
         return list;
 
+    }
+
+    private MesMoScheduleStaff isRepeat(List<MesMoScheduleStaff> list, MesMoScheduleStaff newaffs) {
+
+        for(int i=0 ;i<list.size();i++){
+            MesMoScheduleStaff mesMoScheduleStaff=list.get(i);
+            if(mesMoScheduleStaff.getShiftId().equals(newaffs.getShiftId())){
+                list.remove(i);
+              return  mesMoScheduleStaff;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -775,7 +801,10 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoScheduleShift.setShiftId(shifts[i]);
             mesMoScheduleShiftService.save(mesMoScheduleShift);
         }
+        mesMoSchedule.setFlag(0);
         mesMoSchedule.setShiftId("-");
+        Integer sequence= mesMoScheduleRepository.maxSequence(mesMoSchedule.getMachineId());
+        mesMoSchedule.setSequence(sequence==null ? 0 :sequence+1);
     }
 
     private void saveScheduleStation(List<MesMoScheduleStation> mesMoScheduleStations, String scheduleId) {
