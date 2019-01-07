@@ -110,8 +110,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                         "	bp.part_no partNo,\n" +
                         "	bp.name partName,\n" +
                         "	bm.name machineName,\n" +
-                        "	mms.schedule_qty schedulQty,\n" +
-                        "	msp.output_qty outputQty\n" +
+                        "	IFNULL(mms.schedule_qty,0) scheduleQty,\n" +
+                        "	IFNULL(msp.output_qty,0) outputQty\n" +
                         "FROM\n" +
                         "	mes_mo_schedule mms,\n" +
                         "	base_parts bp,\n" +
