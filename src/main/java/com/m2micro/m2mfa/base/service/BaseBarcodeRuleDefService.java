@@ -25,5 +25,6 @@ public interface BaseBarcodeRuleDefService extends BaseService<BaseBarcodeRuleDe
     int countByNameAndBarcodeIdAndIdNot(String name,String barcodeId,String id);
     void deleteByBarcodeIdIn(List<String> barcodeIds);
     List<BaseBarcodeRuleDef> findByBarcodeId(String barcodeId);
+    void deleteByBarcodeIdAndIdNotIn(String barCodeId,List<String> ids);
 
 }
