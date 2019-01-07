@@ -173,9 +173,11 @@ public class MesMoDescServiceImpl implements MesMoDescService {
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许审核！");
         }
         List<MesPartRoute> mesPartRoutes = mesPartRouteRepository.findByPartId(mesMoDesc.getPartId());
-        if(mesPartRoutes==null){
+        if(mesPartRoutes==null||mesPartRoutes.size()==0){
             throw new MMException("该料件未建好途程，请建途程!");
         }
+        //将最新的涂程id关联过来（料件后来修改了涂程，料件后来增加了涂程）
+        mesMoDescRepository.setRouteIdFor(mesPartRoutes.get(0).getPartRouteId(),mesMoDesc.getMoId());
         //更改为已审待排
         mesMoDescRepository.setCloseFlagFor(MoStatus.AUDITED.getKey(),mesMoDesc.getMoId());
     }
