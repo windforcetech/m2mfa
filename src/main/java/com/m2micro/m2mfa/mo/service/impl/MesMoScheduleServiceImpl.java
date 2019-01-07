@@ -27,6 +27,7 @@ import com.m2micro.m2mfa.mo.service.*;
 import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
+import com.m2micro.m2mfa.pr.vo.OrganizationalStation;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
 import com.querydsl.core.BooleanBuilder;
@@ -703,23 +704,25 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             String staffsql="select * from mes_mo_schedule_staff where shift_id='"+mesMoScheduleStaff.getShiftId()+"'";
             List<MesMoScheduleStaff>stff= jdbcTemplate.query(staffsql,rmstaff);
             List<BaseStaff> lss= new ArrayList<>();
-            List<Organization>o= new ArrayList<>();
+            List<OrganizationalStation>o= new ArrayList<>();
             if(mesMoScheduleStaff.getIsStation()){
                 staffsql="select * from mes_mo_schedule_staff where shift_id='"+mesMoScheduleStaff.getShiftId()+"' and is_station=1";
                 List<MesMoScheduleStaff>staffs = jdbcTemplate.query(staffsql,rmstaff);
                 for(MesMoScheduleStaff staff : staffs){
-                   Organization organization =   organizationRepository.obtainuuidorg(staff.getStaffId());
+                    OrganizationalStation organizational = new OrganizationalStation();
+                    Organization organization =   organizationRepository.obtainuuidorg(staff.getStaffId());
                     BaseStation baseStation =  baseStationService.findById(staff.getStationId()).orElse(null);
-                    organization.setStationId(baseStation.getStationId());
-                    organization.setStationName(baseStation.getName());
-                    o.add(organization);
+                    organizational.setStationId(baseStation.getStationId());
+                    organizational.setStationName(baseStation.getName());
+                    organizational.setOrganization(organization);
+                    o.add(organizational);
                 }
                 MesMoScheduleStaff newaffs = isRepeat(list, staffs.get(0));
                 if(newaffs==null){
                     newaffs= staffs.get(0);
-                    newaffs.setStaffmember(  Staffmember.builder().departments(o).build());
+                    newaffs.setStaffmember(  Staffmember.builder().organizationalStations(o).build());
                 }else {
-                    newaffs.getStaffmember().setDepartments(o);
+                    newaffs.getStaffmember().setOrganizationalStations(o);
                 }
                 list.add(newaffs);
 

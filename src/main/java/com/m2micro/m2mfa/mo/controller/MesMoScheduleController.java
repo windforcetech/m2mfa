@@ -52,7 +52,7 @@ public class MesMoScheduleController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @PostMapping("/list")
     @ApiOperation(value="生产排程表表头列表")
     @UserOperationLog("生产排程表表头列表")
     public ResponseMessage<PageUtil<MesMoScheduleModel>> list(MesMoScheduleQuery query){
@@ -85,7 +85,7 @@ public class MesMoScheduleController {
     /**
      * 更新
      */
-    @RequestMapping("/update")
+    @PostMapping("/update")
     @ApiOperation(value="更新生产排程表表头")
     @UserOperationLog("更新生产排程表表头")
     public ResponseMessage<MesMoSchedule> update(@RequestBody MesMoSchedule mesMoSchedule){
@@ -101,7 +101,7 @@ public class MesMoScheduleController {
     /**
      * 删除
      */
-    @RequestMapping("/delete")
+    @PostMapping("/delete")
     @ApiOperation(value="删除生产排程表表头")
     @UserOperationLog("删除生产排程表表头")
     public ResponseMessage delete(@RequestBody String[] ids){
