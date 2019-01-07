@@ -22,13 +22,16 @@ import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleStaffRepository;
 import com.m2micro.m2mfa.mo.service.*;
 import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import com.m2micro.m2mfa.pr.vo.OrganizationalStation;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
+import com.m2micro.m2mfa.record.repository.MesRecordStaffRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -92,6 +95,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private MesMoScheduleShiftService mesMoScheduleShiftService;
     @Autowired
     private OrganizationRepository organizationRepository;
+    @Autowired
+    MesRecordStaffRepository mesRecordStaffRepository;
+    @Autowired
+    MesMoScheduleStaffRepository mesMoScheduleStaffRepository;
+    @Autowired
+    MesMoScheduleProcessRepository mesMoScheduleProcessRepository;
 
 
 
@@ -104,27 +113,26 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     public PageUtil<MesMoScheduleModel> list(MesMoScheduleQuery query) {
 
         String sql = "SELECT\n" +
-                        "	mms.schedule_id scheduleId,\n" +
-                        "	mms.schedule_no scheduleNo,\n" +
-                        "	mms.flag flag,\n" +
-                        "	mms.enabled enabled,\n" +
-                        "	bp.part_no partNo,\n" +
-                        "	bp.name partName,\n" +
-                        "	bm.name machineName,\n" +
-                        "	IFNULL(mms.schedule_qty,0) scheduleQty,\n" +
-                        "	IFNULL(msp.output_qty,0) outputQty\n" +
-                        "FROM\n" +
-                        "	mes_mo_schedule mms,\n" +
-                        "	base_parts bp,\n" +
-                        "	base_machine bm,\n" +
-                        "	mes_part_route mpr,\n" +
-                        "	mes_mo_schedule_process msp\n" +
-                        "WHERE\n" +
-                        "	mms.part_id = bp.part_id\n" +
-                        "AND mms.machine_id = bm.machine_id\n" +
-                        "AND mms.part_id = mpr.part_id\n" +
-                        "AND msp.process_id = mpr.output_process_id\n" +
-                        "AND msp.schedule_id = mms.schedule_id\n";
+                    "	mms.schedule_id scheduleId,\n" +
+                    "	mms.schedule_no scheduleNo,\n" +
+                    "	mms.flag flag,\n" +
+                    "	mms.enabled enabled,\n" +
+                    "	bp.part_no partNo,\n" +
+                    "	bp. NAME partName,\n" +
+                    "	bm. NAME machineName,\n" +
+                    "	IFNULL(mms.schedule_qty, 0) scheduleQty,\n" +
+                    "	IFNULL(msp.output_qty, 0) outputQty\n" +
+                    "FROM\n" +
+                    "	mes_mo_schedule mms\n" +
+                    "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
+                    "LEFT JOIN base_machine bm ON mms.machine_id = bm.machine_id\n" +
+                    "LEFT JOIN mes_part_route mpr ON mms.part_id = mpr.part_id\n" +
+                    "LEFT JOIN mes_mo_schedule_process msp ON (\n" +
+                    "	msp.process_id = mpr.output_process_id\n" +
+                    "	AND msp.schedule_id = mms.schedule_id\n" +
+                    ")\n" +
+                    "WHERE\n" +
+                    "	1 = 1\n";
 
         if(StringUtils.isNotEmpty(query.getFlag())){
             sql = sql+" AND mms.flag = " + Integer.valueOf(query.getFlag())+ "\n";
@@ -143,17 +151,14 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         String countSql =   "SELECT\n" +
                             "	count(*)\n" +
                             "FROM\n" +
-                            "	mes_mo_schedule mms,\n" +
-                            "	base_parts bp,\n" +
-                            "	base_machine bm,\n" +
-                            "	mes_part_route mpr,\n" +
-                            "	mes_mo_schedule_process msp\n" +
-                            "WHERE\n" +
-                            "	mms.part_id = bp.part_id\n" +
-                            "AND mms.machine_id = bm.machine_id\n" +
-                            "AND mms.part_id = mpr.part_id\n" +
-                            "AND msp.process_id = mpr.output_process_id\n" +
-                            "AND msp.schedule_id = mms.schedule_id";
+                            "	mes_mo_schedule mms\n" +
+                            "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
+                            "LEFT JOIN base_machine bm ON mms.machine_id = bm.machine_id\n" +
+                            "LEFT JOIN mes_part_route mpr ON mms.part_id = mpr.part_id\n" +
+                            "LEFT JOIN mes_mo_schedule_process msp ON (\n" +
+                            "	msp.process_id = mpr.output_process_id\n" +
+                            "	AND msp.schedule_id = mms.schedule_id\n" +
+                            ")";
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
@@ -546,7 +551,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         //更改为冻结状态及冻结前状态
         mesMoScheduleRepository.setFlagAndPrefreezingStateFor(MoScheduleStatus.FROZEN.getKey(),mesMoSchedule.getFlag(),mesMoSchedule.getScheduleId());
         //做冻结额外业务逻辑操作
-
+        mesRecordStaffRepository.setEndAll(new Date(),new BigDecimal(1),new BigDecimal(1),mesMoSchedule.getScheduleId());
     }
 
     @Override
@@ -579,6 +584,14 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         //更改为强制结案状态
         mesMoScheduleRepository.setFlagFor(MoStatus.FORCECLOSE.getKey(),mesMoSchedule.getScheduleId());
         //做强制结案的额外业务逻辑操作
+        //执行中，冻结
+        if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag())||MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag())){
+            mesMoScheduleStaffRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
+            mesRecordStaffRepository.setEndAll(new Date(),new BigDecimal(1),new BigDecimal(1),mesMoSchedule.getScheduleId());
+            mesMoScheduleProcessRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
+        }else{
+
+        }
 
     }
 
