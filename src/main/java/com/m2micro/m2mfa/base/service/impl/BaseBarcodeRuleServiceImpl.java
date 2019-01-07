@@ -99,6 +99,14 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
         return BaseBarcodeRuleObj.createSelf(rule,ones);
     }
 
+    @Transactional
+    @Override
+    public void deleteVal(List<String> varIds) {
+        for(String one:varIds){
+        baseBarcodeRuleDefService.deleteById(one);
+        }
+    }
+
 
     private BaseBarcodeRule addOrUpdateBaseBarcodeRule(BaseBarcodeRule rule) {
         BaseBarcodeRule parent = null;

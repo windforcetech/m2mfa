@@ -27,5 +27,6 @@ public interface BaseBarcodeRuleService extends BaseService<BaseBarcodeRule,Stri
     BaseBarcodeRuleObj AddOrUpdate(BaseBarcodeRuleObj baseBarcodeRuleObj);
     void deleteByIdIn(List<String> ids);
     BaseBarcodeRuleObj findByRuleId(String ruleId);
+    void deleteVal(List<String> varIds);
 
 }
