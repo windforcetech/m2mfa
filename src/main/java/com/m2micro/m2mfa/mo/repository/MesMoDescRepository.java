@@ -62,5 +62,17 @@ public interface MesMoDescRepository extends BaseRepository<MesMoDesc,String> {
     @Query("update MesMoDesc m set m.closeFlag = ?1 , m.prefreezingState = ?2 where m.moId = ?3")
     Integer setCloseFlagAndPrefreezingStateFor(Integer closeFlag,Integer prefreezingState, String moId);
 
+    /**
+     * 更新工单涂程信息
+     * @param routeId
+     *          涂程id
+     * @param moId
+     *          工单id
+     * @return
+     */
+    @Modifying
+    @Query("update MesMoDesc m set m.routeId = ?1 where m.moId = ?2")
+    Integer setRouteIdFor(String routeId,String moId);
+
 
 }
