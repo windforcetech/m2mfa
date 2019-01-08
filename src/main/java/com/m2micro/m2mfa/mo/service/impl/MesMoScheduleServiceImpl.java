@@ -47,6 +47,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 生产排程表表头 服务实现类
@@ -597,7 +598,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许强制结案！");
         }
         //更改为强制结案状态
-        mesMoScheduleRepository.setFlagFor(MoStatus.FORCECLOSE.getKey(),mesMoSchedule.getScheduleId());
+        mesMoScheduleRepository.setFlagFor(MoScheduleStatus.FORCECLOSE.getKey(),mesMoSchedule.getScheduleId());
         //做强制结案的额外业务逻辑操作
         stopWorkForAll(mesMoSchedule);
 
@@ -618,17 +619,26 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoScheduleProcessRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
             //获取未完成的排产单产量
             Integer uncompletedQty = getUncompletedQty(mesMoSchedule.getScheduleId());
-            //将未完成的产量返回给工单
-            mesMoDescRepository.setSchedulQtyFor(uncompletedQty,mesMoSchedule.getMoId());
-        }else{
-            //未开始，已审核
-            //获取未完成的排产单产量
-            Integer uncompletedQty = mesMoSchedule.getScheduleQty();
-            if(mesMoSchedule.getScheduleQty()<=uncompletedQty){
+            MesMoDesc mesMoDesc = mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
+            //获取工单已排的数量
+            Integer schedulQty = mesMoDesc.getSchedulQty()==null?0:mesMoDesc.getSchedulQty();
+            if(schedulQty<uncompletedQty){
                 throw new MMException("未生产的排产单数量大于工单已排产的数量！");
             }
             //将未完成的产量返回给工单
-            mesMoDescRepository.setSchedulQtyFor(uncompletedQty,mesMoSchedule.getMoId());
+            mesMoDescRepository.setSchedulQtyFor(schedulQty-uncompletedQty,mesMoSchedule.getMoId());
+        }else{
+            //未开始，已审核
+            //获取未完成的排产单产量
+            Integer uncompletedQty = mesMoSchedule.getScheduleQty()==null?0:mesMoSchedule.getScheduleQty();
+            MesMoDesc mesMoDesc = mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
+            //获取工单已排的数量
+            Integer schedulQty = mesMoDesc.getSchedulQty()==null?0:mesMoDesc.getSchedulQty();
+            if(schedulQty<uncompletedQty){
+                throw new MMException("未生产的排产单数量大于工单已排产的数量！");
+            }
+            //将未完成的产量返回给工单
+            mesMoDescRepository.setSchedulQtyFor(schedulQty-uncompletedQty,mesMoSchedule.getMoId());
         }
     }
 
