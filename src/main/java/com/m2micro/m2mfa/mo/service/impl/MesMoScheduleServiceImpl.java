@@ -755,14 +755,24 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
          MesMoSchedule mesMoSchedule =    mesMoSchedules.get(0);
         //排产计划计算量
         BigDecimal scheduleTime = mesMoScheduleRepository.getScheduleTime(mesMoSchedule.getMoId());
-        //班别有效工时
-        List<BaseShiftModel> shiftModels =getBaseShiftModels();
+
 
         Integer noitQty = mesMoScheduleRepository.findbnotQty(mesMoSchedule.getMoId());
-        mesMoSchedule.setNotQty(noitQty==null ? 0 :noitQty);
-        mesMoSchedule.setBaseShiftModels(shiftModels);
+        if(noitQty==null){
+            noitQty=0;
+        }
+        if(noitQty<0){
+            noitQty=0;
+        }
+        mesMoSchedule.setNotQty(noitQty);
+
         mesMoSchedule.setScheduleTime(scheduleTime);
         List<MesMoScheduleShift> mesMoScheduleShifts = getMesMoScheduleShifts(scheduleId);
+       for(MesMoScheduleShift mesMoScheduleShift :mesMoScheduleShifts){
+           BaseShift baseShift = baseShiftService.findById(mesMoScheduleShift.getShiftId()).orElse(null);
+           mesMoScheduleShift.setFfectiveTime(getSumEffectiveTime(baseShift));
+        }
+
         mesMoSchedule.setMesMoScheduleShifts(mesMoScheduleShifts);
         return mesMoSchedule;
     }

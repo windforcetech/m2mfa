@@ -62,9 +62,6 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "排产单计算量")
     private BigDecimal scheduleTime;
 
-    @Transient
-    @ApiModelProperty(value = "班别的有效工时")
-    List<BaseShiftModel>baseShiftModels;
 
     @Transient
     @ApiModelProperty(value = "部门名称")
@@ -134,13 +131,7 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     private String description;
 
 
-    public List<BaseShiftModel> getBaseShiftModels() {
-        return baseShiftModels;
-    }
 
-    public void setBaseShiftModels(List<BaseShiftModel> baseShiftModels) {
-        this.baseShiftModels = baseShiftModels;
-    }
 
     public Integer getNotQty() {
         return notQty;

@@ -30,6 +30,11 @@ public class MesMoScheduleShift extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "班别名称")
     private String shiftName;
 
+    @Transient
+    @ApiModelProperty(value = "班别有效时间")
+    private long ffectiveTime;
+
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
@@ -64,5 +69,13 @@ public class MesMoScheduleShift extends BaseEntity implements Serializable {
 
     public void setShiftName(String shiftName) {
         this.shiftName = shiftName;
+    }
+
+    public long getFfectiveTime() {
+        return ffectiveTime;
+    }
+
+    public void setFfectiveTime(long ffectiveTime) {
+        this.ffectiveTime = ffectiveTime;
     }
 }
