@@ -89,14 +89,9 @@ public class MesMoScheduleController {
     @PostMapping("/update")
     @ApiOperation(value="更新生产排程表表头")
     @UserOperationLog("更新生产排程表表头")
-    public ResponseMessage<MesMoSchedule> update(@RequestBody MesMoSchedule mesMoSchedule){
-        ValidatorUtil.validateEntity(mesMoSchedule, UpdateGroup.class);
-        MesMoSchedule mesMoScheduleOld = mesMoScheduleService.findById(mesMoSchedule.getScheduleId()).orElse(null);
-        if(mesMoScheduleOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        PropertyUtil.copy(mesMoSchedule,mesMoScheduleOld);
-        return ResponseMessage.ok(mesMoScheduleService.save(mesMoScheduleOld));
+    public ResponseMessage update(@RequestBody Productionorder productionorder){
+        mesMoScheduleService.update(productionorder.getMesMoSchedule(),productionorder.getMesMoScheduleStaffs(),productionorder.getMesMoScheduleProcesses(),productionorder.getMesMoScheduleStations());
+        return ResponseMessage.ok();
     }
 
     /**

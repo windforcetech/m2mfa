@@ -127,6 +127,14 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
     void save(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations);
 
     /**
+     * 排产单更新
+     * @param mesMoSchedule
+     * @param mesMoScheduleStaffs
+     * @param mesMoScheduleProcesses
+     * @param mesMoScheduleStations
+     */
+    void update(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations);
+    /**
      * 排产单新增要返回的数据
      * @return  排产单新增要返回的数据
      */
@@ -146,7 +154,7 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
     List<Organization>findbPosition();
 
     /**
-     * 删除多个
+     * 删除多个排产单
      * @param ids
      */
     String  deleteIds(String [] ids);

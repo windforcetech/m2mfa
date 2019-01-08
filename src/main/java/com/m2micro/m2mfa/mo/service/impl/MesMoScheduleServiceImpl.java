@@ -995,25 +995,36 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     public String  deleteIds(String[] ids) {
         String msg ="";
         for(int i=0;i<ids.length;i++){
-        MesMoSchedule mesMoSchedule =  mesMoScheduleRepository.findById(ids[i]).orElse(null);
+            msg = deleteMesMoschedule(ids[i], msg);
+        }
+       return msg;
+
+    }
+
+    /**
+     * 删除单个排产单
+     * @param id
+     * @param msg
+     * @return
+     */
+    private String deleteMesMoschedule(String id, String msg) {
+        MesMoSchedule mesMoSchedule =  mesMoScheduleRepository.findById(id).orElse(null);
         if(mesMoSchedule!=null){
-            if(  mesMoSchedule.getFlag()==0){
-                msg+=ids[i]+",";
-            }else {
-                mesMoScheduleRepository.deleteById(ids[i]);
-                mesMoScheduleStaffRepository.deleteScheduleId(ids[i]);
-                mesMoScheduleProcessRepository.deleteScheduleId(ids[i]);
-                mesMoScheduleStationRepository.deleteScheduleId(ids[i]);
-                mesMoScheduleShiftRepository.deleteScheduleId(ids[i]);
+            if( mesMoSchedule.getFlag()==0){
+                mesMoScheduleRepository.deleteById(id);
+                mesMoScheduleStaffRepository.deleteScheduleId(id);
+                mesMoScheduleProcessRepository.deleteScheduleId(id);
+                mesMoScheduleStationRepository.deleteScheduleId(id);
+                mesMoScheduleShiftRepository.deleteScheduleId(id);
                 MesMoDesc moDesc= mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
                 //把排产量更新到工单
                 Integer scheduQty =  moDesc.getSchedulQty()+ mesMoSchedule.getScheduleQty();
                 mesMoDescRepository.setSchedulQtyFor(scheduQty,moDesc.getMoId());
+            }else {
+                msg+= id +",";
             }
         }
-        }
-       return msg;
-
+        return msg;
     }
 
     @Override
@@ -1029,6 +1040,18 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         saveScheduleProcess(mesMoScheduleProcesses, ScheduleId);
         //保持工位
         saveScheduleStation(mesMoScheduleStations, ScheduleId);
+
+    }
+
+    @Override
+    public void update(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations) {
+        //删除
+       String msg= deleteMesMoschedule(mesMoSchedule.getScheduleId(),"");
+       if(msg.trim().equals("")){
+           save(mesMoSchedule,mesMoScheduleStaffs,mesMoScheduleProcesses,mesMoScheduleStations);
+       }else {
+           throw  new MMException("排产单已执行不可修改。");
+       }
 
     }
 
