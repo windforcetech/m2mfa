@@ -48,13 +48,13 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "计划天数")
     private Integer planDay;
 
-    @NotEmpty(message="工单ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
-    @ApiModelProperty(value = "工作群组")
+    @NotEmpty(message="机台ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    @ApiModelProperty(value = "机台ID")
     private String machineId;
 
-//    @Transient
-//    @ApiModelProperty(value = "工作群组名称")
-//    private String machineName;
+    @Transient
+    @ApiModelProperty(value = "机台名称")
+    private String machineName;
 
     @NotEmpty(message="工单ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "工单id")
@@ -126,6 +126,14 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
 
     public void setScheduleId(String scheduleId) {
         this.scheduleId = scheduleId;
+    }
+
+    public String getMachineName() {
+        return machineName;
+    }
+
+    public void setMachineName(String machineName) {
+        this.machineName = machineName;
     }
 
     public String getScheduleNo() {

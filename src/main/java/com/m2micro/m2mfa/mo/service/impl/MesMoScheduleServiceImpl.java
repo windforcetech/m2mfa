@@ -91,7 +91,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @Autowired
     private MesMoScheduleShiftService mesMoScheduleShiftService;
     @Autowired
-    private OrganizationRepository organizationRepository;
+    private BaseMachineService baseMachineService;
     @Autowired
     MesRecordStaffRepository mesRecordStaffRepository;
     @Autowired
@@ -683,16 +683,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @return
      */
     private MesMoSchedule getMesMoSchedule(String scheduleId) {
-        String sqlmesMoSchedule ="SELECT\n" +
+
+        String sqlmesMoSchedule =   "SELECT\n" +
                 "	mms.*, bp.part_no partNo,\n" +
                 "	bp.`name` partName,\n" +
-                "	mmd.mo_number moNumber\n" +
+                "	mmd.mo_number moNumber,\n" +
+                "  bm.`name` machineName\n" +
                 "FROM\n" +
                 "	mes_mo_schedule mms\n" +
                 "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
                 "LEFT JOIN mes_mo_desc mmd ON mms.mo_id = mmd.mo_id\n" +
+                "LEFT JOIN base_machine bm on bm.machine_id = mms.machine_id\n" +
                 "WHERE\n" +
-                "	mms.schedule_id ='"+scheduleId+"'";
+                "	mms.schedule_id  ='"+scheduleId+"'";
         RowMapper rmmesMoSchedule = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
         List<MesMoSchedule> mesMoSchedules = jdbcTemplate.query(sqlmesMoSchedule,rmmesMoSchedule);
         if(mesMoSchedules.isEmpty()){
@@ -736,8 +739,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private List<BaseProcess> getMesMoScheduleStaffs(String scheduleId) {
 
         RowMapper baseprocessrm = BeanPropertyRowMapper.newInstance(BaseProcess.class);
-        //String  sql ="select *  from base_process where process_id IN(SELECT DISTINCT  process_id  FROM  mes_mo_schedule_staff  WHERE schedule_id = '"+scheduleId+"')";
-          String  sql="select bp.*,brd.setp step   from base_process  bp  LEFT JOIN base_route_def brd ON  bp.process_id = brd.process_id  where bp.process_id IN(SELECT DISTINCT  process_id  FROM  mes_mo_schedule_staff  WHERE schedule_id = '"+scheduleId+"') group by bp.process_id ORDER BY step ";
+        String  sql ="select *  from base_process where process_id IN(SELECT DISTINCT  process_id  FROM  mes_mo_schedule_staff  WHERE schedule_id = '"+scheduleId+"')";
         List<BaseProcess>baseProcesses=jdbcTemplate.query(sql,baseprocessrm);
 
         for(BaseProcess baseProcess :baseProcesses){
@@ -922,6 +924,11 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(basePartsService.findById(mesMoSchedule.getPartId()).orElse(null) == null){
             throw  new MMException("料件ID有误。");
         }
+
+        if(baseMachineService.findById(mesMoSchedule.getMachineId()).orElse(null) == null){
+            throw  new MMException("机台ID有误。");
+        }
+
         String []shifts=mesMoSchedule.getShiftId().split(",");
         for(int i=0 ;i<shifts.length;i++){
             if( baseShiftService.findById(shifts[i]).orElse(null)==null){
