@@ -73,5 +73,13 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      */
     Integer countByMachineId(String machineId);
 
+    /**
+     * 获取排产编号，如果为空表示数据库一次也没有生成
+     * @param moId
+     * @return
+     */
+    @Query(value = "SELECT CONCAT(mo_id,'-',LPAD(max(IFNULL(SUBSTRING(schedule_no ,-2),'0'))+1, 2, 0)) FROM mes_mo_schedule where mo_id=?1",nativeQuery = true)
+    String getScheduleNoByMoId(String moId);
+
 
 }

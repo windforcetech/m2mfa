@@ -1002,6 +1002,22 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return list;
     }
 
+    /**
+     * 获取排产单编号
+     * @param moId
+     *          工单id
+     * @return  排产单编号
+     */
+    @Override
+    public String getScheduleNoByMoId(String moId) {
+        String scheduleNo = mesMoScheduleRepository.getScheduleNoByMoId(moId);
+        //同一工单首次添加排产单
+        if(scheduleNo==null){
+            return moId+"-01";
+        }
+        return scheduleNo;
+    }
+
     @Transactional
     @Override
     public String  deleteIds(String[] ids) {
@@ -1044,6 +1060,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     public void save(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations) {
         String ScheduleId  = UUIDUtil.getUUID();
         checkschedule(mesMoSchedule, ScheduleId);
+        //设置排产单编号
+        setScheduleNo(mesMoSchedule);
         //保存排产单
         this.save(mesMoSchedule);
         //保存职员
@@ -1053,6 +1071,15 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         //保持工位
         saveScheduleStation(mesMoScheduleStations, ScheduleId);
 
+    }
+
+    /**
+     * 设置排产单编号
+     * @param mesMoSchedule
+     */
+    private void setScheduleNo(MesMoSchedule mesMoSchedule) {
+        String scheduleNo = getScheduleNoByMoId(mesMoSchedule.getMoId());
+        mesMoSchedule.setScheduleNo(scheduleNo);
     }
 
     @Override
