@@ -1011,11 +1011,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @Override
     public String getScheduleNoByMoId(String moId) {
         String scheduleNo = mesMoScheduleRepository.getScheduleNoByMoId(moId);
+        MesMoDesc mesMoDesc = mesMoDescRepository.findById(moId).orElse(null);
         //同一工单首次添加排产单
         if(scheduleNo==null){
-            return moId+"-01";
+            return mesMoDesc.getMoNumber()+"-01";
         }
-        return scheduleNo;
+        return mesMoDesc.getMoNumber()+"-"+scheduleNo;
     }
 
     @Transactional
