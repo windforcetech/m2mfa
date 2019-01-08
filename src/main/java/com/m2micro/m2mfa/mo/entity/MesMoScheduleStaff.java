@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.m2micro.m2mfa.base.entity.BaseProcess;
-import com.m2micro.m2mfa.base.entity.Staffmember;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;

@@ -1,22 +1,20 @@
 package com.m2micro.m2mfa.base.entity;
 
 
+import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import io.swagger.models.auth.In;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
-
-import com.m2micro.framework.starter.entity.Organization;
-import com.m2micro.m2mfa.common.entity.BaseEntity;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
-import com.m2micro.m2mfa.pr.vo.OrganizationalStation;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * 工位基本档
@@ -67,16 +65,27 @@ public class BaseStation extends BaseEntity implements Serializable {
     private String postCategoryName;
 
 
+    @Transient
     @ApiModelProperty(value = "是否岗位")
     private Boolean isStation;
+
+    @Transient
+    @ApiModelProperty(value = "是否岗位")
+    private Integer step;
+
 
     @Transient
     @ApiModelProperty("班别")
     private List<BaseShift> shifts;
 
 
+    public Integer getStep() {
+        return step;
+    }
 
-
+    public void setStep(Integer step) {
+        this.step = step;
+    }
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
