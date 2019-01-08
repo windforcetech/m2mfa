@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -98,6 +99,12 @@ public class BaseShift extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "职员")
     private List<BaseStaff> staffs;
 
+
+    @Transient
+    @ApiModelProperty("岗位")
+    private List<Organization> organization;
+
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
@@ -128,6 +135,14 @@ public class BaseShift extends BaseEntity implements Serializable {
 
     public String getCategory() {
         return category;
+    }
+
+    public List<Organization> getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(List<Organization> organization) {
+        this.organization = organization;
     }
 
     public void setCategory(String category) {

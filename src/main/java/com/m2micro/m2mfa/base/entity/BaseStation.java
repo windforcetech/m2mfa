@@ -77,10 +77,6 @@ public class BaseStation extends BaseEntity implements Serializable {
 
 
 
-    @Transient
-    @ApiModelProperty("岗位")
-    private List<Organization> organization;
-
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -230,11 +226,5 @@ public class BaseStation extends BaseEntity implements Serializable {
         this.shifts = shifts;
     }
 
-    public List<Organization> getOrganization() {
-        return organization;
-    }
 
-    public void setOrganization(List<Organization> organization) {
-        this.organization = organization;
-    }
 }

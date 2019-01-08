@@ -53,11 +53,4 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
 
 
 
-
-    @Query(value = " SELECT uuid  FROM organization o WHERE uuid  IN ( SELECT DISTINCT staff_id FROM mes_mo_schedule_staff WHERE schedule_id = ?1  AND station_id = ?2 AND is_station = 1 )",nativeQuery = true)
-    List<String> findborganizationschduleId (String scheduleId, String  stationId);
-
-
-
-
 }
