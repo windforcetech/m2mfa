@@ -159,4 +159,11 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     String  deleteIds(String [] ids);
 
+    /**
+     * 获取排产单编号（自动生成）
+     * @param moId
+     * @return
+     */
+    String getScheduleNoByMoId(String moId);
+
 }
