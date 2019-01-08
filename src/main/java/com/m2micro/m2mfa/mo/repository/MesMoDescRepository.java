@@ -68,11 +68,23 @@ public interface MesMoDescRepository extends BaseRepository<MesMoDesc,String> {
      *          涂程id
      * @param moId
      *          工单id
-     * @return
+     * @return  影响行数
      */
     @Modifying
     @Query("update MesMoDesc m set m.routeId = ?1 where m.moId = ?2")
     Integer setRouteIdFor(String routeId,String moId);
+
+    /**
+     * 更新工单已排产数量
+     * @param uncompletedQty
+     *          未排产数量
+     * @param moId
+     *          工单id
+     * @return  影响行数
+     */
+    @Modifying
+    @Query("update MesMoDesc m set m.schedulQty = m.schedulQty-?1 where m.moId = ?2")
+    Integer setSchedulQtyFor(Integer uncompletedQty,String moId);
 
 
 }

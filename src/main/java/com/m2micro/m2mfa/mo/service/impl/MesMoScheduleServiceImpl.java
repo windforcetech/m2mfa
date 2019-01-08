@@ -20,6 +20,7 @@ import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
+import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleStaffRepository;
@@ -100,6 +101,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     MesMoScheduleStaffRepository mesMoScheduleStaffRepository;
     @Autowired
     MesMoScheduleProcessRepository mesMoScheduleProcessRepository;
+    @Autowired
+    MesMoDescRepository mesMoDescRepository;
 
 
 
@@ -583,15 +586,35 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         //更改为强制结案状态
         mesMoScheduleRepository.setFlagFor(MoStatus.FORCECLOSE.getKey(),mesMoSchedule.getScheduleId());
         //做强制结案的额外业务逻辑操作
-        //执行中，冻结
         if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag())||MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag())){
+            //执行中，冻结
             mesMoScheduleStaffRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
             mesRecordStaffRepository.setEndAll(new Date(),new BigDecimal(1),new BigDecimal(1),mesMoSchedule.getScheduleId());
             mesMoScheduleProcessRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
+            Integer uncompletedQty = getUncompletedQty(mesMoSchedule.getScheduleId());
+            mesMoDescRepository.setSchedulQtyFor(uncompletedQty,mesMoSchedule.getMoId());
         }else{
-
+            //未开始，已审核
+            Integer uncompletedQty = mesMoSchedule.getScheduleQty();
+            mesMoDescRepository.setSchedulQtyFor(uncompletedQty,mesMoSchedule.getMoId());
         }
 
+    }
+
+    private Integer getUncompletedQty(String scheduleId) {
+        String sql ="SELECT\n" +
+                    "IFNULL(mms.schedule_qty, 0) - IFNULL(msp.output_qty, 0) UncompletedQty\n" +
+                    "FROM\n" +
+                    "	mes_mo_schedule mms,\n" +
+                    "	mes_part_route mpr,\n" +
+                    "	mes_mo_schedule_process msp\n" +
+                    "WHERE\n" +
+                    "	mms.part_id = mpr.part_id\n" +
+                    "AND msp.process_id = mpr.output_process_id\n" +
+                    "AND msp.schedule_id = mms.schedule_id\n" +
+                    "AND mms.schedule_id = '"+scheduleId+"'";
+        //RowMapper rmstation = BeanPropertyRowMapper.newInstance(MesMoScheduleStation.class);
+        return jdbcTemplate.queryForObject(sql,Integer.class);
     }
 
     @Override
