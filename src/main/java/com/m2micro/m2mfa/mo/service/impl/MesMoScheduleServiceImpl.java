@@ -21,10 +21,7 @@ import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
-import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
-import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
-import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
-import com.m2micro.m2mfa.mo.repository.MesMoScheduleStaffRepository;
+import com.m2micro.m2mfa.mo.repository.*;
 import com.m2micro.m2mfa.mo.service.*;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
@@ -105,6 +102,10 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     MesMoDescRepository mesMoDescRepository;
     @Autowired
     IotMachineOutputRepository iotMachineOutputRepository;
+    @Autowired
+    private MesMoScheduleStationRepository mesMoScheduleStationRepository;
+    @Autowired
+    private MesMoScheduleShiftRepository mesMoScheduleShiftRepository;
 
 
 
@@ -974,7 +975,10 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return jdbcTemplate.query(sql,organizationrm);
     }
 
-
+    /**
+     * 获取所有的岗位信息
+     * @return
+     */
     @Override
     public List<Organization> findbPosition() {
         String sql ="select * from organization where typesof='岗位'";
@@ -984,6 +988,32 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             throw  new MMException("未找到岗位信息。");
         }
         return list;
+    }
+
+    @Transactional
+    @Override
+    public String  deleteIds(String[] ids) {
+        String msg ="";
+        for(int i=0;i<ids.length;i++){
+        MesMoSchedule mesMoSchedule =  mesMoScheduleRepository.findById(ids[i]).orElse(null);
+        if(mesMoSchedule!=null){
+            if(  mesMoSchedule.getFlag()==0){
+                msg+=ids[i]+",";
+            }else {
+                mesMoScheduleRepository.deleteById(ids[i]);
+                mesMoScheduleStaffRepository.deleteScheduleId(ids[i]);
+                mesMoScheduleProcessRepository.deleteScheduleId(ids[i]);
+                mesMoScheduleStationRepository.deleteScheduleId(ids[i]);
+                mesMoScheduleShiftRepository.deleteScheduleId(ids[i]);
+                MesMoDesc moDesc= mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
+                //把排产量更新到工单
+                Integer scheduQty =  moDesc.getSchedulQty()+ mesMoSchedule.getScheduleQty();
+                mesMoDescRepository.setSchedulQtyFor(scheduQty,moDesc.getMoId());
+            }
+        }
+        }
+       return msg;
+
     }
 
     @Override
@@ -1002,6 +1032,11 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     }
 
+    /**
+     * 保存排产单主表
+     * @param mesMoSchedule
+     * @param scheduleId
+     */
     private void checkschedule(MesMoSchedule mesMoSchedule, String scheduleId) {
         mesMoSchedule.setScheduleId(scheduleId);
         ValidatorUtil.validateEntity(mesMoSchedule, AddGroup.class);
@@ -1035,6 +1070,11 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesMoSchedule.setSequence(sequence==null ? 1 :sequence+1);
     }
 
+    /**
+     * 排产单工位保存
+     * @param mesMoScheduleStations
+     * @param scheduleId
+     */
     private void saveScheduleStation(List<MesMoScheduleStation> mesMoScheduleStations, String scheduleId) {
     if(mesMoScheduleStations !=null){
         for(MesMoScheduleStation mesMoScheduleStation : mesMoScheduleStations){
@@ -1053,6 +1093,11 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
     }
 
+    /**
+     * 排产单工序保存
+     * @param mesMoScheduleProcesses
+     * @param scheduleId
+     */
     private void saveScheduleProcess(List<MesMoScheduleProcess> mesMoScheduleProcesses, String scheduleId) {
         for(MesMoScheduleProcess mesMoScheduleProcess : mesMoScheduleProcesses){
             String  scheduleprocessId = UUIDUtil.getUUID();

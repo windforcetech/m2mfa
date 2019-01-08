@@ -145,4 +145,10 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     List<Organization>findbPosition();
 
+    /**
+     * 删除多个
+     * @param ids
+     */
+    String  deleteIds(String [] ids);
+
 }

@@ -106,8 +106,11 @@ public class MesMoScheduleController {
     @ApiOperation(value="删除生产排程表表头")
     @UserOperationLog("删除生产排程表表头")
     public ResponseMessage delete(@RequestBody String[] ids){
-        mesMoScheduleService.deleteByIds(ids);
-        return ResponseMessage.ok();
+       String msg = mesMoScheduleService.deleteIds(ids);
+       if(msg.trim().equals("")){
+           return ResponseMessage.ok();
+       }
+        return ResponseMessage.error(msg+"排产单已执行不可删除。");
     }
 
     /**

@@ -26,4 +26,12 @@ public interface MesMoScheduleProcessRepository extends BaseRepository<MesMoSche
     @Modifying
     @Query("update MesMoScheduleProcess m set m.actualEndTime = ?1 where m.scheduleId = ?2 and m.actualStartTime is not null and m.actualEndTime is null")
     Integer setEndAll(Date actualEndTime, String scheduleId);
+
+    /**
+     * 根据排产单编号删除数据
+     * @param scheduleId
+     */
+    @Modifying
+    @Query(value = "DELETE FROM mes_mo_schedule_process WHERE  schedule_id=?1",nativeQuery = true)
+    void deleteScheduleId(String scheduleId);
 }
