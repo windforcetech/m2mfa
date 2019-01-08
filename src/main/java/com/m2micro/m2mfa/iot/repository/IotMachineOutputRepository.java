@@ -17,4 +17,11 @@ public interface IotMachineOutputRepository extends BaseRepository<IotMachineOut
      * @return  机台产出信息
      */
     IotMachineOutput findIotMachineOutputByMachineId(String machineId);
+
+    /**
+     * 通过机台id删除
+     * @param machineId
+     * @return
+     */
+    Integer deleteByMachineId(String machineId);
 }

@@ -65,5 +65,13 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
             ") )  and  mmd.mo_id=?1",nativeQuery = true)
     Integer  findbnotQty(String moId );
 
+    /**
+     * 通过机台id查找排产单数量
+     * @param machineId
+     *          机台id
+     * @return
+     */
+    Integer countByMachineId(String machineId);
+
 
 }

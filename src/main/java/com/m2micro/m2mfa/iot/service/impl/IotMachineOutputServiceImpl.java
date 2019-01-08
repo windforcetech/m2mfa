@@ -10,6 +10,8 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.iot.entity.QIotMachineOutput;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 /**
  * 机台产出信息 服务实现类
@@ -36,6 +38,19 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
         List<IotMachineOutput> list = jq.fetch();
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    @Override
+    public Integer deleteByMachineId(String machineId) {
+        return iotMachineOutputRepository.deleteByMachineId(machineId);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByMachineIds(String[] machineIds) {
+        for (String machineId:machineIds){
+            deleteByMachineId(machineId);
+        }
     }
 
 }
