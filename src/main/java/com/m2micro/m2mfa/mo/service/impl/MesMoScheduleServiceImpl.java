@@ -1046,8 +1046,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 mesMoScheduleShiftRepository.deleteScheduleId(id);
                 MesMoDesc moDesc= mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
                 //把排产量更新到工单
-                Integer scheduQty =  moDesc.getSchedulQty()+ mesMoSchedule.getScheduleQty();
-                mesMoDescRepository.setSchedulQtyFor(scheduQty,moDesc.getMoId());
+                try {
+                    Integer scheduQty =  moDesc.getSchedulQty()+ mesMoSchedule.getScheduleQty();
+                    mesMoDescRepository.setSchedulQtyFor(scheduQty,moDesc.getMoId());
+                }catch (Exception e){
+
+                }
+
             }else {
                 msg+= id +",";
             }
@@ -1130,7 +1135,6 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesMoSchedule.setShiftId("-");
         Integer sequence= mesMoScheduleRepository.maxSequence(mesMoSchedule.getMachineId());
         mesMoSchedule.setSequence(sequence==null ? 1 :sequence+1);
-
 
     }
 
