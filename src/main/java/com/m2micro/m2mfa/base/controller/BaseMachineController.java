@@ -76,14 +76,7 @@ public class BaseMachineController {
     @ApiOperation(value="保存机台主档")
     @UserOperationLog("保存机台主档")
     public ResponseMessage<BaseMachine> save(@RequestBody BaseMachine baseMachine){
-        ValidatorUtil.validateEntity(baseMachine, AddGroup.class);
-        baseMachine.setMachineId(UUIDUtil.getUUID());
-        //校验code唯一性
-        List<BaseMachine> list = baseMachineService.findAllByCode(baseMachine.getCode());
-        if(list!=null&&list.size()>0){
-            throw new MMException("编号不唯一！");
-        }
-        return ResponseMessage.ok(baseMachineService.save(baseMachine));
+        return ResponseMessage.ok(baseMachineService.saveEntity(baseMachine));
     }
 
     /**
@@ -113,7 +106,7 @@ public class BaseMachineController {
     @ApiOperation(value="删除机台主档")
     @UserOperationLog("删除机台主档")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseMachineService.deleteByIds(ids);
+        baseMachineService.delete(ids);
         return ResponseMessage.ok();
     }
     @RequestMapping("/addDetails")

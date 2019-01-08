@@ -6,6 +6,13 @@ import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
 import com.m2micro.m2mfa.base.repository.BaseMachineRepository;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
+import com.m2micro.m2mfa.iot.repository.IotMachineOutputRepository;
+import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -17,7 +24,12 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.QBaseMachine;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+
 /**
  * 机台主档 服务实现类
  * @author liaotao
@@ -31,6 +43,10 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     JPAQueryFactory queryFactory;
     @Autowired
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    IotMachineOutputService iotMachineOutputService;
+    @Autowired
+    MesMoScheduleRepository mesMoScheduleRepository;
 
     public BaseMachineRepository getRepository() {
         return baseMachineRepository;
@@ -157,6 +173,48 @@ public class BaseMachineServiceImpl implements BaseMachineService {
             throw  new MMException("未找到对应的机台信息。");
         }
         return list;
+    }
+
+    @Override
+    @Transactional
+    public BaseMachine saveEntity(BaseMachine baseMachine) {
+        ValidatorUtil.validateEntity(baseMachine, AddGroup.class);
+        baseMachine.setMachineId(UUIDUtil.getUUID());
+        //校验code唯一性
+        List<BaseMachine> list = findAllByCode(baseMachine.getCode());
+        if(list!=null&&list.size()>0){
+            throw new MMException("编号不唯一！");
+        }
+        IotMachineOutput iotMachineOutput = new IotMachineOutput();
+        iotMachineOutput.setId(UUIDUtil.getUUID());
+        iotMachineOutput.setMachineId(baseMachine.getMachineId());
+        iotMachineOutput.setMolds(new BigDecimal(0));
+        iotMachineOutput.setPower(new BigDecimal(0));
+        iotMachineOutputService.save(iotMachineOutput);
+        return save(baseMachine);
+    }
+
+    @Override
+    @Transactional
+    public void delete(String[] ids) {
+        //校验
+        valid(ids);
+        iotMachineOutputService.deleteByMachineIds(ids);
+        deleteByIds(ids);
+    }
+
+    /**
+     * 校验排产单是否已经引用
+     * @param ids
+     */
+    private void valid(String[] ids) {
+        for (String id:ids){
+            Integer count = mesMoScheduleRepository.countByMachineId(id);
+            if(count>0){
+                BaseMachine baseMachine = findById(id).orElse(null);
+                throw new MMException("设备编号【"+baseMachine.getCode()+"】已产生业务，不允许删除！");
+            }
+        }
     }
 
 

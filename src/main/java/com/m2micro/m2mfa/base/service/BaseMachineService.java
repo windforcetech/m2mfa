@@ -42,4 +42,17 @@ public interface BaseMachineService extends BaseService<BaseMachine,String> {
      */
     List<BaseMachine>   findbyMachine();
 
+    /**
+     * 保存机台信息
+     * @param baseMachine
+     * @return
+     */
+    BaseMachine saveEntity(BaseMachine baseMachine);
+
+    /**
+     * 删除机台信息
+     * @param ids
+     */
+    void delete(String[] ids);
+
 }
