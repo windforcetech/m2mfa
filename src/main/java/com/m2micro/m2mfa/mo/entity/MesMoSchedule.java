@@ -6,12 +6,14 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import com.m2micro.m2mfa.mo.model.BaseShiftModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -56,6 +58,18 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "机台名称")
     private String machineName;
 
+    @Transient
+    @ApiModelProperty(value = "排产单计算量")
+    private BigDecimal scheduleTime;
+
+    @Transient
+    @ApiModelProperty(value = "班别的有效工时")
+    List<BaseShiftModel>baseShiftModels;
+
+    @Transient
+    @ApiModelProperty(value = "部门名称")
+    private String departmentName;
+
     @NotEmpty(message="工单ID不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "工单id")
     private String moId;
@@ -68,6 +82,9 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "料件编号")
     private String partId;
 
+    @Transient
+    @ApiModelProperty(value = "可排数量")
+    private Integer   notQty;
 
 
     @Transient
@@ -116,6 +133,23 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     private String description;
 
+
+    public List<BaseShiftModel> getBaseShiftModels() {
+        return baseShiftModels;
+    }
+
+    public void setBaseShiftModels(List<BaseShiftModel> baseShiftModels) {
+        this.baseShiftModels = baseShiftModels;
+    }
+
+    public Integer getNotQty() {
+        return notQty;
+    }
+
+    public void setNotQty(Integer notQty) {
+        this.notQty = notQty;
+    }
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
@@ -134,6 +168,22 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
 
     public void setMachineName(String machineName) {
         this.machineName = machineName;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public BigDecimal getScheduleTime() {
+        return scheduleTime;
+    }
+
+    public void setScheduleTime(BigDecimal scheduleTime) {
+        this.scheduleTime = scheduleTime;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 
     public String getScheduleNo() {

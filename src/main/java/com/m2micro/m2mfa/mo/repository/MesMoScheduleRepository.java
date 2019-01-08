@@ -51,6 +51,19 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
     @Query(value = "select MAX(sequence)  from mes_mo_schedule where  machine_id=?1 and flag !=3 and flag !=10",nativeQuery = true)
     Integer  maxSequence(String machineId );
 
+    @Query(value =
+            "SELECT\n" +
+            " IFNULL(( IFNULL(mmd.target_qty,0)  -  IFNULL(mmd.schedul_qty ,0) ),0)    notQty \n" +
+            "FROM\n" +
+            "	mes_mo_desc mmd\n" +
+            "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id WHERE\n" +
+            " ( 	mmd.close_flag = 1\n" +
+            "OR mmd.close_flag = 2\n" +
+            "OR (\n" +
+            "	mmd.close_flag = 3\n" +
+            "	AND mmd.is_schedul = 0\n" +
+            ") )  and  mmd.mo_id=?1",nativeQuery = true)
+    Integer  findbnotQty(String moId );
 
 
 }

@@ -732,16 +732,18 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      */
     private MesMoSchedule getMesMoSchedule(String scheduleId) {
 
-        String sqlmesMoSchedule =   "SELECT\n" +
+        String sqlmesMoSchedule =     "SELECT\n" +
                 "	mms.*, bp.part_no partNo,\n" +
                 "	bp.`name` partName,\n" +
                 "	mmd.mo_number moNumber,\n" +
-                "  bm.`name` machineName\n" +
+                "  bm.`name` machineName,\n" +
+                " o.department_name  departmentName\n" +
                 "FROM\n" +
                 "	mes_mo_schedule mms\n" +
                 "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
                 "LEFT JOIN mes_mo_desc mmd ON mms.mo_id = mmd.mo_id\n" +
                 "LEFT JOIN base_machine bm on bm.machine_id = mms.machine_id\n" +
+                "LEFT JOIN organization o on o.uuid=bm.department_id\n" +
                 "WHERE\n" +
                 "	mms.schedule_id  ='"+scheduleId+"'";
         RowMapper rmmesMoSchedule = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
@@ -750,6 +752,27 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             throw  new MMException("排产单ID非法。");
         }
 
+         MesMoSchedule mesMoSchedule =    mesMoSchedules.get(0);
+        //排产计划计算量
+        BigDecimal scheduleTime = mesMoScheduleRepository.getScheduleTime(mesMoSchedule.getMoId());
+        //班别有效工时
+        List<BaseShiftModel> shiftModels =getBaseShiftModels();
+
+        Integer noitQty = mesMoScheduleRepository.findbnotQty(mesMoSchedule.getMoId());
+        mesMoSchedule.setNotQty(noitQty==null ? 0 :noitQty);
+        mesMoSchedule.setBaseShiftModels(shiftModels);
+        mesMoSchedule.setScheduleTime(scheduleTime);
+        List<MesMoScheduleShift> mesMoScheduleShifts = getMesMoScheduleShifts(scheduleId);
+        mesMoSchedule.setMesMoScheduleShifts(mesMoScheduleShifts);
+        return mesMoSchedule;
+    }
+
+    /**
+     * 获取排产单对应的班别信息
+     * @param scheduleId
+     * @return
+     */
+    private List<MesMoScheduleShift> getMesMoScheduleShifts(String scheduleId) {
         String sqlShifts ="SELECT\n" +
                 "	mmss.*, bs.`name` shiftName\n" +
                 "FROM\n" +
@@ -758,9 +781,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 "WHERE\n" +
                 "	mmss.schedule_id ='"+scheduleId+"'";
         RowMapper rmShifts = BeanPropertyRowMapper.newInstance(MesMoScheduleShift.class);
-        List<MesMoScheduleShift> mesMoScheduleShifts = jdbcTemplate.query(sqlShifts,rmShifts);
-        mesMoSchedules.get(0).setMesMoScheduleShifts(mesMoScheduleShifts);
-        return mesMoSchedules.get(0);
+        return jdbcTemplate.query(sqlShifts,rmShifts);
     }
 
     private List<MesMoScheduleProcess> getMesMoScheduleProcesses(String scheduleId) {
