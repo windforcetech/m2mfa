@@ -11,6 +11,8 @@ import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
+import com.m2micro.m2mfa.iot.repository.IotMachineOutputRepository;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.*;
@@ -100,6 +102,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     MesMoScheduleProcessRepository mesMoScheduleProcessRepository;
     @Autowired
     MesMoDescRepository mesMoDescRepository;
+    @Autowired
+    IotMachineOutputRepository iotMachineOutputRepository;
 
 
 
@@ -549,8 +553,20 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
         //更改为冻结状态及冻结前状态
         mesMoScheduleRepository.setFlagAndPrefreezingStateFor(MoScheduleStatus.FROZEN.getKey(),mesMoSchedule.getFlag(),mesMoSchedule.getScheduleId());
-        //做冻结额外业务逻辑操作
-        mesRecordStaffRepository.setEndAll(new Date(),new BigDecimal(1),new BigDecimal(1),mesMoSchedule.getScheduleId());
+        //做冻结额外业务逻辑操作（已审待产不要做此操作，但不影响，因为上工记录表数据库没记录，更新0条）
+        stopWorkForStaff(mesMoSchedule);
+    }
+
+    /**
+     * 人员记录表下工
+     * @param mesMoSchedule
+     */
+    private void stopWorkForStaff(MesMoSchedule mesMoSchedule) {
+        IotMachineOutput iotMachineOutput = iotMachineOutputRepository.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        if(iotMachineOutput==null){
+            throw new MMException("没有对应机台产出信息！");
+        }
+        mesRecordStaffRepository.setEndAll(new Date(),iotMachineOutput.getPower(),iotMachineOutput.getMolds(),mesMoSchedule.getScheduleId());
     }
 
     @Override
@@ -583,21 +599,44 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         //更改为强制结案状态
         mesMoScheduleRepository.setFlagFor(MoStatus.FORCECLOSE.getKey(),mesMoSchedule.getScheduleId());
         //做强制结案的额外业务逻辑操作
-        if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag())||MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag())){
-            //执行中，冻结
-            mesMoScheduleStaffRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
-            mesRecordStaffRepository.setEndAll(new Date(),new BigDecimal(1),new BigDecimal(1),mesMoSchedule.getScheduleId());
-            mesMoScheduleProcessRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
-            Integer uncompletedQty = getUncompletedQty(mesMoSchedule.getScheduleId());
-            mesMoDescRepository.setSchedulQtyFor(uncompletedQty,mesMoSchedule.getMoId());
-        }else{
-            //未开始，已审核
-            Integer uncompletedQty = mesMoSchedule.getScheduleQty();
-            mesMoDescRepository.setSchedulQtyFor(uncompletedQty,mesMoSchedule.getMoId());
-        }
+        stopWorkForAll(mesMoSchedule);
 
     }
 
+    /**
+     *  所有下工操作及退产量
+     * @param mesMoSchedule
+     */
+    private void stopWorkForAll(MesMoSchedule mesMoSchedule) {
+        if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag())||MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag())){
+            //执行中，冻结
+            //排程人员结束
+            mesMoScheduleStaffRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
+            //人员记录下工（1.冻结状态并且冻结前状态为生产中2.生产中，两种情况做此操作，不然人员记录表没有相关数据，这里没有做判定但不影响，人员记录表没有记录更新0条）
+            stopWorkForStaff(mesMoSchedule);
+            //工艺结束
+            mesMoScheduleProcessRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
+            //获取未完成的排产单产量
+            Integer uncompletedQty = getUncompletedQty(mesMoSchedule.getScheduleId());
+            //将未完成的产量返回给工单
+            mesMoDescRepository.setSchedulQtyFor(uncompletedQty,mesMoSchedule.getMoId());
+        }else{
+            //未开始，已审核
+            //获取未完成的排产单产量
+            Integer uncompletedQty = mesMoSchedule.getScheduleQty();
+            if(mesMoSchedule.getScheduleQty()<=uncompletedQty){
+                throw new MMException("未生产的排产单数量大于工单已排产的数量！");
+            }
+            //将未完成的产量返回给工单
+            mesMoDescRepository.setSchedulQtyFor(uncompletedQty,mesMoSchedule.getMoId());
+        }
+    }
+
+    /**
+     * 获取未完成的排产单产量
+     * @param scheduleId
+     * @return
+     */
     private Integer getUncompletedQty(String scheduleId) {
         String sql ="SELECT\n" +
                     "IFNULL(mms.schedule_qty, 0) - IFNULL(msp.output_qty, 0) UncompletedQty\n" +
@@ -633,6 +672,17 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     @Override
     public MesMoScheduleInfoModel addDetails() {
+        List<BaseShiftModel> baseShiftModels = getBaseShiftModels();
+        MesMoScheduleInfoModel mesMoScheduleInfoModel = new MesMoScheduleInfoModel();
+        mesMoScheduleInfoModel.setBaseShiftModels(baseShiftModels);
+        return mesMoScheduleInfoModel;
+    }
+
+    /**
+     * 获取所有班别信息及对应的有效时间
+     * @return
+     */
+    private List<BaseShiftModel> getBaseShiftModels() {
         List<BaseShift> all = baseShiftRepository.findAll();
         List<BaseShiftModel> baseShiftModels = new ArrayList<>();
         all.stream().forEach(baseShift->{
@@ -643,9 +693,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             baseShiftModel.setEffectiveTime(getSumEffectiveTime(baseShift));
             baseShiftModels.add(baseShiftModel);
         });
-        MesMoScheduleInfoModel mesMoScheduleInfoModel = new MesMoScheduleInfoModel();
-        mesMoScheduleInfoModel.setBaseShiftModels(baseShiftModels);
-        return mesMoScheduleInfoModel;
+        return baseShiftModels;
     }
 
     @Override

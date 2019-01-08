@@ -83,7 +83,7 @@ public interface MesMoDescRepository extends BaseRepository<MesMoDesc,String> {
      * @return  影响行数
      */
     @Modifying
-    @Query("update MesMoDesc m set m.schedulQty = m.schedulQty-?1 where m.moId = ?2")
+    @Query(value = "update mes_mo_desc m set m.schedul_qty = ifnull(m.schedul_qty,0)-?1 where m.mo_id = ?2",nativeQuery = true)
     Integer setSchedulQtyFor(Integer uncompletedQty,String moId);
 
 
