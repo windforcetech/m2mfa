@@ -829,7 +829,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private List<BaseProcess> getMesMoScheduleStaffs(String scheduleId) {
 
         RowMapper baseprocessrm = BeanPropertyRowMapper.newInstance(BaseProcess.class);
-        String  sql ="select *  from base_process where process_id IN(SELECT DISTINCT  process_id  FROM  mes_mo_schedule_staff  WHERE schedule_id = '"+scheduleId+"')";
+       // String  sql ="select *  from base_process where process_id IN(SELECT DISTINCT  process_id  FROM  mes_mo_schedule_staff  WHERE schedule_id = '"+scheduleId+"')";
+       String sql = "SELECT\n" +
+               "	bp.*,brd.setp\n" +
+               "FROM\n" +
+               "	base_process bp  LEFT JOIN mes_part_route_process brd ON bp.process_id =brd.processid \n" +
+               "WHERE\n" +
+               "	bp.process_id IN (\n" +
+               "		SELECT DISTINCT\n" +
+               "			process_id\n" +
+               "		FROM\n" +
+               "			mes_mo_schedule_staff\n" +
+               "		WHERE\n" +
+               "			schedule_id = '"+scheduleId+"') group by bp.process_id   ORDER BY brd.setp";
         List<BaseProcess>baseProcesses=jdbcTemplate.query(sql,baseprocessrm);
 
         for(BaseProcess baseProcess :baseProcesses){
@@ -1067,7 +1079,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(moDesc==null){
             throw  new MMException("工单ID有误。");
         }
-        mesMoSchedule.setScheduleQty(moDesc.getSchedulQty());
+
         if(basePartsService.findById(mesMoSchedule.getPartId()).orElse(null) == null){
             throw  new MMException("料件ID有误。");
         }
@@ -1091,6 +1103,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesMoSchedule.setShiftId("-");
         Integer sequence= mesMoScheduleRepository.maxSequence(mesMoSchedule.getMachineId());
         mesMoSchedule.setSequence(sequence==null ? 1 :sequence+1);
+
+
     }
 
     /**
