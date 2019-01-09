@@ -3,8 +3,10 @@ package com.m2micro.m2mfa.mo.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.starter.entity.Organization;
-import com.m2micro.framework.starter.repository.OrganizationRepository;
-import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.entity.BaseProcess;
+import com.m2micro.m2mfa.base.entity.BaseShift;
+import com.m2micro.m2mfa.base.entity.BaseStaff;
+import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseShiftRepository;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
@@ -14,7 +16,6 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.repository.IotMachineOutputRepository;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
-import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.*;
 import com.m2micro.m2mfa.mo.model.BaseShiftModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
@@ -44,7 +45,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 生产排程表表头 服务实现类
@@ -53,6 +53,7 @@ import java.util.Optional;
  * @since 2018-12-26
  */
 @Service
+@Transactional
 public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @Autowired
     private MesMoDescService mesMoDescService;
@@ -660,7 +661,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                     "AND msp.process_id = mpr.output_process_id\n" +
                     "AND msp.schedule_id = mms.schedule_id\n" +
                     "AND mms.schedule_id = '"+scheduleId+"'";
-        //RowMapper rmstation = BeanPropertyRowMapper.newInstance(MesMoScheduleStation.class);
+
         return jdbcTemplate.queryForObject(sql,Integer.class);
     }
 
@@ -712,7 +713,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
         MesMoSchedule mesMoSchedule = getMesMoSchedule(scheduleId);
 
-        List<BaseProcess> mesMoScheduleStaffs = getMesMoScheduleStaffs(scheduleId);
+        List<BaseProcess> mesMoScheduleStaffs = getMesMoScheduleStaffs(mesMoSchedule);
 
         List<MesMoScheduleProcess> mesMoScheduleProcesses = getMesMoScheduleProcesses(scheduleId);
 
@@ -762,21 +763,14 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(mesMoSchedules.isEmpty()){
             throw  new MMException("排产单ID非法。");
         }
-
          MesMoSchedule mesMoSchedule =    mesMoSchedules.get(0);
         //排产计划计算量
         BigDecimal scheduleTime = mesMoScheduleRepository.getScheduleTime(mesMoSchedule.getMoId());
-
-
         Integer noitQty = mesMoScheduleRepository.findbnotQty(mesMoSchedule.getMoId());
-        if(noitQty==null){
-            noitQty=0;
-        }
-        if(noitQty<0){
+        if(noitQty==null ||noitQty<0){
             noitQty=0;
         }
         mesMoSchedule.setNotQty(noitQty);
-
         mesMoSchedule.setScheduleTime(scheduleTime);
         List<MesMoScheduleShift> mesMoScheduleShifts = getMesMoScheduleShifts(scheduleId);
        for(MesMoScheduleShift mesMoScheduleShift :mesMoScheduleShifts){
@@ -823,60 +817,82 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     /**
      *获取工序下面的工位以及工位对应班别（跟班别职员信息或岗位信息）（工位对应的班别下职员跟岗位只能二选择一）
-     * @param scheduleId
+     * @param
      * @return
      */
-    private List<BaseProcess> getMesMoScheduleStaffs(String scheduleId) {
-
-        RowMapper baseprocessrm = BeanPropertyRowMapper.newInstance(BaseProcess.class);
-       // String  sql ="select *  from base_process where process_id IN(SELECT DISTINCT  process_id  FROM  mes_mo_schedule_staff  WHERE schedule_id = '"+scheduleId+"')";
-       String sql = "SELECT\n" +
-               "	bp.*,brd.setp\n" +
-               "FROM\n" +
-               "	base_process bp  LEFT JOIN mes_part_route_process brd ON bp.process_id =brd.processid \n" +
-               "WHERE\n" +
-               "	bp.process_id IN (\n" +
-               "		SELECT DISTINCT\n" +
-               "			process_id\n" +
-               "		FROM\n" +
-               "			mes_mo_schedule_staff\n" +
-               "		WHERE\n" +
-               "			schedule_id = '"+scheduleId+"') group by bp.process_id   ORDER BY brd.setp";
-        List<BaseProcess>baseProcesses=jdbcTemplate.query(sql,baseprocessrm);
+    private List<BaseProcess> getMesMoScheduleStaffs(MesMoSchedule mesMoSchedule) {
+        String scheduleId =mesMoSchedule.getScheduleId();
+        //获取工单对应的图程工序
+        List<BaseProcess> baseProcesses = getBaseProcesses(mesMoSchedule.getMoId());
 
         for(BaseProcess baseProcess :baseProcesses){
             //获取工位信息
             List<BaseStation> baseStations = getBaseStations(scheduleId, baseProcess);
             for(BaseStation  baseStation: baseStations){
-                List<BaseShift> baseShifts = getBaseShifts(scheduleId, baseStation,false);
+                List<BaseShift> baseShifts = getBaseShifts(scheduleId, baseStation.getStationId(),false);
                 //获取多个岗位
                 if(baseShifts.isEmpty()){
-                   baseShifts = getBaseShifts(scheduleId, baseStation,true);
+                   baseShifts = getBaseShifts(scheduleId, baseStation.getStationId(),true);
                     for(BaseShift shift: baseShifts ){
-                        List<Organization> organizations = getOrganizations(scheduleId, baseStation,shift.getShiftId());
-                        baseStation.setIsStation(true);
+                        List<Organization> organizations = getOrganizations(scheduleId, baseStation.getStationId(),shift.getShiftId());
                         shift.setOrganization(organizations);
                     }
-
                 }else {
                     for(BaseShift shift: baseShifts ){
                         //获取职员信息
                         List<BaseStaff> baseStaffs = getStaffs(scheduleId, baseStation, shift);
-                        baseStation.setIsStation(false);
                         shift.setStaffs(baseStaffs);
                     }
 
-
                 }
-
                 baseStation.setShifts(baseShifts);
             }
             baseProcess.setBaseStations(baseStations);
         }
-
-
         return baseProcesses;
 
+    }
+
+    /**
+     * 根据工单Id获取对应的图程工序
+     * @param moId
+     * @return
+     */
+    private List<BaseProcess> getBaseProcesses(String  moId) {
+        RowMapper baseprocessrm = BeanPropertyRowMapper.newInstance(BaseProcess.class);
+        String sql = "SELECT\n" +
+               "	*\n" +
+               "FROM\n" +
+               "	base_process bp\n" +
+               "LEFT JOIN mes_part_route_process brd ON bp.process_id = brd.processid\n" +
+               "WHERE\n" +
+               "	bp.process_id IN (\n" +
+               "		SELECT\n" +
+               "			mprp.processid\n" +
+               "		FROM\n" +
+               "			mes_part_route_process mprp\n" +
+               "		WHERE\n" +
+               "			mprp.partrouteid IN (\n" +
+               "				SELECT\n" +
+               "					mpr.part_route_id\n" +
+               "				FROM\n" +
+               "					mes_part_route mpr\n" +
+               "				WHERE\n" +
+               "					mpr.part_id IN (\n" +
+               "						SELECT\n" +
+               "							mmd.part_id\n" +
+               "						FROM\n" +
+               "							mes_mo_desc mmd\n" +
+               "						WHERE\n" +
+               "							mo_id = '"+moId+"'\n" +
+               "					)\n" +
+               "			)\n" +
+               "	)\n" +
+               "GROUP BY\n" +
+               "	bp.process_id\n" +
+               "ORDER BY\n" +
+               "	brd.setp";
+        return jdbcTemplate.query(sql,baseprocessrm);
     }
 
     /**
@@ -886,23 +902,85 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @return
      */
     private List<BaseStation> getBaseStations(String scheduleId,  BaseProcess baseProcess) {
+        //获取全部工位
+        List<BaseStation> baseStationsAll = getBaseStations(baseProcess.getProcessId());
         RowMapper baseStationrm = BeanPropertyRowMapper.newInstance(BaseStation.class);
         String sql;
-        sql="select bs.* ,bps.step  step   from base_station bs   LEFT JOIN base_process_station bps  ON  bs.station_id=bps.station_id     where bs.station_id  in( SELECT DISTINCT  station_id\n" +
-              "                FROM\n" +
-              "                mes_mo_schedule_staff\n" +
-              "                WHERE\n" +
-              "                	schedule_id = '"+scheduleId+"' and process_id='"+baseProcess.getProcessId()+"') group by bs.station_id  ORDER BY step ";
+        sql ="SELECT\n" +
+                "	bs.*,\n" +
+                "	bps.step step,\n" +
+                "  mmss.is_station\n" +
+                "FROM\n" +
+                "	base_station bs\n" +
+                "LEFT JOIN base_process_station bps ON bs.station_id = bps.station_id\n" +
+                "LEFT JOIN  mes_mo_schedule_staff  mmss ON bs.station_id =  mmss.station_id\n" +
+                "WHERE\n" +
+                "	bs.station_id IN (\n" +
+                "		SELECT DISTINCT\n" +
+                "			nmprs.station_id\n" +
+                "		FROM\n" +
+                "			mes_part_route_station nmprs\n" +
+                "		WHERE\n" +
+                "			nmprs.process_id ='"+baseProcess.getProcessId()+"'\n" +
+                "	)\n" +
+                "and mmss.schedule_id='"+scheduleId+"'\n" +
+                "GROUP BY\n" +
+                "	bs.station_id\n" +
+                "ORDER BY\n" +
+                "	step";
+
+        //排产单对应的工位
+        List<BaseStation> baseStations = jdbcTemplate.query(sql,baseStationrm);
+        for(int i =0;i<baseStationsAll.size();i++){
+            BaseStation baseStation=baseStationsAll.get(i);
+            for(int x  =0;x<baseStations.size();x++){
+                BaseStation baseStation1=baseStations.get(x);
+                if(baseStation.getStationId().equals(baseStation1.getStationId())){
+                    baseStation.setIsStation(baseStation1.getIsStation());
+                }
+            }
+        }
+        return baseStationsAll;
+    }
+
+    /**
+     * 根据工序获取对应的全部工位信息
+     * @param processId
+     * @return
+     */
+    private List<BaseStation> getBaseStations(String processId) {
+        RowMapper baseStationrm = BeanPropertyRowMapper.newInstance(BaseStation.class);
+        String sql;
+        sql ="SELECT\n" +
+                "	bs.*,\n" +
+                "	bps.step step,\n" +
+                "  false isStation\n" +
+                "FROM\n" +
+                "	base_station bs\n" +
+                "LEFT JOIN base_process_station bps ON bs.station_id = bps.station_id\n" +
+                "WHERE\n" +
+                "	bs.station_id IN (\n" +
+                "		SELECT DISTINCT\n" +
+                "			nmprs.station_id\n" +
+                "		FROM\n" +
+                "			mes_part_route_station nmprs\n" +
+                "		WHERE\n" +
+                "			nmprs.process_id ='"+processId+"'\n" +
+                "	)\n" +
+                "GROUP BY\n" +
+                "	bs.station_id\n" +
+                "ORDER BY\n" +
+                "	step";
         return jdbcTemplate.query(sql,baseStationrm);
     }
 
     /**
      * 获取排产单工序下面工位下面所对应的多个班别
      * @param scheduleId
-     * @param baseStation
+     * @param stationId
      * @return
      */
-    private List<BaseShift> getBaseShifts(String scheduleId, BaseStation baseStation,boolean isStation) {
+    private List<BaseShift> getBaseShifts(String scheduleId, String  stationId,boolean isStation) {
         RowMapper baseShiftrm = BeanPropertyRowMapper.newInstance(BaseShift.class);
         String sql;
         if(isStation){
@@ -918,7 +996,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                     "			mes_mo_schedule_staff\n" +
                     "		WHERE\n" +
                     "			schedule_id = '" + scheduleId + "'\n" +
-                    "		AND station_id = '" + baseStation.getStationId() + "'\n" +
+                    "		AND station_id = '" + stationId + "'\n" +
                     "		AND is_station = 1\n" +
                     "	)";
         }else {
@@ -934,11 +1012,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                     "			mes_mo_schedule_staff\n" +
                     "		WHERE\n" +
                     "			schedule_id = '" + scheduleId + "'\n" +
-                    "		AND station_id = '" + baseStation.getStationId() + "'\n" +
+                    "		AND station_id = '" + stationId + "'\n" +
                     "		AND is_station = 0\n" +
                     "	)";
 
         }
+
         return jdbcTemplate.query(sql, baseShiftrm);
     }
 
@@ -976,13 +1055,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     /**
      * 获取排产单工位对应的岗位信息
      * @param scheduleId
-     * @param baseStation
-     * @param baseStation
+     * @param stationId
      * @return shiftId
      */
-    private List<Organization> getOrganizations(String scheduleId, BaseStation baseStation,String shiftId) {
+    private List<Organization> getOrganizations(String scheduleId, String stationId,String shiftId) {
         String sql;
-        sql =" SELECT *  FROM organization o WHERE uuid  IN ( SELECT DISTINCT staff_id FROM mes_mo_schedule_staff WHERE schedule_id = '"+scheduleId+"'  AND station_id = '"+baseStation.getStationId()+"' AND is_station = 1  and shift_id='"+shiftId+"' )";
+        sql =" SELECT *  FROM organization o WHERE uuid  IN ( SELECT DISTINCT staff_id FROM mes_mo_schedule_staff WHERE schedule_id = '"+scheduleId+"'  AND station_id = '"+stationId+"' AND is_station = 1  and shift_id='"+shiftId+"' )";
         RowMapper organizationrm = BeanPropertyRowMapper.newInstance(Organization.class);
         return jdbcTemplate.query(sql,organizationrm);
     }
@@ -1036,7 +1114,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @param msg
      * @return
      */
-    private String deleteMesMoschedule(String id, String msg) {
+    @Transactional
+    public String deleteMesMoschedule(String id, String msg) {
         MesMoSchedule mesMoSchedule =  mesMoScheduleRepository.findById(id).orElse(null);
         if(mesMoSchedule!=null){
             if( mesMoSchedule.getFlag()==0){
@@ -1045,13 +1124,14 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 mesMoScheduleProcessRepository.deleteScheduleId(id);
                 mesMoScheduleStationRepository.deleteScheduleId(id);
                 mesMoScheduleShiftRepository.deleteScheduleId(id);
+               // jdbcTemplate.execute();
                 MesMoDesc moDesc= mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
                 //把排产量更新到工单
                 try {
                     Integer scheduQty =  moDesc.getSchedulQty()+ mesMoSchedule.getScheduleQty();
                     mesMoDescRepository.setSchedulQtyFor(scheduQty,moDesc.getMoId());
                 }catch (Exception e){
-
+                    //工单排产总量为null所以更新进行忽略
                 }
 
             }else {
@@ -1089,7 +1169,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     @Override
-    public void update(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations) {
+    public void updateMesMoSchedule(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations) {
         //删除
        String msg= deleteMesMoschedule(mesMoSchedule.getScheduleId(),"");
        if(msg.trim().equals("")){

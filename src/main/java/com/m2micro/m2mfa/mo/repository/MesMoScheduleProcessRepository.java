@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -32,6 +33,7 @@ public interface MesMoScheduleProcessRepository extends BaseRepository<MesMoSche
      * @param scheduleId
      */
     @Modifying
-    @Query(value = "DELETE FROM mes_mo_schedule_process WHERE  schedule_id=?1",nativeQuery = true)
+    @Transactional
+    @Query(value = "DELETE FROM  MesMoScheduleProcess mmp WHERE  mmp.scheduleId=?1")
     void deleteScheduleId(String scheduleId);
 }

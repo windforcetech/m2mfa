@@ -5,6 +5,9 @@ import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
 /**
  *  Repository 接口
  * @author liaotao
@@ -16,7 +19,8 @@ public interface MesMoScheduleShiftRepository extends BaseRepository<MesMoSchedu
      * 根据排产单编号删除数据
      * @param scheduleId
      */
+    @Transactional
     @Modifying
-    @Query(value = "DELETE FROM mes_mo_schedule_shift WHERE  schedule_id=?1",nativeQuery = true)
+    @Query(value = "DELETE FROM MesMoScheduleShift  mmss WHERE  mmss.scheduleId=?1")
     void deleteScheduleId(String scheduleId);
 }

@@ -33,7 +33,7 @@ public interface MesMoScheduleStaffRepository extends BaseRepository<MesMoSchedu
      * @param scheduleId
      */
     @Modifying
-    @Query(value = "DELETE FROM mes_mo_schedule_staff WHERE  schedule_id=?1",nativeQuery = true)
+    @Query(value = "DELETE FROM   MesMoScheduleStaff  mmss WHERE  mmss.scheduleId=?1")
     void deleteScheduleId(String scheduleId);
 
 }

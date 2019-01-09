@@ -133,7 +133,7 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      * @param mesMoScheduleProcesses
      * @param mesMoScheduleStations
      */
-    void update(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations);
+    void updateMesMoSchedule(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations);
     /**
      * 排产单新增要返回的数据
      * @return  排产单新增要返回的数据

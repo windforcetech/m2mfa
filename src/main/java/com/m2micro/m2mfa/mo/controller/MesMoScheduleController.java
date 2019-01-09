@@ -90,7 +90,7 @@ public class MesMoScheduleController {
     @ApiOperation(value="更新生产排程表表头")
     @UserOperationLog("更新生产排程表表头")
     public ResponseMessage update(@RequestBody Productionorder productionorder){
-        mesMoScheduleService.update(productionorder.getMesMoSchedule(),productionorder.getMesMoScheduleStaffs(),productionorder.getMesMoScheduleProcesses(),productionorder.getMesMoScheduleStations());
+        mesMoScheduleService.updateMesMoSchedule(productionorder.getMesMoSchedule(),productionorder.getMesMoScheduleStaffs(),productionorder.getMesMoScheduleProcesses(),productionorder.getMesMoScheduleStations());
         return ResponseMessage.ok();
     }
 
