@@ -22,12 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 员工排班表 前端控制器
+ *
  * @author liaotao
  * @since 2019-01-04
  */
 @RestController
 @RequestMapping("/base/baseStaffshift")
-@Api(value="员工排班表 前端控制器")
+@Api(description = "员工排班表 前端控制器")
 @Authorize
 public class BaseStaffshiftController {
     @Autowired
@@ -36,10 +37,10 @@ public class BaseStaffshiftController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
-    @ApiOperation(value="员工排班表列表")
+    @PostMapping("/list")
+    @ApiOperation(value = "员工排班表列表")
     @UserOperationLog("员工排班表列表")
-    public ResponseMessage<PageUtil<BaseStaffshift>> list(Query query){
+    public ResponseMessage<PageUtil<BaseStaffshift>> list(Query query) {
         PageUtil<BaseStaffshift> page = baseStaffshiftService.list(query);
         return ResponseMessage.ok(page);
     }
@@ -47,10 +48,10 @@ public class BaseStaffshiftController {
     /**
      * 详情
      */
-    @RequestMapping("/info/{id}")
-    @ApiOperation(value="员工排班表详情")
+    @GetMapping("/info/{id}")
+    @ApiOperation(value = "员工排班表详情")
     @UserOperationLog("员工排班表详情")
-    public ResponseMessage<BaseStaffshift> info(@PathVariable("id") String id){
+    public ResponseMessage<BaseStaffshift> info(@PathVariable("id") String id) {
         BaseStaffshift baseStaffshift = baseStaffshiftService.findById(id).orElse(null);
         return ResponseMessage.ok(baseStaffshift);
     }
@@ -58,10 +59,10 @@ public class BaseStaffshiftController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
-    @ApiOperation(value="保存员工排班表")
+    @PostMapping("/save")
+    @ApiOperation(value = "保存员工排班表")
     @UserOperationLog("保存员工排班表")
-    public ResponseMessage<BaseStaffshift> save(@RequestBody BaseStaffshift baseStaffshift){
+    public ResponseMessage<BaseStaffshift> save(@RequestBody BaseStaffshift baseStaffshift) {
         ValidatorUtil.validateEntity(baseStaffshift, AddGroup.class);
         baseStaffshift.setId(UUIDUtil.getUUID());
         return ResponseMessage.ok(baseStaffshiftService.save(baseStaffshift));
@@ -70,26 +71,26 @@ public class BaseStaffshiftController {
     /**
      * 更新
      */
-    @RequestMapping("/update")
-    @ApiOperation(value="更新员工排班表")
+    @PostMapping("/update")
+    @ApiOperation(value = "更新员工排班表")
     @UserOperationLog("更新员工排班表")
-    public ResponseMessage<BaseStaffshift> update(@RequestBody BaseStaffshift baseStaffshift){
+    public ResponseMessage<BaseStaffshift> update(@RequestBody BaseStaffshift baseStaffshift) {
         ValidatorUtil.validateEntity(baseStaffshift, UpdateGroup.class);
         BaseStaffshift baseStaffshiftOld = baseStaffshiftService.findById(baseStaffshift.getId()).orElse(null);
-        if(baseStaffshiftOld==null){
+        if (baseStaffshiftOld == null) {
             throw new MMException("数据库不存在该记录");
         }
-        PropertyUtil.copy(baseStaffshift,baseStaffshiftOld);
+        PropertyUtil.copy(baseStaffshift, baseStaffshiftOld);
         return ResponseMessage.ok(baseStaffshiftService.save(baseStaffshiftOld));
     }
 
     /**
      * 删除
      */
-    @RequestMapping("/delete")
-    @ApiOperation(value="删除员工排班表")
+    @PostMapping("/delete")
+    @ApiOperation(value = "删除员工排班表")
     @UserOperationLog("删除员工排班表")
-    public ResponseMessage delete(@RequestBody String[] ids){
+    public ResponseMessage delete(@RequestBody String[] ids) {
         baseStaffshiftService.deleteByIds(ids);
         return ResponseMessage.ok();
     }
