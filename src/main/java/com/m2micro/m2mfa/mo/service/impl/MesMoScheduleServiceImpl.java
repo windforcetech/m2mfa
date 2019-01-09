@@ -825,7 +825,6 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         String scheduleId =mesMoSchedule.getScheduleId();
         //获取工单对应的图程工序
         List<BaseProcess> baseProcesses = getBaseProcesses(mesMoSchedule.getMoId());
-
         for(BaseProcess baseProcess :baseProcesses){
             //获取工位信息
             List<BaseStation> baseStations = getBaseStations(scheduleId, baseProcess);
@@ -1153,7 +1152,6 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 mesMoScheduleProcessRepository.deleteScheduleId(id);
                 mesMoScheduleStationRepository.deleteScheduleId(id);
                 mesMoScheduleShiftRepository.deleteScheduleId(id);
-               // jdbcTemplate.execute();
                 MesMoDesc moDesc= mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
                 //把排产量更新到工单
                 try {

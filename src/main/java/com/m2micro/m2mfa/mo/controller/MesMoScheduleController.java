@@ -17,6 +17,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.query.MesMachineQuery;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
@@ -231,9 +232,9 @@ public class MesMoScheduleController {
     @PostMapping("/findbyMachine")
     @ApiOperation(value="机台信息")
     @UserOperationLog("机台信息")
-    public ResponseMessage<List<BaseMachine>> findbyMachine(){
+    public ResponseMessage<PageUtil<BaseMachine>> findbyMachine(@RequestBody MesMachineQuery mesMachineQuery){
 
-        return ResponseMessage.ok(baseMachineService.findbyMachine());
+        return ResponseMessage.ok(baseMachineService.findbyMachine(mesMachineQuery));
     }
 
     @PostMapping("/processEnd")
