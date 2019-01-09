@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
+import com.m2micro.m2mfa.mo.query.MesMachineQuery;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public interface BaseMachineService extends BaseService<BaseMachine,String> {
      * 获取排产单的机台信息
      * @return
      */
-    List<BaseMachine>   findbyMachine();
+    PageUtil<BaseMachine>   findbyMachine( MesMachineQuery mesMachineQuery);
 
     /**
      * 保存机台信息

@@ -12,6 +12,7 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.repository.IotMachineOutputRepository;
 import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
+import com.m2micro.m2mfa.mo.query.MesMachineQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -157,7 +158,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     }
 
     @Override
-    public List<BaseMachine> findbyMachine() {
+    public PageUtil<BaseMachine> findbyMachine( MesMachineQuery query) {
         String sql ="SELECT\n" +
                 "	bm.*, o.department_name departmentName\n" +
                 "FROM\n" +
@@ -165,14 +166,31 @@ public class BaseMachineServiceImpl implements BaseMachineService {
                 "LEFT JOIN base_items_target bit ON bm.flag = bit.id\n" +
                 "LEFT JOIN organization o ON bm.department_id = o.uuid\n" +
                 "WHERE\n" +
-                "	bit.item_name != '维修'\n" +
-                "AND bit.item_name != '保养'";
+                "	bit.item_name != '维修'\n" ;
+                if(StringUtils.isNotEmpty(query.getMachinCode())){
+                   sql += "  and bm.`code`  Like '%"+query.getMachinCode()+"%'";
+                }
+                sql +=  " AND bit.item_name != '保养' ";
+                sql += " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        String countsql ="SELECT\n" +
+                "	count(*) \n" +
+                "FROM\n" +
+                "	base_machine bm\n" +
+                "LEFT JOIN base_items_target bit ON bm.flag = bit.id\n" +
+                "WHERE\n" +
+                "	bit.item_name != '维修'\n" ;
+        if(StringUtils.isNotEmpty(query.getMachinCode())){
+            countsql += "  and bm.`code`  Like '%"+query.getMachinCode()+"%'";
+        }
+        countsql +=  " AND bit.item_name != '保养' ";
+        countsql += " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
         List<BaseMachine> list= jdbcTemplate.query(sql,rm);
+        Long totalCount= jdbcTemplate.queryForObject(countsql,long.class);
         if(list.isEmpty()){
             throw  new MMException("未找到对应的机台信息。");
         }
-        return list;
+        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
 
     @Override
