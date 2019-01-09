@@ -10,9 +10,12 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.QBaseStaffshift;
+
 import java.util.List;
+
 /**
  * 员工排班表 服务实现类
+ *
  * @author liaotao
  * @since 2019-01-04
  */
@@ -35,7 +38,7 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
         jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
         List<BaseStaffshift> list = jq.fetch();
         long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
 
 }

@@ -22,6 +22,7 @@ import java.util.List;
 
 /**
  * 员工（职员）表 服务实现类
+ *
  * @author liaotao
  * @since 2018-11-26
  */
@@ -34,6 +35,7 @@ public class BaseStaffServiceImpl implements BaseStaffService {
 
     @Autowired
     OrganizationService organizationService;
+
     public BaseStaffRepository getRepository() {
         return baseStaffRepository;
     }
@@ -44,20 +46,20 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         JPAQuery<BaseStaff> jq = queryFactory.selectFrom(qBaseStaff);
         BooleanBuilder condition = new BooleanBuilder();
         condition.and(qBaseStaff.deletionStateCode.isFalse());
-        if(StringUtils.isNotEmpty(query.getCode())){
-            condition.and(qBaseStaff.code.like("%"+query.getCode()+"%"));
+        if (StringUtils.isNotEmpty(query.getCode())) {
+            condition.and(qBaseStaff.code.like("%" + query.getCode() + "%"));
         }
-        if(StringUtils.isNotEmpty(query.getName())){
-            condition.and(qBaseStaff.staffName.like("%"+query.getName()+"%"));
+        if (StringUtils.isNotEmpty(query.getName())) {
+            condition.and(qBaseStaff.staffName.like("%" + query.getName() + "%"));
         }
-        if(query.getDutyIds()!=null&&query.getDutyIds().size()>0){
+        if (query.getDutyIds() != null && query.getDutyIds().size() > 0) {
             condition.and(qBaseStaff.dutyId.in(query.getDutyIds()));
         }
         jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
         List<BaseStaff> list = jq.fetch();
-        List<BaseStaffDetailObj> rs=new ArrayList<>();
-        for(BaseStaff one:list ){
-            BaseStaffDetailObj item=new BaseStaffDetailObj();
+        List<BaseStaffDetailObj> rs = new ArrayList<>();
+        for (BaseStaff one : list) {
+            BaseStaffDetailObj item = new BaseStaffDetailObj();
             Organization duty = organizationService.findByUUID(one.getDutyId());
             Organization department = organizationService.findById(duty.getParentNode()).get();
             item.setId(one.getStaffId());
@@ -73,7 +75,7 @@ public class BaseStaffServiceImpl implements BaseStaffService {
             rs.add(item);
         }
         long totalCount = jq.fetchCount();
-        return PageUtil.of(rs,totalCount,query.getSize(),query.getPage());
+        return PageUtil.of(rs, totalCount, query.getSize(), query.getPage());
     }
 
     @Override
@@ -92,7 +94,7 @@ public class BaseStaffServiceImpl implements BaseStaffService {
 
     @Override
     public List<BaseStaff> findByCodeAndStaffIdNot(String code, String staffId) {
-        return baseStaffRepository.findByCodeAndStaffIdNot(code,staffId);
+        return baseStaffRepository.findByCodeAndStaffIdNot(code, staffId);
     }
 
     @Override
