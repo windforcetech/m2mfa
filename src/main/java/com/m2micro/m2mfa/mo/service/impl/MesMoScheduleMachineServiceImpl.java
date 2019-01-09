@@ -1,12 +1,19 @@
 package com.m2micro.m2mfa.mo.service.impl;
 
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.m2mfa.base.node.TreeNode;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.QueryGroup;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
+import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleMachineModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
+import com.m2micro.m2mfa.mo.model.ScheduleAllInfoModel;
+import com.m2micro.m2mfa.mo.model.ScheduleMachineParaModel;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleMachineQuery;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleDispatchService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleMachineService;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +22,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +39,8 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesMoScheduleDispatchService mesMoScheduleDispatchService;
+    @Autowired
+    MesMoScheduleRepository mesMoScheduleRepository;
 
     @Override
     public TreeNode getAllDepartAndMachine() {
@@ -118,5 +128,39 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
         }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    @Override
+    @Transactional
+    public void change(ScheduleMachineParaModel scheduleMachineParaModel) {
+        ValidatorUtil.validateEntity(scheduleMachineParaModel, QueryGroup.class);
+        //获取选中的所有排产单
+        List<MesMoSchedule> mesMoSchedules = mesMoScheduleRepository.findByScheduleIdIn(scheduleMachineParaModel.getScheduleIds());
+        //遍历排产单
+        for (MesMoSchedule mesMoSchedule:mesMoSchedules){
+            //如果排产单状态是生产中
+            if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag())){
+                //获取所有的排产单相关数据（解析，填充）
+                ScheduleAllInfoModel scheduleAllInfoModel = getScheduleAllInfo(mesMoSchedule, scheduleMachineParaModel);
+                //保存所有的排产单相关数据
+                saveAll(scheduleAllInfoModel);
+            }
+            //如果排产单状态是初始或是已审核
+            if(MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())||
+                    MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())){
+                //直接更新机台id
+                mesMoScheduleRepository.updateMachineIdByScheduleId(scheduleMachineParaModel.getNewMachineId(),mesMoSchedule.getScheduleId());
+            }
+            //选中之后，排产单状态已发生改变，抛出异常
+            throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许变更机台！");
+        }
+    }
+
+    private ScheduleAllInfoModel getScheduleAllInfo(MesMoSchedule mesMoSchedule, ScheduleMachineParaModel scheduleMachineParaModel){
+        return null;
+    }
+
+    private void saveAll(ScheduleAllInfoModel scheduleAllInfoModel){
+
     }
 }
