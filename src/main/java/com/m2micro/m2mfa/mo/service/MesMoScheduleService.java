@@ -14,6 +14,7 @@ import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
+import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
 import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
@@ -166,4 +167,15 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     String getScheduleNoByMoId(String moId);
 
+    /**
+     * 结束工序
+     * @param processStatus
+     */
+    void processEnd(ProcessStatus processStatus);
+
+    /**
+     * 工序恢复
+     * @param processStatus
+     */
+    void processRestore(ProcessStatus processStatus);
 }

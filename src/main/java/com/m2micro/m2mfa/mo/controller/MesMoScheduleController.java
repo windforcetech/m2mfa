@@ -21,6 +21,7 @@ import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
 import com.m2micro.m2mfa.mo.vo.Productionorder;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
@@ -235,5 +236,20 @@ public class MesMoScheduleController {
         return ResponseMessage.ok(baseMachineService.findbyMachine());
     }
 
+    @PostMapping("/processEnd")
+    @ApiOperation(value="工序结束")
+    @UserOperationLog("工序结束")
+    public ResponseMessage processEnd(@RequestBody ProcessStatus processStatus){
+        mesMoScheduleService.processEnd(processStatus);
+        return ResponseMessage.ok();
+    }
+
+    @PostMapping("/processRestore")
+    @ApiOperation(value="工序恢复")
+    @UserOperationLog("工序恢复")
+    public ResponseMessage processRestore(@RequestBody ProcessStatus processStatus){
+        mesMoScheduleService.processRestore(processStatus);
+        return ResponseMessage.ok();
+    }
 
 }

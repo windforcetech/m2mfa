@@ -24,6 +24,7 @@ import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.repository.*;
 import com.m2micro.m2mfa.mo.service.*;
+import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
@@ -1097,6 +1098,34 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return mesMoDesc.getMoNumber()+"-"+scheduleNo;
     }
 
+    @Override
+    public void processEnd(ProcessStatus processStatus) {
+       MesMoSchedule mesMoSchedule =  mesMoScheduleRepository.findById(processStatus.getScheduleId()).orElse(null);
+       if(mesMoSchedule==null || mesMoSchedule.getFlag() !=2){
+           throw  new MMException("工序已开始不可操作。");
+       }
+        MesMoScheduleProcess mesMoScheduleProcess = mesMoScheduleProcessRepository.findbscheduleIdProcessId(processStatus.getScheduleId(),processStatus.getProcessId());
+        if(mesMoScheduleProcess==null || mesMoScheduleProcess.getActualStartTime()==null){
+            throw  new MMException("工序未开始。");
+        }
+        mesMoScheduleProcess.setActualEndTime(new Date());
+        mesMoScheduleProcessService.updateById(mesMoScheduleProcess.getId(),mesMoScheduleProcess);
+    }
+
+    @Override
+    public void processRestore(ProcessStatus processStatus) {
+        MesMoSchedule mesMoSchedule =  mesMoScheduleRepository.findById(processStatus.getScheduleId()).orElse(null);
+        if(mesMoSchedule==null || mesMoSchedule.getFlag() !=2){
+            throw  new MMException("工序已开始不可操作。");
+        }
+        MesMoScheduleProcess mesMoScheduleProcess = mesMoScheduleProcessRepository.findbscheduleIdProcessId(processStatus.getScheduleId(),processStatus.getProcessId());
+        if(mesMoScheduleProcess==null){
+            throw  new MMException("工序未开始。");
+        }
+        mesMoScheduleProcess.setActualEndTime(null);
+        mesMoScheduleProcessService.updateById(mesMoScheduleProcess.getId(),mesMoScheduleProcess);
+    }
+
     @Transactional
     @Override
     public String  deleteIds(String[] ids) {
@@ -1135,7 +1164,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 }
 
             }else {
-                msg+= id +",";
+                msg+= mesMoSchedule.getScheduleNo() +",";
             }
         }
         return msg;

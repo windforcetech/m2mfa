@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.mo.repository;
 
+import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
 import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -36,4 +37,15 @@ public interface MesMoScheduleProcessRepository extends BaseRepository<MesMoSche
     @Transactional
     @Query(value = "DELETE FROM  MesMoScheduleProcess mmp WHERE  mmp.scheduleId=?1")
     void deleteScheduleId(String scheduleId);
+
+
+    /**
+     * 获取对应工序
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+
+    @Query(value = "select * from mes_mo_schedule_process where schedule_id =?1 and process_id=?2 " ,nativeQuery = true)
+    MesMoScheduleProcess findbscheduleIdProcessId(String scheduleId, String processId);
 }
