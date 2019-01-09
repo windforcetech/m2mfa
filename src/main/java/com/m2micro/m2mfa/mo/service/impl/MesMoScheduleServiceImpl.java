@@ -17,10 +17,7 @@ import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.repository.IotMachineOutputRepository;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.*;
-import com.m2micro.m2mfa.mo.model.BaseShiftModel;
-import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
-import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
-import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.model.*;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.repository.*;
 import com.m2micro.m2mfa.mo.service.*;
@@ -114,6 +111,22 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
         return mesMoScheduleRepository;
+    }
+
+    @Override
+    public ScheduleAllInfoModel getScheduleAllInfoModel(String scheduleId) {
+        MesMoSchedule mesMoSchedule = findById(scheduleId).orElse(null);
+        List<MesMoScheduleShift> mesMoScheduleShifts = mesMoScheduleShiftRepository.findByScheduleId(scheduleId);
+        List<MesMoScheduleStaff> mesMoScheduleStaffs = mesMoScheduleStaffRepository.findByScheduleId(scheduleId);
+        List<MesMoScheduleProcess> mesMoScheduleProcesss = mesMoScheduleProcessRepository.findByScheduleId(scheduleId);
+        List<MesMoScheduleStation> mesMoScheduleStations = mesMoScheduleStationRepository.findByScheduleId(scheduleId);
+        ScheduleAllInfoModel scheduleAllInfoModel = new ScheduleAllInfoModel();
+        scheduleAllInfoModel.setMesMoSchedule(mesMoSchedule);
+        scheduleAllInfoModel.setMesMoScheduleShifts(mesMoScheduleShifts);
+        scheduleAllInfoModel.setMesMoScheduleStaffs(mesMoScheduleStaffs);
+        scheduleAllInfoModel.setMesMoScheduleProcesss(mesMoScheduleProcesss);
+        scheduleAllInfoModel.setMesMoScheduleStations(mesMoScheduleStations);
+        return scheduleAllInfoModel;
     }
 
     @Override
@@ -650,7 +663,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @param scheduleId
      * @return
      */
-    private Integer getUncompletedQty(String scheduleId) {
+    public Integer getUncompletedQty(String scheduleId) {
         String sql ="SELECT\n" +
                     "IFNULL(mms.schedule_qty, 0) - IFNULL(msp.output_qty, 0) UncompletedQty\n" +
                     "FROM\n" +
@@ -665,6 +678,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
         return jdbcTemplate.queryForObject(sql,Integer.class);
     }
+
+
 
     @Override
     public MesPartvo findbyMoId(String moId) {

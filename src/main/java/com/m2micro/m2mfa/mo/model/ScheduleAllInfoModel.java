@@ -17,6 +17,6 @@ public class ScheduleAllInfoModel {
     MesMoSchedule mesMoSchedule;
     List<MesMoScheduleShift> mesMoScheduleShifts;
     List<MesMoScheduleStaff> mesMoScheduleStaffs;
-    List<MesMoScheduleProcess> mesMoScheduleProcess;
-    List<MesMoScheduleStation> mesMoScheduleStation;
+    List<MesMoScheduleProcess> mesMoScheduleProcesss;
+    List<MesMoScheduleStation> mesMoScheduleStations;
 }

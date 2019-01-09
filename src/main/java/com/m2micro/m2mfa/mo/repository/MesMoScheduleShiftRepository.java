@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
 /**
  *  Repository 接口
@@ -23,4 +25,12 @@ public interface MesMoScheduleShiftRepository extends BaseRepository<MesMoSchedu
     @Modifying
     @Query(value = "DELETE FROM MesMoScheduleShift  mmss WHERE  mmss.scheduleId=?1")
     void deleteScheduleId(String scheduleId);
+
+    /**
+     * 通过排产单id查找排程班别
+     * @param scheduleId
+     *          排程id
+     * @return  排程班别
+     */
+    List<MesMoScheduleShift> findByScheduleId(String scheduleId);
 }

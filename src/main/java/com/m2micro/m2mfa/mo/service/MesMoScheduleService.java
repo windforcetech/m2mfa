@@ -13,6 +13,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoScheduleStation;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.model.ScheduleAllInfoModel;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
@@ -178,4 +179,19 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      * @param processStatus
      */
     void processRestore(ProcessStatus processStatus);
+
+    /**
+     * 获取未完成的排产单产量
+     * @param scheduleId
+     * @return
+     */
+    Integer getUncompletedQty(String scheduleId);
+
+    /**
+     * 获取排产单所有相关的信息
+     * @param scheduleId
+     *          排产单id
+     * @return  排产单所有相关的信息
+     */
+    ScheduleAllInfoModel getScheduleAllInfoModel(String scheduleId);
 }

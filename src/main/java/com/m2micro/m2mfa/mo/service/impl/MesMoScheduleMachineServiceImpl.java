@@ -2,20 +2,23 @@ package com.m2micro.m2mfa.mo.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.m2mfa.base.node.TreeNode;
+import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.QueryGroup;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
-import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.entity.*;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleMachineModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.ScheduleAllInfoModel;
 import com.m2micro.m2mfa.mo.model.ScheduleMachineParaModel;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleMachineQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleShiftRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleDispatchService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleMachineService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -41,6 +44,11 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
     MesMoScheduleDispatchService mesMoScheduleDispatchService;
     @Autowired
     MesMoScheduleRepository mesMoScheduleRepository;
+    @Autowired
+    MesMoScheduleService mesMoScheduleService;
+    @Autowired
+    MesMoScheduleShiftRepository mesMoScheduleShiftRepository;
+
 
     @Override
     public TreeNode getAllDepartAndMachine() {
@@ -140,24 +148,99 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
         for (MesMoSchedule mesMoSchedule:mesMoSchedules){
             //如果排产单状态是生产中
             if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag())){
-                //获取所有的排产单相关数据（解析，填充）
-                ScheduleAllInfoModel scheduleAllInfoModel = getScheduleAllInfo(mesMoSchedule, scheduleMachineParaModel);
+                //获取所有的排产单相关数据
+                ScheduleAllInfoModel scheduleAllInfoModel = mesMoScheduleService.getScheduleAllInfoModel(mesMoSchedule.getScheduleId());
+                //填充所有数据
+                fillScheduleAllInfo(scheduleAllInfoModel,mesMoSchedule,scheduleMachineParaModel);
                 //保存所有的排产单相关数据
                 saveAll(scheduleAllInfoModel);
             }
             //如果排产单状态是初始或是已审核
-            if(MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())||
+            else if(MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())||
                     MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())){
                 //直接更新机台id
                 mesMoScheduleRepository.updateMachineIdByScheduleId(scheduleMachineParaModel.getNewMachineId(),mesMoSchedule.getScheduleId());
             }
-            //选中之后，排产单状态已发生改变，抛出异常
-            throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许变更机台！");
+            else {
+                //选中之后，排产单状态已发生改变，抛出异常
+                throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许变更机台！");
+            }
+
         }
     }
 
-    private ScheduleAllInfoModel getScheduleAllInfo(MesMoSchedule mesMoSchedule, ScheduleMachineParaModel scheduleMachineParaModel){
-        return null;
+    /**
+     * 获取所有的排产单相关数据（解析，填充）
+     * @param scheduleAllInfoModel
+     * @param scheduleMachineParaModel
+     * @return
+     */
+    private ScheduleAllInfoModel fillScheduleAllInfo(ScheduleAllInfoModel scheduleAllInfoModel, MesMoSchedule mesMoSchedule,ScheduleMachineParaModel scheduleMachineParaModel){
+        /*
+            复制与此排产单相关的记录。Mes_Mo_Schedule_Shift，Mes_Mo_Schedule_Staff，Mes_Mo_Schedule_Process，
+            Mes_Mo_Schedule_Station，自动在选择的机台重新生成新的排产记录。排产数量是上机台未完成数。状态为初始。
+            PS：复制时有些内容需要根据当前的机台变更，如排产单号的生成。
+        */
+        //1.解析填充排产单信息
+        MesMoSchedule newMesMoSchedule = scheduleAllInfoModel.getMesMoSchedule();
+        newMesMoSchedule.setScheduleId(UUIDUtil.getUUID());
+        newMesMoSchedule.setScheduleNo(mesMoScheduleService.getScheduleNoByMoId(mesMoSchedule.getMoId()));
+        newMesMoSchedule.setMachineId(scheduleMachineParaModel.getNewMachineId());
+        newMesMoSchedule.setScheduleQty(mesMoScheduleService.getUncompletedQty(mesMoSchedule.getScheduleId()));
+        newMesMoSchedule.setCreateBy(null);
+        newMesMoSchedule.setCreateOn(null);
+        newMesMoSchedule.setModifiedBy(null);
+        newMesMoSchedule.setCreateOn(null);
+        //2.解析填充生产排程班别
+        List<MesMoScheduleShift> mesMoScheduleShifts = scheduleAllInfoModel.getMesMoScheduleShifts();
+        if(mesMoScheduleShifts!=null&&mesMoScheduleShifts.size()>0){
+            mesMoScheduleShifts.stream().forEach(mesMoScheduleShift -> {
+                mesMoScheduleShift.setId(UUIDUtil.getUUID());
+                mesMoScheduleShift.setScheduleId(newMesMoSchedule.getScheduleId());
+            });
+        }
+        //3.解析填充生产排程人员
+        List<MesMoScheduleStaff> mesMoScheduleStaffs = scheduleAllInfoModel.getMesMoScheduleStaffs();
+        if(mesMoScheduleStaffs!=null&&mesMoScheduleStaffs.size()>0){
+            mesMoScheduleStaffs.stream().forEach(mesMoScheduleStaff -> {
+                mesMoScheduleStaff.setId(UUIDUtil.getUUID());
+                mesMoScheduleStaff.setScheduleId(newMesMoSchedule.getScheduleId());
+                mesMoScheduleStaff.setActualStartTime(null);
+                mesMoScheduleStaff.setActualEndTime(null);
+                mesMoScheduleStaff.setCreateBy(null);
+                mesMoScheduleStaff.setCreateOn(null);
+                mesMoScheduleStaff.setModifiedBy(null);
+                mesMoScheduleStaff.setModifiedOn(null);
+            });
+        }
+        //4.解析填充生产排程工序
+        List<MesMoScheduleProcess> mesMoScheduleProcesss = scheduleAllInfoModel.getMesMoScheduleProcesss();
+        if(mesMoScheduleProcesss!=null&&mesMoScheduleProcesss.size()>0){
+            mesMoScheduleProcesss.stream().forEach(mesMoScheduleProcess -> {
+                mesMoScheduleProcess.setId(UUIDUtil.getUUID());
+                mesMoScheduleProcess.setScheduleId(newMesMoSchedule.getScheduleId());
+                mesMoScheduleProcess.setActualEndTime(null);
+                mesMoScheduleProcess.setActualStartTime(null);
+                mesMoScheduleProcess.setOutputQty(null);
+                mesMoScheduleProcess.setCreateBy(null);
+                mesMoScheduleProcess.setCreateOn(null);
+                mesMoScheduleProcess.setModifiedBy(null);
+                mesMoScheduleProcess.setModifiedOn(null);
+            });
+        }
+        //5.解析填充生产排程工位
+        List<MesMoScheduleStation> mesMoScheduleStations = scheduleAllInfoModel.getMesMoScheduleStations();
+        if(mesMoScheduleStations!=null&&mesMoScheduleStations.size()>0){
+            mesMoScheduleStations.stream().forEach(mesMoScheduleStation -> {
+                mesMoScheduleStation.setId(UUIDUtil.getUUID());
+                mesMoScheduleStation.setScheduleId(newMesMoSchedule.getScheduleId());
+                mesMoScheduleStation.setCreateBy(null);
+                mesMoScheduleStation.setCreateOn(null);
+                mesMoScheduleStation.setModifiedBy(null);
+                mesMoScheduleStation.setModifiedOn(null);
+            });
+        }
+        return scheduleAllInfoModel;
     }
 
     private void saveAll(ScheduleAllInfoModel scheduleAllInfoModel){
