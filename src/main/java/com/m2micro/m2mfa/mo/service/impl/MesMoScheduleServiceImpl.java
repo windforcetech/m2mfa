@@ -3,10 +3,7 @@ package com.m2micro.m2mfa.mo.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.starter.entity.Organization;
-import com.m2micro.m2mfa.base.entity.BaseProcess;
-import com.m2micro.m2mfa.base.entity.BaseShift;
-import com.m2micro.m2mfa.base.entity.BaseStaff;
-import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.repository.BaseShiftRepository;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
@@ -22,6 +19,7 @@ import com.m2micro.m2mfa.mo.model.*;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.repository.*;
 import com.m2micro.m2mfa.mo.service.*;
+import com.m2micro.m2mfa.mo.vo.PeopleDistribution;
 import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
@@ -128,6 +126,45 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         scheduleAllInfoModel.setMesMoScheduleProcesss(mesMoScheduleProcesss);
         scheduleAllInfoModel.setMesMoScheduleStations(mesMoScheduleStations);
         return scheduleAllInfoModel;
+    }
+
+    @Override
+    public List<PeopleDistribution> peopleDistribution() {
+        String sql ="SELECT o.department_name  departmentName ,o.uuid  departmentId FROM base_machine bm LEFT JOIN organization o ON bm.department_id = o.uuid WHERE bm.machine_id IN ( SELECT DISTINCT mms.machine_id FROM mes_mo_schedule mms )";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(PeopleDistribution.class);
+        List<PeopleDistribution> peopleDistributions =jdbcTemplate.query(sql,rm);
+        for(PeopleDistribution p :peopleDistributions){
+            sql="SELECT bm.* FROM base_machine bm WHERE bm.machine_id IN ( SELECT DISTINCT mms.machine_id FROM mes_mo_schedule mms ) AND bm.department_id = '"+p.getDepartmentId()+"'";
+             rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
+            p.setBaseMachines(jdbcTemplate.query(sql,rm));
+        }
+        if(peopleDistributions.isEmpty()){
+            throw  new MMException("未找到相关数据。");
+        }
+        return peopleDistributions;
+    }
+
+    @Override
+    public List<MesMoSchedule> findbMachineId(String machineId) {
+        String sql ="SELECT  * FROM mes_mo_schedule mms WHERE mms.machine_id = '"+machineId+"' AND mms.flag = "+MoStatus.AUDITED.getKey()+" OR mms.flag = "+MoStatus.SCHEDULED.getKey()+"";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
+        List<MesMoSchedule> mesMoSchedules =jdbcTemplate.query(sql,rm);
+        List<MesMoSchedule> ms =new ArrayList<>();
+        if(mesMoSchedules.isEmpty()){
+            throw  new MMException("未找对应的排产单数据。");
+        }
+        for(MesMoSchedule mesMoSchedule :mesMoSchedules  ){
+            sql ="select (IFNULL(mrw.strat_power,0)+ IFNULL(mrw.end_molds,0))  completion  from mes_record_work  mrw  where mrw.schedule_id='"+mesMoSchedule.getScheduleId()+"' and mrw.machine_id='"+machineId+"'";
+            Integer completion=0;
+            try {
+                completion= jdbcTemplate.queryForObject(sql ,Integer.class);
+            }catch (Exception e){
+            }
+            MesMoSchedule m = getMesMoSchedule(mesMoSchedule.getScheduleId());
+            m.setCompletion( completion);
+            ms.add(m);
+        }
+        return ms;
     }
 
     @Override
@@ -1278,7 +1315,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesMoSchedule.setFlag(0);
         mesMoSchedule.setShiftId("-");
         Integer sequence= maxSequence(mesMoSchedule.getMachineId());
-        mesMoSchedule.setSequence(sequence==null ? 1 :sequence+1);
+        mesMoSchedule.setSequence(sequence+1);
 
     }
 
@@ -1288,8 +1325,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @return
      */
     public Integer maxSequence(String machineId){
+        Integer max=1;
         String sql ="select MAX(sequence)  from mes_mo_schedule where  machine_id='"+machineId+"'  and flag !="+MoScheduleStatus.CLOSE.getKey()+"  and flag !="+MoScheduleStatus.FORCECLOSE.getKey()+"";
-        return  jdbcTemplate.queryForObject(sql ,Integer.class);
+        try {
+            max= jdbcTemplate.queryForObject(sql ,Integer.class);
+        }catch (Exception e){
+        }
+        return max ;
     }
     /**
      * 排产单工位保存

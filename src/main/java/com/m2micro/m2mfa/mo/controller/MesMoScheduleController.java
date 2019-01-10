@@ -22,6 +22,7 @@ import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.mo.vo.PeopleDistribution;
 import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
 import com.m2micro.m2mfa.mo.vo.Productionorder;
@@ -251,6 +252,20 @@ public class MesMoScheduleController {
     public ResponseMessage processRestore(@RequestBody ProcessStatus processStatus){
         mesMoScheduleService.processRestore(processStatus);
         return ResponseMessage.ok();
+    }
+
+    @PostMapping("/peopleDistribution")
+    @ApiOperation(value="排产单人员分配显示")
+    @UserOperationLog("排产单人员分配显示")
+    public ResponseMessage<List<PeopleDistribution>> peopleDistribution(){
+        return ResponseMessage.ok( mesMoScheduleService.peopleDistribution());
+    }
+
+    @PostMapping("/findbMachineId")
+    @ApiOperation(value="机台ID获取排产单")
+    @UserOperationLog("机台ID获取排产单")
+    public ResponseMessage<List<MesMoSchedule>> findbMachineId(@ApiParam(value = "machineId",required=true) @RequestParam(required = true) String machineId){
+        return ResponseMessage.ok( mesMoScheduleService.findbMachineId(machineId));
     }
 
 }

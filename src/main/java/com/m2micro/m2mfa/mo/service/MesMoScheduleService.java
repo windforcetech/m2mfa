@@ -15,6 +15,7 @@ import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.model.ScheduleAllInfoModel;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
+import com.m2micro.m2mfa.mo.vo.PeopleDistribution;
 import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
 import com.m2micro.m2mfa.mo.vo.Productionorder;
@@ -194,4 +195,17 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      * @return  排产单所有相关的信息
      */
     ScheduleAllInfoModel getScheduleAllInfoModel(String scheduleId);
+
+    /**
+     * 排产单人员安排显示
+     * @return
+     */
+    List<PeopleDistribution> peopleDistribution();
+
+    /**
+     * 机台获取排产单
+     * @param machineId
+     * @return
+     */
+    List<MesMoSchedule>  findbMachineId(String machineId );
 }

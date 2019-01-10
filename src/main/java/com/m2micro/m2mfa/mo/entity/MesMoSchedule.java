@@ -92,6 +92,10 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "料件名称")
     private String partName;
 
+    @Transient
+    @ApiModelProperty(value = "排产单完成量")
+    private Integer completion;
+
 
     @NotEmpty(message="版本不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "班别")
@@ -131,7 +135,13 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     private String description;
 
 
+    public Integer getCompletion() {
+        return completion;
+    }
 
+    public void setCompletion(Integer completion) {
+        this.completion = completion;
+    }
 
     public Integer getNotQty() {
         return notQty;
@@ -152,6 +162,8 @@ public class MesMoSchedule extends BaseEntity implements Serializable {
     public void setScheduleId(String scheduleId) {
         this.scheduleId = scheduleId;
     }
+
+
 
     public String getMachineName() {
         return machineName;
