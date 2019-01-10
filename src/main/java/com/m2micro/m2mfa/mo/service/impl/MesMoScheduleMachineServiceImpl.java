@@ -160,6 +160,10 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
                 ScheduleAllInfoModel newScheduleAllInfoModel = fillScheduleAllInfo(scheduleAllInfoModel,mesMoSchedule,scheduleMachineParaModel);
                 //保存所有的排产单相关数据
                 saveAll(newScheduleAllInfoModel);
+                //原有排产单结案
+                MesMoSchedule mesMoSchedule1 = scheduleAllInfoModel.getMesMoSchedule();
+                mesMoSchedule1.setFlag(MoScheduleStatus.CLOSE.getKey());
+                mesMoScheduleService.save(mesMoSchedule1);
             }
             //如果排产单状态是初始或是已审核
             else if(MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())||
