@@ -223,7 +223,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     }
 
     @Override
-    public List<SelectNode> getNames() {
+    public List<SelectNode> getNames(String machineId) {
         String sql = "SELECT\n" +
                     "	p.uuid id,\n" +
                     "	p.propertyty_name name\n" +
@@ -239,7 +239,13 @@ public class BaseMachineServiceImpl implements BaseMachineService {
                     "		base_machine bm\n" +
                     ")";
         RowMapper rm = BeanPropertyRowMapper.newInstance(SelectNode.class);
-        return jdbcTemplate.query(sql,rm);
+        List<SelectNode> list = jdbcTemplate.query(sql, rm);
+        if(StringUtils.isNotEmpty(machineId)){
+            BaseMachine baseMachine = findById(machineId).orElse(null);
+            SelectNode selectNode = new SelectNode(baseMachine.getId(),baseMachine.getName());
+            list.add(selectNode);
+        }
+        return list;
     }
 
     /**

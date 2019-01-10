@@ -123,7 +123,7 @@ public class BaseMachineController {
     @RequestMapping("/getNames")
     @ApiOperation(value="获取机台名称下拉选项")
     @UserOperationLog("获取机台名称下拉选项")
-    public ResponseMessage<List<SelectNode>> getNames(){
-        return ResponseMessage.ok(baseMachineService.getNames());
+    public ResponseMessage<List<SelectNode>> getNames(String machineId){
+        return ResponseMessage.ok(baseMachineService.getNames(machineId));
     }
 }

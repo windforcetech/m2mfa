@@ -61,6 +61,6 @@ public interface BaseMachineService extends BaseService<BaseMachine,String> {
      * 获取机台名称下拉选项
      * @return 获取机台名称下拉选项
      */
-    List<SelectNode> getNames();
+    List<SelectNode> getNames(String machineId);
 
 }
