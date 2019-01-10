@@ -200,18 +200,6 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     void saveScheduleAllInfoModel(ScheduleAllInfoModel scheduleAllInfoModel);
 
-    /**
-     * 排产单人员安排显示
-     * @return
-     */
-    List<PeopleDistribution> peopleDistribution();
-
-    /**
-     * 机台获取排产单
-     * @param machineId
-     * @return
-     */
-    List<MesMoSchedule>  findbMachineId(String machineId );
 
     /**
      *排产单人员分配

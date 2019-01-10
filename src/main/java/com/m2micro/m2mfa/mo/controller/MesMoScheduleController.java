@@ -252,19 +252,6 @@ public class MesMoScheduleController {
         return ResponseMessage.ok();
     }
 
-    @PostMapping("/peopleDistribution")
-    @ApiOperation(value="排产单人员分配显示")
-    @UserOperationLog("排产单人员分配显示")
-    public ResponseMessage<List<PeopleDistribution>> peopleDistribution(){
-        return ResponseMessage.ok( mesMoScheduleService.peopleDistribution());
-    }
-
-    @PostMapping("/findbMachineId")
-    @ApiOperation(value="机台ID获取排产单")
-    @UserOperationLog("机台ID获取排产单")
-    public ResponseMessage<List<MesMoSchedule>> findbMachineId(@ApiParam(value = "machineId",required=true) @RequestParam(required = true) String machineId){
-        return ResponseMessage.ok( mesMoScheduleService.findbMachineId(machineId));
-    }
 
     @PostMapping("/peopleDistributionsave")
     @ApiOperation(value="排产单人员分配保存")

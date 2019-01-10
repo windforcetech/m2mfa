@@ -152,39 +152,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
     }
 
-    @Override
-    public List<PeopleDistribution> peopleDistribution() {
-        String sql="SELECT oo.department_name  departmentName ,oo.uuid  departmentId FROM organization oo where  oo.id in(SELECT DISTINCT o.id  FROM base_machine bm LEFT JOIN organization o ON bm.department_id = o.uuid WHERE bm.machine_id IN ( SELECT DISTINCT mms.machine_id FROM mes_mo_schedule mms ))";
-        RowMapper rm = BeanPropertyRowMapper.newInstance(PeopleDistribution.class);
-        List<PeopleDistribution> peopleDistributions =jdbcTemplate.query(sql,rm);
-        for(PeopleDistribution p :peopleDistributions){
-            sql="SELECT bm.* FROM base_machine bm WHERE bm.machine_id IN ( SELECT DISTINCT mms.machine_id FROM mes_mo_schedule mms ) AND bm.department_id = '"+p.getDepartmentId()+"'";
-             rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
-            p.setBaseMachines(jdbcTemplate.query(sql,rm));
-        }
 
-        return peopleDistributions;
-    }
 
-    @Override
-    public List<MesMoSchedule> findbMachineId(String machineId) {
-        String sql ="SELECT  * FROM mes_mo_schedule mms WHERE mms.machine_id = '"+machineId+"' AND mms.flag = "+MoStatus.AUDITED.getKey()+" OR mms.flag = "+MoStatus.SCHEDULED.getKey()+"";
-        RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
-        List<MesMoSchedule> mesMoSchedules =jdbcTemplate.query(sql,rm);
-        List<MesMoSchedule> ms =new ArrayList<>();
-        for(MesMoSchedule mesMoSchedule :mesMoSchedules  ){
-            sql ="select (IFNULL(mrw.strat_power,0)+ IFNULL(mrw.end_molds,0))  completion  from mes_record_work  mrw  where mrw.schedule_id='"+mesMoSchedule.getScheduleId()+"' and mrw.machine_id='"+machineId+"'";
-            Integer completion=0;
-            try {
-                completion= jdbcTemplate.queryForObject(sql ,Integer.class);
-            }catch (Exception e){
-            }
-            MesMoSchedule m = getMesMoSchedule(mesMoSchedule.getScheduleId());
-            m.setCompletion( completion==null? 0:completion);
-            ms.add(m);
-        }
-        return ms;
-    }
     @Transactional
     @Override
     public void peopleDistributionsave(List<MesMoScheduleStaff> mesMoScheduleStaffs,List<MesMoScheduleStation> mesMoScheduleStations) {
