@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
+import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
 import com.m2micro.m2mfa.base.repository.BaseMachineRepository;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
@@ -219,6 +220,26 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         valid(ids);
         iotMachineOutputService.deleteByMachineIds(ids);
         deleteByIds(ids);
+    }
+
+    @Override
+    public List<SelectNode> getNames() {
+        String sql = "SELECT\n" +
+                    "	p.uuid id,\n" +
+                    "	p.propertyty_name name\n" +
+                    "FROM\n" +
+                    "	org_device_node odn,\n" +
+                    "	propertyty p\n" +
+                    "WHERE\n" +
+                    "	odn.org_id = p.uuid\n" +
+                    "AND p.uuid NOT IN (\n" +
+                    "	SELECT\n" +
+                    "		bm.id\n" +
+                    "	FROM\n" +
+                    "		base_machine bm\n" +
+                    ")";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(SelectNode.class);
+        return jdbcTemplate.query(sql,rm);
     }
 
     /**

@@ -4,6 +4,7 @@ import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseUnit;
+import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
 import com.m2micro.m2mfa.base.service.BaseUnitService;
@@ -117,5 +118,12 @@ public class BaseMachineController {
         List<BaseUnit>  baseUnitList = baseUnitService.list();
         map.put("baseUnitList",baseUnitList);
         return ResponseMessage.ok(map);
+    }
+
+    @RequestMapping("/getNames")
+    @ApiOperation(value="获取机台名称下拉选项")
+    @UserOperationLog("获取机台名称下拉选项")
+    public ResponseMessage<List<SelectNode>> getNames(){
+        return ResponseMessage.ok(baseMachineService.getNames());
     }
 }
