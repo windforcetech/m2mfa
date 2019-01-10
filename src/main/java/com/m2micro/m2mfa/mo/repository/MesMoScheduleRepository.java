@@ -2,7 +2,6 @@ package com.m2micro.m2mfa.mo.repository;
 
 import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.m2mfa.base.entity.BaseProcess;
-import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -65,5 +64,26 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      */
     @Query(value = "SELECT LPAD(max(IFNULL(SUBSTRING(schedule_no ,-2),'0'))+1, 2, 0) FROM mes_mo_schedule where mo_id=?1",nativeQuery = true)
     String getScheduleNoByMoId(String moId);
+
+    /**
+     * 根据排产单id查找排产单
+     * @param scheduleIds
+     *          排产单id
+     * @return  排产单
+     */
+    List<MesMoSchedule> findByScheduleIdIn(List<String> scheduleIds);
+
+    /**
+     * 更新机台id
+     * @param machineId
+     *          机台id
+     * @param scheduleId
+     *          排产单id
+     * @return  影响行数
+     */
+    @Modifying
+    @Query("update MesMoSchedule m set m.machineId = ?1 where m.scheduleId = ?2")
+    Integer updateMachineIdByScheduleId(String machineId,String scheduleId);
+
 
 }

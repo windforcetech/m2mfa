@@ -70,6 +70,7 @@ public class MesMoScheduleMachineController {
     @ApiOperation(value="排产单机台变更")
     @UserOperationLog("排产单机台变更")
     public ResponseMessage change(@RequestBody ScheduleMachineParaModel scheduleMachineParaModel){
+        mesMoScheduleMachineService.change(scheduleMachineParaModel);
         return ResponseMessage.ok();
     }
 }

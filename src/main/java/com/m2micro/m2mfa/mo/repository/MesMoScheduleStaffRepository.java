@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 生产排程人员 Repository 接口
@@ -35,5 +36,13 @@ public interface MesMoScheduleStaffRepository extends BaseRepository<MesMoSchedu
     @Modifying
     @Query(value = "DELETE FROM   MesMoScheduleStaff  mmss WHERE  mmss.scheduleId=?1")
     void deleteScheduleId(String scheduleId);
+
+    /**
+     *  获取排程人员
+     * @param scheduleId
+     *          排产单id
+     * @return  排程人员
+     */
+    List<MesMoScheduleStaff> findByScheduleId(String scheduleId);
 
 }

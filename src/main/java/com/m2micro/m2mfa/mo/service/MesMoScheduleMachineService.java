@@ -4,6 +4,7 @@ import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.node.TreeNode;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleMachineModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
+import com.m2micro.m2mfa.mo.model.ScheduleMachineParaModel;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleMachineQuery;
 
 import java.util.List;
@@ -34,4 +35,11 @@ public interface MesMoScheduleMachineService {
      * @return  排产机台列表
      */
     PageUtil<MesMoScheduleMachineModel> list(MesMoScheduleMachineQuery query);
+
+    /**
+     * 排产单机台变更
+     * @param scheduleMachineParaModel
+     *          变更需要的参数
+     */
+    void change(ScheduleMachineParaModel scheduleMachineParaModel);
 }

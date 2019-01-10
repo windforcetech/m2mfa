@@ -1,6 +1,5 @@
 package com.m2micro.m2mfa.mo.repository;
 
-import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
 import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -9,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 生产排程工序 Repository 接口
@@ -48,4 +48,12 @@ public interface MesMoScheduleProcessRepository extends BaseRepository<MesMoSche
 
     @Query(value = "select * from mes_mo_schedule_process where schedule_id =?1 and process_id=?2 " ,nativeQuery = true)
     MesMoScheduleProcess findbscheduleIdProcessId(String scheduleId, String processId);
+
+    /**
+     *  获取排程工序
+     * @param scheduleId
+     *          排产单id
+     * @return  排程工序
+     */
+    List<MesMoScheduleProcess> findByScheduleId(String scheduleId);
 }
