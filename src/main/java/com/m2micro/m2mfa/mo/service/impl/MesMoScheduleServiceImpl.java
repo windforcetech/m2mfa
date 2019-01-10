@@ -16,6 +16,7 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.repository.IotMachineOutputRepository;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
+import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.*;
 import com.m2micro.m2mfa.mo.model.BaseShiftModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
@@ -767,7 +768,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
          MesMoSchedule mesMoSchedule =    mesMoSchedules.get(0);
         //排产计划计算量
         BigDecimal scheduleTime = mesMoScheduleRepository.getScheduleTime(mesMoSchedule.getMoId());
-        Integer noitQty = mesMoScheduleRepository.findbnotQty(mesMoSchedule.getMoId());
+        Integer noitQty = findbnotQty(mesMoSchedule.getMoId());
         if(noitQty==null ||noitQty<0){
             noitQty=0;
         }
@@ -783,6 +784,26 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return mesMoSchedule;
     }
 
+    /**
+     * 获取未排量
+     * @param moId
+     * @return
+     */
+    public Integer findbnotQty(String moId){
+        String sql = "SELECT\n" +
+                " IFNULL(( IFNULL(mmd.target_qty,0)  -  IFNULL(mmd.schedul_qty ,0) ),0)    notQty \n" +
+                "FROM\n" +
+                "	mes_mo_desc mmd\n" +
+                "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id WHERE\n" +
+                " ( 	mmd.close_flag = "+MoStatus.AUDITED.getKey()+"\n" +
+                "OR mmd.close_flag = "+ MoStatus.SCHEDULED.getKey()+"\n" +
+                "OR (\n" +
+                "	mmd.close_flag = "+MoStatus.PRODUCTION.getKey()+"\n" +
+                "	AND mmd.is_schedul = 0\n" +
+                ") )  and  mmd.mo_id='"+moId+"'";
+
+        return jdbcTemplate.queryForObject(sql,Integer.class);
+    }
     /**
      * 获取排产单对应的班别信息
      * @param scheduleId
@@ -1241,11 +1262,20 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
         mesMoSchedule.setFlag(0);
         mesMoSchedule.setShiftId("-");
-        Integer sequence= mesMoScheduleRepository.maxSequence(mesMoSchedule.getMachineId());
+        Integer sequence= maxSequence(mesMoSchedule.getMachineId());
         mesMoSchedule.setSequence(sequence==null ? 1 :sequence+1);
 
     }
 
+    /**
+     * 获取生产顺序
+     * @param machineId
+     * @return
+     */
+    public Integer maxSequence(String machineId){
+        String sql ="select MAX(sequence)  from mes_mo_schedule where  machine_id='"+machineId+"'  and flag !="+MoScheduleStatus.CLOSE.getKey()+"  and flag !="+MoScheduleStatus.FORCECLOSE.getKey()+"";
+        return  jdbcTemplate.queryForObject(sql ,Integer.class);
+    }
     /**
      * 排产单工位保存
      * @param mesMoScheduleStations
