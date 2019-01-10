@@ -163,7 +163,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             }catch (Exception e){
             }
             MesMoSchedule m = getMesMoSchedule(mesMoSchedule.getScheduleId());
-            m.setCompletion( completion);
+            m.setCompletion( completion==null? 0:completion);
             ms.add(m);
         }
         return ms;
@@ -1333,7 +1333,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             max= jdbcTemplate.queryForObject(sql ,Integer.class);
         }catch (Exception e){
         }
-        return max ;
+        return max==null? 1: max;
     }
     /**
      * 排产单工位保存
