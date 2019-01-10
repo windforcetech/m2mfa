@@ -129,6 +129,26 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     @Override
+    @Transactional
+    public void saveScheduleAllInfoModel(ScheduleAllInfoModel scheduleAllInfoModel) {
+        if(scheduleAllInfoModel.getMesMoSchedule()!=null){
+            save(scheduleAllInfoModel.getMesMoSchedule());
+        }
+        if(scheduleAllInfoModel.getMesMoScheduleShifts()!=null&&scheduleAllInfoModel.getMesMoScheduleShifts().size()>0){
+            mesMoScheduleShiftRepository.saveAll(scheduleAllInfoModel.getMesMoScheduleShifts());
+        }
+        if(scheduleAllInfoModel.getMesMoScheduleStaffs()!=null&&scheduleAllInfoModel.getMesMoScheduleStaffs().size()>0){
+            mesMoScheduleStaffRepository.saveAll(scheduleAllInfoModel.getMesMoScheduleStaffs());
+        }
+        if(scheduleAllInfoModel.getMesMoScheduleProcesss()!=null&&scheduleAllInfoModel.getMesMoScheduleProcesss().size()>0){
+            mesMoScheduleProcessRepository.saveAll(scheduleAllInfoModel.getMesMoScheduleProcesss());
+        }
+        if(scheduleAllInfoModel.getMesMoScheduleStations()!=null&&scheduleAllInfoModel.getMesMoScheduleStations().size()>0){
+            mesMoScheduleStationRepository.saveAll(scheduleAllInfoModel.getMesMoScheduleStations());
+        }
+    }
+
+    @Override
     public List<PeopleDistribution> peopleDistribution() {
         String sql ="SELECT o.department_name  departmentName ,o.uuid  departmentId FROM base_machine bm LEFT JOIN organization o ON bm.department_id = o.uuid WHERE bm.machine_id IN ( SELECT DISTINCT mms.machine_id FROM mes_mo_schedule mms )";
         RowMapper rm = BeanPropertyRowMapper.newInstance(PeopleDistribution.class);

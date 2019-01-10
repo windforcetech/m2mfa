@@ -38,4 +38,5 @@ public class MesMoScheduleShiftServiceImpl implements MesMoScheduleShiftService 
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 
+
 }

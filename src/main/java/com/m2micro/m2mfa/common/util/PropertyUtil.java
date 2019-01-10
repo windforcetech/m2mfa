@@ -34,6 +34,27 @@ public class PropertyUtil {
     }
 
     /**
+     * 将旧的bean属性值不为null的值设置新的bean中
+     * @param newBean
+     *          新的bean
+     * @param oldBean
+     *          旧的bean
+     * @param <T>
+     * @return
+     */
+    public static <T> T copyToNew(T newBean,T oldBean){
+        if(oldBean==null){
+            return null;
+        }
+        if(newBean==null){
+            return oldBean;
+        }
+        return copyAssist(oldBean,newBean);
+    }
+
+
+
+    /**
      * 复制属性辅助类
      * @param newBean
      * @param oldBean

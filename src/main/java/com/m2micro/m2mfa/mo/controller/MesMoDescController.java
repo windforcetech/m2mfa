@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.mo.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.sysdebug.annotation.SysDebugLog;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
@@ -39,7 +40,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/mo/mesMoDesc")
 @Api(value="工单主档 前端控制器")
-@Authorize
+//@Authorize
 public class MesMoDescController {
     @Autowired
     MesMoDescService mesMoDescService;
@@ -50,6 +51,7 @@ public class MesMoDescController {
     @RequestMapping("/list")
     @ApiOperation(value="工单主档列表")
     @UserOperationLog("工单主档列表")
+    @SysDebugLog("工单主档列表")
     public ResponseMessage<PageUtil<MesMoDescModel>> list(MesMoDescQuery query){
         PageUtil<MesMoDescModel> page = mesMoDescService.list(query);
         return ResponseMessage.ok(page);

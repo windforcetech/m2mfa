@@ -4,8 +4,11 @@ import com.m2micro.m2mfa.mo.entity.MesMoScheduleShift;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+
+import java.util.List;
+
 /**
- *  服务类
+ *  排程班别 服务类
  * @author liaotao
  * @since 2019-01-04
  */
