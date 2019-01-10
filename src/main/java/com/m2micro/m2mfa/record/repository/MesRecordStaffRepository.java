@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 人员作业记录 Repository 接口
@@ -31,4 +32,13 @@ public interface MesRecordStaffRepository extends BaseRepository<MesRecordStaff,
     @Modifying
     @Query("update MesRecordStaff m set m.endTime = ?1 , m.endPower = ?2 , m.endMolds = ?3 where m.scheduleId = ?4 and m.startTime is not null and m.endTime is null")
     Integer setEndAll(Date endTime, BigDecimal endPower,BigDecimal endMolds, String scheduleId);
+
+    /**
+     * 根据员工id获取对应的记录
+     * @param staffId
+     * @return
+     */
+
+    @Query(value = "SELECT  * from  mes_record_staff  where  staff_id=?1",nativeQuery = true)
+    List<MesRecordStaff> findStaffId(String staffId);
 }

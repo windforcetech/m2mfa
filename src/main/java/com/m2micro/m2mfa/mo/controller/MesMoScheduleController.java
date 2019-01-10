@@ -14,6 +14,7 @@ import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.entity.MesMoScheduleStaff;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
@@ -22,10 +23,7 @@ import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
-import com.m2micro.m2mfa.mo.vo.PeopleDistribution;
-import com.m2micro.m2mfa.mo.vo.ProcessStatus;
-import com.m2micro.m2mfa.mo.vo.ProductionProcess;
-import com.m2micro.m2mfa.mo.vo.Productionorder;
+import com.m2micro.m2mfa.mo.vo.*;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -108,7 +106,7 @@ public class MesMoScheduleController {
        if(msg.trim().equals("")){
            return ResponseMessage.ok();
        }
-        return ResponseMessage.error(msg+"排产单已执行不可删除。");
+        return ResponseMessage.ok(msg+"排产单已执行不可删除。");
     }
 
     /**
@@ -269,11 +267,11 @@ public class MesMoScheduleController {
     }
 
     @PostMapping("/peopleDistributionsave")
-    @ApiOperation(value="机台ID获取排产单")
-    @UserOperationLog("机台ID获取排产单")
-    public ResponseMessage<List<MesMoSchedule>> peopleDistributionsave(@ApiParam(value = "machineId",required=true) @RequestParam(required = true) String machineId){
-
-        return ResponseMessage.ok( );
+    @ApiOperation(value="排产单人员分配保存")
+    @UserOperationLog("排产单人员分配保存")
+    public ResponseMessage  peopleDistributionsave(@RequestBody SchedulerDistribution schedulerDistribution){
+        mesMoScheduleService.peopleDistributionsave(schedulerDistribution.getMesMoScheduleStaffs(),schedulerDistribution.getMesMoScheduleStations());
+        return ResponseMessage.ok();
     }
 
 }
