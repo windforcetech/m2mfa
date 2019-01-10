@@ -150,7 +150,9 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     @Override
     public List<PeopleDistribution> peopleDistribution() {
-        String sql ="SELECT o.department_name  departmentName ,o.uuid  departmentId FROM base_machine bm LEFT JOIN organization o ON bm.department_id = o.uuid WHERE bm.machine_id IN ( SELECT DISTINCT mms.machine_id FROM mes_mo_schedule mms )";
+
+
+        String sql="SELECT oo.department_name  departmentName ,oo.uuid  departmentId FROM organization oo where  oo.id in(SELECT DISTINCT o.id  FROM base_machine bm LEFT JOIN organization o ON bm.department_id = o.uuid WHERE bm.machine_id IN ( SELECT DISTINCT mms.machine_id FROM mes_mo_schedule mms ))";
         RowMapper rm = BeanPropertyRowMapper.newInstance(PeopleDistribution.class);
         List<PeopleDistribution> peopleDistributions =jdbcTemplate.query(sql,rm);
         for(PeopleDistribution p :peopleDistributions){
@@ -1274,7 +1276,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         saveScheduleStaff(mesMoScheduleStaffs, ScheduleId);
         //保存工序
         saveScheduleProcess(mesMoScheduleProcesses, ScheduleId);
-        //保持工位
+        //保存工位
         saveScheduleStation(mesMoScheduleStations, ScheduleId);
 
     }
