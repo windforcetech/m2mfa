@@ -15,10 +15,7 @@ import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.model.ScheduleAllInfoModel;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
-import com.m2micro.m2mfa.mo.vo.PeopleDistribution;
-import com.m2micro.m2mfa.mo.vo.ProcessStatus;
-import com.m2micro.m2mfa.mo.vo.ProductionProcess;
-import com.m2micro.m2mfa.mo.vo.Productionorder;
+import com.m2micro.m2mfa.mo.vo.*;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 
 import java.util.List;
@@ -208,4 +205,11 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      * @return
      */
     List<MesMoSchedule>  findbMachineId(String machineId );
+
+    /**
+     *排产单人员分配
+     * @param mesMoScheduleStaffs
+     * @param mesMoScheduleStations
+     */
+    void peopleDistributionsave( List<MesMoScheduleStaff> mesMoScheduleStaffs,List<MesMoScheduleStation> mesMoScheduleStations);
 }

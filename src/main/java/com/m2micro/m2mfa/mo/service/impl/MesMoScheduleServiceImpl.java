@@ -22,11 +22,14 @@ import com.m2micro.m2mfa.mo.service.*;
 import com.m2micro.m2mfa.mo.vo.PeopleDistribution;
 import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
+import com.m2micro.m2mfa.mo.vo.SchedulerDistribution;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
+import com.m2micro.m2mfa.record.entity.MesRecordStaff;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
 import com.m2micro.m2mfa.record.repository.MesRecordStaffRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
+import com.m2micro.m2mfa.record.service.MesRecordStaffService;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -107,6 +110,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
 
 
+
     @SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
         return mesMoScheduleRepository;
@@ -130,8 +134,6 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     @Override
     public List<PeopleDistribution> peopleDistribution() {
-
-
         String sql="SELECT oo.department_name  departmentName ,oo.uuid  departmentId FROM organization oo where  oo.id in(SELECT DISTINCT o.id  FROM base_machine bm LEFT JOIN organization o ON bm.department_id = o.uuid WHERE bm.machine_id IN ( SELECT DISTINCT mms.machine_id FROM mes_mo_schedule mms ))";
         RowMapper rm = BeanPropertyRowMapper.newInstance(PeopleDistribution.class);
         List<PeopleDistribution> peopleDistributions =jdbcTemplate.query(sql,rm);
@@ -140,9 +142,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
              rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
             p.setBaseMachines(jdbcTemplate.query(sql,rm));
         }
-        if(peopleDistributions.isEmpty()){
-            throw  new MMException("未找到相关数据。");
-        }
+
         return peopleDistributions;
     }
 
@@ -152,9 +152,6 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
         List<MesMoSchedule> mesMoSchedules =jdbcTemplate.query(sql,rm);
         List<MesMoSchedule> ms =new ArrayList<>();
-        if(mesMoSchedules.isEmpty()){
-            throw  new MMException("未找对应的排产单数据。");
-        }
         for(MesMoSchedule mesMoSchedule :mesMoSchedules  ){
             sql ="select (IFNULL(mrw.strat_power,0)+ IFNULL(mrw.end_molds,0))  completion  from mes_record_work  mrw  where mrw.schedule_id='"+mesMoSchedule.getScheduleId()+"' and mrw.machine_id='"+machineId+"'";
             Integer completion=0;
@@ -167,6 +164,28 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             ms.add(m);
         }
         return ms;
+    }
+    @Transactional
+    @Override
+    public void peopleDistributionsave(List<MesMoScheduleStaff> mesMoScheduleStaffs,List<MesMoScheduleStation> mesMoScheduleStations) {
+        for( MesMoScheduleStaff mesMoScheduleStaff : mesMoScheduleStaffs){
+           List<MesRecordStaff>mesRecordStaffs =  mesRecordStaffRepository.findStaffId(mesMoScheduleStaff.getStaffId());
+           if(!mesRecordStaffs.isEmpty()){
+               throw  new MMException(baseStaffService.findById(mesMoScheduleStaff.getStaffId()).orElse(null).getStaffName()+"已上工不可添加。");
+           }
+        }
+        String ScheduleId= mesMoScheduleStaffs.get(0).getScheduleId();
+        if(ScheduleId==null || mesMoScheduleRepository.findById(ScheduleId).orElse(null)==null){
+            throw  new MMException("排产单ID有误。");
+        }
+        mesMoScheduleStaffRepository.deleteScheduleId(ScheduleId);
+        mesMoScheduleStationRepository.deleteScheduleId(ScheduleId);
+        //保存职员
+        saveScheduleStaff(mesMoScheduleStaffs,ScheduleId);
+        //保存工位
+        saveScheduleStation(mesMoScheduleStations, ScheduleId);
+
+
     }
 
     @Override
@@ -1393,7 +1412,6 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             String  staffId = UUIDUtil.getUUID();
             mesMoScheduleStaff.setId(staffId);
             mesMoScheduleStaff.setScheduleId(scheduleId);
-
             ValidatorUtil.validateEntity(mesMoScheduleStaff, AddGroup.class);
             if(baseProcessService.findById(mesMoScheduleStaff.getProcessId()).orElse(null)==null){
                 throw  new MMException("排程人员工序ID有误。");
