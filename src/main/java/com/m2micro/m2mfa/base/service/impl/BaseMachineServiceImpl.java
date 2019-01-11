@@ -204,12 +204,6 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         if(list!=null&&list.size()>0){
             throw new MMException("编号不唯一！");
         }
-        IotMachineOutput iotMachineOutput = new IotMachineOutput();
-        iotMachineOutput.setId(UUIDUtil.getUUID());
-        iotMachineOutput.setMachineId(baseMachine.getMachineId());
-        iotMachineOutput.setMolds(new BigDecimal(0));
-        iotMachineOutput.setPower(new BigDecimal(0));
-        iotMachineOutputService.save(iotMachineOutput);
         return save(baseMachine);
     }
 
@@ -218,7 +212,6 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     public void delete(String[] ids) {
         //校验
         valid(ids);
-        iotMachineOutputService.deleteByMachineIds(ids);
         deleteByIds(ids);
     }
 
