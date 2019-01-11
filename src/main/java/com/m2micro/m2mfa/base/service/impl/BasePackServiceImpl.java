@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.base.query.BasePackQuery;
 import com.m2micro.m2mfa.base.repository.BasePackRepository;
 import com.m2micro.m2mfa.base.service.BasePackService;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -44,9 +45,15 @@ public class BasePackServiceImpl implements BasePackService {
         if (StringUtils.isNotEmpty(query.getPartId())) {
             condition.and(qBasePack.partId.like("%" + query.getPartId() + "%"));
         }
-        jq.where(condition).offset((query.getPage() - 1) * query.getSize()*4).limit(query.getSize()*4);
-        List<BasePack> list = jq.fetch();
+
+//        jq.where(condition).orderBy(stringOrderSpecifier).offset((query.getPage() - 1) * query.getSize()*4).limit(query.getSize()*4);
+        jq.where(condition);
         long totalCount = jq.fetchCount();
+        OrderSpecifier<String> stringOrderSpecifier = qBasePack.partId.asc();
+        jq.orderBy(stringOrderSpecifier).offset((query.getPage() - 1) * query.getSize()*4).limit(query.getSize()*4);
+
+        List<BasePack> list = jq.fetch();
+//        long totalCount = jq.fetchCount();
         return PageUtil.of(list, totalCount/4, query.getSize(), query.getPage());
     }
 
