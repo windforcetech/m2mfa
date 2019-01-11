@@ -45,4 +45,12 @@ public interface MesMoScheduleStaffRepository extends BaseRepository<MesMoSchedu
      */
     List<MesMoScheduleStaff> findByScheduleId(String scheduleId);
 
+    /**
+     * 根据排产单ID跟人员ID获取排产单人员数据
+     * @param scheduleId
+     * @param staffId
+     * @return
+     */
+    @Query(value = "select * from mes_mo_schedule_staff mmss where mmss.staff_id =?2 and mmss.schedule_id=?1",nativeQuery = true)
+    List<MesMoScheduleStaff> findByScheduleIdandStafftId(String scheduleId,String staffId);
 }

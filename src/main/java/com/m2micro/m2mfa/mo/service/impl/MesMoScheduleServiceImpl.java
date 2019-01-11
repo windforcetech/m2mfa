@@ -19,17 +19,15 @@ import com.m2micro.m2mfa.mo.model.*;
 import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
 import com.m2micro.m2mfa.mo.repository.*;
 import com.m2micro.m2mfa.mo.service.*;
-import com.m2micro.m2mfa.mo.vo.PeopleDistribution;
+import com.m2micro.m2mfa.mo.vo.Absence;
 import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
-import com.m2micro.m2mfa.mo.vo.SchedulerDistribution;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
 import com.m2micro.m2mfa.record.repository.MesRecordStaffRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
-import com.m2micro.m2mfa.record.service.MesRecordStaffService;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -176,6 +174,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
 
     }
+
+
 
     @Override
     public PageUtil<MesMoScheduleModel> list(MesMoScheduleQuery query) {

@@ -43,7 +43,7 @@ public class BaseProcessController {
     @ApiOperation(value="添加工序")
     @UserOperationLog("添加工序")
     public ResponseMessage save(@RequestBody Processvo processvo){
-        return   baseProcessService.save(processvo.getBaseProcess(),processvo.getBaseProcessStations(),processvo.getBasePageElemen()) ==true ? ResponseMessage.ok("添加工序成功。"): ResponseMessage.error("工序编号【"+processvo.getBaseProcess().getProcessCode()+"】已存在。。。");
+        return   baseProcessService.save(processvo.getBaseProcess(),processvo.getBaseProcessStations(),processvo.getBasePageElemen()) ==true ? ResponseMessage.ok("添加工序成功。"): ResponseMessage.error("工序代码【"+processvo.getBaseProcess().getProcessCode()+"】已存在。。。");
     }
 
 
@@ -54,7 +54,7 @@ public class BaseProcessController {
     @ApiOperation(value="修改工序")
     @UserOperationLog("修改工序")
     public ResponseMessage update(@RequestBody Processvo processvo){
-        return  baseProcessService.update(processvo.getBaseProcess(),processvo.getBaseProcessStations(),processvo.getBasePageElemen()) == true ?ResponseMessage.ok("修改工序成功。"):ResponseMessage.error("工序编号【"+processvo.getBaseProcess().getProcessCode()+"】不存在。。");
+        return  baseProcessService.update(processvo.getBaseProcess(),processvo.getBaseProcessStations(),processvo.getBasePageElemen()) == true ?ResponseMessage.ok("修改工序成功。"):ResponseMessage.error("工序代码【"+processvo.getBaseProcess().getProcessCode()+"】不存在。。");
     }
 
 
