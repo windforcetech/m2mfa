@@ -52,8 +52,7 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
                         mesRecordStaff.setEndTime(new Date());
                         mesRecordStaffService.updateById(mesRecordStaff.getId(),mesRecordStaff);
                     }
-                    //缺勤人员已经上工，给他下工
-                  //  throw  new MMException(baseStaffService.findById(mesMoScheduleStaff.getStaffId()).orElse(null).getStaffName()+"已上工不可添加。");
+
                 }
                 String []   ScheduleIds= absencePersonnel.getScheduleIds();
                 for(int i=0; i<ScheduleIds.length;i++){
