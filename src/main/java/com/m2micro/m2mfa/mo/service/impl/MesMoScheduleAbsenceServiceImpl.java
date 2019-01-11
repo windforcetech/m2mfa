@@ -70,7 +70,6 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
                             newmesMoScheduleStaff.setStaffId(absencePersonnel.getForstaffId());
                             newmesMoScheduleStaff.setScheduleId(mesMoScheduleStaff.getScheduleId());
                             newmesMoScheduleStaff.setStationId(mesMoScheduleStaff.getStationId());
-                            newmesMoScheduleStaff.setStaffId(mesMoScheduleStaff.getStaffId());
                             newmesMoScheduleStaff.setIsStation(mesMoScheduleStaff.getIsStation());
                             newmesMoScheduleStaff.setShiftId(mesMoScheduleStaff.getShiftId());
                             newmesMoScheduleStaff.setProcessId(mesMoScheduleStaff.getProcessId());
