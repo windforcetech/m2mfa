@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.mo.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleStaff;
@@ -51,6 +52,7 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
                     for(MesRecordStaff mesRecordStaff:mesRecordStaffs){
                         mesRecordStaff.setEndTime(new Date());
                         mesRecordStaffService.updateById(mesRecordStaff.getId(),mesRecordStaff);
+                        //需要后期的一些结算数量操作
                     }
 
                 }
@@ -63,8 +65,16 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
                         //缺勤替换
                         List<MesMoScheduleStaff>mesMoScheduleStaffs =  mesMoScheduleStaffRepository.findByScheduleIdandStafftId(ScheduleId,absencePersonnel.getLackstaffId());
                         for(MesMoScheduleStaff mesMoScheduleStaff :mesMoScheduleStaffs){
-                            mesMoScheduleStaff.setStaffId(absencePersonnel.getForstaffId());
-                            mesMoScheduleStaffService.updateById(mesMoScheduleStaff.getId(),mesMoScheduleStaff);
+                            MesMoScheduleStaff newmesMoScheduleStaff= new MesMoScheduleStaff();
+                            newmesMoScheduleStaff.setId(UUIDUtil.getUUID());
+                            newmesMoScheduleStaff.setStaffId(absencePersonnel.getForstaffId());
+                            newmesMoScheduleStaff.setScheduleId(mesMoScheduleStaff.getScheduleId());
+                            newmesMoScheduleStaff.setStationId(mesMoScheduleStaff.getStationId());
+                            newmesMoScheduleStaff.setStaffId(mesMoScheduleStaff.getStaffId());
+                            newmesMoScheduleStaff.setIsStation(mesMoScheduleStaff.getIsStation());
+                            newmesMoScheduleStaff.setShiftId(mesMoScheduleStaff.getShiftId());
+                            newmesMoScheduleStaff.setEnabled(true);
+                            mesMoScheduleStaffService.save(newmesMoScheduleStaff);
                         }
 
         }
