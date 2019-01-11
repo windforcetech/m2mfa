@@ -45,8 +45,7 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
     }
     @Transactional
     @Override
-    public void save(List<AbsencePersonnel> absencePersonnels) {
-        for(AbsencePersonnel absencePersonnel :absencePersonnels){
+    public void save(AbsencePersonnel absencePersonnel) {
                 List<MesRecordStaff>mesRecordStaffs =  mesRecordStaffRepository.findStaffId(absencePersonnel.getLackstaffId());
                 if(!mesRecordStaffs.isEmpty()){
                     for(MesRecordStaff mesRecordStaff:mesRecordStaffs){
@@ -56,16 +55,19 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
                     //缺勤人员已经上工，给他下工
                   //  throw  new MMException(baseStaffService.findById(mesMoScheduleStaff.getStaffId()).orElse(null).getStaffName()+"已上工不可添加。");
                 }
-            String ScheduleId= absencePersonnel.getScheduleId();
-            if(ScheduleId==null || mesMoScheduleRepository.findById(ScheduleId).orElse(null)==null){
-                throw  new MMException("排产单ID有误。");
-            }
-            //缺勤替换
-          List<MesMoScheduleStaff>mesMoScheduleStaffs =  mesMoScheduleStaffRepository.findByScheduleIdandStafftId(ScheduleId,absencePersonnel.getLackstaffId());
-            for(MesMoScheduleStaff mesMoScheduleStaff :mesMoScheduleStaffs){
-                mesMoScheduleStaff.setStaffId(absencePersonnel.getForstaffId());
-                mesMoScheduleStaffService.updateById(mesMoScheduleStaff.getId(),mesMoScheduleStaff);
-            }
+                String []   ScheduleIds= absencePersonnel.getScheduleIds();
+                for(int i=0; i<ScheduleIds.length;i++){
+                    String ScheduleId =ScheduleIds[i];
+                    if(ScheduleId==null || mesMoScheduleRepository.findById(ScheduleId).orElse(null)==null){
+                        throw  new MMException("排产单ID有误。");
+                    }
+                        //缺勤替换
+                        List<MesMoScheduleStaff>mesMoScheduleStaffs =  mesMoScheduleStaffRepository.findByScheduleIdandStafftId(ScheduleId,absencePersonnel.getLackstaffId());
+                        for(MesMoScheduleStaff mesMoScheduleStaff :mesMoScheduleStaffs){
+                            mesMoScheduleStaff.setStaffId(absencePersonnel.getForstaffId());
+                            mesMoScheduleStaffService.updateById(mesMoScheduleStaff.getId(),mesMoScheduleStaff);
+                        }
+
         }
 
     }

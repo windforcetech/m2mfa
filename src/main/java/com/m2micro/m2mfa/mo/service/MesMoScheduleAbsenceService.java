@@ -20,5 +20,5 @@ public interface MesMoScheduleAbsenceService {
      * 缺勤存储
      * @param absencePersonnels
      */
-    void save(List<AbsencePersonnel>  absencePersonnels);
+    void save(AbsencePersonnel  absencePersonnels);
 }

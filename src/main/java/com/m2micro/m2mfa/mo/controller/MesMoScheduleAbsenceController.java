@@ -34,7 +34,7 @@ public class MesMoScheduleAbsenceController {
     @PostMapping("/save")
     @ApiOperation(value="排产单缺勤保存")
     @UserOperationLog("排产单缺勤保存")
-    public ResponseMessage save(@RequestBody  List<AbsencePersonnel>  absencePersonnels){
+    public ResponseMessage save(@RequestBody  AbsencePersonnel  absencePersonnels){
         mesMoScheduleAbsence.save(absencePersonnels);
         return ResponseMessage.ok( );
 

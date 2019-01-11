@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class AbsencePersonnel {
@@ -12,5 +14,5 @@ public class AbsencePersonnel {
     @ApiModelProperty(value = "替补人员ID")
     private String forstaffId;
     @ApiModelProperty(value = "排产单Id")
-    private String scheduleId;
+    private String[] scheduleIds;
 }
