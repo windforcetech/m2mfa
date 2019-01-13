@@ -20,15 +20,23 @@ public interface IotMachineOutputService extends BaseService<IotMachineOutput,St
 
     /**
      * 通过机台id删除
-     * @param machineId
+     * @param orgId
      * @return
      */
-    Integer deleteByMachineId(String machineId);
+    Integer deleteByOrgId(String orgId);
 
     /**
      * 通过机台ids删除
-     * @param machineIds
+     * @param orgIds
      * @return
      */
-    void deleteByMachineIds(String[] machineIds);
+    void deleteByOrgIds(String[] orgIds);
+
+    /**
+     * 通过机台id查找机台产量信息
+     * @param machineId
+     *          机台id
+     * @return  机台产量信息
+     */
+    IotMachineOutput findIotMachineOutputByMachineId(String machineId);
 }

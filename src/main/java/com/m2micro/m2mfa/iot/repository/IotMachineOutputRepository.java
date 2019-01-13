@@ -11,17 +11,17 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IotMachineOutputRepository extends BaseRepository<IotMachineOutput,String> {
     /**
-     * 通过机台id查找机台产出信息
-     * @param machineId
-     *          机台id
+     * 通过物业id查找机台产出信息
+     * @param orgId
+     *          物业id
      * @return  机台产出信息
      */
-    IotMachineOutput findIotMachineOutputByMachineId(String machineId);
+    IotMachineOutput findIotMachineOutputByOrgId(String orgId);
 
     /**
-     * 通过机台id删除
-     * @param machineId
+     * 通过物业id删除
+     * @param orgId
      * @return
      */
-    Integer deleteByMachineId(String machineId);
+    Integer deleteByOrgId(String orgId);
 }

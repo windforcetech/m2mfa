@@ -13,10 +13,7 @@ spring:
   redis:
     host: 192.168.1.111
     port: 6379
-  activemq:
-    user: admin
-    password: admin
-    broker-url: tcp://192.168.1.132:61616
+
   m2miot:
     client:
       url: http://192.168.1.196:8080

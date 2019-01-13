@@ -12,6 +12,7 @@ import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.repository.IotMachineOutputRepository;
+import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.*;
@@ -101,6 +102,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     MesMoDescRepository mesMoDescRepository;
     @Autowired
     IotMachineOutputRepository iotMachineOutputRepository;
+    @Autowired
+    IotMachineOutputService iotMachineOutputService;
     @Autowired
     private MesMoScheduleStationRepository mesMoScheduleStationRepository;
     @Autowired
@@ -627,7 +630,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @param mesMoSchedule
      */
     private void stopWorkForStaff(MesMoSchedule mesMoSchedule) {
-        IotMachineOutput iotMachineOutput = iotMachineOutputRepository.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        //IotMachineOutput iotMachineOutput = iotMachineOutputRepository.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         if(iotMachineOutput==null){
             throw new MMException("没有对应机台产出信息！");
         }

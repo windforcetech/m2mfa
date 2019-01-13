@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.repository;
 
 import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.framework.commons.BaseRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -28,4 +29,7 @@ public interface BaseMachineRepository extends BaseRepository<BaseMachine,String
      * @return
      */
     List<BaseMachine> findByCodeAndMachineIdNot(String code ,String machineId);
+
+    @Query(value = "SELECT bm.* FROM base_machine bm WHERE bm.id = ?1",nativeQuery = true)
+    BaseMachine findByOrgId(String orgId);
 }

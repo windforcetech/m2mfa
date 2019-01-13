@@ -4,6 +4,7 @@ import com.querydsl.jpa.HQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import javax.persistence.EntityManager;
 
@@ -13,6 +14,7 @@ import javax.persistence.EntityManager;
  * @Description:
  */
 @Configuration
+@EnableAsync
 public class M2mfaConfig {
 
     @Bean
