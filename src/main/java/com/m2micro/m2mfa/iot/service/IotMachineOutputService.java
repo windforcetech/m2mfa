@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.iot.service;
 
+import com.m2micro.iot.client.model.DeviceData;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -10,6 +11,13 @@ import com.m2micro.framework.commons.util.Query;
  * @since 2019-01-08
  */
 public interface IotMachineOutputService extends BaseService<IotMachineOutput,String> {
+
+    /**
+     * 处理iot平台推送过来的数据
+     * @param deviceData
+     *          iot平台推送过来的数据
+     */
+    void handleDeviceData(DeviceData deviceData);
     /**
      * 分页查询
      * @param query
