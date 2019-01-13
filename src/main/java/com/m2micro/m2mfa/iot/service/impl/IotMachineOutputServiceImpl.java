@@ -15,6 +15,7 @@ import com.m2micro.m2mfa.iot.constant.IotConstant;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.repository.IotMachineOutputRepository;
 import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
+import com.m2micro.m2mfa.iot.util.IotUtil;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
@@ -80,7 +81,7 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
         5、通过模具ID，得到cavity
         6、更新模数，产量=穴数*(模数-上次模数)+上次产量*/
         //通过dev_id拿到org_id,如果拿不到，丢弃
-        OrgAndDeviceNode orgAndDeviceNode = orgAndDeviceNodeService.findById(deviceData.getDeviceId()).orElse(null);
+        OrgAndDeviceNode orgAndDeviceNode = getOrgAndDeviceNodeByDeviceId(deviceData.getDeviceId());
         if(orgAndDeviceNode!=null){
             //通过org_id,找临时表记录，如何找不到，插一条原始记录
             IotMachineOutput iotMachineOutput = iotMachineOutputRepository.findIotMachineOutputByOrgId(orgAndDeviceNode.getOrgId());
@@ -97,7 +98,7 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
             }
             //如果是电量，直接更新
             if(DataPoint.ENERGY_KEY.equals(deviceData.getKey())){
-                iotMachineOutputRepository.updatePowerByOrgId((BigDecimal) deviceData.getValue(),orgAndDeviceNode.getOrgId());
+                iotMachineOutputRepository.updatePowerByOrgId(IotUtil.toBigDecimal(deviceData.getValue()),orgAndDeviceNode.getOrgId());
             }
             //如果是模数
             if(DataPoint.OUTPUT_COUNT_KEY.equals(deviceData.getKey())){
@@ -120,38 +121,36 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
         5、通过模具ID，得到cavity
         6、更新模数，产量=穴数*(模数-上次模数)+上次产量*/
         //可用穴数
-        Integer cavityAvailable=0;
+        Integer cavityAvailable=1;
         //通过org_id拿mch_id,如果拿不到(机台没有绑定)
         BaseMachine baseMachine = baseMachineRepository.findByOrgId(orgId);
-        if(baseMachine==null){
-            cavityAvailable = 1;
+        if(baseMachine!=null){
+            //通过mch_id找正在生产的排产单ID，如果拿不到(该机台上没有分配排产单)
+            List<MesMoSchedule> productionMesMoSchedule = mesMoScheduleRepository.getProductionMesMoScheduleByMachineId(baseMachine.getMachineId());
+            //同一台机器上正在生产两个排产单，数据异常情况>1，不作处理
+            if(productionMesMoSchedule.size()>1){
+                return;
+            }
+            if(productionMesMoSchedule!=null&&productionMesMoSchedule.size()==1){
+                //通过排产单ID找模具ID，如果拿不到(排产单工序中没有选模具)
+                String scheduleId = productionMesMoSchedule.get(0).getScheduleId();
+                String productionMoldId = mesMoScheduleProcessRepository.getProductionMoldId(scheduleId, IotConstant.PROCESS_ID);
+                if(StringUtils.isNotEmpty(productionMoldId)){
+                    //通过模具ID，得到cavity
+                    BaseMold baseMold = baseMoldRepository.findById(productionMoldId).orElse(null);
+                    if(baseMold!=null){
+                        cavityAvailable = baseMold.getCavityAvailable();
+                    }
+                }
+            }
         }
-        //通过mch_id找正在生产的排产单ID，如果拿不到(该机台上没有分配排产单)
-        List<MesMoSchedule> productionMesMoSchedule = mesMoScheduleRepository.getProductionMesMoScheduleByMachineId(baseMachine.getMachineId());
-        if(productionMesMoSchedule==null||productionMesMoSchedule.size()==0){
-            cavityAvailable = 1;
-        }
-        //同一台机器上正在生产两个排产单，数据异常情况>1，不作处理
-        if(productionMesMoSchedule.size()>1){
-            return;
-        }
-        //通过排产单ID找模具ID，如果拿不到(排产单工序中没有选模具)
-        String scheduleId = productionMesMoSchedule.get(0).getScheduleId();
-        String productionMoldId = mesMoScheduleProcessRepository.getProductionMoldId(scheduleId, IotConstant.PROCESS_ID);
-        if(StringUtils.isEmpty(productionMoldId)){
-            cavityAvailable = 1;
-        }
-        //通过模具ID，得到cavity
-        BaseMold baseMold = baseMoldRepository.findById(productionMoldId).orElse(null);
-        if(baseMold!=null){
-            cavityAvailable = baseMold.getCavityAvailable();
-        }
+
         IotMachineOutput iotMachineOutput = iotMachineOutputRepository.findByOrgId(orgId);
-        BigDecimal molds = (BigDecimal) deviceData.getValue();
+        BigDecimal molds = IotUtil.toBigDecimal(deviceData.getValue());
         BigDecimal oldMolds = iotMachineOutput.getMolds();
         BigDecimal cavity = new BigDecimal(cavityAvailable);
         BigDecimal output = cavity.multiply(molds.subtract(oldMolds)).add(iotMachineOutput.getOutput());
-        iotMachineOutput.setMolds((BigDecimal) deviceData.getValue());
+        iotMachineOutput.setMolds(molds);
         iotMachineOutput.setModifiedOn(new Date());
         iotMachineOutput.setOutput(output);
         iotMachineOutputRepository.save(iotMachineOutput);
@@ -212,6 +211,24 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
             throw new MMException("物业id数据异常，有多条记录");
         }
         return list.get(0);
+    }
+
+    @Override
+    public OrgAndDeviceNode getOrgAndDeviceNodeByDeviceId(String deviceId) {
+        String sql = "SELECT\n" +
+                    "	odn.device_node_id deviceNodeId,\n" +
+                    "	odn.org_id orgId,\n" +
+                    "	odn.node_type nodeType\n" +
+                    "FROM\n" +
+                    "	org_device_node odn\n" +
+                    "WHERE\n" +
+                    "	odn.device_node_id = '"+deviceId+"'";
+        RowMapper<OrgAndDeviceNode> rowMapper = BeanPropertyRowMapper.newInstance(OrgAndDeviceNode.class);
+        List<OrgAndDeviceNode> list = jdbcTemplate.query(sql, rowMapper);
+        if(list!=null&&list.size()==1){
+            return list.get(0);
+        }
+        return null;
     }
 
 }

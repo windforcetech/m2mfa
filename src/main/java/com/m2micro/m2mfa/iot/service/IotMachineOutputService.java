@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.iot.service;
 
+import com.m2micro.framework.starter.entity.OrgAndDeviceNode;
 import com.m2micro.iot.client.model.DeviceData;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.framework.commons.BaseService;
@@ -47,4 +48,11 @@ public interface IotMachineOutputService extends BaseService<IotMachineOutput,St
      * @return  机台产量信息
      */
     IotMachineOutput findIotMachineOutputByMachineId(String machineId);
+
+    /**
+     * 获取物业和拓扑的关联关系
+     * @param deviceId
+     * @return
+     */
+    OrgAndDeviceNode getOrgAndDeviceNodeByDeviceId(String deviceId);
 }
