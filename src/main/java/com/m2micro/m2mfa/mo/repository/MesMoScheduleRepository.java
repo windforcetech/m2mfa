@@ -85,5 +85,12 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
     @Query("update MesMoSchedule m set m.machineId = ?1 where m.scheduleId = ?2")
     Integer updateMachineIdByScheduleId(String machineId,String scheduleId);
 
-
+    /**
+     * 获取当前机器正在生产的排产单
+     * @param machineId
+     *              机台id
+     * @return
+     */
+    @Query(value = "SELECT mms.*  from mes_mo_schedule mms WHERE mms.actual_start_time is not null AND mms.actual_end_time is NULL AND mms.machine_id=?1",nativeQuery = true)
+    List<MesMoSchedule> getProductionMesMoScheduleByMachineId(String machineId);
 }

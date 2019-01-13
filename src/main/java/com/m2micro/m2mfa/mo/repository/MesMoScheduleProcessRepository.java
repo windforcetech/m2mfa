@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.mo.repository;
 
+import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
 import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -56,4 +57,13 @@ public interface MesMoScheduleProcessRepository extends BaseRepository<MesMoSche
      * @return  排程工序
      */
     List<MesMoScheduleProcess> findByScheduleId(String scheduleId);
+
+    /**
+     * 获取当前排产单的模具id
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+    @Query(value = "SELECT distinct mmsp.mold_id from mes_mo_schedule_process mmsp WHERE mmsp.schedule_id=?1 and mmsp.process_id=?2",nativeQuery = true)
+    String getProductionMoldId(String scheduleId,String processId);
 }
