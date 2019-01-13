@@ -94,6 +94,7 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
             iotMachineOutput.setOutput(new BigDecimal(0));
             iotMachineOutput.setCreateOn(new Date());
             iotMachineOutput.setModifiedOn(new Date());
+            return iotMachineOutput;
         }
         if(list.size()>1){
             throw new MMException("物业id数据异常，有多条记录");
