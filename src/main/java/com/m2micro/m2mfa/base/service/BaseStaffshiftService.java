@@ -4,6 +4,10 @@ import com.m2micro.m2mfa.base.entity.BaseStaffshift;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.query.BaseStaffshiftQuery;
+
+import java.util.Map;
+
 /**
  * 员工排班表 服务类
  * @author liaotao
@@ -16,5 +20,5 @@ public interface BaseStaffshiftService extends BaseService<BaseStaffshift,String
      *         查询参数
      * @return  分页信息
      */
-    PageUtil<BaseStaffshift> list(Query query);
+    PageUtil<Map<String, Object>> list(BaseStaffshiftQuery query);
 }

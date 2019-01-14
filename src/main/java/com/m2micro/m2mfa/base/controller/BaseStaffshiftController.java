@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.query.BaseStaffshiftQuery;
 import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -19,6 +20,8 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseStaffshift;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 /**
  * 员工排班表 前端控制器
@@ -40,8 +43,8 @@ public class BaseStaffshiftController {
     @PostMapping("/list")
     @ApiOperation(value = "员工排班表列表")
     @UserOperationLog("员工排班表列表")
-    public ResponseMessage<PageUtil<BaseStaffshift>> list(Query query) {
-        PageUtil<BaseStaffshift> page = baseStaffshiftService.list(query);
+    public ResponseMessage<PageUtil<Map<String, Object>>> list(BaseStaffshiftQuery query) {
+        PageUtil<Map<String, Object>> page = baseStaffshiftService.list(query);
         return ResponseMessage.ok(page);
     }
 
