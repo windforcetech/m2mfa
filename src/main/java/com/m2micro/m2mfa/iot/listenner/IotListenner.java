@@ -27,13 +27,13 @@ public class IotListenner {
     @EventListener
     @Async
     public void handleDeviceData(DeviceData deviceData) {
-//        System.out.println(deviceData);
         log.info(Thread.currentThread().getId() + "");
         log.info(deviceData.toString());
         try {
             iotMachineOutputService.handleDeviceData(deviceData);
         }catch (Exception e){
-            sysDebugLogService.saveLog(SysDebugLogType.EXCEPTION,"iot 平台推送过来的数据处理异常！");
+            System.out.println(e);
+            sysDebugLogService.saveLog(SysDebugLogType.EXCEPTION,"iot 平台推送过来的数据处理异常！"+e);
         }
 
     }
