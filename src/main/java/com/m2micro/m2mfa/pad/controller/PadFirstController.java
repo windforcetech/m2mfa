@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.pad.controller;
 
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.m2mfa.pad.model.PadPara;
 import com.m2micro.m2mfa.pad.service.PadFirstService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,7 +28,7 @@ public class PadFirstController {
     @RequestMapping("/startWork")
     @ApiOperation(value="pad首件上工")
     @UserOperationLog("pad首件上工")
-    public ResponseMessage startWork(Object obj){
+    public ResponseMessage startWork(PadPara obj){
         return ResponseMessage.ok(padFirstService.startWork(obj));
     }
 

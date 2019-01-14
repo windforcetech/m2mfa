@@ -16,7 +16,7 @@ import java.util.List;
  * @Date: 2018/12/28 15:03
  * @Description:
  */
-@Service
+@Service("padScheduleService")
 public class PadScheduleServiceImpl implements PadScheduleService {
     @Autowired
     MesMoScheduleService mesMoScheduleService;
