@@ -45,11 +45,12 @@ public class BaseStaff extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "公司主键")
     //@NotEmpty(message="公司主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String companyId;
-    @ApiModelProperty(value = "mes职能主键")
-    //@NotEmpty(message="部门主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
-    private String departmentId;
     @NotEmpty(message="基础织架构岗位主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    //@NotEmpty(message="部门主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "基础组织架构岗位主键")
+    private String departmentId;
+
+    @ApiModelProperty(value = "mes职能主键")
     private String dutyId;
     @Size(max=50,message = "身份证号码字节不能大于50位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "身份证号码")

@@ -57,8 +57,9 @@ public class BaseStaffController {
         query.setCode(baseStaffQueryObj.getCode());
         query.setName(baseStaffQueryObj.getName());
         if(StringUtils.isNotEmpty(baseStaffQueryObj.getDepartmentId())){
-            List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
-            query.setDutyIds(obtainpost);
+            List<String> departmentIds = baseStaffService.getAllIDsOfDepartmentTree(baseStaffQueryObj.getDepartmentId());
+         //   List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
+            query.setDepartmentIds(departmentIds);
         }
         query.setSize(baseStaffQueryObj.getSize());
         query.setPage(baseStaffQueryObj.getPage());
@@ -106,7 +107,7 @@ public class BaseStaffController {
             user.setState(1);
             user.setShowIndex(9999);
             List<String> orgIds = new ArrayList<>();
-            orgIds.add(baseStaff.getDutyId());
+            orgIds.add(baseStaff.getDepartmentId());
             user.setOrgIds(orgIds);
             user.setId(UUIDUtil.getUUID());
             ResponseMessage responseMessage = iUserService.saveUser(user);
@@ -147,7 +148,7 @@ public class BaseStaffController {
             user.setState(1);
             user.setShowIndex(9999);
             List<String> orgIds = new ArrayList<>();
-            orgIds.add(baseStaff.getDutyId());
+            orgIds.add(baseStaff.getDepartmentId());
             user.setOrgIds(orgIds);
             ResponseMessage responseMessage = iUserService.updateUser(user);
             if (responseMessage.getStatus()!=200){
