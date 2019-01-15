@@ -284,6 +284,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(StringUtils.isEmpty(staffId)){
             throw new MMException("请重新登录或刷新！");
         }
+
         if(StringUtils.isEmpty(scheduleId)){
             throw new MMException("当前没有可处理的排产单！");
         }
