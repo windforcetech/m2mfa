@@ -22,7 +22,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Date;
 import java.util.List;
 
@@ -62,7 +61,7 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
                             mesRecordStaff.setEndPower(iotMachineOutput.getPower());
                         }
                         mesRecordStaffService.updateById(mesRecordStaff.getId(),mesRecordStaff);
-                        //需要后期的一些结算数量操作
+
                     }
 
                 }
@@ -75,6 +74,7 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
                         //缺勤替换
                         List<MesMoScheduleStaff>mesMoScheduleStaffs =  mesMoScheduleStaffRepository.findByScheduleIdandStafftId(ScheduleId,absencePersonnel.getLackstaffId());
                         for(MesMoScheduleStaff mesMoScheduleStaff :mesMoScheduleStaffs){
+
                             MesMoScheduleStaff newmesMoScheduleStaff= new MesMoScheduleStaff();
                             newmesMoScheduleStaff.setId(UUIDUtil.getUUID());
                             newmesMoScheduleStaff.setStaffId(absencePersonnel.getForstaffId());
@@ -84,7 +84,13 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
                             newmesMoScheduleStaff.setShiftId(mesMoScheduleStaff.getShiftId());
                             newmesMoScheduleStaff.setProcessId(mesMoScheduleStaff.getProcessId());
                             newmesMoScheduleStaff.setEnabled(true);
-                            mesMoScheduleStaffService.save(newmesMoScheduleStaff);
+
+                            String sql ="SELECT * FROM mes_mo_schedule_staff WHERE schedule_id = '"+mesMoScheduleStaff.getScheduleId()+"' AND staff_id = '"+absencePersonnel.getForstaffId()+"' AND shift_id = '"+mesMoScheduleStaff.getShiftId()+"' AND station_id = '"+mesMoScheduleStaff.getStationId()+"' AND is_station = "+mesMoScheduleStaff.getIsStation()+"";
+                            RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoScheduleStaff.class);
+                            List<MesMoScheduleStaff> list=jdbcTemplate.query(sql,rm);
+                            if(list.isEmpty()){
+                                mesMoScheduleStaffService.save(newmesMoScheduleStaff);
+                            }
                         }
 
         }
