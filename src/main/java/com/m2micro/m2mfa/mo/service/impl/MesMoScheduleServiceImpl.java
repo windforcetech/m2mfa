@@ -1103,6 +1103,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         saveScheduleStaff(mesMoScheduleStaffs, ScheduleId);
         //保存工序
         saveScheduleProcess(mesMoScheduleProcesses, ScheduleId);
+        //获取已有的工位信息
         List<MesMoScheduleStation> mesMoScheduleStations1 = getMesMoScheduleStations(mesMoSchedule);
         //保存工位
         saveScheduleStation(mesMoScheduleStations1, ScheduleId);

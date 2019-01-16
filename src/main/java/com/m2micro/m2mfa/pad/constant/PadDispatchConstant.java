@@ -15,10 +15,10 @@ public class PadDispatchConstant {
     private static HashMap handle = new HashMap();
 
     static {
-        handle.put("10000022", PadMachineService.class.getName());//调机
-        handle.put("10000021", PadMoldService.class.getName());//架模
-        handle.put("10000020", PadChargingService.class.getName());//加料
-        handle.put("10000039", PadBootstrapService.class.getName());//开机
+        handle.put("KZ029", PadMachineService.class.getName());//调机
+        handle.put("KZ027", PadMoldService.class.getName());//架模
+        handle.put("ZS_CX_02", PadChargingService.class.getName());//加料
+        handle.put("KZ001", PadBootstrapService.class.getName());//开机
 
         /*
         handle.put("10000023", PadFirstService.class.getName());//首件
@@ -30,7 +30,7 @@ public class PadDispatchConstant {
     public static String getHandle(String key){
         String handleName = (String)handle.get(key);
         if(StringUtils.isEmpty(handleName)){
-            return PadFrontierInspectionService.class.getName();
+            return PadCommonService.class.getName();
         }
         return handleName;
     }
