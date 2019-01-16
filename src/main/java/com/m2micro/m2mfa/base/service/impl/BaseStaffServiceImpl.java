@@ -16,10 +16,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 员工（职员）表 服务实现类
@@ -135,9 +136,29 @@ public class BaseStaffServiceImpl implements BaseStaffService {
 
     }
 
-//    @Override
+    //    @Override
 //    public List<BaseStaff> findByCodeOrStaffNameOrdOrDutyIdIn(String code, String staffName, List<String> dutyIds) {
 //        return baseStaffRepository.findByCodeOrStaffNameOrdOrDutyIdIn(code,staffName,dutyIds);
 //    }
+    @Override
+    public Boolean isUsedForStaff(String[] ids) {
+        String sql = "SELECT count(*) FROM mes_record_staff where staff_id in(:ids);";
+        HashMap<String, Object> args = new HashMap<>();
+        ArrayList<String> mids = new ArrayList<>();
+        for (String one : ids) {
+            mids.add(one);
+        }
+        args.put("ids", args);
+        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
+        Long count = givenParamJdbcTemp.queryForObject(sql, args, Long.class);
+        return count > 0;
+    }
 
+    @Transactional
+    @Override
+    public void deleteByStaffId(String[] ids) {
+        for (String id : ids) {
+            baseStaffRepository.deleteByStaffId(id);
+        }
+    }
 }

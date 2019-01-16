@@ -1,14 +1,22 @@
 package com.m2micro.m2mfa.base.controller;
 
+import com.google.common.collect.Lists;
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseStaffshiftQuery;
+import com.m2micro.m2mfa.base.service.BaseShiftService;
+import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.vo.StaffShiftObj;
+import com.m2micro.m2mfa.base.vo.StaffShiftResult;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -18,10 +26,14 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
-import com.m2micro.m2mfa.base.entity.BaseStaffshift;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 员工排班表 前端控制器
@@ -36,6 +48,11 @@ import java.util.Map;
 public class BaseStaffshiftController {
     @Autowired
     BaseStaffshiftService baseStaffshiftService;
+
+    @Autowired
+    BaseStaffService baseStaffService;
+    @Autowired
+    BaseShiftService baseShiftService;
 
     /**
      * 列表
@@ -65,10 +82,111 @@ public class BaseStaffshiftController {
     @PostMapping("/save")
     @ApiOperation(value = "保存员工排班表")
     @UserOperationLog("保存员工排班表")
-    public ResponseMessage<BaseStaffshift> save(@RequestBody BaseStaffshift baseStaffshift) {
-        ValidatorUtil.validateEntity(baseStaffshift, AddGroup.class);
-        baseStaffshift.setId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(baseStaffshiftService.save(baseStaffshift));
+    public ResponseMessage<List<StaffShiftResult>> save(@RequestBody StaffShiftObj staffShiftObj) throws ParseException {
+        ValidatorUtil.validateEntity(staffShiftObj, AddGroup.class);
+        List<BaseStaffshift> baseStaffshiftList = new ArrayList<>();
+        List<String> stringst;
+        if (StringUtils.isEmpty(staffShiftObj.getStaffId())) {
+            QBaseStaff qBaseStaff = QBaseStaff.baseStaff;
+            BooleanExpression expression = qBaseStaff.departmentId.eq(staffShiftObj.getDepartmentId());
+            ArrayList<BaseStaff> baseStaffs = Lists.newArrayList(baseStaffService.findAll(expression));
+            stringst = baseStaffs.stream().map(x -> x.getStaffId()).collect(Collectors.toList());
+        } else {
+            stringst = Arrays.asList(staffShiftObj.getStaffId().split(","));
+        }
+        for (String baseStaff :
+                stringst) {
+            if (StringUtils.isNotEmpty(staffShiftObj.getExcludeStaffId())) {
+                String[] split = staffShiftObj.getExcludeStaffId().split(",");
+                List<String> strings = Arrays.asList(split);
+                if (!strings.contains(baseStaff)) {
+                    Calendar c = Calendar.getInstance();
+                    DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd");
+                    Date beginDate = dateFormat1.parse(dateFormat1.format(staffShiftObj.getStartDate()));
+                    Date endDate = dateFormat1.parse(dateFormat1.format(staffShiftObj.getEndDate()));
+                    c.setTime(endDate);
+                    c.add(Calendar.DATE, 1); // 结束日期加1天
+                    endDate = c.getTime();
+                    Date date = beginDate;
+                    while (!date.equals(endDate)) {
+                        if (StringUtils.isNotEmpty(staffShiftObj.getExcludeDate())) {
+                            String[] split1 = staffShiftObj.getExcludeDate().split(",");
+                            List<String> strings1 = Arrays.asList(split1);
+                            if (!strings1.contains(dateFormat1.format(date))) {
+                                BaseStaffshift baseStaffshift = new BaseStaffshift();
+                                baseStaffshift.setId(UUIDUtil.getUUID());
+                                baseStaffshift.setEnabled(true);
+                                baseStaffshift.setShiftId(staffShiftObj.getShiftId());
+                                baseStaffshift.setStaffId(baseStaff);
+                                baseStaffshift.setShiftDate(date);
+                                baseStaffshiftList.add(baseStaffshift);
+
+                            }
+                        }
+                        System.out.println(date);
+                        c.setTime(date);
+                        c.add(Calendar.DATE, 1); // 日期加1天
+                        date = c.getTime();
+                    }
+                }
+
+            }
+        }
+        ArrayList<StaffShiftResult> staffShiftResults = new ArrayList<>();
+
+        for (BaseStaffshift baseStaffshift :
+                baseStaffshiftList) {
+            StaffShiftResult staffShiftResult = new StaffShiftResult();
+            staffShiftResult.setShiftDate(baseStaffshift.getShiftDate());
+
+            Optional<BaseStaff> byId = baseStaffService.findById(baseStaffshift.getStaffId());
+            BaseStaff baseStaff = byId.get();
+            staffShiftResult.setStaffName(baseStaff.getStaffName());
+            staffShiftResult.setStaffCode(baseStaff.getCode());
+
+            Optional<BaseShift> byId1 = baseShiftService.findById(baseStaffshift.getShiftId());
+            BaseShift baseShift = byId1.get();
+            staffShiftResult.setShiftName(baseShift.getName());
+            staffShiftResult.setShiftCode(baseShift.getCode());
+
+            if (staffShiftObj.getForceUpdate()) {
+
+                QBaseStaffshift qBaseStaff = QBaseStaffshift.baseStaffshift;
+                BooleanExpression expression = qBaseStaff.shiftDate.eq(baseStaffshift.getShiftDate())
+                        .and(qBaseStaff.shiftId.eq(baseStaffshift.getShiftId()))
+                        .and(qBaseStaff.staffId.eq(baseStaffshift.getStaffId()));
+                ArrayList<BaseStaffshift> baseStaffs = Lists.newArrayList(baseStaffshiftService.findAll(expression));
+                if (baseStaffs.size() > 0) {
+
+                    BaseStaffshift baseStaffshift1 = baseStaffs.get(0);
+                    baseStaffshift1.setShiftId(baseStaffshift.getShiftId());
+                    baseStaffshiftService.updateById(baseStaffshift1.getId(), baseStaffshift1);
+
+                    staffShiftResult.setResult("更新成功");
+
+                } else {
+                    baseStaffshiftService.save(baseStaffshift);
+                    staffShiftResult.setResult("新增成功");
+
+                }
+            } else {
+                QBaseStaffshift qBaseStaff = QBaseStaffshift.baseStaffshift;
+                BooleanExpression expression = qBaseStaff.shiftDate.eq(baseStaffshift.getShiftDate())
+                        .and(qBaseStaff.shiftId.eq(baseStaffshift.getShiftId()))
+                        .and(qBaseStaff.staffId.eq(baseStaffshift.getStaffId()));
+                ArrayList<BaseStaffshift> baseStaffs = Lists.newArrayList(baseStaffshiftService.findAll(expression));
+                if (baseStaffs.size() == 0) {
+                    baseStaffshiftService.save(baseStaffshift);
+                    staffShiftResult.setResult("新增成功");
+                } else {
+                    staffShiftResult.setResult("已存在排班，没有选择强制替换");
+                }
+
+            }
+            staffShiftResults.add(staffShiftResult);
+        }
+
+        return ResponseMessage.ok(staffShiftResults);
     }
 
     /**

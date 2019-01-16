@@ -27,4 +27,6 @@ public interface BaseStaffRepository extends BaseRepository<BaseStaff,String> {
      * @return  员工信息
      */
     BaseStaff findByCode(String code);
+
+    void deleteByStaffId(String id);
 }
