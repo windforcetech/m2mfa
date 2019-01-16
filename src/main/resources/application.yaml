@@ -31,6 +31,9 @@ scheduletask:
   companyID: process001
   address：: http://monitor.m2micro.cn
 
+m2mfa:
+  version: @project.version@
+
 
 
 
