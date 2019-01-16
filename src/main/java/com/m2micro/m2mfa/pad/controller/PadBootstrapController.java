@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.pad.controller;
 
+import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.pad.model.PadPara;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/pad/padBootstrap")
 @Api(value="pad开机  前端控制器")
+@Authorize(Authorize.authorizeType.AllowAll)
 public class PadBootstrapController {
     @Autowired
     PadBootstrapService padBootstrapService;
