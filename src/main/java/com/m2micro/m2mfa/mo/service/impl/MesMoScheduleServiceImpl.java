@@ -283,7 +283,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(operationInfoAbnormal.getStartTime()==null){
             throw new MMException("异常记录提报数据库数据异常！");
         }
-        //有一个正在提报异常,不允许提报异常
+        //有一个正在提报异常,不允许再次提报异常
         if(operationInfoAbnormal.getEndTime()==null){
             operationInfo.setAbnormalFlag("0");
             operationInfo.setRecordAbnormalId(operationInfoAbnormal.getRecordAbnormalId());

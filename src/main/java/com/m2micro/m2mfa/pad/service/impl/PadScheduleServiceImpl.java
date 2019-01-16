@@ -103,6 +103,14 @@ public class PadScheduleServiceImpl implements PadScheduleService {
         return getPadStationModels(scheduleId, baseStaff);
     }
 
+    /**
+     * 获取待处理的工位
+     * @param scheduleId
+     *          排产单id
+     * @param baseStaff
+     *          员工信息
+     * @return  待处理的工位
+     */
     private List<PadStationModel> getPadStationModels(String scheduleId, BaseStaff baseStaff) {
         //获取待处理的所有工位
         List<PadStationModel> baseStations = getAllBaseStations(baseStaff.getStaffId(), scheduleId);
@@ -151,39 +159,22 @@ public class PadScheduleServiceImpl implements PadScheduleService {
      */
     private List<PadStationModel> getAllBaseStations(String staffId, String scheduleId) {
         String sqlStation = "SELECT\n" +
-                "	bs.station_id stationId,\n" +
-                "	bs.code code,\n" +
-                "	bs.name name,\n" +
-                "	bs.lead_time leadTime,\n" +
-                "	bs.waiting_time waitingTime,\n" +
-                "	bs.post_time postTime,\n" +
-                "	bs.job_peoples jobPeoples,\n" +
-                "	bs.standard_hours standardHours,\n" +
-                "	bs.coefficient coefficient,\n" +
-                "	bs.control_peoples controlPeoples,\n" +
-                "	bs.control_machines controlMachines,\n" +
-                "	bs.post_category postCategory,\n" +
-                "	bs.sort_code sortCode,\n" +
-                "	bs.enabled enabled,\n" +
-                "	bs.description description,\n" +
-                "	bs.create_on createOn,\n" +
-                "	bs.create_by createBy,\n" +
-                "	bs.modified_on modifiedOn,\n" +
-                "	bs.modified_by modifiedBy,\n" +
-                "	MIN(mps.step) step\n" +
-                "FROM\n" +
-                "	base_station bs,\n" +
-                "	mes_mo_schedule_staff mss,\n" +
-                "	base_process_station mps\n" +
-                "WHERE\n" +
-                "	mss.station_id = bs.station_id\n" +
-                "AND mss.actual_end_time IS NULL\n" +
-                "AND mss.schedule_id = '" + scheduleId + "'\n" +
-                "AND mss.staff_id = '" + staffId + "'\n" +
-                "AND mps.station_id = mss.station_id\n" +
-                "AND mps.process_id=mss.process_id\n" +
-                "GROUP BY\n" +
-                "	mss.process_id";
+                            "	bs.station_id stationId,\n" +
+                            "	bs.code code,\n" +
+                            "	bs.name name,\n" +
+                            "	mps.step step\n" +
+                            "FROM\n" +
+                            "	base_station bs,\n" +
+                            "	mes_mo_schedule_staff mss,\n" +
+                            "	base_process_station mps\n" +
+                            "WHERE\n" +
+                            "	mss.station_id = bs.station_id\n" +
+                            "AND mss.schedule_id = '" + scheduleId + "'\n" +
+                            "AND mss.staff_id = '" + staffId + "'\n" +
+                            "AND mps.station_id = mss.station_id\n" +
+                            "AND mps.process_id = mss.process_id\n" +
+                            "ORDER BY\n" +
+                            "	mps.step ASC";
         RowMapper<PadStationModel> rowMapper = BeanPropertyRowMapper.newInstance(PadStationModel.class);
         return jdbcTemplate.query(sqlStation, rowMapper);
     }
@@ -197,43 +188,26 @@ public class PadScheduleServiceImpl implements PadScheduleService {
      */
     private List<PadStationModel> getAllExcludedBaseStations(String staffId, String scheduleId) {
         String sqlStation = "SELECT\n" +
-                "	bs.station_id stationId,\n" +
-                "	bs.code code,\n" +
-                "	bs.name name,\n" +
-                "	bs.lead_time leadTime,\n" +
-                "	bs.waiting_time waitingTime,\n" +
-                "	bs.post_time postTime,\n" +
-                "	bs.job_peoples jobPeoples,\n" +
-                "	bs.standard_hours standardHours,\n" +
-                "	bs.coefficient coefficient,\n" +
-                "	bs.control_peoples controlPeoples,\n" +
-                "	bs.control_machines controlMachines,\n" +
-                "	bs.post_category postCategory,\n" +
-                "	bs.sort_code sortCode,\n" +
-                "	bs.enabled enabled,\n" +
-                "	bs.description description,\n" +
-                "	bs.create_on createOn,\n" +
-                "	bs.create_by createBy,\n" +
-                "	bs.modified_on modifiedOn,\n" +
-                "	bs.modified_by modifiedBy,\n" +
-                "   MIN(mps.step) step\n" +
-                "FROM\n" +
-                "	base_station bs,\n" +
-                "	mes_mo_schedule_staff mss,\n" +
-                "	mes_mo_schedule_station mmss,\n" +
-                "	base_process_station mps\n" +
-                "WHERE\n" +
-                "	mss.station_id = bs.station_id\n" +
-                "AND mss.schedule_id = mmss.schedule_id\n" +
-                "AND mss.station_id = mmss.station_id\n" +
-                "AND mss.actual_end_time IS NULL\n" +
-                "AND mss.schedule_id = '" + scheduleId + "'\n" +
-                "AND mss.staff_id = '" + staffId + "'\n" +
-                "AND mmss.jump=0\n" +
-                "AND mps.station_id = mss.station_id\n" +
-                "AND mps.process_id = mss.process_id\n" +
-                "GROUP BY\n" +
-                "	mss.process_id";
+                            "	bs.station_id stationId,\n" +
+                            "	bs.code code,\n" +
+                            "	bs.name name,\n" +
+                            "	mps.step step\n" +
+                            "FROM\n" +
+                            "	base_station bs,\n" +
+                            "	mes_mo_schedule_staff mss,\n" +
+                            "	base_process_station mps,\n" +
+                            "	mes_mo_schedule_station mmss\n" +
+                            "WHERE\n" +
+                            "	mss.station_id = bs.station_id\n" +
+                            "AND mss.schedule_id = '" + scheduleId + "'\n" +
+                            "AND mss.staff_id = '" + staffId + "'\n" +
+                            "AND mps.station_id = mss.station_id\n" +
+                            "AND mps.process_id = mss.process_id\n" +
+                            "AND mss.schedule_id = mmss.schedule_id\n" +
+                            "AND mss.station_id = mmss.station_id\n" +
+                            "AND mmss.jump = 0\n" +
+                            "ORDER BY\n" +
+                            "	mps.step ASC";
         RowMapper<PadStationModel> rowMapper = BeanPropertyRowMapper.newInstance(PadStationModel.class);
         return jdbcTemplate.query(sqlStation, rowMapper);
     }
