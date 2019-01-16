@@ -36,6 +36,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/pad/padSchedule")
 @Api(value="pad生产排程  前端控制器")
+@Authorize(Authorize.authorizeType.AllowAll)
 public class PadScheduleController {
     @Autowired
     PadScheduleService padScheduleService;
@@ -53,11 +54,11 @@ public class PadScheduleController {
     /**
      * 获取当前员工下的排产单
      */
-    @RequestMapping("/getMesMoScheduleByStaffNo")
+    @RequestMapping("/getMesMoSchedule")
     @ApiOperation(value="获取当前员工下的排产单")
     @UserOperationLog("获取当前员工下的排产单")
-    public ResponseMessage<List<PadScheduleModel>> getMesMoScheduleByStaffNo(String staffNo){
-        return ResponseMessage.ok(padScheduleService.getMesMoScheduleByStaffNo(staffNo));
+    public ResponseMessage<List<PadScheduleModel>> getMesMoSchedule(){
+        return ResponseMessage.ok(padScheduleService.getMesMoSchedule());
     }
 
     /**

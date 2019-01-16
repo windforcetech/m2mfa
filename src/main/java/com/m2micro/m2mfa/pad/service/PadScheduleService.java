@@ -30,6 +30,11 @@ public interface PadScheduleService {
      * @return
      */
     List<PadScheduleModel> getMesMoScheduleByStaffNo(String staffNo);
+    /**
+     * 获取当前用户下的排产单
+     * @return
+     */
+    List<PadScheduleModel> getMesMoSchedule();
 
     /**
      * 获取待处理的工位

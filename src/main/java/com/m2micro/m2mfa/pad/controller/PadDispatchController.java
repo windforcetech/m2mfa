@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.pad.controller;
 
+import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.pad.model.PadPara;
@@ -19,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 @RestController
 @RequestMapping("/pad/padDispatch")
 @Api(value="pad分发  前端控制器")
+@Authorize(Authorize.authorizeType.AllowAll)
 public class PadDispatchController {
     @Autowired
     PadDispatchService padDispatchService;

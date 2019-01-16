@@ -38,4 +38,11 @@ public interface BaseStaffService extends BaseService<BaseStaff,String> {
     void deleteByStaffId(String[] ids);
 
     Boolean isUsedForStaff(String[] ids);
+    /**
+     * 根据员工编号获取员工信息
+     * @param code
+     *          员工编号
+     * @return  员工信息
+     */
+    BaseStaff findByCode(String code);
 }

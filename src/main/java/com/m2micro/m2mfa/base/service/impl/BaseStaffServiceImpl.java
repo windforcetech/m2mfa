@@ -154,6 +154,11 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         return count > 0;
     }
 
+    @Override
+    public BaseStaff findByCode(String code) {
+        return baseStaffRepository.findByCode(code);
+    }
+
     @Transactional
     @Override
     public void deleteByStaffId(String[] ids) {
