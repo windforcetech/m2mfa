@@ -166,36 +166,7 @@ public class MesMoScheduleController {
         return ResponseMessage.ok();
     }
 
-    /**
-     * 获取当前员工下的排产单
-     */
-    @RequestMapping("/getMesMoScheduleByStaffId")
-    @ApiOperation(value="获取当前员工下的排产单")
-    @UserOperationLog("获取当前员工下的排产单")
-    public ResponseMessage getMesMoScheduleByStaffId(String staffId){
-        return ResponseMessage.ok(mesMoScheduleService.getMesMoScheduleByStaffId(staffId));
-    }
 
-    /**
-     * 获取待处理的工位
-     */
-    @RequestMapping("/getPendingStations")
-    @ApiOperation(value="获取待处理的工位")
-    @UserOperationLog("获取待处理的工位")
-    public ResponseMessage<List<BaseStation>> getPendingStations(String staffId, String scheduleId){
-        return ResponseMessage.ok(mesMoScheduleService.getPendingStations(staffId, scheduleId));
-    }
-
-
-    /**
-     * 获取操作栏相关信息
-     */
-    @RequestMapping("/getOperationInfo")
-    @ApiOperation(value="获取操作栏相关信息")
-    @UserOperationLog("获取操作栏相关信息")
-    public ResponseMessage<OperationInfo> getOperationInfo(String staffId, String scheduleId, String stationId){
-        return ResponseMessage.ok(mesMoScheduleService.getOperationInfo(staffId, scheduleId,stationId));
-    }
 
     @PostMapping("/schedulingDetails")
     @ApiOperation(value="工单信息")

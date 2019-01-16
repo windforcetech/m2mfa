@@ -41,15 +41,6 @@ public class PadScheduleController {
     @Autowired
     PadScheduleService padScheduleService;
 
-    /**
-     * 获取当前员工下初始数据（排产单，工位）
-     */
-    /*@RequestMapping("/getInitData")
-    @ApiOperation(value="获取当前员工下初始数据")
-    @UserOperationLog("获取当前员工下初始数据")
-    public ResponseMessage getInitData(String staffId){
-        return ResponseMessage.ok(padScheduleService.getInitData(staffId));
-    }*/
 
     /**
      * 获取当前员工下的排产单
@@ -67,8 +58,8 @@ public class PadScheduleController {
     @RequestMapping("/getPendingStations")
     @ApiOperation(value="获取待处理的工位")
     @UserOperationLog("获取待处理的工位")
-    public ResponseMessage<List<PadStationModel>> getPendingStations(String staffNo, String scheduleId){
-        return ResponseMessage.ok(padScheduleService.getPendingStations(staffNo, scheduleId));
+    public ResponseMessage<List<PadStationModel>> getPendingStations(String scheduleId){
+        return ResponseMessage.ok(padScheduleService.getPendingStations(scheduleId));
     }
 
 

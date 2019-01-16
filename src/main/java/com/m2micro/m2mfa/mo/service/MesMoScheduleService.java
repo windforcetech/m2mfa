@@ -34,23 +34,7 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     PageUtil<MesMoScheduleModel> list(MesMoScheduleQuery query);
 
-    /**
-     * 获取当前用户下的排产单
-     * @param staffId
-     *          员工工号id
-     * @return
-     */
-    MesMoSchedule getMesMoScheduleByStaffId(String staffId);
 
-    /**
-     * 获取待处理的工位
-     * @param staffId
-     *          员工工号id
-     * @param scheduleId
-     *          排产单id
-     * @return
-     */
-    List<BaseStation> getPendingStations(String staffId, String scheduleId);
 
     /**
      * 获取操作栏相关信息
