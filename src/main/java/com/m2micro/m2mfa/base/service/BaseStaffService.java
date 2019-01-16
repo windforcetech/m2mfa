@@ -34,4 +34,8 @@ public interface BaseStaffService extends BaseService<BaseStaff,String> {
 
     //获取组织架构节点子树id 集合
     List<String> getAllIDsOfDepartmentTree(String departmentId);
+
+    void deleteByStaffId(String[] ids);
+
+    Boolean isUsedForStaff(String[] ids);
 }

@@ -30,12 +30,13 @@ import java.util.Optional;
 
 /**
  * 员工（职员）表 前端控制器
+ *
  * @author liaotao
  * @since 2018-11-26
  */
 @RestController
 @RequestMapping(value = "/base/baseStaff")
-@Api(description="职工api接口")
+@Api(description = "职工api接口")
 @Authorize
 public class BaseStaffController {
     @Autowired
@@ -45,20 +46,21 @@ public class BaseStaffController {
 
     @Autowired
     OrganizationService organizationService;
-    private String defaultPassword="123456";
+    private String defaultPassword = "123456";
+
     /**
      * 列表
      */
-    @RequestMapping(value = "/list",method = RequestMethod.POST)
-    @ApiOperation(value="员工（职员）表列表")
+    @RequestMapping(value = "/list", method = RequestMethod.POST)
+    @ApiOperation(value = "员工（职员）表列表")
     @UserOperationLog("员工（职员）表列表")
-    public ResponseMessage<PageUtil<BaseStaffDetailObj>> list(@RequestBody BaseStaffQueryObj baseStaffQueryObj){
-        BaseStaffQuery query=new BaseStaffQuery();
+    public ResponseMessage<PageUtil<BaseStaffDetailObj>> list(@RequestBody BaseStaffQueryObj baseStaffQueryObj) {
+        BaseStaffQuery query = new BaseStaffQuery();
         query.setCode(baseStaffQueryObj.getCode());
         query.setName(baseStaffQueryObj.getName());
-        if(StringUtils.isNotEmpty(baseStaffQueryObj.getDepartmentId())){
+        if (StringUtils.isNotEmpty(baseStaffQueryObj.getDepartmentId())) {
             List<String> departmentIds = baseStaffService.getAllIDsOfDepartmentTree(baseStaffQueryObj.getDepartmentId());
-         //   List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
+            //   List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
             query.setDepartmentIds(departmentIds);
         }
         query.setSize(baseStaffQueryObj.getSize());
@@ -71,10 +73,10 @@ public class BaseStaffController {
     /**
      * 详情
      */
-    @RequestMapping(value = "/info/{id}",method = RequestMethod.GET)
-    @ApiOperation(value="员工（职员）表详情")
+    @RequestMapping(value = "/info/{id}", method = RequestMethod.GET)
+    @ApiOperation(value = "员工（职员）表详情")
     @UserOperationLog("员工（职员）表详情")
-    public ResponseMessage<BaseStaff> info(@PathVariable("id") String id){
+    public ResponseMessage<BaseStaff> info(@PathVariable("id") String id) {
         BaseStaff baseStaff = baseStaffService.findById(id).orElse(null);
         return ResponseMessage.ok(baseStaff);
     }
@@ -82,21 +84,20 @@ public class BaseStaffController {
     /**
      * 添加
      */
-    @RequestMapping(value = "/save",method = RequestMethod.POST)
-    @ApiOperation(value="添加员工（职员）表")
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    @ApiOperation(value = "添加员工（职员）表")
     @UserOperationLog("添加员工（职员）表")
-    public ResponseMessage<BaseStaff> save(@RequestBody BaseStaff baseStaff){
+    public ResponseMessage<BaseStaff> save(@RequestBody BaseStaff baseStaff) {
         ValidatorUtil.validateEntity(baseStaff, AddGroup.class);
         baseStaff.setStaffId(UUIDUtil.getUUID());
         baseStaff.setDeletionStateCode(false);
         List<BaseStaff> byCodeAndStaffIdNot = baseStaffService.findByCodeAndStaffIdNot(baseStaff.getCode(), "");
-        if(byCodeAndStaffIdNot!=null&&byCodeAndStaffIdNot.size()>0)
-        {
+        if (byCodeAndStaffIdNot != null && byCodeAndStaffIdNot.size() > 0) {
             throw new MMException("工号不唯一！");
         }
         Boolean needAddUser = baseStaff.getNeedAddUser();
-        if(needAddUser){
-         //   T t = ;
+        if (needAddUser) {
+            //   T t = ;
             User user = new User();
             user.setLoginName(baseStaff.getCode());
             user.setAdmin(false);
@@ -110,12 +111,26 @@ public class BaseStaffController {
             orgIds.add(baseStaff.getDepartmentId());
             user.setOrgIds(orgIds);
             user.setId(UUIDUtil.getUUID());
-            ResponseMessage responseMessage = iUserService.saveUser(user);
-            User user1 = iUserService.findByLoginNameOrTelOrEmail(user.getLoginName()).get();
-            baseStaff.setUserId(user1.getId());
-            if (responseMessage.getStatus()!=200){
-                return  responseMessage;
+
+            //     User user1 = iUserService.findByLoginNameOrTelOrEmail(user.getLoginName()).get();
+            Optional<User> user2 = iUserService.findByLoginNameOrTelOrEmail(user.getLoginName());
+            String userId = "";
+            if (user2.isPresent()) {
+                User mm=user2.get();
+                mm.setModifyPassword(defaultPassword);
+                mm.setOrgIds(orgIds);
+                iUserService.updateUser(mm);
+                userId = mm.getId();
+            } else {
+                ResponseMessage responseMessage = iUserService.saveUser(user);
+                userId = user.getId();
+                if (responseMessage.getStatus() != 200) {
+                    return responseMessage;
+                }
             }
+
+            baseStaff.setUserId(userId);
+
         }
         return ResponseMessage.ok(baseStaffService.save(baseStaff));
     }
@@ -123,23 +138,22 @@ public class BaseStaffController {
     /**
      * 更新
      */
-    @RequestMapping(value = "/update",method = RequestMethod.POST)
-    @ApiOperation(value="更新员工（职员）表")
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @ApiOperation(value = "更新员工（职员）表")
     @UserOperationLog("更新员工（职员）表")
-    public ResponseMessage<BaseStaff> update(@RequestBody BaseStaff baseStaff){
+    public ResponseMessage<BaseStaff> update(@RequestBody BaseStaff baseStaff) {
         ValidatorUtil.validateEntity(baseStaff, UpdateGroup.class);
         BaseStaff baseStaffOld = baseStaffService.findById(baseStaff.getStaffId()).orElse(null);
-        if(baseStaffOld==null){
+        if (baseStaffOld == null) {
             throw new MMException("数据库不存在该记录");
         }
         List<BaseStaff> byCodeAndStaffIdNot = baseStaffService.findByCodeAndStaffIdNot(baseStaff.getCode(), baseStaff.getStaffId());
-        if(byCodeAndStaffIdNot!=null&&byCodeAndStaffIdNot.size()>0)
-        {
+        if (byCodeAndStaffIdNot != null && byCodeAndStaffIdNot.size() > 0) {
             throw new MMException("工号不唯一！");
         }
         Boolean needAddUser = baseStaff.getNeedAddUser();
-        if(needAddUser){
-            User user= iUserService.findById(baseStaffOld.getUserId()).get();
+        if (needAddUser) {
+            User user = iUserService.findById(baseStaffOld.getUserId()).get();
             user.setLoginName(baseStaff.getCode());
             user.setAdmin(false);
             user.setUserName(baseStaff.getStaffName());
@@ -151,11 +165,11 @@ public class BaseStaffController {
             orgIds.add(baseStaff.getDepartmentId());
             user.setOrgIds(orgIds);
             ResponseMessage responseMessage = iUserService.updateUser(user);
-            if (responseMessage.getStatus()!=200){
-                return  responseMessage;
+            if (responseMessage.getStatus() != 200) {
+                return responseMessage;
             }
         }
-        PropertyUtil.copy(baseStaff,baseStaffOld);
+        PropertyUtil.copy(baseStaff, baseStaffOld);
         return ResponseMessage.ok(baseStaffService.save(baseStaffOld));
     }
 
@@ -163,16 +177,20 @@ public class BaseStaffController {
     /**
      * 删除
      */
-    @RequestMapping(value = "/delete",method = RequestMethod.POST)
-    @ApiOperation(value="删除员工（职员）表")
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    @ApiOperation(value = "删除员工（职员）表")
     @UserOperationLog("删除员工（职员）表")
-    public ResponseMessage delete(@RequestBody String[] ids){
+    public ResponseMessage delete(@RequestBody String[] ids) {
         //baseStaffService.deleteByIds(ids);
-        for (String id :ids){
-            BaseStaff baseStaff = baseStaffService.findById(id).get();
-            baseStaff.setDeletionStateCode(true);
-            baseStaffService.save(baseStaff);
+        if (baseStaffService.isUsedForStaff(ids)) {
+            throw new MMException("职员被使用不可删除！");
         }
+        baseStaffService.deleteByStaffId(ids);
+//        for (String id :ids){
+//            BaseStaff baseStaff = baseStaffService.findById(id).get();
+//            baseStaff.setDeletionStateCode(true);
+//            baseStaffService.save(baseStaff);
+//        }
 
         return ResponseMessage.ok();
     }
@@ -180,10 +198,10 @@ public class BaseStaffController {
     /**
      * 列表
      */
-    @RequestMapping(value = "/productionlist",method = RequestMethod.POST)
-    @ApiOperation(value="排产单员工（职员）表列表")
+    @RequestMapping(value = "/productionlist", method = RequestMethod.POST)
+    @ApiOperation(value = "排产单员工（职员）表列表")
     @UserOperationLog("排产单员工（职员）表列表")
-    public ResponseMessage<PageUtil<BaseStaffDetailObj>> productionlist(@RequestBody BaseStaffQueryObj baseStaffQueryObj){
+    public ResponseMessage<PageUtil<BaseStaffDetailObj>> productionlist(@RequestBody BaseStaffQueryObj baseStaffQueryObj) {
 
         PageUtil<BaseStaffDetailObj> page = baseStaffService.productionlist(baseStaffQueryObj);
 
