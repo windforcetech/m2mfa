@@ -19,4 +19,14 @@ public interface BaseStaffRepository extends BaseRepository<BaseStaff,String> {
    // List<BaseStaff> findByCodeOrStaffNameOrdOrDutyIdIn(String code,String staffName,List<String> dutyIds);
     @Query(value = "select * from base_staff where  `code` =?1", nativeQuery = true)
     BaseStaff finydbStaffNo(String code);
+
+    /**
+     * 根据员工编号获取员工信息
+     * @param code
+     *          员工编号
+     * @return  员工信息
+     */
+    BaseStaff findByCode(String code);
+
+    void deleteByStaffId(String id);
 }

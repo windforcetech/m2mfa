@@ -9,6 +9,6 @@ import org.springframework.stereotype.Service;
  * @Date: 2019/1/2 14:02
  * @Description: 终检
  */
-@Service
+@Service("padFinalInspectionService")
 public class PadFinalInspectionServiceImpl extends BaseOperateImpl implements PadFinalInspectionService {
 }

@@ -15,6 +15,8 @@ import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.pad.model.PadScheduleModel;
+import com.m2micro.m2mfa.pad.model.PadStationModel;
 import com.m2micro.m2mfa.pad.service.PadScheduleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -41,21 +43,21 @@ public class PadScheduleController {
     /**
      * 获取当前员工下初始数据（排产单，工位）
      */
-    @RequestMapping("/getInitData")
+    /*@RequestMapping("/getInitData")
     @ApiOperation(value="获取当前员工下初始数据")
     @UserOperationLog("获取当前员工下初始数据")
     public ResponseMessage getInitData(String staffId){
         return ResponseMessage.ok(padScheduleService.getInitData(staffId));
-    }
+    }*/
 
     /**
      * 获取当前员工下的排产单
      */
-    @RequestMapping("/getMesMoScheduleByStaffId")
+    @RequestMapping("/getMesMoScheduleByStaffNo")
     @ApiOperation(value="获取当前员工下的排产单")
     @UserOperationLog("获取当前员工下的排产单")
-    public ResponseMessage getMesMoScheduleByStaffId(String staffId){
-        return ResponseMessage.ok(padScheduleService.getMesMoScheduleByStaffId(staffId));
+    public ResponseMessage<List<PadScheduleModel>> getMesMoScheduleByStaffNo(String staffNo){
+        return ResponseMessage.ok(padScheduleService.getMesMoScheduleByStaffNo(staffNo));
     }
 
     /**
@@ -64,8 +66,8 @@ public class PadScheduleController {
     @RequestMapping("/getPendingStations")
     @ApiOperation(value="获取待处理的工位")
     @UserOperationLog("获取待处理的工位")
-    public ResponseMessage<List<BaseStation>> getPendingStations(String staffId, String scheduleId){
-        return ResponseMessage.ok(padScheduleService.getPendingStations(staffId, scheduleId));
+    public ResponseMessage<List<PadStationModel>> getPendingStations(String staffNo, String scheduleId){
+        return ResponseMessage.ok(padScheduleService.getPendingStations(staffNo, scheduleId));
     }
 
 

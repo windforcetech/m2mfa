@@ -9,6 +9,6 @@ import org.springframework.stereotype.Service;
  * @Date: 2019/1/2 14:02
  * @Description: 开机
  */
-@Service
+@Service("padBootstrapService")
 public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBootstrapService {
 }

@@ -23,6 +23,7 @@ import com.m2micro.m2mfa.mo.service.*;
 import com.m2micro.m2mfa.mo.vo.Absence;
 import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
+import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
@@ -32,6 +33,7 @@ import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -282,6 +284,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(StringUtils.isEmpty(staffId)){
             throw new MMException("请重新登录或刷新！");
         }
+
         if(StringUtils.isEmpty(scheduleId)){
             throw new MMException("当前没有可处理的排产单！");
         }
@@ -1268,9 +1271,44 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         saveScheduleStaff(mesMoScheduleStaffs, ScheduleId);
         //保存工序
         saveScheduleProcess(mesMoScheduleProcesses, ScheduleId);
+        List<MesMoScheduleStation> mesMoScheduleStations1 = getMesMoScheduleStations(mesMoSchedule);
         //保存工位
-        saveScheduleStation(mesMoScheduleStations, ScheduleId);
+        saveScheduleStation(mesMoScheduleStations1, ScheduleId);
 
+    }
+
+    /**
+     * 获取途程工位数据赋值给排产工位
+     * @param mesMoSchedule
+     * @return
+     */
+    private List<MesMoScheduleStation> getMesMoScheduleStations(MesMoSchedule mesMoSchedule) {
+        MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
+        MesPartvo mesPartvo = mesPartRouteService.findparId(moDesc.getPartId());
+        List<MesPartRouteStation> mesPartRouteStations = mesPartvo.getMesPartRouteStations();
+        List<MesMoScheduleStation> mesMoScheduleStations1=new ArrayList<>();
+        for(MesPartRouteStation mesPartRouteStation :mesPartRouteStations){
+            MesMoScheduleStation mesMoScheduleStation = new MesMoScheduleStation();
+            mesMoScheduleStation.setId(UUIDUtil.getUUID());
+            mesMoScheduleStation.setScheduleId(mesMoSchedule.getScheduleId());
+            mesMoScheduleStation.setProcessId(mesPartRouteStation.getProcessId());
+            mesMoScheduleStation.setStationId(mesPartRouteStation.getStationId());
+            mesMoScheduleStation.setLeadTime(mesPartRouteStation.getLeadTime());
+            mesMoScheduleStation.setWaitingTime(mesPartRouteStation.getWaitingTime());
+            mesMoScheduleStation.setJump(mesPartRouteStation.getJump());
+            mesMoScheduleStation.setJobPeoples(mesPartRouteStation.getJobPeoples());
+            mesMoScheduleStation.setStandardHours(mesPartRouteStation.getStandardHours().intValue());
+            mesMoScheduleStation.setCoefficient(mesPartRouteStation.getCoefficient());
+            mesMoScheduleStation.setControlMachines(mesPartRouteStation.getControlMachines());
+            mesMoScheduleStation.setControlPeoples(mesPartRouteStation.getControlPeoples());
+            Integer enabled= mesPartRouteStation.getEnabled();
+            if(enabled==null){
+                enabled=0;
+            }
+            mesMoScheduleStation.setEnabled(enabled==0 ? false:true);
+            mesMoScheduleStations1.add(mesMoScheduleStation);
+        }
+        return mesMoScheduleStations1;
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.pad.operate;
 
+import com.m2micro.m2mfa.pad.model.PadPara;
+
 /**
  * @Auther: liaotao
  * @Date: 2019/1/2 10:31
@@ -8,7 +10,8 @@ package com.m2micro.m2mfa.pad.operate;
 public class BaseOperateImpl implements BaseOperate {
 
     @Override
-    public Object startWork(Object obj) {
+    public Object startWork(PadPara obj) {
+        System.out.println("+++++++++++++++++++");
         return null;
     }
 

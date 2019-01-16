@@ -15,10 +15,12 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 员工（职员）表 服务实现类
@@ -28,6 +30,8 @@ import java.util.List;
  */
 @Service
 public class BaseStaffServiceImpl implements BaseStaffService {
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Autowired
     BaseStaffRepository baseStaffRepository;
     @Autowired
@@ -52,21 +56,23 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         if (StringUtils.isNotEmpty(query.getName())) {
             condition.and(qBaseStaff.staffName.like("%" + query.getName() + "%"));
         }
-        if (query.getDutyIds() != null && query.getDutyIds().size() > 0) {
-            condition.and(qBaseStaff.dutyId.in(query.getDutyIds()));
+        if (query.getDepartmentIds() != null && query.getDepartmentIds().size() > 0) {
+            condition.and(qBaseStaff.departmentId.in(query.getDepartmentIds()));
         }
         jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
         List<BaseStaff> list = jq.fetch();
         List<BaseStaffDetailObj> rs = new ArrayList<>();
         for (BaseStaff one : list) {
             BaseStaffDetailObj item = new BaseStaffDetailObj();
-            Organization duty = organizationService.findByUUID(one.getDutyId());
-            Organization department = organizationService.findById(duty.getParentNode()).get();
+            Organization department = organizationService.findByUUID(one.getDepartmentId());
+            //  Organization department = organizationService.findById(duty.getParentNode()).get();
             item.setId(one.getStaffId());
             item.setCode(one.getCode());
             item.setDepartment(department.getDepartmentName());
             item.setDimission(one.getDimission());
-            item.setDuty(duty.getDepartmentName());
+            String sql = "select item_name from base_items_target where id='" + one.getDutyId() + "'";
+
+            item.setDuty(jdbcTemplate.queryForObject(sql, String.class));
             item.setEnabled(one.getEnabled());
             item.setGender(one.getGender());
             item.setMobile(one.getMobile());
@@ -80,16 +86,20 @@ public class BaseStaffServiceImpl implements BaseStaffService {
 
     @Override
     public PageUtil<BaseStaffDetailObj> productionlist(BaseStaffQueryObj baseStaffQueryObj) {
-        BaseStaffQuery query=new BaseStaffQuery();
+        BaseStaffQuery query = new BaseStaffQuery();
         query.setCode(baseStaffQueryObj.getCode());
         query.setName(baseStaffQueryObj.getName());
-        if(StringUtils.isNotEmpty(baseStaffQueryObj.getDepartmentId())){
-            List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
-            query.setDutyIds(obtainpost);
+        if (StringUtils.isNotEmpty(baseStaffQueryObj.getDepartmentId())) {
+
+            List<String> departmentIds = this.getAllIDsOfDepartmentTree(baseStaffQueryObj.getDepartmentId());
+            //   List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
+            query.setDepartmentIds(departmentIds);
+//            List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
+//            query.setDutyIds(obtainpost);
         }
         query.setSize(baseStaffQueryObj.getSize());
         query.setPage(baseStaffQueryObj.getPage());
-       return  this.list(query);
+        return this.list(query);
     }
 
     @Override
@@ -103,9 +113,52 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         return baseStaffRepository.finydbStaffNo(code);
     }
 
-//    @Override
+    private void getDepartmentidsCore(long id, List<Organization> orgs, List<String> rs) {
+        for (Organization org : orgs) {
+            if (org.getParentNode() == id) {
+                if (!rs.contains(org.getUuid())) {
+                    rs.add(org.getUuid());
+                }
+                getDepartmentidsCore(org.getId(), orgs, rs);
+            }
+        }
+    }
+
+
+    public List<String> getAllIDsOfDepartmentTree(String departmentId) {
+        ArrayList<String> rs = new ArrayList<>();
+        List<Organization> all = organizationService.findAll();
+        Organization org = organizationService.findByUUID(departmentId);
+        rs.add(departmentId);
+        getDepartmentidsCore(org.getId(), all, rs);
+
+        return rs;
+
+    }
+
+    //    @Override
 //    public List<BaseStaff> findByCodeOrStaffNameOrdOrDutyIdIn(String code, String staffName, List<String> dutyIds) {
 //        return baseStaffRepository.findByCodeOrStaffNameOrdOrDutyIdIn(code,staffName,dutyIds);
 //    }
+    @Override
+    public Boolean isUsedForStaff(String[] ids) {
+        String sql = "SELECT count(*) FROM mes_record_staff where staff_id in(:ids);";
+        HashMap<String, Object> args = new HashMap<>();
+        ArrayList<String> mids = new ArrayList<>();
+        for (String one : ids) {
+            mids.add(one);
+        }
+        args.put("ids", args);
+        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
+        Long count = givenParamJdbcTemp.queryForObject(sql, args, Long.class);
+        return count > 0;
+    }
 
+    @Transactional
+    @Override
+    public void deleteByStaffId(String[] ids) {
+        for (String id : ids) {
+            baseStaffRepository.deleteByStaffId(id);
+        }
+    }
 }

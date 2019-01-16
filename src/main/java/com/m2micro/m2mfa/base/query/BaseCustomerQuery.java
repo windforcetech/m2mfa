@@ -18,6 +18,16 @@ public class BaseCustomerQuery extends Query {
     private String name;
     @ApiModelProperty(value = "类型")
     private String category;
+    @ApiModelProperty(value = "全称")
+    private String fullname;
+
+    public String getFullname() {
+        return fullname;
+    }
+
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
+    }
 
     public String getCode() {
         return code;
