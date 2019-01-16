@@ -87,5 +87,10 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
 
     }
 
+    @Override
+    public List<BaseStaffshift> saveSome(List<BaseStaffshift> entities) {
+        return null;
+    }
+
 
 }
