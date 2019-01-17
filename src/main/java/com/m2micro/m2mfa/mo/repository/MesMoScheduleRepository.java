@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.mo.repository;
 
 import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.m2mfa.base.entity.BaseProcess;
+import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import static com.m2micro.m2mfa.mo.constant.MoScheduleStatus.AUDITED;
 
 /**
  * 生产排程表表头 Repository 接口
@@ -93,4 +96,15 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      */
     @Query(value = "SELECT mms.*  from mes_mo_schedule mms WHERE mms.actual_start_time is not null AND mms.actual_end_time is NULL AND mms.machine_id=?1",nativeQuery = true)
     List<MesMoSchedule> getProductionMesMoScheduleByMachineId(String machineId);
+
+    /**
+     * 获取当前机台优先级最高的排产单
+     * @param machineId
+     *          机台id
+     * @param flag
+     *          排产单状态
+     * @return 排产单
+     */
+    @Query(value = "SELECT mms.* FROM mes_mo_schedule mms WHERE mms.machine_id = ?1 AND mms.flag = ?2 ORDER BY sequence ASC, create_on ASC LIMIT 1",nativeQuery = true)
+    MesMoSchedule getFirstMesMoScheduleByMachineId(String machineId,Integer flag);
 }

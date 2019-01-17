@@ -23,6 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,6 +44,11 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     @Autowired
     MesRecordWorkRepository mesRecordWorkRepository;
 
+    @Override
+    public List<PadScheduleModel> getMesMoSchedule() {
+        return getMesMoScheduleByBaseStaff(PadStaffUtil.getStaff());
+    }
+
 
     @Override
     public List<PadScheduleModel> getMesMoScheduleByStaffNo(String staffNo) {
@@ -60,8 +66,23 @@ public class PadScheduleServiceImpl implements PadScheduleService {
      * @return
      */
     private List<PadScheduleModel> getMesMoScheduleByBaseStaff(BaseStaff baseStaff) {
-        //获取该员工下已审待产和生产中每个机器上的排产单（每个机器只取优先级最高的排产单）
-        String sql = "SELECT\n" +
+        //获取生产中的排产单并且对该员工至少有一个工位没完成（排除掉所有分配给该员工的工位都已完成的排产单）
+        List<PadScheduleModel> production = getProductionScheduleModels(baseStaff);
+        if(production!=null&&production.size()>0){
+            return production;
+        }
+        //获取已审待产的在同一机台上的优先级最高的排产单(过滤掉排产单不是当前机台优先级最高的排产单)
+        return getFilterScheduleModels(baseStaff);
+    }
+
+    /**
+     * 获取生产中的排产单并且对该员工至少有一个工位没完成（排除掉所有分配给该员工的工位都已完成的排产单）
+     * @param baseStaff
+     * @return
+     */
+    private List<PadScheduleModel> getProductionScheduleModels(BaseStaff baseStaff) {
+        //获取该员工下生产中每个机器上的排产单（每个机器只取优先级最高的排产单）
+        String sqlProduction = "SELECT\n" +
                 "	ms.schedule_id scheduleId,\n" +
                 "	ms.schedule_no scheduleNo,\n" +
                 "	min(ms.sequence) sequence,\n" +
@@ -74,7 +95,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "	base_machine bm\n" +
                 "WHERE\n" +
                 "	mss.schedule_id = ms.schedule_id \n" +
-                "AND (ms.flag = "+ MoScheduleStatus.AUDITED.getKey() +" OR ms.flag = "+ MoScheduleStatus.PRODUCTION.getKey() +")\n" +
+                "AND ms.flag = "+ MoScheduleStatus.PRODUCTION.getKey() +"\n" +
                 "AND bm.machine_id = ms.machine_id\n" +
                 "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
                 "GROUP BY\n" +
@@ -82,14 +103,66 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "ORDER BY\n" +
                 "	ms.sequence ASC,\n" +
                 "	bm.code ASC";
-        RowMapper<PadScheduleModel> rowMapper = BeanPropertyRowMapper.newInstance(PadScheduleModel.class);
-        return jdbcTemplate.query(sql, rowMapper);
+        RowMapper<PadScheduleModel> rowMapperProduction = BeanPropertyRowMapper.newInstance(PadScheduleModel.class);
+        return jdbcTemplate.query(sqlProduction, rowMapperProduction);
     }
 
-    @Override
-    public List<PadScheduleModel> getMesMoSchedule() {
-        return getMesMoScheduleByBaseStaff(PadStaffUtil.getStaff());
+    /**
+     * 获取已审待产的在同一机台上的优先级最高的排产单（保证不插队）
+     * @param baseStaff
+     * @return
+     */
+    private List<PadScheduleModel> getFilterScheduleModels(BaseStaff baseStaff) {
+        //获取该员工下已审待产中每个机器上的排产单（每个机器只取优先级最高的排产单）
+        List<PadScheduleModel> auditeds = getAuditedScheduleModels(baseStaff);
+        //过滤后的排产单相关信息
+        List<PadScheduleModel> filterPadScheduleModel = new ArrayList<>();
+        if(auditeds!=null&&auditeds.size()>0){
+            for (PadScheduleModel audited:auditeds) {
+                //通过机台id找到当前机台的优先级最高的排产单
+                MesMoSchedule mesMoSchedule = mesMoScheduleRepository.getFirstMesMoScheduleByMachineId(audited.getMachineId(), MoScheduleStatus.AUDITED.getKey());
+                //如果该排产单就是当前机台优先级最高的排产单则可以生产，不然舍弃。（保证不插队）
+                if(audited.getScheduleId().equals(mesMoSchedule.getScheduleId())){
+                    filterPadScheduleModel.add(audited);
+                }
+            }
+        }
+        return filterPadScheduleModel;
     }
+
+    /**
+     * 获取该员工下已审待产中每个机器上的排产单（每个机器只取优先级最高的排产单）
+     * @param baseStaff
+     * @return
+     */
+    private List<PadScheduleModel> getAuditedScheduleModels(BaseStaff baseStaff) {
+        //获取该员工下已审待产中每个机器上的排产单（每个机器只取优先级最高的排产单）
+        String sqlAudited = "SELECT\n" +
+                "	ms.schedule_id scheduleId,\n" +
+                "	ms.schedule_no scheduleNo,\n" +
+                "	min(ms.sequence) sequence,\n" +
+                "	ms.machine_id machineId,\n" +
+                "	IF(ms.flag="+ MoScheduleStatus.AUDITED.getKey() +",'"+MoScheduleStatus.AUDITED.getValue()+"','"+MoScheduleStatus.PRODUCTION.getValue()+"') flagStatus,\n" +
+                "	bm.name machineName\n" +
+                "FROM\n" +
+                "	mes_mo_schedule ms,\n" +
+                "	mes_mo_schedule_staff mss,\n" +
+                "	base_machine bm\n" +
+                "WHERE\n" +
+                "	mss.schedule_id = ms.schedule_id \n" +
+                "AND ms.flag = "+ MoScheduleStatus.AUDITED.getKey() +"\n" +
+                "AND bm.machine_id = ms.machine_id\n" +
+                "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
+                "GROUP BY\n" +
+                "	ms.machine_id\n" +
+                "ORDER BY\n" +
+                "	ms.sequence ASC,\n" +
+                "	bm.code ASC";
+        RowMapper<PadScheduleModel> rowMapperAudited = BeanPropertyRowMapper.newInstance(PadScheduleModel.class);
+        return jdbcTemplate.query(sqlAudited, rowMapperAudited);
+    }
+
+
 
     @Override
     public List<PadStationModel> getPendingStations(String scheduleId) {
@@ -213,7 +286,143 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     }
 
     @Override
-    public OperationInfo getOperationInfo(String staffId, String scheduleId, String stationId) {
-        return mesMoScheduleService.getOperationInfo(staffId, scheduleId, stationId);
+    public OperationInfo getOperationInfo(String scheduleId, String stationId) {
+        if(StringUtils.isEmpty(scheduleId)){
+            throw new MMException("当前没有可处理的排产单！");
+        }
+        if(StringUtils.isEmpty(stationId)){
+            throw new MMException("当前岗位为空，请刷新！");
+        }
+        BaseStaff baseStaff = PadStaffUtil.getStaff();
+
+        OperationInfo operationInfo = new OperationInfo();
+        //获取当前员工在当前排产单的当前岗位上的上工最新时间信息
+        List<OperationInfo> recordWorks = getOperationInfoForRecordWork(baseStaff.getStaffId(), scheduleId, stationId);
+        //设置上下工标志
+        setWorkInfo(recordWorks,operationInfo);
+
+        //获取在当前排产单的当前岗位上的提报异常最新信息
+        List<OperationInfo> recordAbnormals = getOperationInfoForRecordAbnormal(scheduleId, stationId);
+        //设置提报异常标志
+        setAbnormalInfo(recordAbnormals,operationInfo);
+        return operationInfo;
+    }
+
+    /**
+     * 获取当前员工在当前排产单的当前岗位上的上工最新时间信息
+     * @param staffId
+     * @param scheduleId
+     * @param stationId
+     * @return
+     */
+    private List<OperationInfo> getOperationInfoForRecordWork(String staffId, String scheduleId, String stationId) {
+        String sql = "SELECT\n" +
+                "	mrs.id recordStaffId,\n" +
+                "	mrs.start_time startTime,\n" +
+                "	mrs.end_time endTime\n" +
+                "FROM\n" +
+                "	mes_record_staff mrs\n" +
+                "LEFT JOIN mes_record_work mrw ON mrs.rw_id = mrw.rwid\n" +
+                "WHERE\n" +
+                "	mrs.staff_id = '" + staffId + "'\n" +
+                "AND mrw.schedule_id = '" + scheduleId + "'\n" +
+                "AND mrw.station_id = '" + stationId + "'\n" +
+                "ORDER BY mrs.start_time DESC\n"+
+                "LIMIT 1";
+        RowMapper<OperationInfo> rowMapper = BeanPropertyRowMapper.newInstance(OperationInfo.class);
+        return jdbcTemplate.query(sql, rowMapper);
+    }
+
+    /**
+     *获取在当前排产单的当前岗位上的提报异常最新信息
+     * @param scheduleId
+     * @param stationId
+     * @return
+     */
+    private List<OperationInfo> getOperationInfoForRecordAbnormal(String scheduleId, String stationId) {
+        String sql = "SELECT\n" +
+                "   mra.id recordAbnormalId,\n" +
+                "   mra.abnormal_id abnormalId\n" +
+                "FROM\n" +
+                "	mes_record_abnormal mra\n" +
+                "LEFT JOIN mes_record_work mrw ON mra.rw_id = mrw.rwid \n" +
+                "WHERE\n" +
+                "	mra.start_time IS NOT NULL\n" +
+                "AND mra.end_time IS NULL\n" +
+                "AND mrw.schedule_id = '" + scheduleId + "'\n" +
+                "AND mrw.station_id = '" + stationId + "'\n"+
+                "ORDER BY mra.start_time DESC\n"+
+                "LIMIT 1";
+        RowMapper<OperationInfo> rowMapper = BeanPropertyRowMapper.newInstance(OperationInfo.class);
+        return jdbcTemplate.query(sql, rowMapper);
+    }
+
+    /**
+     * 设置上下工标志
+     * @param recordWorks
+     * @param operationInfo
+     * @return
+     */
+    private OperationInfo setWorkInfo(List<OperationInfo> recordWorks,OperationInfo operationInfo) {
+        if(recordWorks!=null&&recordWorks.size()>1){
+            throw new MMException("人员作业记录数据库数据异常！");
+        }
+        //一次也没有上过工，可以上工
+        if (recordWorks==null||recordWorks.size()==0) {
+            operationInfo.setWorkFlag("1");//上工
+            return operationInfo;
+        }
+        OperationInfo operationInfoWork = recordWorks.get(0);
+        if(operationInfoWork.getStartTime()==null){
+            throw new MMException("人员作业记录数据库数据异常！");
+        }
+        //正在上工，可以下工
+        if(operationInfoWork.getEndTime()==null){
+            operationInfo.setWorkFlag("0");//下工
+            operationInfo.setRecordStaffId(operationInfoWork.getRecordStaffId());
+            operationInfo.setStartTime(operationInfoWork.getStartTime());
+            return operationInfo;
+        }
+        //上下工都完成，可以进行下次上工
+        operationInfo.setWorkFlag("1");//上工
+        operationInfo.setRecordStaffId(operationInfoWork.getRecordStaffId());
+        operationInfo.setStartTime(operationInfoWork.getStartTime());
+        operationInfo.setEndTime(operationInfoWork.getEndTime());
+        return operationInfo;
+    }
+
+    /**
+     * 设置提报异常标志
+     * @param recordAbnormals
+     *
+     * @param operationInfo
+     *
+     * @return
+     */
+    private OperationInfo setAbnormalInfo(List<OperationInfo> recordAbnormals,OperationInfo operationInfo) {
+        if(recordAbnormals!=null&&recordAbnormals.size()>1){
+            throw new MMException("异常记录提报数据库数据异常！");
+        }
+        //一次也没有提报异常，可以提报异常
+        if (recordAbnormals==null||recordAbnormals.size()==0) {
+            operationInfo.setAbnormalFlag("1");
+            return operationInfo;
+        }
+        OperationInfo operationInfoAbnormal = recordAbnormals.get(0);
+        if(operationInfoAbnormal.getStartTime()==null){
+            throw new MMException("异常记录提报数据库数据异常！");
+        }
+        //有一个正在提报异常,不允许再次提报异常
+        if(operationInfoAbnormal.getEndTime()==null){
+            operationInfo.setAbnormalFlag("0");
+            operationInfo.setRecordAbnormalId(operationInfoAbnormal.getRecordAbnormalId());
+            operationInfo.setAbnormalId(operationInfoAbnormal.getAbnormalId());
+            return operationInfo;
+        }
+        //提报的异常都完成，可以进行下次提报
+        operationInfo.setWorkFlag("1");
+        operationInfo.setRecordAbnormalId(operationInfoAbnormal.getRecordAbnormalId());
+        operationInfo.setAbnormalId(operationInfoAbnormal.getAbnormalId());
+        return operationInfo;
     }
 }

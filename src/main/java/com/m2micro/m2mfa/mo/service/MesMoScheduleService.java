@@ -34,16 +34,6 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     PageUtil<MesMoScheduleModel> list(MesMoScheduleQuery query);
 
-
-
-    /**
-     * 获取操作栏相关信息
-     * @param staffId
-     * @param scheduleId
-     * @param stationId
-     */
-    OperationInfo getOperationInfo(String staffId, String scheduleId, String stationId);
-
     /**
      * 通过料件获取图称信息
      * @param partID

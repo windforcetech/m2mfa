@@ -69,8 +69,8 @@ public class PadScheduleController {
     @RequestMapping("/getOperationInfo")
     @ApiOperation(value="获取操作栏相关信息")
     @UserOperationLog("获取操作栏相关信息")
-    public ResponseMessage<OperationInfo> getOperationInfo(String staffId, String scheduleId, String stationId){
-        return ResponseMessage.ok(padScheduleService.getOperationInfo(staffId, scheduleId,stationId));
+    public ResponseMessage<OperationInfo> getOperationInfo(String scheduleId, String stationId){
+        return ResponseMessage.ok(padScheduleService.getOperationInfo(scheduleId,stationId));
     }
 
 }
