@@ -257,12 +257,27 @@ public class BasePartsServiceImpl implements BasePartsService {
 
     @Override
     public PageUtil<BaseParts> findByNotUsedForPack(BasePartsQuery query) {
-        String sql ="SELECT t.* FROM factory_application.base_parts t where t.part_no not in(select distinct part_id from factory_application.base_pack) order by t.part_id ";
+        String sql ="SELECT t.* FROM factory_application.base_parts t where t.part_no not in(select distinct part_id from factory_application.base_pack) ";
+       String sqlCount="Select count(*) FROM factory_application.base_parts t where t.part_no not in(select distinct part_id from factory_application.base_pack) ";
+        if( query.getPartNo()!=null&&query.getPartNo()!=""){
+            sql+=" and t.part_no like '%"+query.getPartNo()+"%' ";
+            sqlCount+=" and t.part_no like '%"+query.getPartNo()+"%' ";
+        }
+        if(query.getName()!=null&&query.getName()!=""){
+            sql+=" and t.name like '%"+query.getName()+"%' ";
+            sqlCount+=" and t.name like '%"+query.getName()+"%' ";
+        }
+        if(query.getSpec()!=null&&query.getSpec()!=""){
+            sql+=" and t.spec like '%"+query.getSpec()+"%' ";
+            sqlCount+=" and t.spec like '%"+query.getSpec()+"%' ";
+        }
+        sql+= "  order by t.part_id ";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql,rm);
-        String countSql = "Select count(*) FROM factory_application.base_parts t where t.part_no not in(select distinct part_id from factory_application.base_pack) ";
-        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+
+     //   String countSql = "Select count(*) FROM factory_application.base_parts t where t.part_no not in(select distinct part_id from factory_application.base_pack) ";
+        long totalCount = jdbcTemplate.queryForObject(sqlCount,long.class);
 
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
