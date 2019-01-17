@@ -29,8 +29,6 @@ public class OperationInfo {
     private String recordAbnormalId;
     @ApiModelProperty(value = "异常项目id")
     private String abnormalId;
-    @ApiModelProperty(value = "异常名称")
-    private String abnormalName;
 
     public OperationInfo() {
         super();

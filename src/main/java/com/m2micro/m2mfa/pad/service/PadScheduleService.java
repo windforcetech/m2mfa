@@ -39,9 +39,8 @@ public interface PadScheduleService {
 
     /**
      * 获取操作栏相关信息
-     * @param staffId
      * @param scheduleId
      * @param stationId
      */
-    OperationInfo getOperationInfo(String staffId, String scheduleId, String stationId);
+    OperationInfo getOperationInfo(String scheduleId, String stationId);
 }
