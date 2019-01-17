@@ -92,7 +92,7 @@ public class BaseRouteDescController {
                 msgs+=msg;
             }
         }
-        return  msgs.trim()==""? ResponseMessage.ok():  ResponseMessage.error(msgs.trim()+"已产生途程业务。");
+        return  msgs.trim()==""? ResponseMessage.ok():  ResponseMessage.ok(msgs.trim()+"已产生途程业务。");
     }
 
 
