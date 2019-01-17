@@ -94,7 +94,7 @@ public class BaseRouteDescController {
         }
        ResponseMessage rm = ResponseMessage.ok();
         if(msgs.trim()!=""){
-            rm.setResult(msgs.trim()+"已产生途程业务。");
+            rm.setMessage(msgs.trim()+"已产生途程业务。");
         }
 
         return  rm;

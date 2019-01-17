@@ -98,7 +98,7 @@ public class BaseProcessController {
         }
         ResponseMessage rm = ResponseMessage.ok();
         if(msgs.trim()!=""){
-            rm.setResult(msgs.trim()+"已产生工艺业务。");
+            rm.setMessage(msgs.trim()+"已产生工艺业务。");
         }
         return  rm;
     }
