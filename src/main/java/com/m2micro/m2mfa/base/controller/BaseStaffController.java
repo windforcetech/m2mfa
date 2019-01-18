@@ -13,6 +13,7 @@ import com.m2micro.m2mfa.base.query.BaseStaffQuery;
 import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.m2mfa.base.vo.BaseStaffDetailObj;
 import com.m2micro.m2mfa.base.vo.BaseStaffQueryObj;
+import com.m2micro.m2mfa.base.vo.MesMoscheduleQueryObj;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -201,9 +202,9 @@ public class BaseStaffController {
     @RequestMapping(value = "/productionlist", method = RequestMethod.POST)
     @ApiOperation(value = "排产单员工（职员）表列表")
     @UserOperationLog("排产单员工（职员）表列表")
-    public ResponseMessage<PageUtil<BaseStaffDetailObj>> productionlist(@RequestBody BaseStaffQueryObj baseStaffQueryObj) {
+    public ResponseMessage<List<BaseStaffDetailObj>> productionlist(@RequestBody MesMoscheduleQueryObj baseStaffQueryObj) {
 
-        PageUtil<BaseStaffDetailObj> page = baseStaffService.productionlist(baseStaffQueryObj);
+        List<BaseStaffDetailObj> page = baseStaffService.productionlist(baseStaffQueryObj);
 
         return ResponseMessage.ok(page);
     }

@@ -6,6 +6,7 @@ import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.query.BaseStaffQuery;
 import com.m2micro.m2mfa.base.vo.BaseStaffDetailObj;
 import com.m2micro.m2mfa.base.vo.BaseStaffQueryObj;
+import com.m2micro.m2mfa.base.vo.MesMoscheduleQueryObj;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public interface BaseStaffService extends BaseService<BaseStaff,String> {
 
     PageUtil<BaseStaffDetailObj> list(BaseStaffQuery query);
 
-    PageUtil<BaseStaffDetailObj>  productionlist(BaseStaffQueryObj query);
+    List<BaseStaffDetailObj>  productionlist(MesMoscheduleQueryObj query);
 
     List<BaseStaff> findByCodeAndStaffIdNot(String code, String staffId);
 

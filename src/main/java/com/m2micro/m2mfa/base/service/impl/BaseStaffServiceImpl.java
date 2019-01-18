@@ -10,12 +10,16 @@ import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
 import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.m2mfa.base.vo.BaseStaffDetailObj;
 import com.m2micro.m2mfa.base.vo.BaseStaffQueryObj;
+import com.m2micro.m2mfa.base.vo.MesMoscheduleQueryObj;
+import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,21 +89,10 @@ public class BaseStaffServiceImpl implements BaseStaffService {
     }
 
     @Override
-    public PageUtil<BaseStaffDetailObj> productionlist(BaseStaffQueryObj baseStaffQueryObj) {
-        BaseStaffQuery query = new BaseStaffQuery();
-        query.setCode(baseStaffQueryObj.getCode());
-        query.setName(baseStaffQueryObj.getName());
-        if (StringUtils.isNotEmpty(baseStaffQueryObj.getDepartmentId())) {
-
-            List<String> departmentIds = this.getAllIDsOfDepartmentTree(baseStaffQueryObj.getDepartmentId());
-            //   List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
-            query.setDepartmentIds(departmentIds);
-//            List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
-//            query.setDutyIds(obtainpost);
-        }
-        query.setSize(baseStaffQueryObj.getSize());
-        query.setPage(baseStaffQueryObj.getPage());
-        return this.list(query);
+    public List<BaseStaffDetailObj> productionlist(MesMoscheduleQueryObj baseStaffQueryObj) {
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseStaffDetailObj.class);
+        String sql ="SELECT * FROM base_staffshift bss LEFT JOIN base_staff bs ON bss.staff_id = bs.staff_id WHERE bss.shift_id = '"+baseStaffQueryObj.getShiftId()+" 'AND bss.shift_date = '"+baseStaffQueryObj.getShiftDate()+"'";
+        return  jdbcTemplate.query(sql,rm);
     }
 
     @Override
