@@ -8,6 +8,8 @@ import com.m2micro.m2mfa.base.service.BaseShiftService;
 import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.vo.OneStaffShift;
+import com.m2micro.m2mfa.base.vo.StaffShiftByOne;
 import com.m2micro.m2mfa.base.vo.StaffShiftObj;
 import com.m2micro.m2mfa.base.vo.StaffShiftResult;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -66,6 +68,72 @@ public class BaseStaffshiftController {
     }
 
     /**
+     * 列表
+     */
+    @PostMapping("/listbystaff")
+    @ApiOperation(value = "单个员工排班表列表")
+    @UserOperationLog("单个员工排班表列表")
+    public ResponseMessage<StaffShiftByOne> listbystaff(BaseStaffshiftQuery query) {
+        QBaseStaffshift qBaseStaff = QBaseStaffshift.baseStaffshift;
+        BooleanExpression expression = qBaseStaff.shiftDate.between(query.getStartTime(), query.getEndTime())
+                .and(qBaseStaff.staffId.eq(query.getStaffId()));
+        ArrayList<BaseStaffshift> baseStaffs = Lists.newArrayList(baseStaffshiftService.findAll(expression));
+
+//        List<String> baseShiftIdList = baseStaffs.stream()
+//                .map(BaseStaffshift::getShiftId).distinct()
+//                .collect(Collectors.toList());
+//        Map<String, String> baseShiftNameMap = baseShiftService.findAllById(baseShiftIdList)
+//                .stream()
+//                .collect(Collectors.toMap(BaseShift::getShiftId, BaseShift::getName));
+//
+//        Map<String, List<BaseStaffshift>> baseStaffshitMap = baseStaffs.stream()
+//                .map(item -> {
+//
+//                })
+//                .collect(Collectors.groupingBy(BaseStaffshift::getStaffId));
+//
+//        Set<String> keys = baseStaffshitMap.keySet();
+//
+//        List<HashMap<String, Object>> collect = baseStaffService.findAllById(Lists.newArrayList(keys))
+//                .stream()
+//                .map(item -> {
+//                    HashMap<String, Object> map = new HashMap<>();
+//                    map.put("staff_id", item.getStaffId());
+//                    map.put("keyvalue", baseStaffshitMap.get(item.getStaffId()));
+//                    map.put("code", item.getCode());
+//                    return map;
+//                }).collect(Collectors.toList());
+
+
+        Stream<BaseStaffshift> sorted = baseStaffs.stream().sorted(Comparator.comparing(BaseStaffshift::getShiftDate));
+        StaffShiftByOne staffShiftByOne = new StaffShiftByOne();
+        staffShiftByOne.setStaffId(query.getStaffId());
+
+        Optional<BaseStaff> byId = baseStaffService.findById(query.getStaffId());
+        BaseStaff baseStaff = byId.get();
+        staffShiftByOne.setStaffName(baseStaff.getStaffName());
+        staffShiftByOne.setStaffCode(baseStaff.getCode());
+
+        List<OneStaffShift> list =
+                sorted.map(item -> {
+                    OneStaffShift oneStaffShift = new OneStaffShift();
+                    oneStaffShift.setId(item.getId());
+                    oneStaffShift.setShiftDate(item.getShiftDate());
+                    oneStaffShift.setShiftId(item.getShiftId());
+
+                    Optional<BaseShift> byId1 = baseShiftService.findById(item.getShiftId());
+                    BaseShift baseShift = byId1.get();
+                    oneStaffShift.setShiftName(baseShift.getName());
+                    oneStaffShift.setShiftCode(baseShift.getCode());
+
+                    return oneStaffShift;
+                }).collect(Collectors.toList());
+
+        staffShiftByOne.setList(list);
+        return ResponseMessage.ok(staffShiftByOne);
+    }
+
+    /**
      * 详情
      */
     @GetMapping("/info/{id}")
@@ -86,6 +154,7 @@ public class BaseStaffshiftController {
         ValidatorUtil.validateEntity(staffShiftObj, AddGroup.class);
         List<BaseStaffshift> baseStaffshiftList = new ArrayList<>();
         List<String> stringst;
+        //员工id为空，取部门所有人员
         if (StringUtils.isEmpty(staffShiftObj.getStaffId())) {
             QBaseStaff qBaseStaff = QBaseStaff.baseStaff;
             BooleanExpression expression = qBaseStaff.departmentId.eq(staffShiftObj.getDepartmentId());
@@ -94,44 +163,51 @@ public class BaseStaffshiftController {
         } else {
             stringst = Arrays.asList(staffShiftObj.getStaffId().split(","));
         }
+        //排除人员不为空,将他们删除
+        if (StringUtils.isNotEmpty(staffShiftObj.getExcludeStaffId())) {
+            String[] split = staffShiftObj.getExcludeStaffId().split(",");
+            List<String> strings = Arrays.asList(split);
+            stringst.removeAll(strings);
+        }
+        if (stringst.size() == 0) {
+            throw new MMException("员工个数为零");
+        }
+        //遍历所有人员
         for (String baseStaff :
                 stringst) {
-            if (StringUtils.isNotEmpty(staffShiftObj.getExcludeStaffId())) {
-                String[] split = staffShiftObj.getExcludeStaffId().split(",");
-                List<String> strings = Arrays.asList(split);
-                if (!strings.contains(baseStaff)) {
-                    Calendar c = Calendar.getInstance();
-                    DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd");
-                    Date beginDate = dateFormat1.parse(dateFormat1.format(staffShiftObj.getStartDate()));
-                    Date endDate = dateFormat1.parse(dateFormat1.format(staffShiftObj.getEndDate()));
-                    c.setTime(endDate);
-                    c.add(Calendar.DATE, 1); // 结束日期加1天
-                    endDate = c.getTime();
-                    Date date = beginDate;
-                    while (!date.equals(endDate)) {
-                        if (StringUtils.isNotEmpty(staffShiftObj.getExcludeDate())) {
-                            String[] split1 = staffShiftObj.getExcludeDate().split(",");
-                            List<String> strings1 = Arrays.asList(split1);
-                            if (!strings1.contains(dateFormat1.format(date))) {
-                                BaseStaffshift baseStaffshift = new BaseStaffshift();
-                                baseStaffshift.setId(UUIDUtil.getUUID());
-                                baseStaffshift.setEnabled(true);
-                                baseStaffshift.setShiftId(staffShiftObj.getShiftId());
-                                baseStaffshift.setStaffId(baseStaff);
-                                baseStaffshift.setShiftDate(date);
-                                baseStaffshiftList.add(baseStaffshift);
+            Calendar c = Calendar.getInstance();
+            DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd");
+            Date beginDate = dateFormat1.parse(dateFormat1.format(staffShiftObj.getStartDate()));
+            Date endDate = dateFormat1.parse(dateFormat1.format(staffShiftObj.getEndDate()));
+            c.setTime(endDate);
+            c.add(Calendar.DATE, 1); // 结束日期加1天
+            endDate = c.getTime();
+            Date date = beginDate;
+            List<String> strings1 = new ArrayList<>();//要排除日期
+            if (StringUtils.isNotEmpty(staffShiftObj.getExcludeDate())) {
+                String[] split1 = staffShiftObj.getExcludeDate().split(",");
+                strings1 = Arrays.asList(split1);
+            }
+            //遍历所有时间
+            while (!date.equals(endDate)) {
+                //不是要排除的日期，添加
+                if (!strings1.contains(dateFormat1.format(date))) {
+                    BaseStaffshift baseStaffshift = new BaseStaffshift();
+                    baseStaffshift.setId(UUIDUtil.getUUID());
+                    baseStaffshift.setEnabled(true);
+                    baseStaffshift.setShiftId(staffShiftObj.getShiftId());
+                    baseStaffshift.setStaffId(baseStaff);
+                    baseStaffshift.setShiftDate(date);
+                    baseStaffshiftList.add(baseStaffshift);
 
-                            }
-                        }
-                        System.out.println(date);
-                        c.setTime(date);
-                        c.add(Calendar.DATE, 1); // 日期加1天
-                        date = c.getTime();
-                    }
                 }
-
+                System.out.println(date);
+                c.setTime(date);
+                c.add(Calendar.DATE, 1); // 日期加1天
+                date = c.getTime();
             }
         }
+
         ArrayList<StaffShiftResult> staffShiftResults = new ArrayList<>();
 
         for (BaseStaffshift baseStaffshift :
@@ -188,6 +264,29 @@ public class BaseStaffshiftController {
 
         return ResponseMessage.ok(staffShiftResults);
     }
+
+    /**
+     * 更新
+     */
+    @PostMapping("/updateall")
+    @ApiOperation(value = "更新所有员工排班表")
+    @UserOperationLog("更新所有员工排班表")
+    public ResponseMessage<List<BaseStaffshift>> updateall(@RequestBody List<BaseStaffshift> baseStaffshift) {
+
+        List<BaseStaffshift> list = new ArrayList<>();
+        for (BaseStaffshift baseStaffshift1 : baseStaffshift
+        ) {
+            ValidatorUtil.validateEntity(baseStaffshift1, UpdateGroup.class);
+            BaseStaffshift baseStaffshiftOld = baseStaffshiftService.findById(baseStaffshift1.getId()).orElse(null);
+            if (baseStaffshiftOld == null) {
+                throw new MMException("数据库不存在该记录");
+            }
+            PropertyUtil.copy(baseStaffshift1, baseStaffshiftOld);
+            list.add(baseStaffshiftOld);
+        }
+        return ResponseMessage.ok(baseStaffshiftService.saveAll(list));
+    }
+
 
     /**
      * 更新

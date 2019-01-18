@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BaseStaffshiftRepository extends BaseRepository<BaseStaffshift,String> {
 
+    int countByStaffIdIn(String[] staffId);
 }

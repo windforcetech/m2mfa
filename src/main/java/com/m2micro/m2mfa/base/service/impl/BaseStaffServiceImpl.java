@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.entity.QBaseStaff;
 import com.m2micro.m2mfa.base.query.BaseStaffQuery;
 import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
+import com.m2micro.m2mfa.base.repository.BaseStaffshiftRepository;
 import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.m2mfa.base.vo.BaseStaffDetailObj;
 import com.m2micro.m2mfa.base.vo.BaseStaffQueryObj;
@@ -44,6 +45,8 @@ public class BaseStaffServiceImpl implements BaseStaffService {
     @Autowired
     OrganizationService organizationService;
 
+    @Autowired
+    BaseStaffshiftRepository baseStaffshiftRepository;
     public BaseStaffRepository getRepository() {
         return baseStaffRepository;
     }
@@ -144,7 +147,8 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         args.put("ids", args);
         NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
         Long count = givenParamJdbcTemp.queryForObject(sql, args, Long.class);
-        return count > 0;
+        int shift=baseStaffshiftRepository.countByStaffIdIn(ids);
+        return count > 0 ||shift>0;
     }
 
     @Override
