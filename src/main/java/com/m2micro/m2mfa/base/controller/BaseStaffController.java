@@ -202,9 +202,9 @@ public class BaseStaffController {
     @RequestMapping(value = "/productionlist", method = RequestMethod.POST)
     @ApiOperation(value = "排产单员工（职员）表列表")
     @UserOperationLog("排产单员工（职员）表列表")
-    public ResponseMessage<List<BaseStaffDetailObj>> productionlist(@RequestBody MesMoscheduleQueryObj baseStaffQueryObj) {
+    public ResponseMessage<List<BaseStaff>> productionlist(@RequestBody MesMoscheduleQueryObj baseStaffQueryObj) {
 
-        List<BaseStaffDetailObj> page = baseStaffService.productionlist(baseStaffQueryObj);
+        List<BaseStaff> page = baseStaffService.productionlist(baseStaffQueryObj);
 
         return ResponseMessage.ok(page);
     }

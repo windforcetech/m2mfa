@@ -25,7 +25,7 @@ public interface BaseStaffService extends BaseService<BaseStaff,String> {
 
     PageUtil<BaseStaffDetailObj> list(BaseStaffQuery query);
 
-    List<BaseStaffDetailObj>  productionlist(MesMoscheduleQueryObj query);
+    List<BaseStaff>  productionlist(MesMoscheduleQueryObj query);
 
     List<BaseStaff> findByCodeAndStaffIdNot(String code, String staffId);
 

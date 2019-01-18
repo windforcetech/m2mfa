@@ -92,9 +92,9 @@ public class BaseStaffServiceImpl implements BaseStaffService {
     }
 
     @Override
-    public List<BaseStaffDetailObj> productionlist(MesMoscheduleQueryObj baseStaffQueryObj) {
-        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseStaffDetailObj.class);
-        String sql ="SELECT * FROM base_staffshift bss LEFT JOIN base_staff bs ON bss.staff_id = bs.staff_id WHERE bss.shift_id = '"+baseStaffQueryObj.getShiftId()+" 'AND bss.shift_date = '"+baseStaffQueryObj.getShiftDate()+"'";
+    public List<BaseStaff> productionlist(MesMoscheduleQueryObj baseStaffQueryObj) {
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseStaff.class);
+        String sql ="SELECT bs.*  FROM base_staffshift bss LEFT JOIN base_staff bs ON bss.staff_id = bs.staff_id WHERE bss.shift_id = '"+baseStaffQueryObj.getShiftId()+" 'AND bss.shift_date = '"+baseStaffQueryObj.getShiftDate()+"'";
         return  jdbcTemplate.query(sql,rm);
     }
 
