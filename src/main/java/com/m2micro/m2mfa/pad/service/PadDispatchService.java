@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.pad.service;
 
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
+import com.m2micro.m2mfa.pad.model.StartWorkPara;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -23,7 +24,7 @@ public interface PadDispatchService {
      * @throws InvocationTargetException
      * @throws IllegalAccessException
      */
-    Object startWork(PadPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException;
+    StartWorkPara startWork(PadPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException;
 
     /**
      * 下工

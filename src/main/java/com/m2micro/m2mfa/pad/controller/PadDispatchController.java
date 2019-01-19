@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
+import com.m2micro.m2mfa.pad.model.StartWorkPara;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,7 +43,7 @@ public class PadDispatchController {
     @RequestMapping("/startWork")
     @ApiOperation(value="pad开机上工")
     @UserOperationLog("pad开机上工")
-    public ResponseMessage startWork(PadPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public ResponseMessage<StartWorkPara> startWork(PadPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         return ResponseMessage.ok(padDispatchService.startWork(obj));
     }
 

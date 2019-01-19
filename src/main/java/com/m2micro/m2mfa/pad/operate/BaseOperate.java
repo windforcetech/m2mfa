@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.pad.operate;
 
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
+import com.m2micro.m2mfa.pad.model.StartWorkPara;
 
 public interface BaseOperate {
 
@@ -17,7 +18,7 @@ public interface BaseOperate {
      * @param obj
      * @return
      */
-    Object startWork(PadPara obj);
+    StartWorkPara startWork(PadPara obj);
 
     /**
      * 下工

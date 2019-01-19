@@ -5,6 +5,8 @@ import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
+import com.m2micro.m2mfa.pad.model.StartWorkPara;
+import com.m2micro.m2mfa.pad.util.DateUtil;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -231,7 +233,7 @@ public class BaseOperateImpl implements BaseOperate {
     }
 
     @Override
-    public Object startWork(PadPara obj) {
+    public StartWorkPara startWork(PadPara obj) {
         System.out.println("+++++++++++++++++++");
         return null;
     }
@@ -310,7 +312,7 @@ public class BaseOperateImpl implements BaseOperate {
      */
     @Transactional
     protected void updateProcessStarTime(String scheduleId, String processId) {
-        String sql ="UPDATE mes_mo_schedule_process mmsp SET mmsp.actual_start_time = '"+new Date() +"' WHERE mmsp.schedule_id = '"+scheduleId+"' AND mmsp.process_id = '"+processId+"' AND ISNULL(mmsp.actual_start_time)";
+        String sql ="UPDATE mes_mo_schedule_process mmsp SET mmsp.actual_start_time = '"+ DateUtil.dateFormat(new Date())+"'   WHERE mmsp.schedule_id = '"+scheduleId+"' AND mmsp.process_id = '"+processId+"' AND ISNULL(mmsp.actual_start_time)";
         jdbcTemplate.update(sql);
     }
 
@@ -323,7 +325,7 @@ public class BaseOperateImpl implements BaseOperate {
      */
     @Transactional
     protected void updateStaffOperationTime(String scheduleId, String staffId, String stationId) {
-        String sql ="UPDATE mes_mo_schedule_staff mmss SET mmss.actual_start_time = '"+new Date() +"'  WHERE mmss.schedule_id = '"+scheduleId+"' AND ISNULL(mmss.actual_start_time) AND mmss.staff_id = '"+staffId+"' AND mmss.station_id = '"+stationId+"'";
+        String sql ="UPDATE mes_mo_schedule_staff mmss SET mmss.actual_start_time ='"+ DateUtil.dateFormat(new Date())+"'  WHERE mmss.schedule_id = '"+scheduleId+"' AND ISNULL(mmss.actual_start_time) AND mmss.staff_id = '"+staffId+"' AND mmss.station_id = '"+stationId+"'";
         jdbcTemplate.update(sql);
     }
 
@@ -338,7 +340,24 @@ public class BaseOperateImpl implements BaseOperate {
         jdbcTemplate.update(sql);
     }
 
+    /**
+     * 跟新（上工记录表）下工时间
+     * @param rwId
+     */
+    @Transactional
+    protected void updateMesRecordWorkEndTime(String rwId){
+        String sql ="UPDATE mes_record_work SET end_time = '"+ DateUtil.dateFormat(new Date())+"'  WHERE rwid = '"+rwId+"'";
+        jdbcTemplate.update(sql);
+    }
 
-
+    /**
+     * 职员作业记录跟新结束时间
+     * @param recordStaffId
+     */
+    @Transactional
+    protected void updateMesRecordStaffendTime(String recordStaffId){
+        String sql ="update mes_record_staff  set end_time = '"+ DateUtil.dateFormat(new Date())+"'   where id='"+recordStaffId+"'";
+        jdbcTemplate.update(sql);
+    }
 
 }

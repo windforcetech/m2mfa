@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.pad.service.impl;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.InitData;
 import com.m2micro.m2mfa.pad.model.PadPara;
+import com.m2micro.m2mfa.pad.model.StartWorkPara;
 import com.m2micro.m2mfa.pad.operate.BaseOperateImpl;
 import com.m2micro.m2mfa.pad.service.PadChargingService;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class PadChargingServiceImpl extends BaseOperateImpl implements PadChargi
     }
 
     @Override
-    public Object startWork(PadPara obj) {
+    public StartWorkPara startWork(PadPara obj) {
         System.out.println("===============");
         return null;
     }
