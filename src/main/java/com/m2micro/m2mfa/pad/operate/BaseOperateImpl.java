@@ -5,6 +5,8 @@ import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
+import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
@@ -45,6 +47,8 @@ public class BaseOperateImpl implements BaseOperate {
     MesRecordStaffService mesRecordStaffService;
     @Autowired
     MesRecordFailService mesRecordFailService;
+    @Autowired
+    IotMachineOutputService iotMachineOutputService;
     @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
 
@@ -395,6 +399,8 @@ public class BaseOperateImpl implements BaseOperate {
         jdbcTemplate.update(sql);
     }
 
-
+    protected IotMachineOutput findIotMachineOutputByMachineId(String machineId){
+        return iotMachineOutputService.findIotMachineOutputByMachineId(machineId);
+    }
 
 }
