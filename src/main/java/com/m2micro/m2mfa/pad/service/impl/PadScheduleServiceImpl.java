@@ -12,6 +12,8 @@ import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.model.InitData;
 import com.m2micro.m2mfa.pad.model.PadScheduleModel;
 import com.m2micro.m2mfa.pad.model.PadStationModel;
+import com.m2micro.m2mfa.pad.model.StationAndOperate;
+import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import com.m2micro.m2mfa.pad.service.PadScheduleService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
@@ -23,6 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +46,8 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     MesMoScheduleRepository mesMoScheduleRepository;
     @Autowired
     MesRecordWorkRepository mesRecordWorkRepository;
+    @Autowired
+    PadDispatchService padDispatchService;
 
     @Override
     public List<PadScheduleModel> getMesMoSchedule() {
@@ -176,6 +181,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
         return getPadStationModels(scheduleId, baseStaff);
     }
 
+
     /**
      * 获取待处理的工位
      * @param scheduleId
@@ -286,5 +292,37 @@ public class PadScheduleServiceImpl implements PadScheduleService {
         RowMapper<PadStationModel> rowMapper = BeanPropertyRowMapper.newInstance(PadStationModel.class);
         return jdbcTemplate.query(sqlStation, rowMapper);
     }
+
+    @Override
+    public StationAndOperate getStationsAndOperate(String scheduleId) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        StationAndOperate stationAndOperate = new StationAndOperate();
+        List<PadStationModel> pendingStations = getPendingStations(scheduleId);
+        stationAndOperate.setPadStationModels(pendingStations);
+        if(pendingStations==null||pendingStations.size()==0){
+            OperationInfo operationInfo = new OperationInfo();
+            //上工标志位/下工标志位(0:上工,1:下工)
+            operationInfo.setWorkFlag("0");
+            //上下工(0:置灰,1:不置灰)
+            operationInfo.setStartWork("0");
+            //不良品数(0:置灰,1:不置灰)
+            operationInfo.setDefectiveProducts("0");
+            //提报异常(0:置灰,1:不置灰)
+            operationInfo.setReportingAnomalies("0");
+            //作业输入(0:置灰,1:不置灰)
+            operationInfo.setJobInput("0");
+            //作业指导(0:置灰,1:不置灰)
+            operationInfo.setHomeworkGuidance("0");
+            //操作历史(0:置灰,1:不置灰)
+            operationInfo.setOperationHistory("0");
+            //结束作业(0:置灰,1:不置灰)
+            operationInfo.setFinishHomework("0");
+            stationAndOperate.setOperationInfo(operationInfo);
+            return stationAndOperate;
+        }
+        OperationInfo operationInfo = padDispatchService.getOperationInfo(scheduleId, pendingStations.get(0).getStationId());
+        stationAndOperate.setOperationInfo(operationInfo);
+        return stationAndOperate;
+    }
+
 
 }

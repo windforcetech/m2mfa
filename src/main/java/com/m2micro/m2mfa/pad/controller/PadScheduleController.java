@@ -17,6 +17,7 @@ import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.model.PadScheduleModel;
 import com.m2micro.m2mfa.pad.model.PadStationModel;
+import com.m2micro.m2mfa.pad.model.StationAndOperate;
 import com.m2micro.m2mfa.pad.service.PadScheduleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -60,6 +62,16 @@ public class PadScheduleController {
     @UserOperationLog("获取待处理的工位")
     public ResponseMessage<List<PadStationModel>> getPendingStations(String scheduleId){
         return ResponseMessage.ok(padScheduleService.getPendingStations(scheduleId));
+    }
+
+    /**
+     * 获取待处理的工位
+     */
+    @RequestMapping("/getStationsAndOperate")
+    @ApiOperation(value="获取待处理的工位及第一个工位操作信息")
+    @UserOperationLog("获取待处理的工位")
+    public ResponseMessage<StationAndOperate> getStationsAndOperate(String scheduleId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        return ResponseMessage.ok(padScheduleService.getStationsAndOperate(scheduleId));
     }
 
 }

@@ -6,7 +6,9 @@ import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.InitData;
 import com.m2micro.m2mfa.pad.model.PadScheduleModel;
 import com.m2micro.m2mfa.pad.model.PadStationModel;
+import com.m2micro.m2mfa.pad.model.StationAndOperate;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -37,5 +39,11 @@ public interface PadScheduleService {
      */
     List<PadStationModel> getPendingStations(String scheduleId);
 
-
+    /**
+     * 获取待处理的工位及第一个工位操作信息
+     * @param scheduleId
+     *          排产单id
+     * @return
+     */
+    StationAndOperate getStationsAndOperate(String scheduleId) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException;
 }
