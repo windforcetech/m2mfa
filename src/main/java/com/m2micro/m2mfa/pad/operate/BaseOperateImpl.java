@@ -340,24 +340,6 @@ public class BaseOperateImpl implements BaseOperate {
         jdbcTemplate.update(sql);
     }
 
-    /**
-     * 跟新（上工记录表）下工时间
-     * @param rwId
-     */
-    @Transactional
-    protected void updateMesRecordWorkEndTime(String rwId){
-        String sql ="UPDATE mes_record_work SET end_time = '"+ DateUtil.dateFormat(new Date())+"'  WHERE rwid = '"+rwId+"'";
-        jdbcTemplate.update(sql);
-    }
 
-    /**
-     * 职员作业记录跟新结束时间
-     * @param recordStaffId
-     */
-    @Transactional
-    protected void updateMesRecordStaffendTime(String recordStaffId){
-        String sql ="update mes_record_staff  set end_time = '"+ DateUtil.dateFormat(new Date())+"'   where id='"+recordStaffId+"'";
-        jdbcTemplate.update(sql);
-    }
 
 }

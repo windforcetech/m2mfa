@@ -9,7 +9,6 @@ public class DateUtil {
    * 时间格式化成字符串
    * @param date Date
    * @return
-   * @throws ParseException
    */
   public static String dateFormat(Date date)  {
 
