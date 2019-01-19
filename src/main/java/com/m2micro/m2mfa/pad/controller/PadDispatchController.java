@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
+import com.m2micro.m2mfa.pad.model.StopWorkModel;
 import com.m2micro.m2mfa.pad.model.StopWorkPara;
 import com.m2micro.m2mfa.pad.model.StartWorkPara;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
@@ -42,8 +43,8 @@ public class PadDispatchController {
      * 上工
      */
     @RequestMapping("/startWork")
-    @ApiOperation(value="pad开机上工")
-    @UserOperationLog("pad开机上工")
+    @ApiOperation(value="pad上工")
+    @UserOperationLog("pad上工")
     public ResponseMessage<StartWorkPara> startWork(PadPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         return ResponseMessage.ok(padDispatchService.startWork(obj));
     }
@@ -52,9 +53,9 @@ public class PadDispatchController {
      * 下工
      */
     @RequestMapping("/stopWork")
-    @ApiOperation(value="pad开机下工")
-    @UserOperationLog("pad开机下工")
-    public ResponseMessage stopWork(StopWorkPara obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    @ApiOperation(value="pad下工")
+    @UserOperationLog("pad下工")
+    public ResponseMessage<StopWorkModel> stopWork(StopWorkPara obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.stopWork(obj));
     }
 
@@ -62,8 +63,8 @@ public class PadDispatchController {
      * 结束作业
      */
     @RequestMapping("/finishHomework")
-    @ApiOperation(value="pad开机结束作业")
-    @UserOperationLog("pad开机结束作业")
+    @ApiOperation(value="pad结束作业")
+    @UserOperationLog("pad结束作业")
     public ResponseMessage finishHomework(Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.finishHomework(obj));
     }
@@ -71,8 +72,8 @@ public class PadDispatchController {
      * 不良品数
      */
     @RequestMapping("/defectiveProducts")
-    @ApiOperation(value="pad开机不良品数")
-    @UserOperationLog("pad开机不良品数")
+    @ApiOperation(value="pad不良品数")
+    @UserOperationLog("pad不良品数")
     public ResponseMessage defectiveProducts (Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.defectiveProducts(obj));
     }
@@ -80,8 +81,8 @@ public class PadDispatchController {
      * 提报异常
      */
     @RequestMapping("/reportingAnomalies")
-    @ApiOperation(value="pad开机提报异常")
-    @UserOperationLog("pad开机提报异常")
+    @ApiOperation(value="pad提报异常")
+    @UserOperationLog("pad提报异常")
     public ResponseMessage reportingAnomalies(Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.reportingAnomalies(obj));
     }
@@ -89,8 +90,8 @@ public class PadDispatchController {
      * 作业输入
      */
     @RequestMapping("/jobInput")
-    @ApiOperation(value="pad开机作业输入")
-    @UserOperationLog("pad开机作业输入")
+    @ApiOperation(value="pad作业输入")
+    @UserOperationLog("pad作业输入")
     public ResponseMessage jobInput(Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.jobInput(obj));
     }
@@ -99,8 +100,8 @@ public class PadDispatchController {
      * 作业指导
      */
     @RequestMapping("/homeworkGuidance")
-    @ApiOperation(value="pad开机作业指导")
-    @UserOperationLog("pad开机作业指导")
+    @ApiOperation(value="pad作业指导")
+    @UserOperationLog("pad作业指导")
     public ResponseMessage homeworkGuidance(Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.homeworkGuidance(obj));
     }
@@ -109,8 +110,8 @@ public class PadDispatchController {
      * 操作历史
      */
     @RequestMapping("/operationHistory")
-    @ApiOperation(value="pad开机操作历史")
-    @UserOperationLog("pad开机操作历史")
+    @ApiOperation(value="pad操作历史")
+    @UserOperationLog("pad操作历史")
     public ResponseMessage operationHistory (Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.operationHistory(obj));
     }
