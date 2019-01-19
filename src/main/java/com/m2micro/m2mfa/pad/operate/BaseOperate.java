@@ -65,4 +65,5 @@ public interface BaseOperate {
      */
     Object operationHistory (Object obj);
 
+
 }

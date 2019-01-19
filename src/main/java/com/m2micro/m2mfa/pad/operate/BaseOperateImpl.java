@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.pad.operate;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
+import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
@@ -267,4 +268,72 @@ public class BaseOperateImpl implements BaseOperate {
     public Object operationHistory(Object obj) {
         return null;
     }
+
+    /**
+     * 是否工序的首工位
+     * @param processId
+     * @param stationId
+     * @return
+     */
+    protected boolean isProcessfirstStation(String processId, String stationId) {
+        String sql ="select MAX(bps.step)  from base_process_station bps where bps.process_id = '"+processId+"'";
+        Integer maxstep =  jdbcTemplate.queryForObject(sql ,Integer.class);
+        sql ="select bps.step  from base_process_station bps where bps.process_id = '"+processId+"' and bps.station_id='"+stationId+"' ";
+        Integer thisstep =  jdbcTemplate.queryForObject(sql ,Integer.class);
+        if(maxstep== thisstep){
+            return true;
+        }
+        return false;
+    }
+
+
+
+    /**
+     * 工位是否有上工记录
+     * @param scheduleId
+     * @param stationId
+     * @return
+     */
+    protected boolean isStationisWork(String scheduleId, String stationId) {
+        String sql ="SELECT  mrw.rwid  FROM mes_record_work mrw WHERE mrw.schedule_id = '"+scheduleId+"' AND mrw.station_id = '"+stationId+"' AND mrw.start_time IS NOT NULL AND ISNULL(mrw.end_time)";
+        String rwid =  jdbcTemplate.queryForObject(sql ,String.class);
+        if(rwid !=null){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 跟新排产单工序开始时间
+     * @param scheduleId
+     * @param processId
+     */
+    protected void updateProcessStarTime(String scheduleId, String processId) {
+        String sql ="UPDATE mes_mo_schedule_process mmsp SET mmsp.actual_start_time = NOW() WHERE mmsp.schedule_id = '"+scheduleId+"' AND mmsp.process_id = '"+processId+"' AND ISNULL(mmsp.actual_start_time)";
+        jdbcTemplate.update(sql);
+    }
+
+
+    /**
+     * 跟新排产单员工作业时间
+     * @param scheduleId
+     * @param staffId
+     * @param stationId
+     */
+    protected void updateStaffOperationTime(String scheduleId, String staffId, String stationId) {
+        String sql ="UPDATE mes_mo_schedule_staff mmss SET mmss.actual_start_time = NOW() WHERE mmss.schedule_id = '"+scheduleId+"' AND ISNULL(mmss.actual_start_time) AND mmss.staff_id = '"+staffId+"' AND mmss.station_id = '"+stationId+"'";
+        jdbcTemplate.update(sql);
+    }
+
+
+    /**
+     * 跟新排产单状态为执行中
+     * @param scheduleId
+     */
+    protected void updateMesMoScheduleFlag(String scheduleId) {
+        String sql ="update mes_mo_schedule  mms   set  mms.flag="+ MoStatus.SCHEDULED.getKey()+" where  mms.schedule_id='"+scheduleId+"' and mms.flag="+ MoStatus.AUDITED.getKey()+"";
+        jdbcTemplate.update(sql);
+    }
+
+
 }
