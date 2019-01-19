@@ -399,6 +399,12 @@ public class BaseOperateImpl implements BaseOperate {
         jdbcTemplate.update(sql);
     }
 
+    /**
+     * 通过机台id查找机台产量信息
+     * @param machineId
+     *          机台id
+     * @return
+     */
     protected IotMachineOutput findIotMachineOutputByMachineId(String machineId){
         return iotMachineOutputService.findIotMachineOutputByMachineId(machineId);
     }
