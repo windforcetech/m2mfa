@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -277,11 +278,9 @@ public class BaseOperateImpl implements BaseOperate {
      * @return
      */
     protected boolean isProcessfirstStation(String processId, String stationId) {
-        String sql ="select MAX(bps.step)  from base_process_station bps where bps.process_id = '"+processId+"'";
-        Integer maxstep =  jdbcTemplate.queryForObject(sql ,Integer.class);
-        sql ="select bps.step  from base_process_station bps where bps.process_id = '"+processId+"' and bps.station_id='"+stationId+"' ";
-        Integer thisstep =  jdbcTemplate.queryForObject(sql ,Integer.class);
-        if(maxstep== thisstep){
+        String sql ="select station_id  from base_process_station where  step  in( select min(bps.step)  from base_process_station bps where bps.process_id = '"+processId+"')and process_id = '"+processId+"'";
+        String  maxstationId =  jdbcTemplate.queryForObject(sql ,String .class);
+        if(stationId.equals(maxstationId)){
             return true;
         }
         return false;
@@ -311,7 +310,7 @@ public class BaseOperateImpl implements BaseOperate {
      */
     @Transactional
     protected void updateProcessStarTime(String scheduleId, String processId) {
-        String sql ="UPDATE mes_mo_schedule_process mmsp SET mmsp.actual_start_time = NOW() WHERE mmsp.schedule_id = '"+scheduleId+"' AND mmsp.process_id = '"+processId+"' AND ISNULL(mmsp.actual_start_time)";
+        String sql ="UPDATE mes_mo_schedule_process mmsp SET mmsp.actual_start_time = '"+new Date() +"' WHERE mmsp.schedule_id = '"+scheduleId+"' AND mmsp.process_id = '"+processId+"' AND ISNULL(mmsp.actual_start_time)";
         jdbcTemplate.update(sql);
     }
 
@@ -324,7 +323,7 @@ public class BaseOperateImpl implements BaseOperate {
      */
     @Transactional
     protected void updateStaffOperationTime(String scheduleId, String staffId, String stationId) {
-        String sql ="UPDATE mes_mo_schedule_staff mmss SET mmss.actual_start_time = NOW() WHERE mmss.schedule_id = '"+scheduleId+"' AND ISNULL(mmss.actual_start_time) AND mmss.staff_id = '"+staffId+"' AND mmss.station_id = '"+stationId+"'";
+        String sql ="UPDATE mes_mo_schedule_staff mmss SET mmss.actual_start_time = '"+new Date() +"'  WHERE mmss.schedule_id = '"+scheduleId+"' AND ISNULL(mmss.actual_start_time) AND mmss.staff_id = '"+staffId+"' AND mmss.station_id = '"+stationId+"'";
         jdbcTemplate.update(sql);
     }
 
@@ -335,9 +334,11 @@ public class BaseOperateImpl implements BaseOperate {
      */
     @Transactional
     protected void updateMesMoScheduleFlag(String scheduleId) {
-        String sql ="update mes_mo_schedule  mms   set  mms.flag="+ MoStatus.SCHEDULED.getKey()+" where  mms.schedule_id='"+scheduleId+"' and mms.flag="+ MoStatus.AUDITED.getKey()+"";
+        String sql ="update mes_mo_schedule  mms   set  mms.flag="+ MoStatus.SCHEDULED.getKey()+"   ,  mms.sequence=0    where  mms.schedule_id='"+scheduleId+"' and mms.flag="+ MoStatus.AUDITED.getKey()+"";
         jdbcTemplate.update(sql);
     }
+
+
 
 
 }
