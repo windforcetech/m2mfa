@@ -19,6 +19,7 @@ public class PadDispatchConstant {
         handle.put("KZ027", PadMoldService.class.getName());//架模
         handle.put("ZS_CX_02", PadChargingService.class.getName());//加料
         handle.put("KZ001", PadBootstrapService.class.getName());//开机
+        handle.put("ZS_CX_02", PadBakingService.class.getName());//烤料
 
         /*
         handle.put("10000023", PadFirstService.class.getName());//首件
