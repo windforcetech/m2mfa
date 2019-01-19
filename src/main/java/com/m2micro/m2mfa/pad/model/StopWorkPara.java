@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.pad.model;
 
+import com.m2micro.m2mfa.record.entity.MesRecordFail;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -18,4 +19,6 @@ public class StopWorkPara {
     private String rwid;
     @ApiModelProperty(value = "人员作业记录主键")
     private String recordStaffId;
+    @ApiModelProperty(value = "不良输入记录")
+    private MesRecordFail mesRecordFail;
 }

@@ -2,6 +2,9 @@ package com.m2micro.m2mfa.pad.operate;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
@@ -10,8 +13,10 @@ import com.m2micro.m2mfa.pad.model.StopWorkPara;
 import com.m2micro.m2mfa.pad.model.StartWorkPara;
 import com.m2micro.m2mfa.pad.util.DateUtil;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
+import com.m2micro.m2mfa.record.entity.MesRecordFail;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
+import com.m2micro.m2mfa.record.service.MesRecordFailService;
 import com.m2micro.m2mfa.record.service.MesRecordStaffService;
 import com.m2micro.m2mfa.record.service.MesRecordWorkService;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +43,8 @@ public class BaseOperateImpl implements BaseOperate {
     MesRecordWorkService mesRecordWorkService;
     @Autowired
     MesRecordStaffService mesRecordStaffService;
+    @Autowired
+    MesRecordFailService mesRecordFailService;
     @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
 
@@ -252,10 +259,21 @@ public class BaseOperateImpl implements BaseOperate {
     @Transactional
     public StopWorkModel stopWork(StopWorkPara obj) {
         //更新上工记录表结束时间
-        updateRecordWorkEndTime(obj.getRecordStaffId());
+        updateRecordWorkEndTime(obj.getRwid());
         //更新职员作业记录表结束时间
         updateRecordStaffEndTime(obj.getRecordStaffId());
         return new StopWorkModel();
+    }
+
+    @Transactional
+    protected StopWorkModel stopWorkForRecordFail(StopWorkPara obj) {
+        MesRecordFail mesRecordFail = obj.getMesRecordFail();
+        mesRecordFail.setId(UUIDUtil.getUUID());
+        mesRecordFail.setRwId(obj.getRwid());
+        mesRecordFail.setCreateOn(new Date());
+        ValidatorUtil.validateEntity(mesRecordFail, AddGroup.class);
+        mesRecordFailService.save(mesRecordFail);
+        return stopWork(obj);
     }
 
     /**
@@ -271,11 +289,11 @@ public class BaseOperateImpl implements BaseOperate {
 
     /**
      * 更新上工记录表结束时间
-     * @param recordStaffId
+     * @param rwid
      */
     @Transactional
-    protected void updateRecordWorkEndTime(String recordStaffId) {
-        MesRecordWork mesRecordWork = mesRecordWorkService.findById(recordStaffId).orElse(null);
+    protected void updateRecordWorkEndTime(String rwid) {
+        MesRecordWork mesRecordWork = mesRecordWorkService.findById(rwid).orElse(null);
         mesRecordWork.setEndTime(new Date());
         mesRecordWorkService.save(mesRecordWork);
     }

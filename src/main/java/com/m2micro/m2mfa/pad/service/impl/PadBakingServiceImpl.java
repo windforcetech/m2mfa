@@ -1,6 +1,8 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.pad.model.StopWorkModel;
+import com.m2micro.m2mfa.pad.model.StopWorkPara;
 import com.m2micro.m2mfa.pad.operate.BaseOperateImpl;
 import com.m2micro.m2mfa.pad.service.PadBakingService;
 import org.springframework.stereotype.Service;
@@ -22,5 +24,10 @@ public class PadBakingServiceImpl extends BaseOperateImpl  implements PadBakingS
         //烤料没有作业输入，置灰
         operationInfo.setJobInput("0");
         return operationInfo;
+    }
+
+    @Override
+    public StopWorkModel stopWork(StopWorkPara obj) {
+        return super.stopWork(obj);
     }
 }

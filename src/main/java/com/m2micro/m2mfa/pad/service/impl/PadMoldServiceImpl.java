@@ -1,6 +1,8 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.pad.model.StopWorkModel;
+import com.m2micro.m2mfa.pad.model.StopWorkPara;
 import com.m2micro.m2mfa.pad.operate.BaseOperateImpl;
 import com.m2micro.m2mfa.pad.service.PadMoldService;
 import org.springframework.stereotype.Service;
@@ -18,5 +20,10 @@ public class PadMoldServiceImpl extends BaseOperateImpl implements PadMoldServic
         //架模没有不良输入，置灰
         operationInfo.setDefectiveProducts("0");
         return operationInfo;
+    }
+
+    @Override
+    public StopWorkModel stopWork(StopWorkPara obj) {
+        return super.stopWork(obj);
     }
 }
