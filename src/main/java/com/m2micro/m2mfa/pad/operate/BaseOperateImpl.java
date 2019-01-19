@@ -8,7 +8,11 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
+import com.m2micro.m2mfa.mo.entity.MesMoDesc;
+import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.service.MesMoDescService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.model.PadPara;
 import com.m2micro.m2mfa.pad.model.StopWorkModel;
 import com.m2micro.m2mfa.pad.model.StopWorkPara;
@@ -47,6 +51,12 @@ public class BaseOperateImpl implements BaseOperate {
     MesRecordStaffService mesRecordStaffService;
     @Autowired
     MesRecordFailService mesRecordFailService;
+    @Autowired
+    MesMoScheduleService mesMoScheduleService;
+    @Autowired
+    MesMoDescService mesMoDescService;
+
+
     @Autowired
     IotMachineOutputService iotMachineOutputService;
     @Override
@@ -254,9 +264,55 @@ public class BaseOperateImpl implements BaseOperate {
     }
 
     @Override
+    @Transactional
     public StartWorkPara startWork(PadPara obj) {
-        System.out.println("+++++++++++++++++++");
-        return null;
+        StartWorkPara startWorkPara = new StartWorkPara();
+        //是否工序的首工位
+        if(isProcessfirstStation(obj.getProcessId(),obj.getStationId())){
+            //跟新工具开始时间
+            updateProcessStarTime(obj.getScheduleId(),obj.getProcessId());
+        }
+        //判断工位是否有上工记录
+        if(!isStationisWork(obj.getScheduleId(),obj.getStationId())){
+            //新增上工记录返回上工记录id
+            startWorkPara.setRwid(saveMesRecordWork(obj));
+
+        }
+        //更新员工作业时间
+        updateStaffOperationTime(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId());
+
+        //新增人员作业记录
+
+        //新增上工记录返回人员记录id
+        startWorkPara.setRecordStaffId(saveMesRecordStaff());
+
+        return startWorkPara;
+    }
+
+
+    protected  String saveMesRecordStaff(){
+
+        return  null;
+    }
+
+    protected String  saveMesRecordWork(PadPara obj) {
+       MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(obj.getScheduleId()).orElse(null);
+       MesMoDesc moDesc =  mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
+
+        //没有上工记录
+        String rwId = UUIDUtil.getUUID();
+        MesRecordWork mesRecordWork = new MesRecordWork();
+        mesRecordWork.setRwid(rwId);
+        mesRecordWork.setScheduleId(obj.getScheduleId());
+        mesRecordWork.setPartNo(mesMoSchedule.getPartNo());
+        mesRecordWork.setMoNumber(moDesc.getMoNumber());
+        mesRecordWork.setProcessId(obj.getProcessId());
+        mesRecordWork.setStationId(obj.getStationId());
+        mesRecordWork.setMachineId(mesMoSchedule.getMachineId());
+
+        mesRecordWorkService.save(mesRecordWork);
+
+        return  rwId;
     }
 
     @Override
