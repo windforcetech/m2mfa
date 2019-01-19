@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.pad.model;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
@@ -8,8 +10,12 @@ import lombok.Data;
  * @Description:
  */
 @Data
+@ApiModel(value = "padPara", description = "Pad参数")
 public class PadPara {
+    @ApiModelProperty(value = "工位Id")
     private String stationId;
-    private String staffId;
+    @ApiModelProperty(value = "排产单Id")
     private String scheduleId;
+    @ApiModelProperty(value = "工序Id")
+    private String processId;
 }
