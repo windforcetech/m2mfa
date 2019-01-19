@@ -4,6 +4,7 @@ import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.SpringContextUtil;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.service.BaseStationService;
+import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.constant.PadDispatchConstant;
 import com.m2micro.m2mfa.pad.model.PadPara;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
@@ -23,6 +24,16 @@ import java.lang.reflect.Method;
 public class PadDispatchServiceImpl implements PadDispatchService {
     @Autowired
     BaseStationService baseStationService;
+
+    @Override
+    public OperationInfo getOperationInfo(String scheduleId, String stationId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        BaseStation baseStation = baseStationService.findById(stationId).orElse(null);
+        String handle = PadDispatchConstant.getHandle(baseStation.getCode());
+        Class<?> clazz = Class.forName(handle);
+        Object handleInstance = SpringContextUtil.getBean(clazz);
+        Method method = clazz.getMethod("getOperationInfo",String.class,String.class);
+        return (OperationInfo)method.invoke(handleInstance,scheduleId,stationId);
+    }
 
     @Override
     public Object startWork(PadPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {

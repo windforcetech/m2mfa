@@ -15,20 +15,36 @@ import java.util.Date;
 @ApiModel(description="工单主档综合信息")
 @Data
 public class OperationInfo {
-    @ApiModelProperty(value = "上下工标志位")
+    @ApiModelProperty(value = "上工标志位/下工标志位(0:上工,1:下工)")
     private String workFlag;
-    @ApiModelProperty(value = "人员作业记录主键")
-    private String recordStaffId;
+    @ApiModelProperty(value = "上下工(0:置灰,1:不置灰)")
+    private String startWork;
     @ApiModelProperty(value = "开始时间")
     private Date startTime;
     @ApiModelProperty(value = "结束时间")
     private Date endTime;
-    @ApiModelProperty(value = "提报异常标志位")
-    private String abnormalFlag;
+    @ApiModelProperty(value = "上工记录主键")
+    private String rwid;
+    @ApiModelProperty(value = "人员作业记录主键")
+    private String recordStaffId;
+    @ApiModelProperty(value = "不良品数(0:置灰,1:不置灰)")
+    private String defectiveProducts;
+    @ApiModelProperty(value = "提报异常(0:置灰,1:不置灰)")
+    private String reportingAnomalies;
     @ApiModelProperty(value = "异常主键")
     private String recordAbnormalId;
-    @ApiModelProperty(value = "异常项目id")
-    private String abnormalId;
+    @ApiModelProperty(value = "作业输入(0:置灰,1:不置灰)")
+    private String jobInput;
+    @ApiModelProperty(value = "作业指导(0:置灰,1:不置灰)")
+    private String homeworkGuidance;
+    @ApiModelProperty(value = "操作历史(0:置灰,1:不置灰)")
+    private String operationHistory;
+    @ApiModelProperty(value = "结束作业(0:置灰,1:不置灰)")
+    private String finishHomework;
+
+
+
+
 
     public OperationInfo() {
         super();

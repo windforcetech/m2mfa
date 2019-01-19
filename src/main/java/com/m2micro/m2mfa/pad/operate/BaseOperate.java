@@ -1,8 +1,16 @@
 package com.m2micro.m2mfa.pad.operate;
 
+import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
 
 public interface BaseOperate {
+
+    /**
+     * 获取操作栏相关信息
+     * @param scheduleId
+     * @param stationId
+     */
+    OperationInfo getOperationInfo(String scheduleId, String stationId);
 
     /**
      * 上工

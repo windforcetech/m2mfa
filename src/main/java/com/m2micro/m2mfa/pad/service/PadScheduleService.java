@@ -37,10 +37,5 @@ public interface PadScheduleService {
      */
     List<PadStationModel> getPendingStations(String scheduleId);
 
-    /**
-     * 获取操作栏相关信息
-     * @param scheduleId
-     * @param stationId
-     */
-    OperationInfo getOperationInfo(String scheduleId, String stationId);
+
 }

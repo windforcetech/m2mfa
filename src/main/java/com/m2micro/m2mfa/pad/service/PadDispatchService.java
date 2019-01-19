@@ -1,10 +1,18 @@
 package com.m2micro.m2mfa.pad.service;
 
+import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
 
 import java.lang.reflect.InvocationTargetException;
 
 public interface PadDispatchService {
+
+    /**
+     * 获取操作栏相关信息
+     * @param scheduleId
+     * @param stationId
+     */
+    OperationInfo getOperationInfo(String scheduleId, String stationId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException;
 
     /**
      * 上工

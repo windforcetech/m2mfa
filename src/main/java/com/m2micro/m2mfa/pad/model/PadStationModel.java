@@ -17,7 +17,8 @@ import javax.validation.constraints.NotEmpty;
 @ApiModel(description="pad端登陆后工位信息")
 @Data
 public class PadStationModel {
-
+    @ApiModelProperty(value = "工序主键")
+    private String processId;
     @ApiModelProperty(value = "工位主键")
     private String stationId;
     @ApiModelProperty(value = "工位编号")

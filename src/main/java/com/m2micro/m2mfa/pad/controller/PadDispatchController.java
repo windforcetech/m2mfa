@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.pad.controller;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import io.swagger.annotations.Api;
@@ -24,6 +25,16 @@ import java.lang.reflect.InvocationTargetException;
 public class PadDispatchController {
     @Autowired
     PadDispatchService padDispatchService;
+
+    /**
+     * 获取操作栏相关信息
+     */
+    @RequestMapping("/getOperationInfo")
+    @ApiOperation(value="获取操作栏相关信息")
+    @UserOperationLog("获取操作栏相关信息")
+    public ResponseMessage<OperationInfo> getOperationInfo(String scheduleId, String stationId) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return ResponseMessage.ok(padDispatchService.getOperationInfo(scheduleId,stationId));
+    }
 
     /**
      * 上工

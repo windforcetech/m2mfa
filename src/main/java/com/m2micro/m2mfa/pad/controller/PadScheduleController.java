@@ -62,15 +62,4 @@ public class PadScheduleController {
         return ResponseMessage.ok(padScheduleService.getPendingStations(scheduleId));
     }
 
-
-    /**
-     * 获取操作栏相关信息
-     */
-    @RequestMapping("/getOperationInfo")
-    @ApiOperation(value="获取操作栏相关信息")
-    @UserOperationLog("获取操作栏相关信息")
-    public ResponseMessage<OperationInfo> getOperationInfo(String scheduleId, String stationId){
-        return ResponseMessage.ok(padScheduleService.getOperationInfo(scheduleId,stationId));
-    }
-
 }
