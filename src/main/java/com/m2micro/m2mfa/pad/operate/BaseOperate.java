@@ -3,7 +3,12 @@ package com.m2micro.m2mfa.pad.operate;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
 import com.m2micro.m2mfa.pad.model.StartWorkPara;
+import com.m2micro.m2mfa.pad.model.StopWorkModel;
+import com.m2micro.m2mfa.pad.model.StopWorkPara;
 
+/**
+ * 基础操作接口
+ */
 public interface BaseOperate {
 
     /**
@@ -25,7 +30,7 @@ public interface BaseOperate {
      * @param obj
      * @return
      */
-    Object stopWork(Object obj);
+    StopWorkModel stopWork(StopWorkPara obj);
 
     /**
      * 结束作业

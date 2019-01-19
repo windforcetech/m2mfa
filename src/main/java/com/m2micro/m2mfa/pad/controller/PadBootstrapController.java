@@ -4,6 +4,7 @@ import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.pad.model.PadPara;
+import com.m2micro.m2mfa.pad.model.StopWorkPara;
 import com.m2micro.m2mfa.pad.service.PadBootstrapService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,7 +41,7 @@ public class PadBootstrapController {
     @RequestMapping("/stopWork")
     @ApiOperation(value="pad开机下工")
     @UserOperationLog("pad开机下工")
-    public ResponseMessage stopWork(Object obj){
+    public ResponseMessage stopWork(StopWorkPara obj){
         return ResponseMessage.ok(padBootstrapService.stopWork(obj));
     }
 

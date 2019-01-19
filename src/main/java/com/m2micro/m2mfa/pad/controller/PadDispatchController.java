@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
+import com.m2micro.m2mfa.pad.model.StopWorkPara;
 import com.m2micro.m2mfa.pad.model.StartWorkPara;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import io.swagger.annotations.Api;
@@ -53,7 +54,7 @@ public class PadDispatchController {
     @RequestMapping("/stopWork")
     @ApiOperation(value="pad开机下工")
     @UserOperationLog("pad开机下工")
-    public ResponseMessage stopWork(Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public ResponseMessage stopWork(StopWorkPara obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.stopWork(obj));
     }
 

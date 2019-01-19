@@ -5,9 +5,15 @@ import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
+import com.m2micro.m2mfa.pad.model.StopWorkModel;
+import com.m2micro.m2mfa.pad.model.StopWorkPara;
 import com.m2micro.m2mfa.pad.model.StartWorkPara;
 import com.m2micro.m2mfa.pad.util.DateUtil;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
+import com.m2micro.m2mfa.record.entity.MesRecordStaff;
+import com.m2micro.m2mfa.record.entity.MesRecordWork;
+import com.m2micro.m2mfa.record.service.MesRecordStaffService;
+import com.m2micro.m2mfa.record.service.MesRecordWorkService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -22,12 +28,16 @@ import java.util.List;
 /**
  * @Auther: liaotao
  * @Date: 2019/1/2 10:31
- * @Description:
+ * @Description:    基础操作接口实现类
  */
 @Component("baseOperate")
 public class BaseOperateImpl implements BaseOperate {
     @Autowired
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    MesRecordWorkService mesRecordWorkService;
+    @Autowired
+    MesRecordStaffService mesRecordStaffService;
     @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
 
@@ -239,8 +249,35 @@ public class BaseOperateImpl implements BaseOperate {
     }
 
     @Override
-    public Object stopWork(Object obj) {
-        return null;
+    @Transactional
+    public StopWorkModel stopWork(StopWorkPara obj) {
+        //更新上工记录表结束时间
+        updateRecordWorkEndTime(obj.getRecordStaffId());
+        //更新职员作业记录表结束时间
+        updateRecordStaffEndTime(obj.getRecordStaffId());
+        return new StopWorkModel();
+    }
+
+    /**
+     * 更新职员作业记录表结束时间
+     * @param recordStaffId
+     */
+    @Transactional
+    protected void updateRecordStaffEndTime(String recordStaffId) {
+        MesRecordStaff mesRecordStaff = mesRecordStaffService.findById(recordStaffId).orElse(null);
+        mesRecordStaff.setEndTime(new Date());
+        mesRecordStaffService.save(mesRecordStaff);
+    }
+
+    /**
+     * 更新上工记录表结束时间
+     * @param recordStaffId
+     */
+    @Transactional
+    protected void updateRecordWorkEndTime(String recordStaffId) {
+        MesRecordWork mesRecordWork = mesRecordWorkService.findById(recordStaffId).orElse(null);
+        mesRecordWork.setEndTime(new Date());
+        mesRecordWorkService.save(mesRecordWork);
     }
 
     @Override
@@ -312,7 +349,7 @@ public class BaseOperateImpl implements BaseOperate {
      */
     @Transactional
     protected void updateProcessStarTime(String scheduleId, String processId) {
-        String sql ="UPDATE mes_mo_schedule_process mmsp SET mmsp.actual_start_time = '"+ DateUtil.dateFormat(new Date())+"'   WHERE mmsp.schedule_id = '"+scheduleId+"' AND mmsp.process_id = '"+processId+"' AND ISNULL(mmsp.actual_start_time)";
+        String sql ="UPDATE mes_mo_schedule_process mmsp SET mmsp.actual_start_time = '"+new Date() +"' WHERE mmsp.schedule_id = '"+scheduleId+"' AND mmsp.process_id = '"+processId+"' AND ISNULL(mmsp.actual_start_time)";
         jdbcTemplate.update(sql);
     }
 

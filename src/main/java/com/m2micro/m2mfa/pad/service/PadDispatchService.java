@@ -3,6 +3,8 @@ package com.m2micro.m2mfa.pad.service;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.PadPara;
 import com.m2micro.m2mfa.pad.model.StartWorkPara;
+import com.m2micro.m2mfa.pad.model.StopWorkModel;
+import com.m2micro.m2mfa.pad.model.StopWorkPara;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -31,7 +33,7 @@ public interface PadDispatchService {
      * @param obj
      * @return
      */
-    Object stopWork(Object obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException;
+    StopWorkModel stopWork(StopWorkPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException;
 
     /**
      * 结束作业

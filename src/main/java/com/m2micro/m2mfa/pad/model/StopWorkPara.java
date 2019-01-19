@@ -12,6 +12,8 @@ import lombok.Data;
 @ApiModel(description="pad 下工参数")
 @Data
 public class StopWorkPara {
+    @ApiModelProperty(value = "工位Id")
+    private String stationId;
     @ApiModelProperty(value = "上工记录主键")
     private String rwid;
     @ApiModelProperty(value = "人员作业记录主键")
