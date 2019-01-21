@@ -84,7 +84,7 @@ public class BaseStaff extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "工位名称")
     private String  stationName;
 
-    @Size(max=50,message = "卡号长度不能大于50位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=50,message = "卡号长度不能大于15位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "卡号")
     private String icCard;
 
