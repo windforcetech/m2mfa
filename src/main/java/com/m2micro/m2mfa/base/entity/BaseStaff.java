@@ -86,14 +86,14 @@ public class BaseStaff extends BaseEntity implements Serializable {
 
     @Size(max=50,message = "卡号长度不能大于50位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "卡号")
-    private String cardNo;
+    private String icCard;
 
-    public String getCardNo() {
-        return cardNo;
+    public String getIcCard() {
+        return icCard;
     }
 
-    public void setCardNo(String cardNo) {
-        this.cardNo = cardNo;
+    public void setIcCard(String icCard) {
+        this.icCard = icCard;
     }
 
     public String getStationId() {
