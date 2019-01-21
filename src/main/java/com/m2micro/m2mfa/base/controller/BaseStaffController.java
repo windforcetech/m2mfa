@@ -122,6 +122,7 @@ public class BaseStaffController {
             if (user2.isPresent()) {
                 User mm=user2.get();
                 mm.setModifyPassword(defaultPassword);
+                mm.setUserName(user.getUserName());
                 mm.setOrgIds(orgIds);
                 iUserService.updateUser(mm);
                 userId = mm.getId();
