@@ -36,6 +36,11 @@ public class PadMachineServiceImpl extends BaseOperateImpl implements PadMachine
     }
 
     @Override
+    public StartWorkPara startWork(PadPara obj) {
+        return super.startWorkForOutput(obj);
+    }
+
+    @Override
     public StopWorkModel stopWork(StopWorkPara obj) {
         return super.stopWork(obj);
     }

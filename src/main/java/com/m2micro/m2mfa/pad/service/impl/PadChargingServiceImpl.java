@@ -23,8 +23,7 @@ public class PadChargingServiceImpl extends BaseOperateImpl implements PadChargi
 
     @Override
     public StartWorkPara startWork(PadPara obj) {
-        System.out.println("===============");
-        return null;
+        return super.startWorkForOutput(obj);
     }
 
     @Override
