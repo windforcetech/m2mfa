@@ -36,12 +36,12 @@ public class PadLoginController {
     @RequestMapping("/login")
     @ApiOperation(value="pad登录")
     @UserOperationLog("pad登录")
-    public ResponseMessage<LoginData> login(String staffNo){
-        if(StringUtils.isEmpty(staffNo)){
-            return ResponseMessage.error("用员工工号不能为空");
+    public ResponseMessage<LoginData> login(String icCard){
+        if(StringUtils.isEmpty(icCard)){
+            return ResponseMessage.error("用员工卡号不能为空");
         }
         //当前员工不存在
-        BaseStaff baseStaff = baseStaffRepository.findByCode(staffNo);
+        BaseStaff baseStaff = baseStaffRepository.findByIcCard(icCard);
         if(baseStaff==null){
             return ResponseMessage.error("当前员工不存在");
         }
@@ -51,7 +51,7 @@ public class PadLoginController {
         token.setUserID(baseStaff.getStaffId());
         TokenInfo.SetToken(token);
         //获取员工下的排产单
-        List<PadScheduleModel> mesMoSchedule = padScheduleService.getMesMoScheduleByStaffNo(staffNo);
+        List<PadScheduleModel> mesMoSchedule = padScheduleService.getMesMoSchedule();
         //设置返回数据
         LoginData loginData = new LoginData();
         loginData.setTokenId(token.getTokenID());
