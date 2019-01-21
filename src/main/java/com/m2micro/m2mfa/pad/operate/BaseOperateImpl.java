@@ -291,7 +291,6 @@ public class BaseOperateImpl implements BaseOperate {
         if(!isStationisWork(obj.getScheduleId(),obj.getStationId())){
             //新增上工记录返回上工记录id
             startWorkPara.setRwid(saveMesRecordWork(obj));
-
         }
         //更新员工作业时间
         updateStaffOperationTime(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId());
@@ -363,8 +362,9 @@ public class BaseOperateImpl implements BaseOperate {
      * @param machineId
      * @return
      */
+    @Transactional
     protected  String saveMesRecordStaff(String scheduleId,String rwId,String staffId,String machineId ){
-        IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(machineId);
+        IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(machineId);
         String id = UUIDUtil.getUUID();
         MesRecordStaff mesRecordStaff = new MesRecordStaff();
         mesRecordStaff.setId(id);
@@ -384,8 +384,9 @@ public class BaseOperateImpl implements BaseOperate {
      * @param machineId
      * @return
      */
+    @Transactional
     protected  String saveMesRecordStaffForOutput(String scheduleId,String rwId,String staffId,String machineId ){
-        IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(machineId);
+        IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(machineId);
         String id = UUIDUtil.getUUID();
         MesRecordStaff mesRecordStaff = new MesRecordStaff();
         mesRecordStaff.setId(id);
@@ -393,7 +394,7 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordStaff.setRwId(rwId);
         mesRecordStaff.setStaffId(staffId);
         if(iotMachineOutput !=null){
-            mesRecordStaff.setEndPower(iotMachineOutput.getPower());
+            mesRecordStaff.setStratPower(iotMachineOutput.getPower());
             mesRecordStaff.setStartMolds(iotMachineOutput.getMolds());
         }
         mesRecordStaff.setStartTime(new Date());
@@ -406,10 +407,11 @@ public class BaseOperateImpl implements BaseOperate {
      * @param obj
      * @return
      */
+    @Transactional
     protected String  saveMesRecordWork(PadPara obj) {
        MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(obj.getScheduleId()).orElse(null);
        MesMoDesc moDesc =  mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
-       IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+       IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
        MesMoScheduleProcess mesMoScheduleProcess =  mesMoScheduleProcessRepository.findbscheduleIdProcessId(obj.getScheduleId(),obj.getProcessId());
         //没有上工记录
         String rwId = UUIDUtil.getUUID();
@@ -422,6 +424,7 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordWork.setStationId(obj.getStationId());
         mesRecordWork.setMachineId(mesMoSchedule.getMachineId());
         mesRecordWork.setMoldId(mesMoScheduleProcess.getMoldId());
+        mesRecordWork.setStartTime(new Date());
         mesRecordWorkService.save(mesRecordWork);
         return  rwId;
     }
@@ -431,10 +434,11 @@ public class BaseOperateImpl implements BaseOperate {
      * @param obj
      * @return
      */
+    @Transactional
     protected String  saveMesRecordWorkForOutput(PadPara obj) {
         MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(obj.getScheduleId()).orElse(null);
         MesMoDesc moDesc =  mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
-        IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         MesMoScheduleProcess mesMoScheduleProcess =  mesMoScheduleProcessRepository.findbscheduleIdProcessId(obj.getScheduleId(),obj.getProcessId());
         //没有上工记录
         String rwId = UUIDUtil.getUUID();
@@ -447,6 +451,7 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordWork.setStationId(obj.getStationId());
         mesRecordWork.setMachineId(mesMoSchedule.getMachineId());
         mesRecordWork.setMoldId(mesMoScheduleProcess.getMoldId());
+        mesRecordWork.setStartTime(new Date());
         if(iotMachineOutput!=null){
             mesRecordWork.setStratPower(iotMachineOutput.getPower());
             mesRecordWork.setStartMolds(iotMachineOutput.getMolds());
