@@ -218,7 +218,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     @Override
     public List<SelectNode> getNames(String machineId) {
         String sql = "SELECT\n" +
-                    "	p.uuid id,\n" +
+                    "	DISTINCT p.uuid id,\n" +
                     "	p.propertyty_name name\n" +
                     "FROM\n" +
                     "	org_device_node odn,\n" +
