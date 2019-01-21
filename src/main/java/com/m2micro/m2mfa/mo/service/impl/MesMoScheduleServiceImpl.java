@@ -1028,7 +1028,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             throw  new MMException("工单ID有误。");
         }
         //修改工单状态为已排产
-        mesMoDescRepository.setCloseFlagFor(MoStatus.SCHEDULED.getKey(),mesMoSchedule.getMoId());
+        mesMoDescRepository.setCloseFlagFor(MoStatus.PRODUCTION.getKey(),mesMoSchedule.getMoId());
         if(basePartsService.findById(mesMoSchedule.getPartId()).orElse(null) == null){
             throw  new MMException("料件ID有误。");
         }
