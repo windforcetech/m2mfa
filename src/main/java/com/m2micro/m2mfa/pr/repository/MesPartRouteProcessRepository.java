@@ -19,4 +19,6 @@ public interface MesPartRouteProcessRepository extends BaseRepository<MesPartRou
     @Modifying
     @Query(value="delete from mes_part_route_process where  partrouteid=?1",nativeQuery = true)
     void deleteParRouteID(String parrouteid);
+
+
 }

@@ -23,9 +23,12 @@ import com.m2micro.m2mfa.pad.model.StartWorkPara;
 import com.m2micro.m2mfa.pad.util.DateUtil;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
+import com.m2micro.m2mfa.pr.entity.MesPartRouteProcess;
+import com.m2micro.m2mfa.pr.repository.MesPartRouteProcessRepository;
 import com.m2micro.m2mfa.record.entity.MesRecordFail;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
+import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
 import com.m2micro.m2mfa.record.service.MesRecordFailService;
 import com.m2micro.m2mfa.record.service.MesRecordStaffService;
 import com.m2micro.m2mfa.record.service.MesRecordWorkService;
@@ -65,6 +68,10 @@ public class BaseOperateImpl implements BaseOperate {
     MesMoScheduleProcessRepository mesMoScheduleProcessRepository;
     @Autowired
     IotMachineOutputService iotMachineOutputService;
+    @Autowired
+    private MesRecordWorkRepository mesRecordWorkRepository;
+    @Autowired
+    private MesPartRouteProcessRepository mesPartRouteProcessRepository;
     @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
 
@@ -544,8 +551,9 @@ public class BaseOperateImpl implements BaseOperate {
      * @return
      */
     protected boolean isfirstProcessfirstStation(String partRoutId ,String processId, String stationId) {
-        String sql ="select * from mes_part_route_process where setp in (select min(mpr.setp)   from mes_part_route_process mpr where  partrouteid='"+partRoutId+"') and  partrouteid='"+partRoutId+"'";
+        String sql ="select processid  from mes_part_route_process where setp in (select min(mpr.setp)   from mes_part_route_process mpr where  partrouteid='"+partRoutId+"') and  partrouteid='"+partRoutId+"'";
         String  maxprocessId =  jdbcTemplate.queryForObject(sql ,String .class);
+
         if(processId.equals(maxprocessId)){
             return  isProcessfirstStation(processId,stationId);
         }
@@ -560,8 +568,7 @@ public class BaseOperateImpl implements BaseOperate {
      * @return
      */
     protected boolean isStationisWork(String scheduleId, String stationId) {
-        String sql ="SELECT  mrw.rwid  FROM mes_record_work mrw WHERE mrw.schedule_id = '"+scheduleId+"' AND mrw.station_id = '"+stationId+"' AND mrw.start_time IS NOT NULL AND ISNULL(mrw.end_time)";
-        String rwid =  jdbcTemplate.queryForObject(sql ,String.class);
+       String rwid = mesRecordWorkRepository.isStationisWork(scheduleId,stationId);
         if(rwid !=null){
             return true;
         }
