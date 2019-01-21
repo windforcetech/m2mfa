@@ -56,8 +56,8 @@ public class PadScheduleServiceImpl implements PadScheduleService {
 
 
     @Override
-    public List<PadScheduleModel> getMesMoScheduleByStaffNo(String staffNo) {
-        BaseStaff baseStaff = baseStaffRepository.findByCode(staffNo);
+    public List<PadScheduleModel> getMesMoScheduleByIcCard(String icCard) {
+        BaseStaff baseStaff = baseStaffRepository.findByIcCard(icCard);
         if(baseStaff==null){
             throw new MMException("不存在该员工");
         }
@@ -93,15 +93,20 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "	min(ms.sequence) sequence,\n" +
                 "	ms.machine_id machineId,\n" +
                 "	IF(ms.flag="+ MoScheduleStatus.AUDITED.getKey() +",'"+MoScheduleStatus.AUDITED.getValue()+"','"+MoScheduleStatus.PRODUCTION.getValue()+"') flagStatus,\n" +
-                "	bm.name machineName\n" +
+                "	bm.name machineName,\n" +
+                "	bm.code machineCode,\n" +
+                "	bp.part_no partNo,\n" +
+                "	bp.name partName\n" +
                 "FROM\n" +
                 "	mes_mo_schedule ms,\n" +
                 "	mes_mo_schedule_staff mss,\n" +
-                "	base_machine bm\n" +
+                "	base_machine bm,\n" +
+                "	base_parts bp\n" +
                 "WHERE\n" +
                 "	mss.schedule_id = ms.schedule_id \n" +
                 "AND ms.flag = "+ MoScheduleStatus.PRODUCTION.getKey() +"\n" +
                 "AND bm.machine_id = ms.machine_id\n" +
+                "AND bp.part_id=ms.part_id\n" +
                 "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
                 "GROUP BY\n" +
                 "	ms.machine_id\n" +
@@ -148,15 +153,20 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "	min(ms.sequence) sequence,\n" +
                 "	ms.machine_id machineId,\n" +
                 "	IF(ms.flag="+ MoScheduleStatus.AUDITED.getKey() +",'"+MoScheduleStatus.AUDITED.getValue()+"','"+MoScheduleStatus.PRODUCTION.getValue()+"') flagStatus,\n" +
-                "	bm.name machineName\n" +
+                "	bm.name machineName,\n" +
+                "	bm.code machineCode,\n" +
+                "	bp.part_no partNo,\n" +
+                "	bp.name partName\n" +
                 "FROM\n" +
                 "	mes_mo_schedule ms,\n" +
                 "	mes_mo_schedule_staff mss,\n" +
-                "	base_machine bm\n" +
+                "	base_machine bm,\n" +
+                "	base_parts bp\n" +
                 "WHERE\n" +
                 "	mss.schedule_id = ms.schedule_id \n" +
                 "AND ms.flag = "+ MoScheduleStatus.AUDITED.getKey() +"\n" +
                 "AND bm.machine_id = ms.machine_id\n" +
+                "AND bp.part_id=ms.part_id\n" +
                 "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
                 "GROUP BY\n" +
                 "	ms.machine_id\n" +

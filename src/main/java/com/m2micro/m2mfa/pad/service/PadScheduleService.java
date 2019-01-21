@@ -20,11 +20,11 @@ public interface PadScheduleService {
 
     /**
      * 获取当前用户下的排产单
-     * @param staffNo
-     *          员工工号id
+     * @param icCard
+     *          ic卡号
      * @return
      */
-    List<PadScheduleModel> getMesMoScheduleByStaffNo(String staffNo);
+    List<PadScheduleModel> getMesMoScheduleByIcCard(String icCard);
     /**
      * 获取当前用户下的排产单
      * @return

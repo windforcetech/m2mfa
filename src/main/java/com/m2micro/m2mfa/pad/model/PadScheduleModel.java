@@ -21,8 +21,14 @@ public class PadScheduleModel {
     private Integer sequence;
     @ApiModelProperty(value = "机台ID")
     private String machineId;
+    @ApiModelProperty(value = "机台编号")
+    private String machineCode;
     @ApiModelProperty(value = "机台名称")
     private String machineName;
+    @ApiModelProperty(value = "料件编号")
+    private String partNo;
+    @ApiModelProperty(value = "品名")
+    private String partName;
     @ApiModelProperty(value = "排产单状态")
     private String flagStatus;
 }

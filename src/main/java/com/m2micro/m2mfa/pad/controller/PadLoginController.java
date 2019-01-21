@@ -51,7 +51,7 @@ public class PadLoginController {
         token.setUserID(baseStaff.getStaffId());
         TokenInfo.SetToken(token);
         //获取员工下的排产单
-        List<PadScheduleModel> mesMoSchedule = padScheduleService.getMesMoSchedule();
+        List<PadScheduleModel> mesMoSchedule = padScheduleService.getMesMoScheduleByIcCard(icCard);
         //设置返回数据
         LoginData loginData = new LoginData();
         loginData.setTokenId(token.getTokenID());

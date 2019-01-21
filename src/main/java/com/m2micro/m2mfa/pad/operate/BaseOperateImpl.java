@@ -10,7 +10,10 @@ import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.model.PadPara;
@@ -19,6 +22,7 @@ import com.m2micro.m2mfa.pad.model.StopWorkPara;
 import com.m2micro.m2mfa.pad.model.StartWorkPara;
 import com.m2micro.m2mfa.pad.util.DateUtil;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
+import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.record.entity.MesRecordFail;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
@@ -55,8 +59,10 @@ public class BaseOperateImpl implements BaseOperate {
     MesMoScheduleService mesMoScheduleService;
     @Autowired
     MesMoDescService mesMoDescService;
-
-
+    @Autowired
+    MesMoDescRepository mesMoDescRepository;
+    @Autowired
+    MesMoScheduleProcessRepository mesMoScheduleProcessRepository;
     @Autowired
     IotMachineOutputService iotMachineOutputService;
     @Override
@@ -239,6 +245,7 @@ public class BaseOperateImpl implements BaseOperate {
      * @return
      */
     private OperationInfo setAbnormalInfo(List<OperationInfo> recordAbnormals,OperationInfo operationInfo) {
+
         if(recordAbnormals!=null&&recordAbnormals.size()>1){
             throw new MMException("异常记录提报数据库数据异常！");
         }
@@ -266,6 +273,8 @@ public class BaseOperateImpl implements BaseOperate {
     @Override
     @Transactional
     public StartWorkPara startWork(PadPara obj) {
+        MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(obj.getScheduleId()).orElse(null);
+
         StartWorkPara startWorkPara = new StartWorkPara();
         //是否工序的首工位
         if(isProcessfirstStation(obj.getProcessId(),obj.getStationId())){
@@ -278,27 +287,78 @@ public class BaseOperateImpl implements BaseOperate {
             startWorkPara.setRwid(saveMesRecordWork(obj));
 
         }
+
         //更新员工作业时间
         updateStaffOperationTime(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId());
 
-        //新增人员作业记录
 
-        //新增上工记录返回人员记录id
-        startWorkPara.setRecordStaffId(saveMesRecordStaff());
+        //新增人员作业记录 新增上工记录返回人员记录id
+        startWorkPara.setRecordStaffId(saveMesRecordStaff(obj.getScheduleId(),startWorkPara.getRwid(), PadStaffUtil.getStaff().getStaffId(),mesMoSchedule.getMachineId()));
+
+        //是否首工序首工位
+        MesPartRoute mesPartRoute =getMesParRoute(mesMoSchedule.getMoId());
+        if(isfirstProcessfirstStation(mesPartRoute.getPartRouteId(),obj.getProcessId(), obj.getStationId())){
+            // 跟新排产单状态为执行中
+            updateMesMoScheduleFlag(obj.getScheduleId());
+            //修改工单状态为生产中
+            mesMoDescRepository.setCloseFlagFor(MoStatus.PRODUCTION.getKey(),mesMoSchedule.getMoId());
+        }
+
 
         return startWorkPara;
     }
 
-
-    protected  String saveMesRecordStaff(){
-
-        return  null;
+    /**
+     * 根据排产单Id获取对应的图称信息
+     * @param moId
+     * @return
+     */
+    private MesPartRoute getMesParRoute(String moId) {
+        MesMoDesc moDesc = mesMoDescService.findById(moId).orElse(null);
+        String sql ="select * from mes_part_route where part_id ='"+moDesc.getPartId()+"'";
+        RowMapper rms= BeanPropertyRowMapper.newInstance(MesPartRoute.class);
+        List<MesPartRoute> mesPartRoutes  = jdbcTemplate.query(sql ,rms);
+        if(mesPartRoutes.isEmpty()){
+            throw  new MMException("该料件不存在。");
+        }
+        return  mesPartRoutes.get(0);
     }
 
+    /**
+     * 新增人员作业记录
+     * @param scheduleId
+     * @param rwId
+     * @param staffId
+     * @param machineId
+     * @return
+     */
+    protected  String saveMesRecordStaff(String scheduleId,String rwId,String staffId,String machineId ){
+        IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(machineId);
+        String id = UUIDUtil.getUUID();
+        MesRecordStaff mesRecordStaff = new MesRecordStaff();
+        mesRecordStaff.setId(id);
+        mesRecordStaff.setScheduleId(scheduleId);
+        mesRecordStaff.setRwId(rwId);
+        mesRecordStaff.setStaffId(staffId);
+        if(iotMachineOutput !=null){
+            mesRecordStaff.setEndPower(iotMachineOutput.getPower());
+            mesRecordStaff.setStartMolds(iotMachineOutput.getMolds());
+        }
+        mesRecordStaff.setStartTime(new Date());
+        mesRecordStaffService.save(mesRecordStaff);
+        return  id;
+    }
+
+    /**
+     * 新增上工记录
+     * @param obj
+     * @return
+     */
     protected String  saveMesRecordWork(PadPara obj) {
        MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(obj.getScheduleId()).orElse(null);
        MesMoDesc moDesc =  mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
-
+       IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+       MesMoScheduleProcess mesMoScheduleProcess =  mesMoScheduleProcessRepository.findbscheduleIdProcessId(obj.getScheduleId(),obj.getProcessId());
         //没有上工记录
         String rwId = UUIDUtil.getUUID();
         MesRecordWork mesRecordWork = new MesRecordWork();
@@ -309,6 +369,11 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordWork.setProcessId(obj.getProcessId());
         mesRecordWork.setStationId(obj.getStationId());
         mesRecordWork.setMachineId(mesMoSchedule.getMachineId());
+        mesRecordWork.setMoldId(mesMoScheduleProcess.getMoldId());
+        if(iotMachineOutput!=null){
+            mesRecordWork.setStratPower(iotMachineOutput.getPower());
+            mesRecordWork.setStartMolds(iotMachineOutput.getMolds());
+        }
 
         mesRecordWorkService.save(mesRecordWork);
 
@@ -403,6 +468,21 @@ public class BaseOperateImpl implements BaseOperate {
         return false;
     }
 
+    /**
+     * 是否首工序的首工位
+     * @param partRoutId
+     * @param processId
+     * @param stationId
+     * @return
+     */
+    protected boolean isfirstProcessfirstStation(String partRoutId ,String processId, String stationId) {
+        String sql ="select * from mes_part_route_process where setp in (select min(mpr.setp)   from mes_part_route_process mpr where  partrouteid='"+partRoutId+"') and  partrouteid='"+partRoutId+"'";
+        String  maxprocessId =  jdbcTemplate.queryForObject(sql ,String .class);
+        if(processId.equals(maxprocessId)){
+            return  isProcessfirstStation(processId,stationId);
+        }
+        return false;
+    }
 
 
     /**
@@ -464,5 +544,6 @@ public class BaseOperateImpl implements BaseOperate {
     protected IotMachineOutput findIotMachineOutputByMachineId(String machineId){
         return iotMachineOutputService.findIotMachineOutputByMachineId(machineId);
     }
+
 
 }
