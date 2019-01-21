@@ -37,4 +37,8 @@ public interface BaseStaffRepository extends BaseRepository<BaseStaff,String> {
      * @return  员工信息
      */
     BaseStaff findByIcCard(String idCard);
+
+    int countByIcCard(String icCard);
+
+    int countByIcCardAndStaffIdNot(String icCard,String staffId);
 }

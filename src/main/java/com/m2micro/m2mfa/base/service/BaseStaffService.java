@@ -46,4 +46,7 @@ public interface BaseStaffService extends BaseService<BaseStaff,String> {
      * @return  员工信息
      */
     BaseStaff findByCode(String code);
+
+    boolean existByIcCard(String icCard);
+    boolean existByIcCardAndIdNot(String icCard,String id);
 }

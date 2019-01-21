@@ -156,6 +156,17 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         return baseStaffRepository.findByCode(code);
     }
 
+    @Override
+    public boolean existByIcCard(String icCard) {
+
+        return baseStaffRepository.countByIcCard(icCard)>0;
+    }
+
+    @Override
+    public boolean existByIcCardAndIdNot(String icCard, String id) {
+        return baseStaffRepository.countByIcCardAndStaffIdNot(icCard,id)>0;
+    }
+
     @Transactional
     @Override
     public void deleteByStaffId(String[] ids) {

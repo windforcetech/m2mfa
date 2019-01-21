@@ -96,6 +96,9 @@ public class BaseStaffController {
         if (byCodeAndStaffIdNot != null && byCodeAndStaffIdNot.size() > 0) {
             throw new MMException("工号不唯一！");
         }
+        if(baseStaff.getIcCard()!=null&&baseStaffService.existByIcCard(baseStaff.getIdCard())){
+            throw new MMException("卡号不唯一！");
+        }
         Boolean needAddUser = baseStaff.getNeedAddUser();
         if (needAddUser) {
             //   T t = ;
@@ -151,6 +154,9 @@ public class BaseStaffController {
         List<BaseStaff> byCodeAndStaffIdNot = baseStaffService.findByCodeAndStaffIdNot(baseStaff.getCode(), baseStaff.getStaffId());
         if (byCodeAndStaffIdNot != null && byCodeAndStaffIdNot.size() > 0) {
             throw new MMException("工号不唯一！");
+        }
+        if(baseStaff.getIcCard()!=null&&baseStaffService.existByIcCardAndIdNot(baseStaff.getIdCard(),baseStaff.getStaffId())){
+            throw new MMException("卡号冲突！");
         }
         Boolean needAddUser = baseStaff.getNeedAddUser();
         if (needAddUser) {
