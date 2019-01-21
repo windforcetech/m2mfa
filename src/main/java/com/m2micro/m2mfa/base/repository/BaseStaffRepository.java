@@ -29,4 +29,12 @@ public interface BaseStaffRepository extends BaseRepository<BaseStaff,String> {
     BaseStaff findByCode(String code);
 
     void deleteByStaffId(String id);
+
+    /**
+     * 根据icCard获取员工信息
+     * @param idCard
+     *          ic卡号
+     * @return  员工信息
+     */
+    BaseStaff findByIcCard(String idCard);
 }
