@@ -274,6 +274,7 @@ public class BaseStaffshiftController {
     public ResponseMessage<List<BaseStaffshift>> updateall(@RequestBody List<BaseStaffshift> baseStaffshift) {
 
         List<BaseStaffshift> list = new ArrayList<>();
+        List<String> listDelete = new ArrayList<>();
         for (BaseStaffshift baseStaffshift1 : baseStaffshift
         ) {
             ValidatorUtil.validateEntity(baseStaffshift1, UpdateGroup.class);
@@ -281,9 +282,15 @@ public class BaseStaffshiftController {
             if (baseStaffshiftOld == null) {
                 throw new MMException("数据库不存在该记录");
             }
-            PropertyUtil.copy(baseStaffshift1, baseStaffshiftOld);
-            list.add(baseStaffshiftOld);
+            if (StringUtils.isEmpty(baseStaffshift1.getShiftId())) {//为null,删除
+                listDelete.add(baseStaffshift1.getId());
+
+            } else {
+                PropertyUtil.copy(baseStaffshift1, baseStaffshiftOld);
+                list.add(baseStaffshiftOld);
+            }
         }
+        baseStaffshiftService.deleteByIds(listDelete.toArray(new String [0]));
         return ResponseMessage.ok(baseStaffshiftService.saveAll(list));
     }
 
