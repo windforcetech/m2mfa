@@ -7,5 +7,5 @@ package com.m2micro.m2mfa.iot.constant;
  */
 public class IotConstant {
     // 注塑成型工序的id
-    public static final String PROCESS_ID = "3C4E364EFCBE4C8080F2462D26E41991";
+    public static final String PROCESS_ID = "F5A936ED96074714AEA9E90E9B5B2F35";
 }
