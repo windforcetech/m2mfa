@@ -473,13 +473,12 @@ public class MesMoDescServiceImpl implements MesMoDescService {
               }else {
                   sql += " ( 	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" ;
               }
-              sql += "OR mmd.close_flag = " + MoStatus.SCHEDULED.getKey() + "\n" +
-                 "OR (\n" +
-                 "	mmd.close_flag = " + MoStatus.PRODUCTION.getKey() + "\n" +
-                 "	AND mmd.is_schedul = 0\n" +
-                 ") ) ";
+              sql += " OR mmd.close_flag = "+ MoStatus.SCHEDULED.getKey() + "\n" +
+                      "		OR mmd.close_flag = "+ MoStatus.PRODUCTION.getKey() + "\n" +
+                      "	)\n" +
+                      " AND IFNULL(mmd.is_schedul,0) <> 1\n";
               RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDesc.class);
-              List<MesMoDesc>listcount = jdbcTemplate.query(sql,rm);
+              List<MesMoDesc> listcount = jdbcTemplate.query(sql,rm);
              sql += "limit  " + (query.getPage() - 1) *query.getSize()+" , "+query.getSize();
              List<MesMoDesc>list = jdbcTemplate.query(sql,rm);
             return PageUtil.of(list,listcount.size(),query.getSize(),query.getPage());
