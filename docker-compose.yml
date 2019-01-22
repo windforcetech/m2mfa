@@ -1,7 +1,7 @@
 version: '2'
 services:
   web:
-    image: m2micro/m2mfa
+    image: m2micro/m2mfa:2.1.0-SNAPSHOT
     build:
       context: .
       args:
