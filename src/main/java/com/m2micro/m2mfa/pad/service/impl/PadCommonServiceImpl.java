@@ -13,7 +13,7 @@ public class PadCommonServiceImpl extends BaseOperateImpl implements PadCommonSe
 
     @Override
     public StartWorkPara startWork(PadPara obj) {
-        return super.startWork(obj);
+        return  super.startWork(obj);
     }
 
     @Override
