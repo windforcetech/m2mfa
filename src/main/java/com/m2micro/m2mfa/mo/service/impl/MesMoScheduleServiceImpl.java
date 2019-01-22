@@ -56,7 +56,8 @@ import java.util.List;
 @Service
 @Transactional
 public class MesMoScheduleServiceImpl implements MesMoScheduleService {
-    @Autowired
+
+@Autowired
     private MesMoDescService mesMoDescService;
     @Autowired
     private MesPartRouteService mesPartRouteService;
@@ -111,15 +112,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @Autowired
     private MesMoScheduleShiftRepository mesMoScheduleShiftRepository;
 
-
-
-
-    @SuppressWarnings("unchecked")
+@Override@SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
         return mesMoScheduleRepository;
     }
 
-    @Override
+
+@Override
     public ScheduleAllInfoModel getScheduleAllInfoModel(String scheduleId) {
         MesMoSchedule mesMoSchedule = findById(scheduleId).orElse(null);
         List<MesMoScheduleShift> mesMoScheduleShifts = mesMoScheduleShiftRepository.findByScheduleId(scheduleId);
@@ -135,7 +134,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return scheduleAllInfoModel;
     }
 
-    @Override
+
+@Override
     @Transactional
     public void saveScheduleAllInfoModel(ScheduleAllInfoModel scheduleAllInfoModel) {
         if(scheduleAllInfoModel.getMesMoSchedule()!=null){
@@ -156,8 +156,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-
-    @Transactional
+@Transactional
     @Override
     public void peopleDistributionsave(List<MesMoScheduleStaff> mesMoScheduleStaffs,List<MesMoScheduleStation> mesMoScheduleStations) {
         for( MesMoScheduleStaff mesMoScheduleStaff : mesMoScheduleStaffs){
@@ -181,8 +180,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-
-    @Override
+@Override
     public PageUtil<MesMoScheduleModel> list(MesMoScheduleQuery query) {
 
         String sql = "SELECT\n" +
@@ -236,14 +234,16 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
 
-    @Override
+
+@Override
     public List<MesMoSchedule> findpartID(String partID) {
         String sql ="select * from mes_mo_schedule where part_id='"+partID+"'";
         RowMapper<MesMoSchedule> rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
         return jdbcTemplate.query(sql,rm);
     }
 
-    @Override
+
+@Override
     public List<MesMoSchedule> findByMoIdAndFlag(String moId, List<Integer> flags) {
 
         QMesMoSchedule qMesMoSchedule = QMesMoSchedule.mesMoSchedule;
@@ -264,7 +264,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return list;
     }
 
-    @Override
+
+@Override
     @Transactional
     public void auditing(String id) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
@@ -278,7 +279,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesMoScheduleRepository.setFlagFor(MoScheduleStatus.AUDITED.getKey(),mesMoSchedule.getScheduleId());
     }
 
-    @Override
+
+@Override
     @Transactional
     public void cancel(String id) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
@@ -292,7 +294,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesMoScheduleRepository.setFlagFor(MoScheduleStatus.INITIAL.getKey(),mesMoSchedule.getScheduleId());
     }
 
-    @Override
+
+@Override
     @Transactional
     public void frozen(String id) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
@@ -310,7 +313,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         stopWorkForStaff(mesMoSchedule);
     }
 
-    /**
+
+/**
      * 人员记录表下工
      * @param mesMoSchedule
      */
@@ -323,7 +327,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesRecordStaffRepository.setEndAll(new Date(),iotMachineOutput.getPower(),iotMachineOutput.getMolds(),mesMoSchedule.getScheduleId());
     }
 
-    @Override
+
+@Override
     @Transactional
     public void unfreeze(String id) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
@@ -336,7 +341,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesMoScheduleRepository.setFlagAndPrefreezingStateFor(mesMoSchedule.getPrefreezingState(),null,mesMoSchedule.getScheduleId());
     }
 
-    @Override
+
+@Override
     @Transactional
     public void forceClose(String id) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
@@ -357,7 +363,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     }
 
-    /**
+
+/**
      *  所有下工操作及退产量
      * @param mesMoSchedule
      */
@@ -395,12 +402,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
     }
 
-    /**
+
+/**
      * 获取未完成的排产单产量
      * @param scheduleId
      * @return
      */
-    public Integer getUncompletedQty(String scheduleId) {
+    @Override public Integer getUncompletedQty(String scheduleId) {
         String sql ="SELECT\n" +
                     "IFNULL(mms.schedule_qty, 0) - IFNULL(msp.output_qty, 0) UncompletedQty\n" +
                     "FROM\n" +
@@ -417,8 +425,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-
-    @Override
+@Override
     public MesPartvo findbyMoId(String moId) {
         MesMoDesc moDesc = mesMoDescService.findById(moId).orElse(null);
         if(moDesc == null){
@@ -434,8 +441,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-
-    @Override
+@Override
     public MesMoScheduleInfoModel addDetails() {
         List<BaseShiftModel> baseShiftModels = getBaseShiftModels();
         MesMoScheduleInfoModel mesMoScheduleInfoModel = new MesMoScheduleInfoModel();
@@ -443,7 +449,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return mesMoScheduleInfoModel;
     }
 
-    /**
+
+/**
      * 获取所有班别信息及对应的有效时间
      * @return
      */
@@ -461,7 +468,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return baseShiftModels;
     }
 
-    @Override
+
+@Override
     public ProductionProcess info(String scheduleId) {
 
         MesMoSchedule mesMoSchedule = getMesMoSchedule(scheduleId);
@@ -475,7 +483,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return ProductionProcess.builder().mesMoSchedule(mesMoSchedule).baseProcesses(mesMoScheduleStaffs).mesMoScheduleProcesses(mesMoScheduleProcesses).mesMoScheduleStations(mesMoScheduleStations).build();
     }
 
-    private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
+
+private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         String sqlstation ="SELECT\n" +
                 "	mss.*, bp.process_name processName,\n" +
                 "	bs.`name` stationName\n" +
@@ -490,7 +499,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return jdbcTemplate.query(sqlstation,rmstation);
     }
 
-    /**
+
+/**
      * 获取排产主表信息以及所对应的班别信息
      * @param scheduleId
      * @return
@@ -535,7 +545,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return mesMoSchedule;
     }
 
-    /**
+
+/**
      * 获取未排量
      * @param moId
      * @return
@@ -552,8 +563,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 "	mmd.close_flag = "+MoStatus.PRODUCTION.getKey()+"\n" +
                 "	AND mmd.is_schedul = 0\n" +
                 ") )  and  mmd.mo_id='"+moId+"'";
+       try {
+           return jdbcTemplate.queryForObject(sql,Integer.class);
+       }catch (Exception e){
+           return 0;
+       }
 
-        return jdbcTemplate.queryForObject(sql,Integer.class);
     }
     /**
      * 获取排产单对应的班别信息
@@ -1114,10 +1129,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 //            if(basePackService.findById(mesMoScheduleProcess.getPackId()).orElse(null)==null){
 //                throw  new MMException("生产排程包装配置档ID有误。");
 //            }
-
-            if( baseMoldService.findById(mesMoScheduleProcess.getMoldId()).orElse(null)==null){
-                throw  new MMException("生产排程模具ID有误。");
+            if(mesMoScheduleProcess.getMoldId()!=null){
+                if( baseMoldService.findById(mesMoScheduleProcess.getMoldId()).orElse(null)==null){
+                    throw  new MMException("生产排程模具ID有误。");
+                }
             }
+
             mesMoScheduleProcessService.save(mesMoScheduleProcess);
         }
     }
@@ -1196,3 +1213,5 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 }
+
+
