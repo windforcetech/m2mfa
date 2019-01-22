@@ -65,7 +65,7 @@ public class MesMoScheduleProcess extends BaseEntity implements Serializable {
     private Integer beerQty;
     @ApiModelProperty(value = "产出数")
     private Integer outputQty;
-    @NotEmpty(message="模具主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
+
     @ApiModelProperty(value = "模具主键")
     private String moldId;
 

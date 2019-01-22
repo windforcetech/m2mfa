@@ -1114,10 +1114,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 //            if(basePackService.findById(mesMoScheduleProcess.getPackId()).orElse(null)==null){
 //                throw  new MMException("生产排程包装配置档ID有误。");
 //            }
-
-            if( baseMoldService.findById(mesMoScheduleProcess.getMoldId()).orElse(null)==null){
-                throw  new MMException("生产排程模具ID有误。");
+            if(mesMoScheduleProcess.getMoldId()!=null){
+                if( baseMoldService.findById(mesMoScheduleProcess.getMoldId()).orElse(null)==null){
+                    throw  new MMException("生产排程模具ID有误。");
+                }
             }
+
             mesMoScheduleProcessService.save(mesMoScheduleProcess);
         }
     }
