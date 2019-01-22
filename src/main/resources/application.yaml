@@ -33,6 +33,8 @@ scheduletask:
 
 m2mfa:
   version: @project.version@
+file:
+  baseDir:
 
 
 
