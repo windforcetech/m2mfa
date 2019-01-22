@@ -17,5 +17,7 @@ public interface BaseRouteDescRepository extends BaseRepository<BaseRouteDesc,St
 
     @Query("select r.routeId  from BaseRouteDesc  as r where r.routeNo=?1")
     String selectRouteNo(String routeNo);
+    @Query(value = "select route_id from base_route_desc  where route_name=?1",nativeQuery = true)
+    String selectrouteName(String routName);
 
 }

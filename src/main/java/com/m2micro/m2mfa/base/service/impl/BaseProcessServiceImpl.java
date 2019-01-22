@@ -54,6 +54,9 @@ public class BaseProcessServiceImpl implements BaseProcessService {
     @Override
     @Transactional
     public boolean save(BaseProcess baseProcess, List<BaseProcessStation> baseProcessStations, BasePageElemen basePageElemen) {
+        if(baseProcessRepository.selectName(baseProcess.getProcessName())!=null){
+            throw   new MMException(baseProcess.getProcessName()+"工序名称已经存在");
+        }
         if(!StringUtils.isNotEmpty(baseProcessRepository.selectprocessCode(baseProcess.getProcessCode()))) {
             String uuid = UUIDUtil.getUUID();
             baseProcess.setProcessId(uuid);

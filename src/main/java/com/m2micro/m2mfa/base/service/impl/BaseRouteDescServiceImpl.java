@@ -83,6 +83,11 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
     @Override
     @Transactional
     public boolean save(BaseRouteDesc baseRouteDesc, List<BaseRouteDef >baseRouteDefs, BasePageElemen basePageElemen) {
+
+        if(baseRouteDescRepository.selectrouteName(baseRouteDesc.getRouteName())!=null){
+            throw   new MMException(baseRouteDesc.getRouteName()+"工艺名称已经存在");
+        }
+
         if(!StringUtils.isNotEmpty(baseRouteDescRepository.selectRouteNo(baseRouteDesc.getRouteNo()))){
             String routeuuid = UUIDUtil.getUUID();
             baseRouteDesc.setRouteId(routeuuid);
