@@ -1,29 +1,18 @@
-package com.m2micro.m2mfa.base.entity;
+package com.m2micro.m2mfa.base.vo;
 
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.Date;
-import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.List;
 
-/**
- * 标签模板
- * @author liaotao
- * @since 2019-01-22
- */
-@Entity
-@ApiModel(value="BaseTemplate对象", description="标签模板")
-public class BaseTemplate extends BaseEntity implements Serializable {
+@ApiModel(value = "BaseTemplateObj", description = "模板定义")
+public class BaseTemplateObj {
 
-    private static final long serialVersionUID = 1L;
-    @Id
+
     @ApiModelProperty(value = "主键")
     private String id;
     @Size(max=50,message = "编号字节不能大于50位",groups = {AddGroup.class, UpdateGroup.class})
@@ -40,7 +29,7 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     private Integer version;
     @ApiModelProperty(value = "标签图片")
     private String imageUrl;
-    @Size(max=50,message = "标签模板字节不能大于200位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=50,message = "标签模板字节不能大于50位",groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message="标签模板不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "标签模板")
     private String labelFileUrl;
@@ -50,10 +39,13 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+    @ApiModelProperty(value = "模板变量")
+    private List<BaseTemplateVarObj> templateVarObjList;
 
     public String getId() {
         return id;
     }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -61,6 +53,7 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     public String getNumber() {
         return number;
     }
+
     public void setNumber(String number) {
         this.number = number;
     }
@@ -68,6 +61,7 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -75,6 +69,7 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     public String getCategory() {
         return category;
     }
+
     public void setCategory(String category) {
         this.category = category;
     }
@@ -82,6 +77,7 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     public Integer getVersion() {
         return version;
     }
+
     public void setVersion(Integer version) {
         this.version = version;
     }
@@ -89,6 +85,7 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     public String getImageUrl() {
         return imageUrl;
     }
+
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
@@ -96,6 +93,7 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     public String getLabelFileUrl() {
         return labelFileUrl;
     }
+
     public void setLabelFileUrl(String labelFileUrl) {
         this.labelFileUrl = labelFileUrl;
     }
@@ -103,6 +101,7 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     public Integer getSortCode() {
         return sortCode;
     }
+
     public void setSortCode(Integer sortCode) {
         this.sortCode = sortCode;
     }
@@ -110,6 +109,7 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     public Boolean getEnabled() {
         return enabled;
     }
+
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
@@ -117,10 +117,16 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
 
+    public List<BaseTemplateVarObj> getTemplateVarObjList() {
+        return templateVarObjList;
+    }
 
-
+    public void setTemplateVarObjList(List<BaseTemplateVarObj> templateVarObjList) {
+        this.templateVarObjList = templateVarObjList;
+    }
 }

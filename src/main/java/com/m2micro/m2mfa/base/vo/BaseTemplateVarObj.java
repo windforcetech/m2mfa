@@ -1,29 +1,16 @@
-package com.m2micro.m2mfa.base.entity;
+package com.m2micro.m2mfa.base.vo;
 
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.Date;
-import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-/**
- * 模板变量
- * @author liaotao
- * @since 2019-01-22
- */
-@Entity
-@ApiModel(value="BaseTemplateVar对象", description="模板变量")
-public class BaseTemplateVar extends BaseEntity implements Serializable {
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
 
-    private static final long serialVersionUID = 1L;
-    @Id
+@ApiModel(value = "BaseTemplateVarObj", description = "模板变量")
+public class BaseTemplateVarObj {
     @ApiModelProperty(value = "主键")
     private String id;
     @ApiModelProperty(value = "模板主键")
@@ -48,6 +35,7 @@ public class BaseTemplateVar extends BaseEntity implements Serializable {
     public String getId() {
         return id;
     }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -55,6 +43,7 @@ public class BaseTemplateVar extends BaseEntity implements Serializable {
     public String getTemplateId() {
         return templateId;
     }
+
     public void setTemplateId(String templateId) {
         this.templateId = templateId;
     }
@@ -62,6 +51,7 @@ public class BaseTemplateVar extends BaseEntity implements Serializable {
     public String getNumber() {
         return number;
     }
+
     public void setNumber(String number) {
         this.number = number;
     }
@@ -69,6 +59,7 @@ public class BaseTemplateVar extends BaseEntity implements Serializable {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -76,6 +67,7 @@ public class BaseTemplateVar extends BaseEntity implements Serializable {
     public String getRuleId() {
         return ruleId;
     }
+
     public void setRuleId(String ruleId) {
         this.ruleId = ruleId;
     }
@@ -91,6 +83,7 @@ public class BaseTemplateVar extends BaseEntity implements Serializable {
     public Integer getSortCode() {
         return sortCode;
     }
+
     public void setSortCode(Integer sortCode) {
         this.sortCode = sortCode;
     }
@@ -98,6 +91,7 @@ public class BaseTemplateVar extends BaseEntity implements Serializable {
     public Boolean getEnabled() {
         return enabled;
     }
+
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
@@ -105,10 +99,8 @@ public class BaseTemplateVar extends BaseEntity implements Serializable {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
-
-
-
 }

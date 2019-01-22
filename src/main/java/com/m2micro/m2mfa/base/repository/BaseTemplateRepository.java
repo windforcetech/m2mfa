@@ -11,4 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BaseTemplateRepository extends BaseRepository<BaseTemplate,String> {
 
+    int countByNumber(String number);
+    int countByNumberAndIdNot(String number,String id);
+    void  deleteByIdIn(String[] templateIds);
 }

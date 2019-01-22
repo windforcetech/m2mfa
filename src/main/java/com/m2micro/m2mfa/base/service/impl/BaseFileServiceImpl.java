@@ -4,19 +4,26 @@ import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseFile;
 import com.m2micro.m2mfa.base.repository.BaseFileRepository;
 import com.m2micro.m2mfa.base.service.BaseFileService;
+import com.m2micro.m2mfa.base.service.LabService;
+import com.m2micro.m2mfa.base.vo.ResultInfo;
+import com.m2micro.m2mfa.common.config.LabServerConfig;
 import com.m2micro.m2mfa.common.util.FileLocation;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import retrofit2.Call;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * 上传文件 服务实现类
@@ -32,6 +39,8 @@ public class BaseFileServiceImpl implements BaseFileService {
     @Autowired
     private FileLocation fileLocation;
 
+    @Autowired
+    private LabServerConfig labServerConfig;
     @Override
     public String uploadFile(MultipartFile file) throws IOException {
 
@@ -80,5 +89,31 @@ public class BaseFileServiceImpl implements BaseFileService {
             read = bufferedInputStream.read(buffer);
         }
 
+    }
+
+    @Override
+    public List<String> analysisLabFile(String filePath) throws IOException {
+        String labServerUrl = labServerConfig.getLabServerUrl();
+        Retrofit retrofit = new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+                //基础地址，这里我以本地测试进行
+                .baseUrl(labServerUrl)
+                .build();
+
+        File file = new File(filePath);
+
+        RequestBody requestBody =
+                RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part file1 = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
+        LabService labService = retrofit.create(LabService.class);
+        Call<ResultInfo> calls = labService.getValue(file1);
+            ResultInfo body = calls.execute().body();
+        String data = body.getData();
+        List<String> rs=new ArrayList<>();
+        if(data!=null&&data!=""){
+            String[] split = data.split(";");
+            List<String> strings = Arrays.asList(split);
+            rs.addAll(strings);
+        }
+        return rs;
     }
 }
