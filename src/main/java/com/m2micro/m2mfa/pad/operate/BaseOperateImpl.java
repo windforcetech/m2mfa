@@ -292,10 +292,11 @@ public class BaseOperateImpl implements BaseOperate {
             //新增上工记录返回上工记录id
             startWorkPara.setRwid(saveMesRecordWork(obj));
         }
+
         //更新员工作业时间
         updateStaffOperationTime(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId());
         //新增人员作业记录 新增上工记录返回人员记录id
-        startWorkPara.setRecordStaffId(saveMesRecordStaff(obj.getScheduleId(),startWorkPara.getRwid(), PadStaffUtil.getStaff().getStaffId(),mesMoSchedule.getMachineId()));
+        startWorkPara.setRecordStaffId(saveMesRecordStaff(obj.getScheduleId(), mesRecordWorkRepository.isStationisWork(obj.getScheduleId(),obj.getStationId()), PadStaffUtil.getStaff().getStaffId(),mesMoSchedule.getMachineId()));
         // 跟新排产单状态为执行中
         updateMesMoScheduleFlag(obj.getScheduleId());
         //修改工单状态为生产中
@@ -321,7 +322,7 @@ public class BaseOperateImpl implements BaseOperate {
         //更新员工作业时间
         updateStaffOperationTime(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId());
         //新增人员作业记录 新增上工记录返回人员记录id
-        startWorkPara.setRecordStaffId(saveMesRecordStaffForOutput(obj.getScheduleId(),startWorkPara.getRwid(), PadStaffUtil.getStaff().getStaffId(),mesMoSchedule.getMachineId()));
+        startWorkPara.setRecordStaffId(saveMesRecordStaffForOutput(obj.getScheduleId(), mesRecordWorkRepository.isStationisWork(obj.getScheduleId(),obj.getStationId()), PadStaffUtil.getStaff().getStaffId(),mesMoSchedule.getMachineId()));
 
         // 跟新排产单状态为执行中
         updateMesMoScheduleFlag(obj.getScheduleId());
