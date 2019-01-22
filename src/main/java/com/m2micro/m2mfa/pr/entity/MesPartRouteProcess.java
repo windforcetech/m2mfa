@@ -70,28 +70,13 @@ public class MesPartRouteProcess extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "检验方案名称")
     private String qualitysolutionName;
 
-    public MesPartRouteProcess(String id, String partrouteid, @NotNull(message = "步骤不能为空。", groups = {AddGroup.class, UpdateGroup.class}) Integer setp, String processid, @Size(max = 32, message = "数据采集方式长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String collection, String nextprocessid, String failprocessid, Integer jump, String packid, String qualitysolutionid, Integer sortcode, Integer enabled, String description, String failprocessName, String processidName, String packName, String qualitysolutionName) {
-        this.id = id;
-        this.partrouteid = partrouteid;
-        this.setp = setp;
-        this.processid = processid;
-        this.collection = collection;
-        this.nextprocessid = nextprocessid;
-        this.failprocessid = failprocessid;
-        this.jump = jump;
-        this.packid = packid;
-        this.qualitysolutionid = qualitysolutionid;
-        this.sortcode = sortcode;
-        this.enabled = enabled;
-        this.description = description;
-        this.failprocessName = failprocessName;
-        this.processidName = processidName;
-        this.packName = packName;
-        this.qualitysolutionName = qualitysolutionName;
-    }
+    @Transient
+    @ApiModelProperty(value = "类型")
+    private String category;
 
-    public MesPartRouteProcess() {
-    }
+    @Transient
+    @ApiModelProperty("工序类型名称")
+    private String  categoryName;
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -231,5 +216,21 @@ public class MesPartRouteProcess extends BaseEntity implements Serializable {
 
     public void setQualitysolutionName(String qualitysolutionName) {
         this.qualitysolutionName = qualitysolutionName;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

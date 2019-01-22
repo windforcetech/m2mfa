@@ -270,7 +270,13 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             if(StringUtils.isNotEmpty(mesPartRouteProcess.getFailprocessid())){
                 mesPartRouteProcess.setFailprocessName(baseProcessService.findById(mesPartRouteProcess.getFailprocessid()).orElse(null).getProcessName());
             }
-            mesPartRouteProcess.setProcessidName(baseProcessService.findById(mesPartRouteProcess.getProcessid()).orElse(null).getProcessName());
+            BaseProcess baseProcess =  baseProcessService.findById(mesPartRouteProcess.getProcessid()).orElse(null);
+            if(baseProcess !=null){
+                mesPartRouteProcess.setProcessidName(baseProcess.getProcessName());
+                mesPartRouteProcess.setCategory(baseProcess.getCategory());
+                mesPartRouteProcess.setCategoryName(baseItemsTargetService.findById(baseProcess.getCategory()).get().getItemName());
+
+            }
         }
 
         for(MesPartRouteStation mesPartRouteStation :mesPartRouteStations){
