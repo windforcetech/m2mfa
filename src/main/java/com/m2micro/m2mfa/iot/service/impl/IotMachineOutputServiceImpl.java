@@ -22,6 +22,7 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -46,6 +47,9 @@ import java.util.Optional;
  */
 @Service
 public class IotMachineOutputServiceImpl implements IotMachineOutputService {
+
+    @Autowired
+    IotConstant iotConstant;
     @Autowired
     IotMachineOutputRepository iotMachineOutputRepository;
     @Autowired
@@ -134,7 +138,7 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
             if(productionMesMoSchedule!=null&&productionMesMoSchedule.size()==1){
                 //通过排产单ID找模具ID，如果拿不到(排产单工序中没有选模具)
                 String scheduleId = productionMesMoSchedule.get(0).getScheduleId();
-                String productionMoldId = mesMoScheduleProcessRepository.getProductionMoldId(scheduleId, IotConstant.PROCESS_ID);
+                String productionMoldId = mesMoScheduleProcessRepository.getProductionMoldId(scheduleId, iotConstant.getProcessId());
                 if(StringUtils.isNotEmpty(productionMoldId)){
                     //通过模具ID，得到cavity
                     BaseMold baseMold = baseMoldRepository.findById(productionMoldId).orElse(null);
