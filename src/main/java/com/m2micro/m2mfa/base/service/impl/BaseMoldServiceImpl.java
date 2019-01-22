@@ -1,8 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
-import com.m2micro.m2mfa.base.entity.BaseMold;
-import com.m2micro.m2mfa.base.entity.QBaseCustomer;
-import com.m2micro.m2mfa.base.entity.QBaseItemsTarget;
+import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseMoldQuery;
 import com.m2micro.m2mfa.base.repository.BaseMoldRepository;
 import com.m2micro.m2mfa.base.service.BaseMoldService;
@@ -19,7 +17,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBaseMold;
+
 import java.util.List;
 /**
  * 模具主档 服务实现类
@@ -34,6 +32,8 @@ public class BaseMoldServiceImpl implements BaseMoldService {
     JPAQueryFactory queryFactory;
     @Autowired
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    BaseItemsTargetServiceImpl baseItemsTargetService;
 
     public BaseMoldRepository getRepository() {
         return baseMoldRepository;
@@ -212,7 +212,11 @@ public class BaseMoldServiceImpl implements BaseMoldService {
             sql = sql+" and bm.flag = '"+query.getFlag()+"'";
         }
         if(StringUtils.isNotEmpty(query.getCategoryId())){
-            sql = sql+" and bm.category_id = '"+query.getCategoryId()+"'";
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategoryId()).orElse(null);
+            //不等于全部，全部特殊处理
+            if(!(baseItemsTarget!=null&&"全部".equals(baseItemsTarget.getItemName()))){
+                sql = sql+" and bm.category_id = '"+query.getCategoryId()+"'";
+            }
         }
         sql = sql + " order by bm.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();

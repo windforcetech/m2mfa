@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.m2mfa.base.entity.BaseMold;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.query.BasePartsQuery;
@@ -39,6 +40,8 @@ public class BasePartsServiceImpl implements BasePartsService {
     MesMoDescRepository mesMoDescRepository;
     @Autowired
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    BaseItemsTargetServiceImpl baseItemsTargetService;
 
     public BasePartsRepository getRepository() {
         return basePartsRepository;
@@ -128,7 +131,12 @@ public class BasePartsServiceImpl implements BasePartsService {
             sql = sql+" and bp.source = '"+query.getSource()+"'";
         }
         if(StringUtils.isNotEmpty(query.getCategory())){
-            sql = sql+" and bp.category = '"+query.getCategory()+"'";
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
+            //不等于全部
+            if(!(baseItemsTarget!=null&&"全部".equals(baseItemsTarget.getItemName()))){
+                sql = sql+" and bp.category = '"+query.getCategory()+"'";
+            }
+
         }
         sql = sql + " order by bp.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
