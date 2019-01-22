@@ -234,12 +234,14 @@ public class BaseOperateImpl implements BaseOperate {
         //正在上工，可以下工
         if(operationInfoWork.getEndTime()==null){
             operationInfo.setWorkFlag("1");//下工
+            operationInfo.setRwid(operationInfoWork.getRwid());
             operationInfo.setRecordStaffId(operationInfoWork.getRecordStaffId());
             operationInfo.setStartTime(operationInfoWork.getStartTime());
             return operationInfo;
         }
         //上下工都完成，可以进行下次上工
         operationInfo.setWorkFlag("0");//上工
+        operationInfo.setRwid(operationInfoWork.getRwid());
         operationInfo.setRecordStaffId(operationInfoWork.getRecordStaffId());
         operationInfo.setStartTime(operationInfoWork.getStartTime());
         operationInfo.setEndTime(operationInfoWork.getEndTime());
