@@ -1,9 +1,11 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
+import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
@@ -48,6 +50,8 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     MesRecordWorkRepository mesRecordWorkRepository;
     @Autowired
     PadDispatchService padDispatchService;
+    @Autowired
+    BaseProcessService baseProcessService;
 
     @Override
     public List<PadScheduleModel> getMesMoSchedule() {
@@ -108,6 +112,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "AND bm.machine_id = ms.machine_id\n" +
                 "AND bp.part_id=ms.part_id\n" +
                 "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
+                "AND mss.enabled = 1 \n" +
                 "GROUP BY\n" +
                 "	ms.machine_id\n" +
                 "ORDER BY\n" +
@@ -168,6 +173,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "AND bm.machine_id = ms.machine_id\n" +
                 "AND bp.part_id=ms.part_id\n" +
                 "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
+                "AND mss.enabled = 1 \n" +
                 "GROUP BY\n" +
                 "	ms.machine_id\n" +
                 "ORDER BY\n" +
@@ -261,6 +267,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                             "	mss.station_id = bs.station_id\n" +
                             "AND mss.schedule_id = '" + scheduleId + "'\n" +
                             "AND mss.staff_id = '" + staffId + "'\n" +
+                            "AND mss.enabled = 1 \n" +
                             "AND mps.station_id = mss.station_id\n" +
                             "AND mps.process_id = mss.process_id\n" +
                             "ORDER BY\n" +
@@ -296,6 +303,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                             "AND mps.process_id = mss.process_id\n" +
                             "AND mss.schedule_id = mmss.schedule_id\n" +
                             "AND mss.station_id = mmss.station_id\n" +
+                            "AND mss.enabled = 1 \n" +
                             "AND mmss.jump = 0\n" +
                             "ORDER BY\n" +
                             "	mps.step ASC";
@@ -306,8 +314,16 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     @Override
     public StationAndOperate getStationsAndOperate(String scheduleId) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         StationAndOperate stationAndOperate = new StationAndOperate();
+        //设置工位
         List<PadStationModel> pendingStations = getPendingStations(scheduleId);
         stationAndOperate.setPadStationModels(pendingStations);
+        //设置工艺
+        if(pendingStations!=null&&pendingStations.size()>0){
+            PadStationModel padStationModel = pendingStations.get(0);
+            BaseProcess baseProcess = baseProcessService.findById(padStationModel.getProcessId()).orElse(null);
+            stationAndOperate.setProcessId(baseProcess.getProcessId());
+            stationAndOperate.setProcessName(baseProcess.getProcessName());
+        }
         if(pendingStations==null||pendingStations.size()==0){
             OperationInfo operationInfo = new OperationInfo();
             //上工标志位/下工标志位(0:上工,1:下工)
