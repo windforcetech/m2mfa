@@ -481,7 +481,10 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordWork.setProcessId(obj.getProcessId());
         mesRecordWork.setStationId(obj.getStationId());
         mesRecordWork.setMachineId(mesMoSchedule.getMachineId());
-        mesRecordWork.setMoldId(mesMoScheduleProcess.getMoldId());
+        if(mesMoScheduleProcess.getMoldId()!=null){
+          mesRecordWork.setMoldId(mesMoScheduleProcess.getMoldId());
+        }
+
         mesRecordWork.setStartTime(new Date());
         mesRecordWorkService.save(mesRecordWork);
         return  rwId;
@@ -888,5 +891,51 @@ public class BaseOperateImpl implements BaseOperate {
     protected MesMoSchedule getFirstMesMoScheduleByMachineId(String machineId){
         return mesMoScheduleRepository.getFirstMesMoScheduleByMachineId(machineId,MoScheduleStatus.AUDITED.getKey());
     }
+
+  /**
+   * 删除只上工下工结束时间为空的人员记录   （用于新排产单替换）
+   * @param rwId
+   */
+    @Transactional
+    protected void deleteMesRecordStaffAtlast(String rwId){
+        String sql ="DELETE FROM mes_record_work WHERE rwid = '"+rwId+"' AND start_time IS NOT NULL AND ISNULL(end_time)";
+        jdbcTemplate.update(sql);
+    }
+
+  /**
+   * 获取旧排产单上工纪录，赋值跟新排产单的纪录进行添加  以及模具信息
+   * @param oldscheduleId
+   * @param newscheduleId
+   * @param stationId
+   * @param iotMachineOutput
+   */
+   protected  void generateMesRecordWorkandMesRecordMold(String oldscheduleId ,String newscheduleId , String stationId,IotMachineOutput iotMachineOutput){
+      //copy的上工记录数据，必须的上个工序已经更新endTime 下工记录时间的
+     MesRecordWork mesRecordWork =  mesRecordWorkRepository.selectMesRecordWork(oldscheduleId,stationId);
+     if(mesRecordWork==null){
+       throw  new MMException("未找到对应的上工记录数据。");
+     }
+     String newrwid= UUIDUtil.getUUID();
+     mesRecordWork.setRwid(newrwid);
+     mesRecordWork.setScheduleId(newscheduleId);
+     mesRecordWork.setStartMolds(iotMachineOutput.getOutput());
+     mesRecordWork.setStratPower(iotMachineOutput.getPower());
+     mesRecordWork.setStartTime(new Date());
+     mesRecordWork.setEndTime(null);
+     mesRecordWork.setEndMolds(null);
+     mesRecordWork.setEndPower(null);
+     if(mesRecordWork.getMoldId() == null){
+       throw  new MMException("该工序未有模具");
+     }
+     MesRecordMold  mesRecordMold =mesRecordMoldRepository.findRwId(mesRecordWork.getMoldId());
+     mesRecordMold.setRwId(newrwid);
+     mesRecordMold.setId(UUIDUtil.getUUID());
+     mesRecordMold.setCreateOn(new Date());
+     mesRecordMold.setUnderMold(0);
+
+     mesRecordWorkService.save(mesRecordWork);
+     mesRecordMoldRepository.save(mesRecordMold);
+   }
+
 
 }

@@ -20,4 +20,7 @@ public interface MesRecordWorkRepository extends BaseRepository<MesRecordWork,St
     @Query(value = "SELECT  mrw.rwid  FROM mes_record_work mrw WHERE mrw.schedule_id = ?1 AND mrw.station_id =?2 AND mrw.start_time IS NOT NULL AND ISNULL(mrw.end_time)", nativeQuery = true)
     String  isStationisWork(String scheduleId, String stationId) ;
 
+    @Query(value = "select * from mes_record_work  where schedule_id=?1 and station_id=?2 and start_time IS NOT NULL AND  end_time IS NOT NULL" ,nativeQuery = true)
+    MesRecordWork selectMesRecordWork (String scheduleId, String stationId) ;
+
 }
