@@ -86,5 +86,9 @@ public interface MesMoDescRepository extends BaseRepository<MesMoDesc,String> {
     @Query(value = "update MesMoDesc m set m.schedulQty = ?1 where m.moId = ?2")
     Integer setSchedulQtyFor(Integer schedulQty,String moId);
 
+    @Modifying
+    @Query(value = "update MesMoDesc m set m.isSchedul = ?1 where m.moId = ?2")
+    Integer updateIsSchedeul(Integer isSchedul,String moId);
+
 
 }

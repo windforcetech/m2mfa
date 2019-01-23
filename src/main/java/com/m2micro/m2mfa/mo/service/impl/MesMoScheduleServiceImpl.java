@@ -942,8 +942,9 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
                 MesMoDesc moDesc= mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
                 //把排产量更新到工单
                 try {
-                    Integer scheduQty =  moDesc.getSchedulQty()+ mesMoSchedule.getScheduleQty();
+                    Integer scheduQty =  moDesc.getSchedulQty()-mesMoSchedule.getScheduleQty();
                     mesMoDescRepository.setSchedulQtyFor(scheduQty,moDesc.getMoId());
+                    mesMoDescRepository.updateIsSchedeul(0,moDesc.getMoId());
                 }catch (Exception e){
                     //工单排产总量为null所以更新进行忽略
                 }
@@ -964,6 +965,8 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         setScheduleNo(mesMoSchedule);
         //保存排产单
         this.save(mesMoSchedule);
+        //跟新工单信息
+        updateMesMoDescscheduQty(mesMoSchedule);
         //保存职员
         saveScheduleStaff(mesMoScheduleStaffs, ScheduleId);
         //保存工序
@@ -973,6 +976,17 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         //保存工位
         saveScheduleStation(mesMoScheduleStations1, ScheduleId);
 
+    }
+
+    private void updateMesMoDescscheduQty(MesMoSchedule mesMoSchedule) {
+        MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
+        Integer scheduQty =  (moDesc.getSchedulQty()==null? 0:moDesc.getSchedulQty()) + mesMoSchedule.getScheduleQty();
+        mesMoDescRepository.setSchedulQtyFor(scheduQty,moDesc.getMoId());
+        String sql ="select SUM(schedule_qty) from mes_mo_schedule where  mo_id='"+mesMoSchedule.getMoId()+"'";
+        Integer scheduleQtysum =jdbcTemplate.queryForObject(sql,Integer.class);
+        if(moDesc.getTargetQty().equals(scheduleQtysum) || scheduleQtysum> moDesc.getTargetQty()){
+            mesMoDescRepository.updateIsSchedeul(1,moDesc.getMoId());
+        }
     }
 
     /**
@@ -1067,6 +1081,8 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         mesMoSchedule.setShiftId("-");
         Integer sequence= maxSequence(mesMoSchedule.getMachineId());
         mesMoSchedule.setSequence(sequence+1);
+
+
 
     }
 

@@ -642,5 +642,8 @@ public class BaseOperateImpl implements BaseOperate {
         return iotMachineOutputService.findIotMachineOutputByMachineId(machineId);
     }
 
+    public void updatesScheduleProcessEndTime(String scheduleId ,String processId){
+        String sql ="";
+    }
 
 }
