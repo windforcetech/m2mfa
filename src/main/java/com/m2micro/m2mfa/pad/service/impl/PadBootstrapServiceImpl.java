@@ -34,6 +34,16 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
 
     @Override
     public StopWorkModel stopWork(StopWorkPara obj) {
+        //保存不良输入
+        saveRecordFail(obj);
+        //下工
+        if(isMesRecorWorkEnd(obj.getRwid())){
+            //更新上工记录表结束时间
+            updateRecordWorkEndTime(obj.getRwid());
+        }
+        //更新职员作业记录表结束时间
+        updateRecordStaffEndTime(obj.getRecordStaffId());
+
         return super.stopWorkForRecordFail(obj);
     }
 }

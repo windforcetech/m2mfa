@@ -315,7 +315,6 @@ public class BaseOperateImpl implements BaseOperate {
             startWorkPara.setRwid(saveMesRecordWork(obj));
 
         }
-
         //更新员工作业时间
         updateStaffOperationTime(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId());
         //新增人员作业记录 新增上工记录返回人员记录id
@@ -327,24 +326,30 @@ public class BaseOperateImpl implements BaseOperate {
         return startWorkPara;
     }
 
-  /**
-   * 上工模具添加
-   * @param moId
-   * @param rwId
-   */
-  @Transactional
-  protected void saveMesRecordMold(String  moId, String rwId) {
-    MesRecordMold mesRecordMold = new MesRecordMold();
-    mesRecordMold.setId(UUIDUtil.getUUID());
-    mesRecordMold.setMoldId(moId);
-    mesRecordMold.setUnderMold(0);
-    mesRecordMold.setRwId(rwId);
-    mesRecordMoldRepository.save(mesRecordMold);
-  }
+    /**
+    * 上工模具添加
+    * @param moId
+    * @param rwId
+    */
+    @Transactional
+    protected void saveMesRecordMold(String  moId, String rwId) {
+        MesRecordMold mesRecordMold = new MesRecordMold();
+        mesRecordMold.setId(UUIDUtil.getUUID());
+        mesRecordMold.setMoldId(moId);
+        mesRecordMold.setUnderMold(0);
+        mesRecordMold.setRwId(rwId);
+        mesRecordMoldRepository.save(mesRecordMold);
+    }
 
 
-  @Transactional
+    @Transactional
     protected StartWorkPara startWorkForOutput(PadPara obj) {
+        BaseStaff baseStaff = PadStaffUtil.getStaff();
+        return startWorkForOutputByBaseStaff(obj,baseStaff);
+    }
+
+    @Transactional
+    protected StartWorkPara startWorkForOutputByBaseStaff(PadPara obj,BaseStaff baseStaff) {
         MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(obj.getScheduleId()).orElse(null);
         isScheduleFlag(mesMoSchedule);
         MesMoDesc moDesc =  mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
@@ -359,9 +364,9 @@ public class BaseOperateImpl implements BaseOperate {
 
         }
         //更新员工作业时间
-        updateStaffOperationTime(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId());
+        updateStaffOperationTime(obj.getScheduleId(), baseStaff.getStaffId(),obj.getStationId());
         //新增人员作业记录 新增上工记录返回人员记录id
-        startWorkPara.setRecordStaffId(saveMesRecordStaffForOutput(obj.getScheduleId(), mesRecordWorkRepository.isStationisWork(obj.getScheduleId(),obj.getStationId()), PadStaffUtil.getStaff().getStaffId(),mesMoSchedule.getMachineId()));
+        startWorkPara.setRecordStaffId(saveMesRecordStaffForOutput(obj.getScheduleId(), mesRecordWorkRepository.isStationisWork(obj.getScheduleId(),obj.getStationId()), baseStaff.getStaffId(),mesMoSchedule.getMachineId()));
 
         // 跟新排产单状态为执行中
         updateMesMoScheduleFlag(obj.getScheduleId());
@@ -528,13 +533,21 @@ public class BaseOperateImpl implements BaseOperate {
 
     @Transactional
     protected StopWorkModel stopWorkForRecordFail(StopWorkPara obj) {
+        saveRecordFail(obj);
+        return stopWork(obj);
+    }
+
+    /**
+     * 保存不良输入
+     * @param obj
+     */
+    protected void saveRecordFail(StopWorkPara obj) {
         MesRecordFail mesRecordFail = obj.getMesRecordFail();
         mesRecordFail.setId(UUIDUtil.getUUID());
         mesRecordFail.setRwId(obj.getRwid());
         mesRecordFail.setCreateOn(new Date());
         ValidatorUtil.validateEntity(mesRecordFail, AddGroup.class);
         mesRecordFailService.save(mesRecordFail);
-        return stopWork(obj);
     }
 
     /**
@@ -781,9 +794,8 @@ public class BaseOperateImpl implements BaseOperate {
    * @param rwId
    */
   @Transactional
-  protected void updateMesRecordWorkEndTime(String rwId){
+  protected void updateMesRecordWorkEndTime(IotMachineOutput iotMachineOutput,String rwId){
     MesRecordWork mesRecordWork =  mesRecordWorkService.findById(rwId).orElse(null);
-    IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesRecordWork.getMachineId());
     String sql ="update mes_record_work set  end_time = '"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"' ,end_power='"+iotMachineOutput.getPower()+"' ,end_molds='"+iotMachineOutput.getMolds()+"'  where rwid='"+rwId+"'";
     jdbcTemplate.update(sql);
   }
