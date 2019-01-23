@@ -1,9 +1,11 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
+import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
@@ -48,6 +50,8 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     MesRecordWorkRepository mesRecordWorkRepository;
     @Autowired
     PadDispatchService padDispatchService;
+    @Autowired
+    BaseProcessService baseProcessService;
 
     @Override
     public List<PadScheduleModel> getMesMoSchedule() {
@@ -306,8 +310,16 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     @Override
     public StationAndOperate getStationsAndOperate(String scheduleId) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         StationAndOperate stationAndOperate = new StationAndOperate();
+        //设置工位
         List<PadStationModel> pendingStations = getPendingStations(scheduleId);
         stationAndOperate.setPadStationModels(pendingStations);
+        //设置工艺
+        if(pendingStations!=null&&pendingStations.size()>0){
+            PadStationModel padStationModel = pendingStations.get(0);
+            BaseProcess baseProcess = baseProcessService.findById(padStationModel.getProcessId()).orElse(null);
+            stationAndOperate.setProcessId(baseProcess.getProcessId());
+            stationAndOperate.setProcessName(baseProcess.getProcessName());
+        }
         if(pendingStations==null||pendingStations.size()==0){
             OperationInfo operationInfo = new OperationInfo();
             //上工标志位/下工标志位(0:上工,1:下工)

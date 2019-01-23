@@ -36,7 +36,7 @@ m2mfa:
   iot:
     processId: F5A936ED96074714AEA9E90E9B5B2F35 #(注塑成型工艺id)排产单ID找模具ID是只找注塑成型工序的模具
   pad:
-    changeTime: 10
+    changeTime: 10  #交班间隙时间
 file:
   baseDir:
 labServer:

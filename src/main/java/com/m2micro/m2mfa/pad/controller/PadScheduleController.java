@@ -57,12 +57,12 @@ public class PadScheduleController {
     /**
      * 获取待处理的工位
      */
-    @RequestMapping("/getPendingStations")
+    /*@RequestMapping("/getPendingStations")
     @ApiOperation(value="获取待处理的工位")
     @UserOperationLog("获取待处理的工位")
     public ResponseMessage<List<PadStationModel>> getPendingStations(String scheduleId){
         return ResponseMessage.ok(padScheduleService.getPendingStations(scheduleId));
-    }
+    }*/
 
     /**
      * 获取待处理的工位
