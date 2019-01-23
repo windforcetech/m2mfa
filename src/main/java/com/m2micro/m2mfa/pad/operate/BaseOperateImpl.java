@@ -17,9 +17,11 @@ import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
+import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.constant.PadConstant;
@@ -44,6 +46,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -80,6 +83,9 @@ public class BaseOperateImpl implements BaseOperate {
     private BasePartsService basePartsService;
     @Autowired
     BaseStaffshiftService baseStaffshiftService;
+    @Autowired
+    MesMoScheduleRepository mesMoScheduleRepository;
+
 
     @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
@@ -674,7 +680,9 @@ public class BaseOperateImpl implements BaseOperate {
     /**
      * 下工时间是否处于下班的排班交接时间段内(只要满足一个交班时间就可以了)
      * @param baseShift
+     *              班别信息
      * @param date
+     *              下工时间
      * @return
      */
     protected Boolean isInclude(BaseShift baseShift,Date date ){
@@ -696,7 +704,9 @@ public class BaseOperateImpl implements BaseOperate {
     /**
      * 下工时间是否处于下班的排班交接时间段内(单个下工时间判定)
      * @param offTime
+     *          下班时间
      * @param date
+     *          下工时间
      * @return
      */
     protected Boolean isIncludeOffTime(String  offTime,Date date ){
@@ -709,6 +719,93 @@ public class BaseOperateImpl implements BaseOperate {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 获取接班人员上工记录
+     * @param scheduleId
+     *          排产单id
+     * @param stationId
+     *          工位id
+     * @return
+     */
+    protected MesRecordStaff getNextMesRecordStaff(String scheduleId,String stationId){
+        String sql = "SELECT\n" +
+                        "	mrs.id id,\n" +
+                        "	mrs.schedule_id scheduleId,\n" +
+                        "	mrs.rw_id rwId,\n" +
+                        "	mrs.staff_id staffId,\n" +
+                        "	mrs.start_time startTime,\n" +
+                        "	mrs.end_time endTime,\n" +
+                        "	mrs.strat_power stratPower,\n" +
+                        "	mrs.end_power endPower,\n" +
+                        "	mrs.start_molds startMolds,\n" +
+                        "	mrs.end_molds endMolds,\n" +
+                        "	mrs.id id,\n" +
+                        "	mrs.schedule_id scheduleId,\n" +
+                        "	mrs.rw_id rwId,\n" +
+                        "	mrs.staff_id staffId,\n" +
+                        "	mrs.start_time startTime,\n" +
+                        "	mrs.end_time endTime,\n" +
+                        "	mrs.strat_power stratPower,\n" +
+                        "	mrs.end_power endPower,\n" +
+                        "	mrs.start_molds startMolds,\n" +
+                        "	mrs.end_molds endMolds\n" +
+                        "FROM\n" +
+                        "	mes_record_work mrw,\n" +
+                        "	mes_record_staff mrs\n" +
+                        "WHERE\n" +
+                        "	mrw.rwid = mrs.rw_id\n" +
+                        "AND mrw.schedule_id = '" + scheduleId + "'\n" +
+                        "AND mrw.station_id = '" + stationId + "'\n" +
+                        "AND mrs.start_time IS NOT NULL\n" +
+                        "AND mrs.end_time IS NULL";
+        RowMapper<MesRecordStaff> rm = BeanPropertyRowMapper.newInstance(MesRecordStaff.class);
+        List<MesRecordStaff> list = jdbcTemplate.query(sql,rm);
+        if(list.size()==0){
+            return null;
+        }
+        if(list.size()>0){
+            throw new MMException("接班人员有多个，请先解决冲突！");
+        }
+        return list.get(0);
+    }
+
+    /**
+     * 更新接班人员
+     * 开始产量、开始电量
+     * @param iotMachineOutput
+     *              机台产量信息
+     * @param mesRecordStaff
+     *              人员记录信息
+     */
+    @Transactional
+    protected void updateNextMesRecordStaff(IotMachineOutput iotMachineOutput,MesRecordStaff mesRecordStaff){
+        mesRecordStaff.setStratPower(iotMachineOutput.getPower());
+        mesRecordStaff.setStartMolds(iotMachineOutput.getOutput());
+        mesRecordStaffService.save(mesRecordStaff);
+    }
+
+    /**
+     * 当前机台产量是否大于排产单目标量
+     * @param iotMachineOutput
+     * @param mesMoSchedule
+     * @return  机台产量>=目标量 true
+     */
+    protected Boolean isCompleted(IotMachineOutput iotMachineOutput,MesMoSchedule mesMoSchedule){
+        Integer scheduleQty = mesMoSchedule.getScheduleQty();
+        BigDecimal qty = new BigDecimal(scheduleQty);
+        BigDecimal output = iotMachineOutput.getOutput();
+        return output.compareTo(qty)==-1?false:true;
+    }
+
+    /**
+     * 获取当前机台优先级最高的排产单
+     * @param machineId
+     * @return
+     */
+    protected MesMoSchedule getFirstMesMoScheduleByMachineId(String machineId){
+        return mesMoScheduleRepository.getFirstMesMoScheduleByMachineId(machineId,MoScheduleStatus.AUDITED.getKey());
     }
 
 }
