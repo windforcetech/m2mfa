@@ -112,6 +112,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "AND bm.machine_id = ms.machine_id\n" +
                 "AND bp.part_id=ms.part_id\n" +
                 "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
+                "AND mss.enabled = 1 \n" +
                 "GROUP BY\n" +
                 "	ms.machine_id\n" +
                 "ORDER BY\n" +
@@ -172,6 +173,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "AND bm.machine_id = ms.machine_id\n" +
                 "AND bp.part_id=ms.part_id\n" +
                 "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
+                "AND mss.enabled = 1 \n" +
                 "GROUP BY\n" +
                 "	ms.machine_id\n" +
                 "ORDER BY\n" +
@@ -265,6 +267,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                             "	mss.station_id = bs.station_id\n" +
                             "AND mss.schedule_id = '" + scheduleId + "'\n" +
                             "AND mss.staff_id = '" + staffId + "'\n" +
+                            "AND mss.enabled = 1 \n" +
                             "AND mps.station_id = mss.station_id\n" +
                             "AND mps.process_id = mss.process_id\n" +
                             "ORDER BY\n" +
@@ -300,6 +303,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                             "AND mps.process_id = mss.process_id\n" +
                             "AND mss.schedule_id = mmss.schedule_id\n" +
                             "AND mss.station_id = mmss.station_id\n" +
+                            "AND mss.enabled = 1 \n" +
                             "AND mmss.jump = 0\n" +
                             "ORDER BY\n" +
                             "	mps.step ASC";
