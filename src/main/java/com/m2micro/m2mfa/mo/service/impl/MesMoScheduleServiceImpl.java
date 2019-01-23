@@ -832,7 +832,7 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
                 "			schedule_id = '"+scheduleId+"'\n" +
                 "		AND station_id = '"+baseStation.getStationId()+"'\n" +
                 "		AND shift_id = '"+shift.getShiftId()+"'\n" +
-                "		AND is_station = 0\n" +
+                "		AND is_station = 0 AND enabled=1 \n" +
                 "	)\n" +
                 "	";
         baseStation.setIsStation(false);
@@ -982,7 +982,7 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
         Integer scheduQty =  (moDesc.getSchedulQty()==null? 0:moDesc.getSchedulQty()) + mesMoSchedule.getScheduleQty();
         mesMoDescRepository.setSchedulQtyFor(scheduQty,moDesc.getMoId());
-        String sql ="select SUM(schedule_qty) from mes_mo_schedule where  mo_id='"+mesMoSchedule.getMoId()+"'";
+        String sql ="select ifnull(SUM(schedule_qty),0)  from mes_mo_schedule where  mo_id='"+mesMoSchedule.getMoId()+"'";
         Integer scheduleQtysum =jdbcTemplate.queryForObject(sql,Integer.class);
         if(moDesc.getTargetQty().equals(scheduleQtysum) || scheduleQtysum> moDesc.getTargetQty()){
             mesMoDescRepository.updateIsSchedeul(1,moDesc.getMoId());
@@ -1160,6 +1160,7 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
             String  staffId = UUIDUtil.getUUID();
             mesMoScheduleStaff.setId(staffId);
             mesMoScheduleStaff.setScheduleId(scheduleId);
+            mesMoScheduleStaff.setEnabled(true);
             ValidatorUtil.validateEntity(mesMoScheduleStaff, AddGroup.class);
             if(baseProcessService.findById(mesMoScheduleStaff.getProcessId()).orElse(null)==null){
                 throw  new MMException("排程人员工序ID有误。");
