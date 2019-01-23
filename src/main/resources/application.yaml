@@ -35,6 +35,8 @@ m2mfa:
   version: @project.version@
   iot:
     processId: F5A936ED96074714AEA9E90E9B5B2F35 #(注塑成型工艺id)排产单ID找模具ID是只找注塑成型工序的模具
+  pad:
+    changeTime: 10
 file:
   baseDir:
 labServer:

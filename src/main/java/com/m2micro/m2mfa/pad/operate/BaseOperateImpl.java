@@ -2,8 +2,11 @@ package com.m2micro.m2mfa.pad.operate;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.service.BasePartsService;
+import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
+import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
@@ -19,11 +22,11 @@ import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.pad.constant.PadConstant;
 import com.m2micro.m2mfa.pad.model.PadPara;
 import com.m2micro.m2mfa.pad.model.StopWorkModel;
 import com.m2micro.m2mfa.pad.model.StopWorkPara;
 import com.m2micro.m2mfa.pad.model.StartWorkPara;
-import com.m2micro.m2mfa.pad.util.DateUtil;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.record.entity.MesRecordFail;
@@ -52,6 +55,8 @@ import java.util.List;
 @Component("baseOperate")
 public class BaseOperateImpl implements BaseOperate {
     @Autowired
+    PadConstant padConstant;
+    @Autowired
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesRecordWorkService mesRecordWorkService;
@@ -73,6 +78,9 @@ public class BaseOperateImpl implements BaseOperate {
     private MesRecordWorkRepository mesRecordWorkRepository;
     @Autowired
     private BasePartsService basePartsService;
+    @Autowired
+    BaseStaffshiftService baseStaffshiftService;
+
     @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
 
@@ -603,7 +611,7 @@ public class BaseOperateImpl implements BaseOperate {
      */
     @Transactional
     protected void updateProcessStarTime(String scheduleId, String processId) {
-        String sql ="UPDATE mes_mo_schedule_process mmsp SET mmsp.actual_start_time = '"+ DateUtil.dateFormat(new Date())+"' WHERE mmsp.schedule_id = '"+scheduleId+"' AND mmsp.process_id = '"+processId+"' AND ISNULL(mmsp.actual_start_time)";
+        String sql ="UPDATE mes_mo_schedule_process mmsp SET mmsp.actual_start_time = '"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"' WHERE mmsp.schedule_id = '"+scheduleId+"' AND mmsp.process_id = '"+processId+"' AND ISNULL(mmsp.actual_start_time)";
         jdbcTemplate.update(sql);
     }
 
@@ -617,7 +625,7 @@ public class BaseOperateImpl implements BaseOperate {
      */
     @Transactional
     protected void updateStaffOperationTime(String scheduleId, String staffId, String stationId) {
-        String sql ="UPDATE mes_mo_schedule_staff mmss SET mmss.actual_start_time ='"+ DateUtil.dateFormat(new Date())+"'  WHERE mmss.schedule_id = '"+scheduleId+"' AND ISNULL(mmss.actual_start_time) AND mmss.staff_id = '"+staffId+"' AND mmss.station_id = '"+stationId+"'";
+        String sql ="UPDATE mes_mo_schedule_staff mmss SET mmss.actual_start_time ='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  WHERE mmss.schedule_id = '"+scheduleId+"' AND ISNULL(mmss.actual_start_time) AND mmss.staff_id = '"+staffId+"' AND mmss.station_id = '"+stationId+"'";
         jdbcTemplate.update(sql);
     }
 
@@ -642,5 +650,65 @@ public class BaseOperateImpl implements BaseOperate {
         return iotMachineOutputService.findIotMachineOutputByMachineId(machineId);
     }
 
+    /**
+     * 是否交接班
+     * @param staffId
+     *          员工id
+     * @return
+     */
+    protected Boolean isChangeShifts(String staffId){
+        Date date = new Date();
+        List<BaseShift> list = baseStaffshiftService.findByStaffIdAndShiftDate(staffId, date);
+        if(list!=null&&list.size()>0){
+            for (BaseShift baseShift:list) {
+                //只取时间，去掉日期
+                String format = DateUtil.format(date, DateUtil.TIME_PATTERN);
+                if(isInclude(baseShift,DateUtil.stringToDate(format,DateUtil.TIME_PATTERN))){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 下工时间是否处于下班的排班交接时间段内(只要满足一个交班时间就可以了)
+     * @param baseShift
+     * @param date
+     * @return
+     */
+    protected Boolean isInclude(BaseShift baseShift,Date date ){
+        if(isIncludeOffTime(baseShift.getOffTime1(),date)){
+            return true;
+        }
+        if(isIncludeOffTime(baseShift.getOffTime2(),date)){
+            return true;
+        }
+        if(isIncludeOffTime(baseShift.getOffTime3(),date)){
+            return true;
+        }
+        if(isIncludeOffTime(baseShift.getOffTime4(),date)){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 下工时间是否处于下班的排班交接时间段内(单个下工时间判定)
+     * @param offTime
+     * @param date
+     * @return
+     */
+    protected Boolean isIncludeOffTime(String  offTime,Date date ){
+        Date offDate = DateUtil.stringToDate(offTime, DateUtil.TIME_PATTERN);
+        String changeTime = padConstant.getChangeTime();
+        //排班12:00:00下班，则只要在11:50::00和12:10:00之间
+        Date dateTop = DateUtil.addDateMinutes(offDate, (-1)*Integer.valueOf(changeTime));
+        Date dateDown = DateUtil.addDateMinutes(offDate, Integer.valueOf(changeTime));
+        if(date.after(dateTop)&&date.before(dateDown)){
+            return true;
+        }
+        return false;
+    }
 
 }
