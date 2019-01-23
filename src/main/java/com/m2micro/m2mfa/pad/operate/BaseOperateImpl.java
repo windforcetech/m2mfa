@@ -453,7 +453,7 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordStaff.setStaffId(staffId);
         if(iotMachineOutput !=null){
             mesRecordStaff.setStratPower(iotMachineOutput.getPower());
-            mesRecordStaff.setStartMolds(iotMachineOutput.getMolds());
+            mesRecordStaff.setStartMolds(iotMachineOutput.getOutput());
         }
         mesRecordStaff.setStartTime(new Date());
         mesRecordStaffService.save(mesRecordStaff);
@@ -513,7 +513,7 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordWork.setStartTime(new Date());
         if(iotMachineOutput!=null){
             mesRecordWork.setStratPower(iotMachineOutput.getPower());
-            mesRecordWork.setStartMolds(iotMachineOutput.getMolds());
+            mesRecordWork.setStartMolds(iotMachineOutput.getOutput());
         }
         mesRecordWorkService.save(mesRecordWork);
         return  rwId;
@@ -796,7 +796,7 @@ public class BaseOperateImpl implements BaseOperate {
   @Transactional
   protected void updateMesRecordWorkEndTime(IotMachineOutput iotMachineOutput,String rwId){
     MesRecordWork mesRecordWork =  mesRecordWorkService.findById(rwId).orElse(null);
-    String sql ="update mes_record_work set  end_time = '"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"' ,end_power='"+iotMachineOutput.getPower()+"' ,end_molds='"+iotMachineOutput.getMolds()+"'  where rwid='"+rwId+"'";
+    String sql ="update mes_record_work set  end_time = '"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"' ,end_power='"+iotMachineOutput.getPower()+"' ,end_molds='"+iotMachineOutput.getOutput()+"'  where rwid='"+rwId+"'";
     jdbcTemplate.update(sql);
   }
 
