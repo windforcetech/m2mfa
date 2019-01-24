@@ -602,7 +602,7 @@ public class BaseOperateImpl implements BaseOperate {
             Integer badsum = jdbcTemplate.queryForObject(sql, Integer.class);
            Integer qtynum= Math.abs(qty);
             if (qtynum > badsum) {
-                throw new MMException("不良数量不能负数量不可大于原有数量");
+                throw new MMException("不良负数量不可大于原有数量");
             }
         }
         mesRecordFail.setQty(qty);
