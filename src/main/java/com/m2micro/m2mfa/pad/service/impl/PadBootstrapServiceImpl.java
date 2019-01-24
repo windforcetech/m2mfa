@@ -4,10 +4,7 @@ import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
-import com.m2micro.m2mfa.pad.model.PadPara;
-import com.m2micro.m2mfa.pad.model.StartWorkPara;
-import com.m2micro.m2mfa.pad.model.StopWorkModel;
-import com.m2micro.m2mfa.pad.model.StopWorkPara;
+import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.operate.BaseOperateImpl;
 import com.m2micro.m2mfa.pad.service.PadBootstrapService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
@@ -43,11 +40,16 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
     public StopWorkModel stopWork(StopWorkPara obj) {
         //预留，现阶段内没用
         StopWorkModel stopWorkModel = new StopWorkModel();
-        //保存不良输入
-        //saveRecordFail(obj);
+
         MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
         MesMoSchedule mesMoSchedule = findMesMoScheduleById(mesRecordWork.getScheduleId());
         IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+
+        //保存不良输入
+        Padbad padbad = new Padbad();
+        padbad.setStationId(mesRecordWork.getStationId());
+        padbad.setMesRecordFail(obj.getMesRecordFail());
+        saveMesRocerdRail(padbad);
         //下工
         stopWorkForOutput(obj.getRwid(),PadStaffUtil.getStaff().getStaffId(),iotMachineOutput);
         //是否已完成目标量

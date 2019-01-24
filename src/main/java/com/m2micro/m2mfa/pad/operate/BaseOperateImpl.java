@@ -9,8 +9,6 @@ import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
-import com.m2micro.m2mfa.common.util.ValidatorUtil;
-import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
@@ -530,12 +528,12 @@ public class BaseOperateImpl implements BaseOperate {
     @Override
     @Transactional
     public StopWorkModel stopWork(StopWorkPara obj) {
+        //更新职员作业记录表结束时间
+        updateRecordStaffEndTime(obj.getRecordStaffId());
         if(isMesRecorWorkEnd(obj.getRwid())){
           //更新上工记录表结束时间
           updateRecordWorkEndTime(obj.getRwid());
         }
-        //更新职员作业记录表结束时间
-        updateRecordStaffEndTime(obj.getRecordStaffId());
         return new StopWorkModel();
     }
 
@@ -550,12 +548,11 @@ public class BaseOperateImpl implements BaseOperate {
      * @param obj
      */
     protected void saveRecordFail(StopWorkPara obj) {
-        MesRecordFail mesRecordFail = obj.getMesRecordFail();
-        mesRecordFail.setId(UUIDUtil.getUUID());
-        mesRecordFail.setRwId(obj.getRwid());
-        mesRecordFail.setCreateOn(new Date());
-        ValidatorUtil.validateEntity(mesRecordFail, AddGroup.class);
-        mesRecordFailService.save(mesRecordFail);
+        MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
+        Padbad padbad = new Padbad();
+        padbad.setStationId(mesRecordWork.getStationId());
+        padbad.setMesRecordFail(obj.getMesRecordFail());
+        saveMesRocerdRail(padbad);
     }
 
     /**
@@ -591,7 +588,7 @@ public class BaseOperateImpl implements BaseOperate {
         return null;
     }
 
-    private void saveMesRocerdRail(Padbad padbad) {
+    protected void saveMesRocerdRail(Padbad padbad) {
         MesRecordFail mesRecordFail1 = padbad.getMesRecordFail();
         MesRecordFail mesRecordFail = new MesRecordFail();
         mesRecordFail.setRwId(mesRecordFail1.getRwId());
