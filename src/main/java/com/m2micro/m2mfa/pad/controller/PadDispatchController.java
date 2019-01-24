@@ -11,6 +11,7 @@ import com.m2micro.m2mfa.pad.model.StartWorkPara;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +58,10 @@ public class PadDispatchController {
     @ApiOperation(value="pad下工")
     @UserOperationLog("pad下工")
     public ResponseMessage<StopWorkModel> stopWork(@RequestBody StopWorkPara obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        //return ResponseMessage.ok(padDispatchService.stopWork(obj));
+        StopWorkModel stopWorkModel = padDispatchService.stopWork(obj);
+        if(StringUtils.isNotEmpty(stopWorkModel.getMsg())){
+            return ResponseMessage.error(stopWorkModel.getMsg());
+        }
         return ResponseMessage.ok();
     }
 
