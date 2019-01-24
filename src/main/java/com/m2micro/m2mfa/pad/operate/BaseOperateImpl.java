@@ -909,6 +909,7 @@ public class BaseOperateImpl implements BaseOperate {
    * @param stationId
    * @param iotMachineOutput
    */
+  @Transactional
    protected  void generateMesRecordWorkandMesRecordMold(String oldscheduleId ,String newscheduleId , String stationId,IotMachineOutput iotMachineOutput){
       //copy的上工记录数据，必须的上个工序已经更新endTime 下工记录时间的
      MesRecordWork mesRecordWork =  mesRecordWorkRepository.selectMesRecordWork(oldscheduleId,stationId);
@@ -937,5 +938,16 @@ public class BaseOperateImpl implements BaseOperate {
      mesRecordMoldRepository.save(mesRecordMold);
    }
 
+  /**
+   * 结束上工记录人员表
+   * @param rwId
+   * @param staffId
+   * @param iotMachineOutput
+   */
+   @Transactional
+   protected  void updateMesRecordStaffend(String rwId,String staffId,IotMachineOutput iotMachineOutput){
+     String sql ="update  mes_record_staff  set end_time =  '"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'   ,end_power='"+iotMachineOutput.getPower()+"' end_molds='"+iotMachineOutput.getOutput()+"'  where rw_id= '"+rwId+"' and staff_id='"+staffId+"'  and ISNULL(end_time)  and  start_time  is NOT null";
+     jdbcTemplate.update(sql);
+   }
 
 }
