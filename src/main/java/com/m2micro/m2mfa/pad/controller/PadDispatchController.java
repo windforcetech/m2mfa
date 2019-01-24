@@ -77,7 +77,7 @@ public class PadDispatchController {
     @RequestMapping("/defectiveProducts")
     @ApiOperation(value="pad不良品数")
     @UserOperationLog("pad不良品数")
-    public ResponseMessage defectiveProducts (Padbad obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public ResponseMessage defectiveProducts (@RequestBody Padbad obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.defectiveProducts(obj));
     }
     /**
