@@ -320,6 +320,10 @@ public class BaseOperateImpl implements BaseOperate {
         }
         //更新员工作业时间
         updateStaffOperationTime(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId());
+
+        if(!isWork(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId())){
+            throw  new MMException("当前职员已经上工，不允许重复上工。");
+        }
         //新增人员作业记录 新增上工记录返回人员记录id
         startWorkPara.setRecordStaffId(saveMesRecordStaff(obj.getScheduleId(), mesRecordWorkRepository.isStationisWork(obj.getScheduleId(),obj.getStationId()), PadStaffUtil.getStaff().getStaffId()));
         // 跟新排产单状态为执行中
@@ -368,6 +372,9 @@ public class BaseOperateImpl implements BaseOperate {
         }
         //更新员工作业时间
         updateStaffOperationTime(obj.getScheduleId(), baseStaff.getStaffId(),obj.getStationId());
+        if(!isWork(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId())){
+            throw  new MMException("当前职员已经上工，不允许重复上工。");
+        }
         //新增人员作业记录 新增上工记录返回人员记录id
         startWorkPara.setRecordStaffId(saveMesRecordStaffForOutput(obj.getScheduleId(), mesRecordWorkRepository.isStationisWork(obj.getScheduleId(),obj.getStationId()), baseStaff.getStaffId(),mesMoSchedule.getMachineId()));
 
@@ -1043,5 +1050,13 @@ public class BaseOperateImpl implements BaseOperate {
        return baseStaffService.findById(staffId).orElse(null);
    }
 
+   protected  boolean isWork(String scheduleId,String staffId,String stationId){
+       String sql ="SELECT count(*) FROM mes_record_work mrw, mes_record_staff mrs WHERE mrs.schedule_id = '"+scheduleId+"' AND mrs.staff_id = '"+staffId+"' AND mrw.station_id = '"+stationId+"' AND mrs.start_time IS NOT NULL AND ISNULL(mrs.end_time)";
+          Integer countwork  =  jdbcTemplate.queryForObject(sql ,Integer.class);
+          if(countwork.equals(0)){
+            return true;
+          }
+       return false;
+    }
 
 }
