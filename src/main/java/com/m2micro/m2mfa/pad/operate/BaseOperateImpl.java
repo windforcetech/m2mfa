@@ -1014,7 +1014,7 @@ public class BaseOperateImpl implements BaseOperate {
    */
    @Transactional
    protected  void updateMesRecordStaffend(String rwId,String staffId,IotMachineOutput iotMachineOutput){
-     String sql ="update  mes_record_staff  set end_time =  '"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'   ,end_power='"+iotMachineOutput.getPower()+"' end_molds='"+iotMachineOutput.getOutput()+"'  where rw_id= '"+rwId+"' and staff_id='"+staffId+"'  and ISNULL(end_time)  and  start_time  is NOT null";
+     String sql ="update  mes_record_staff  set end_time =  '"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'   ,end_power='"+iotMachineOutput.getPower()+"', end_molds='"+iotMachineOutput.getOutput()+"'  where rw_id= '"+rwId+"' and staff_id='"+staffId+"'  and ISNULL(end_time)  and  start_time  is NOT null";
      jdbcTemplate.update(sql);
    }
 
