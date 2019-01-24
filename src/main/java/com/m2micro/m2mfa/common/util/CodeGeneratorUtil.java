@@ -140,7 +140,7 @@ public class CodeGeneratorUtil {
         mpg.setTemplate(tc);
 
 
-        
+
         // 策略配置
         StrategyConfig strategy = new StrategyConfig();
         strategy.setNaming(NamingStrategy.underline_to_camel);
