@@ -82,10 +82,12 @@ public class PadDispatchServiceImpl implements PadDispatchService {
         try {
             Method method = clazz.getMethod("defectiveProducts",Padbad.class);
             return method.invoke(handleInstance,obj);
-        }catch (Exception ex){
-            InvocationTargetException targetEx = (InvocationTargetException)ex;
-            Throwable t = targetEx .getTargetException();
-            throw (MMException)t;
+        }catch (InvocationTargetException ex){
+            Throwable t = ex.getTargetException();
+            if(t instanceof MMException){
+                throw (MMException)t;
+            }
+            throw ex;
         }
 
     }
