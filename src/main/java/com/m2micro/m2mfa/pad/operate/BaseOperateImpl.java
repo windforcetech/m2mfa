@@ -594,11 +594,11 @@ public class BaseOperateImpl implements BaseOperate {
     private void saveMesRocerdRail(Padbad padbad) {
         MesRecordFail mesRecordFail1 = padbad.getMesRecordFail();
         MesRecordFail mesRecordFail = new MesRecordFail();
-        mesRecordFail.setRwId(padbad.getRwId());
+        mesRecordFail.setRwId(mesRecordFail1.getRwId());
         mesRecordFail.setId(UUIDUtil.getUUID());
         mesRecordFail.setDefectCode(mesRecordFail1.getDefectCode());
         if(mesRecordFail1.getQty()<0){
-            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +padbad.getRwId() + "'";
+            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +mesRecordFail1.getRwId() + "'";
             Integer badsum = jdbcTemplate.queryForObject(sql, Integer.class);
            Integer qtynum= Math.abs(mesRecordFail1.getQty());
             if (qtynum > badsum) {
