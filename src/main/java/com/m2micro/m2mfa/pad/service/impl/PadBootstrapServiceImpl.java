@@ -1,6 +1,5 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
-import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
@@ -14,8 +13,6 @@ import com.m2micro.m2mfa.pad.service.PadBootstrapService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +44,7 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         //预留，现阶段内没用
         StopWorkModel stopWorkModel = new StopWorkModel();
         //保存不良输入
-        saveRecordFail(obj);
+        //saveRecordFail(obj);
         MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
         MesMoSchedule mesMoSchedule = findMesMoScheduleById(mesRecordWork.getScheduleId());
         IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());

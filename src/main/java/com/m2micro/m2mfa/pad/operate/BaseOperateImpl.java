@@ -46,7 +46,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -588,24 +587,25 @@ public class BaseOperateImpl implements BaseOperate {
 
     @Override
     public Object defectiveProducts(Padbad padbad) {
-        saveMesRocerdRail(padbad.getRwId(),padbad.getDctCode(),padbad.getQty());
+        saveMesRocerdRail(padbad);
         return null;
     }
 
-    private void saveMesRocerdRail(String rwId,String dctCode,Integer qty) {
+    private void saveMesRocerdRail(Padbad padbad) {
+        MesRecordFail mesRecordFail1 = padbad.getMesRecordFail();
         MesRecordFail mesRecordFail = new MesRecordFail();
-        mesRecordFail.setRwId(rwId);
+        mesRecordFail.setRwId(padbad.getRwId());
         mesRecordFail.setId(UUIDUtil.getUUID());
-        mesRecordFail.setDefectCode(dctCode);
-        if(qty<0){
-            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +rwId + "'";
+        mesRecordFail.setDefectCode(mesRecordFail1.getDefectCode());
+        if(mesRecordFail1.getQty()<0){
+            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +padbad.getRwId() + "'";
             Integer badsum = jdbcTemplate.queryForObject(sql, Integer.class);
-           Integer qtynum= Math.abs(qty);
+           Integer qtynum= Math.abs(mesRecordFail1.getQty());
             if (qtynum > badsum) {
                 throw new MMException("不良负数量不可大于原有数量");
             }
         }
-        mesRecordFail.setQty(qty);
+        mesRecordFail.setQty(mesRecordFail1.getQty());
         mesRecordFailRepository.save(mesRecordFail);
     }
 
