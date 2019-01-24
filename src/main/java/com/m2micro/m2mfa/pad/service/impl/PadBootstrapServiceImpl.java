@@ -44,15 +44,31 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
         MesMoSchedule mesMoSchedule = findMesMoScheduleById(mesRecordWork.getScheduleId());
         IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        return stopWorkForReal(obj, stopWorkModel, mesRecordWork, mesMoSchedule, iotMachineOutput);
 
+    }
+
+    /**
+     * 真正处理业务
+     * @param obj
+     * @param stopWorkModel
+     * @param mesRecordWork
+     * @param mesMoSchedule
+     * @param iotMachineOutput
+     * @return
+     */
+    private StopWorkModel stopWorkForReal(StopWorkPara obj, StopWorkModel stopWorkModel, MesRecordWork mesRecordWork, MesMoSchedule mesMoSchedule, IotMachineOutput iotMachineOutput) {
         //保存不良输入
-        Padbad padbad = new Padbad();
-        padbad.setStationId(mesRecordWork.getStationId());
-        padbad.setMesRecordFail(obj.getMesRecordFail());
-        obj.getMesRecordFail().setRwId(obj.getRwid());
-        saveMesRocerdRail(padbad);
+        if(obj.getMesRecordFail()!=null){
+            Padbad padbad = new Padbad();
+            padbad.setStationId(mesRecordWork.getStationId());
+            padbad.setMesRecordFail(obj.getMesRecordFail());
+            obj.getMesRecordFail().setRwId(obj.getRwid());
+            saveMesRocerdRail(padbad);
+        }
+
         //下工
-        stopWorkForOutput(obj.getRwid(),PadStaffUtil.getStaff().getStaffId(),iotMachineOutput);
+        stopWorkForOutput(obj.getRwid(), PadStaffUtil.getStaff().getStaffId(),iotMachineOutput);
         //是否已完成目标量
         if(isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork)){
             //已完成目标量
@@ -62,6 +78,14 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         return stopWorkForUnCompleted(obj,stopWorkModel,iotMachineOutput,mesRecordWork);
     }
 
+    /**
+     * 没有完成目标量
+     * @param obj
+     * @param stopWorkModel
+     * @param iotMachineOutput
+     * @param mesRecordWork
+     * @return
+     */
     private StopWorkModel stopWorkForUnCompleted(StopWorkPara obj,StopWorkModel stopWorkModel,IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork ){
         //是否交接班
         if(!isChangeShifts(PadStaffUtil.getStaff().getStaffId())){
@@ -79,6 +103,15 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         return stopWorkModel;
     }
 
+    /**
+     * 已完成目标量
+     * @param obj
+     * @param stopWorkModel
+     * @param iotMachineOutput
+     * @param mesRecordWork
+     * @param mesMoSchedule
+     * @return
+     */
     private StopWorkModel stopWorkForCompleted(StopWorkPara obj,StopWorkModel stopWorkModel,IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork,MesMoSchedule mesMoSchedule){
         //退料
 
@@ -115,6 +148,14 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         return stopWorkModel;
     }
 
+    /**
+     * 处理新排产单
+     * @param iotMachineOutput
+     * @param mesRecordWork
+     * @param nextMesRecordStaff
+     * @param firstMesMoSchedule
+     * @param baseStaffById
+     */
     private void handleNewSchedule(IotMachineOutput iotMachineOutput, MesRecordWork mesRecordWork, MesRecordStaff nextMesRecordStaff, MesMoSchedule firstMesMoSchedule, BaseStaff baseStaffById) {
         //添加余料到新排产单
 
@@ -123,7 +164,6 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         //获取旧排产单上工纪录，赋值跟新排产单的纪录进行添加:模具信息
         generateMesRecordWorkandMesRecordMold(mesRecordWork.getScheduleId(),firstMesMoSchedule.getScheduleId(),mesRecordWork.getStationId(),iotMachineOutput);
 
-        //不相同调用接班人员开机上工
         PadPara startPara = new PadPara();
         //新排产单
         startPara.setScheduleId(firstMesMoSchedule.getScheduleId());
@@ -131,6 +171,7 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         startPara.setProcessId(mesRecordWork.getProcessId());
         //当前工位
         startPara.setStationId(mesRecordWork.getStationId());
+        //调用接班人员开机上工
         startWorkForOutputByBaseStaff(startPara,baseStaffById);
     }
 }
