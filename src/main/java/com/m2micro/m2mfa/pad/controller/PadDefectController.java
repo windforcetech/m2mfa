@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/pad/baseDefect")
 @Api(value="不良現象代碼 前端控制器")
-@Authorize
+@Authorize(Authorize.authorizeType.AllowAll)
 public class PadDefectController {
     @Autowired
     PadDefectServie padDefectServie;
