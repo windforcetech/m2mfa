@@ -79,7 +79,9 @@ public class PadDispatchServiceImpl implements PadDispatchService {
         String handle = PadDispatchConstant.getHandle(baseStation.getCode());
         Class<?> clazz = Class.forName(handle);
         Object handleInstance = SpringContextUtil.getBean(clazz);
-        try {
+        Method method = clazz.getMethod("defectiveProducts",Padbad.class);
+        return method.invoke(handleInstance,obj);
+        /*try {
             Method method = clazz.getMethod("defectiveProducts",Padbad.class);
             return method.invoke(handleInstance,obj);
         }catch (InvocationTargetException ex){
@@ -88,7 +90,7 @@ public class PadDispatchServiceImpl implements PadDispatchService {
                 throw (MMException)t;
             }
             throw ex;
-        }
+        }*/
 
     }
 
