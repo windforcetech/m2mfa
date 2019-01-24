@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
  */
 @Service
 public class PadDispatchServiceImpl implements PadDispatchService {
+
     @Autowired
     BaseStationService baseStationService;
 
@@ -36,6 +37,7 @@ public class PadDispatchServiceImpl implements PadDispatchService {
         return (OperationInfo)method.invoke(handleInstance,scheduleId,stationId);
     }
 
+
     @Override
     public StartWorkPara startWork(PadPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         BaseStation baseStation = baseStationService.findById(obj.getStationId()).orElse(null);
@@ -46,6 +48,7 @@ public class PadDispatchServiceImpl implements PadDispatchService {
         return (StartWorkPara)method.invoke(handleInstance,obj);
     }
 
+
     @Override
     public StopWorkModel stopWork(StopWorkPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         BaseStation baseStation = baseStationService.findById(obj.getStationId()).orElse(null);
@@ -55,6 +58,7 @@ public class PadDispatchServiceImpl implements PadDispatchService {
         Method method = clazz.getMethod("stopWork",StopWorkPara.class);
         return (StopWorkModel)method.invoke(handleInstance,obj);
     }
+
 
     @Override
     public Object finishHomework(Object obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -68,14 +72,22 @@ public class PadDispatchServiceImpl implements PadDispatchService {
         return method.invoke(handleInstance,obj);
     }
 
+
     @Override
     public Object defectiveProducts(Padbad obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         BaseStation baseStation = baseStationService.findById(obj.getStationId()).orElse(null);
         String handle = PadDispatchConstant.getHandle(baseStation.getCode());
         Class<?> clazz = Class.forName(handle);
         Object handleInstance = SpringContextUtil.getBean(clazz);
-        Method method = clazz.getMethod("defectiveProducts",Padbad.class);
-        return method.invoke(handleInstance,obj);
+        try {
+            Method method = clazz.getMethod("defectiveProducts",Padbad.class);
+            return method.invoke(handleInstance,obj);
+        }catch (Exception ex){
+            InvocationTargetException targetEx = (InvocationTargetException)ex;
+            Throwable t = targetEx .getTargetException();
+            throw (MMException)t;
+        }
+
     }
 
     @Override
@@ -126,3 +138,5 @@ public class PadDispatchServiceImpl implements PadDispatchService {
         return method.invoke(handleInstance,obj);
     }
 }
+
+

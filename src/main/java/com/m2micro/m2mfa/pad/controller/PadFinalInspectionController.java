@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * @Auther: liaotao
  * @Date: 2019/1/2 13:38
@@ -62,7 +64,7 @@ public class PadFinalInspectionController {
     @RequestMapping("/defectiveProducts")
     @ApiOperation(value="pad终检不良品数")
     @UserOperationLog("pad终检不良品数")
-    public ResponseMessage defectiveProducts (Padbad obj){
+    public ResponseMessage defectiveProducts (Padbad obj) throws InvocationTargetException {
         return ResponseMessage.ok(padFinalInspectionService.defectiveProducts(obj));
     }
     /**
