@@ -24,16 +24,14 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.constant.PadConstant;
-import com.m2micro.m2mfa.pad.model.PadPara;
-import com.m2micro.m2mfa.pad.model.StopWorkModel;
-import com.m2micro.m2mfa.pad.model.StopWorkPara;
-import com.m2micro.m2mfa.pad.model.StartWorkPara;
+import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.record.entity.MesRecordFail;
 import com.m2micro.m2mfa.record.entity.MesRecordMold;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
+import com.m2micro.m2mfa.record.repository.MesRecordFailRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordMoldRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordStaffRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
@@ -92,6 +90,8 @@ public class BaseOperateImpl implements BaseOperate {
     MesRecordStaffRepository mesRecordStaffRepository;
     @Autowired
     MesRecordMoldRepository mesRecordMoldRepository ;
+    @Autowired
+    MesRecordFailRepository mesRecordFailRepository;
 
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
@@ -584,8 +584,26 @@ public class BaseOperateImpl implements BaseOperate {
     }
 
     @Override
-    public Object defectiveProducts(Object obj) {
+    public Object defectiveProducts(Padbad padbad) {
+        saveMesRocerdRail(padbad.getRwId(),padbad.getDctCode(),padbad.getQty());
         return null;
+    }
+
+    private void saveMesRocerdRail(String rwId,String dctCode,Integer qty) {
+        MesRecordFail mesRecordFail = new MesRecordFail();
+        mesRecordFail.setRwId(rwId);
+        mesRecordFail.setId(UUIDUtil.getUUID());
+        mesRecordFail.setDefectCode(dctCode);
+        if(qty<0){
+            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +rwId + "'";
+            Integer badsum = jdbcTemplate.queryForObject(sql, Integer.class);
+           Integer qtynum= Math.abs(qty);
+            if (qtynum > badsum) {
+                throw new MMException("不良数量不能负数量不可大于原有数量");
+            }
+        }
+        mesRecordFail.setQty(qty);
+        mesRecordFailRepository.save(mesRecordFail);
     }
 
     @Override

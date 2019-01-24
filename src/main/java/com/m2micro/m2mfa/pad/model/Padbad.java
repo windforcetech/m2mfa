@@ -13,4 +13,6 @@ public class Padbad {
   private String dctCode;
   @ApiModelProperty(value = "数量")
   private Integer qty;
+  @ApiModelProperty(value = "工位Id")
+  private String stationId;
 }

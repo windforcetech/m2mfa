@@ -4,10 +4,7 @@ import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
-import com.m2micro.m2mfa.pad.model.PadPara;
-import com.m2micro.m2mfa.pad.model.StopWorkModel;
-import com.m2micro.m2mfa.pad.model.StopWorkPara;
-import com.m2micro.m2mfa.pad.model.StartWorkPara;
+import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -76,7 +73,7 @@ public class PadDispatchController {
     @RequestMapping("/defectiveProducts")
     @ApiOperation(value="pad不良品数")
     @UserOperationLog("pad不良品数")
-    public ResponseMessage defectiveProducts (Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public ResponseMessage defectiveProducts (Padbad obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.defectiveProducts(obj));
     }
     /**

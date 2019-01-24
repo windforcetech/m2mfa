@@ -1,10 +1,7 @@
 package com.m2micro.m2mfa.pad.operate;
 
 import com.m2micro.m2mfa.mo.model.OperationInfo;
-import com.m2micro.m2mfa.pad.model.PadPara;
-import com.m2micro.m2mfa.pad.model.StartWorkPara;
-import com.m2micro.m2mfa.pad.model.StopWorkModel;
-import com.m2micro.m2mfa.pad.model.StopWorkPara;
+import com.m2micro.m2mfa.pad.model.*;
 
 /**
  * 基础操作接口
@@ -43,7 +40,7 @@ public interface BaseOperate {
      * @param obj
      * @return
      */
-    Object defectiveProducts (Object obj);
+    Object defectiveProducts (Padbad obj);
     /**
      * 提报异常
      * @param obj

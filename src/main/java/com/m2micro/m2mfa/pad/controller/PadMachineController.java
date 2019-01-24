@@ -4,6 +4,7 @@ import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.pad.model.PadPara;
+import com.m2micro.m2mfa.pad.model.Padbad;
 import com.m2micro.m2mfa.pad.model.StopWorkPara;
 import com.m2micro.m2mfa.pad.service.PadMachineService;
 import io.swagger.annotations.Api;
@@ -60,7 +61,7 @@ public class PadMachineController {
     @RequestMapping("/defectiveProducts")
     @ApiOperation(value="pad调机不良品数")
     @UserOperationLog("pad调机不良品数")
-    public ResponseMessage defectiveProducts (Object obj){
+    public ResponseMessage defectiveProducts (Padbad obj){
         return ResponseMessage.ok(padMachineService.defectiveProducts(obj));
     }
     /**
