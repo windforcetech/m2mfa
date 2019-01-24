@@ -5,6 +5,7 @@ import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.service.BasePartsService;
+import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
@@ -45,6 +46,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -85,13 +87,14 @@ public class BaseOperateImpl implements BaseOperate {
     BaseStaffshiftService baseStaffshiftService;
     @Autowired
     MesMoScheduleRepository mesMoScheduleRepository;
-
     @Autowired
     MesRecordStaffRepository mesRecordStaffRepository;
     @Autowired
     MesRecordMoldRepository mesRecordMoldRepository ;
     @Autowired
     MesRecordFailRepository mesRecordFailRepository;
+    @Autowired
+    BaseStaffService baseStaffService;
 
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
@@ -897,11 +900,40 @@ public class BaseOperateImpl implements BaseOperate {
      * @param mesMoSchedule
      * @return  机台产量>=目标量 true
      */
-    protected Boolean isCompleted(IotMachineOutput iotMachineOutput,MesMoSchedule mesMoSchedule){
+    protected Boolean isCompleted(IotMachineOutput iotMachineOutput,MesMoSchedule mesMoSchedule,MesRecordWork mesRecordWork){
         Integer scheduleQty = mesMoSchedule.getScheduleQty();
         BigDecimal qty = new BigDecimal(scheduleQty);
-        BigDecimal output = iotMachineOutput.getOutput();
-        return output.compareTo(qty)==-1?false:true;
+        BigDecimal completedQty = getCompletedQty(iotMachineOutput,mesRecordWork);
+        return completedQty.compareTo(qty)==-1?false:true;
+    }
+
+    /**
+     * 获取当前工位当前排产单完成的产量
+     * @param iotMachineOutput
+     * @param mesRecordWork
+     * @return
+     */
+    protected BigDecimal getCompletedQty(IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork){
+        BigDecimal completedQty = new BigDecimal(0);
+        List<MesRecordWork> mesRecordWorks = getMesRecordWork(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
+        if(mesRecordWorks!=null&&mesRecordWorks.size()>0){
+           for (MesRecordWork m:mesRecordWorks){
+               //已经下工
+               if(m.getEndTime()!=null){
+                   BigDecimal singleQty = m.getEndMolds().subtract(m.getStartMolds());
+                   completedQty.add(singleQty);
+               }else {
+                   //正在上工还未下工
+                   BigDecimal singleQty = iotMachineOutput.getOutput().subtract(m.getStartMolds());
+                   completedQty.add(singleQty);
+               }
+           }
+        }
+        return completedQty;
+    }
+
+    protected List<MesRecordWork> getMesRecordWork(String scheduleId, String stationId){
+        return mesRecordWorkRepository.findByScheduleIdAndStationIdAndStartTimeNotNull(scheduleId,stationId);
     }
 
     /**
@@ -913,10 +945,20 @@ public class BaseOperateImpl implements BaseOperate {
         return mesMoScheduleRepository.getFirstMesMoScheduleByMachineId(machineId,MoScheduleStatus.AUDITED.getKey());
     }
 
+    /**
+     * 获取职员记录信息
+     * @param recordStaffId
+     * @return
+     */
     protected MesRecordStaff findMesRecordStaffById(String recordStaffId){
         return mesRecordStaffService.findById(recordStaffId).orElse(null);
     }
 
+    /**
+     * 获取上工记录
+     * @param rwid
+     * @return
+     */
     protected MesRecordWork findMesRecordWorkById(String rwid){
         return mesRecordWorkService.findById(rwid).orElse(null);
     }
@@ -978,5 +1020,31 @@ public class BaseOperateImpl implements BaseOperate {
      String sql ="update  mes_record_staff  set end_time =  '"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'   ,end_power='"+iotMachineOutput.getPower()+"' end_molds='"+iotMachineOutput.getOutput()+"'  where rw_id= '"+rwId+"' and staff_id='"+staffId+"'  and ISNULL(end_time)  and  start_time  is NOT null";
      jdbcTemplate.update(sql);
    }
+
+    /**
+     * 带产量下工（更新上工记录和人员记录）
+     * @param rwId
+     * @param staffId
+     */
+   protected void stopWorkForOutput(String rwId,String staffId, IotMachineOutput iotMachineOutput){
+       //更新职员作业记录表结束时间
+       updateMesRecordStaffend(rwId,staffId,iotMachineOutput);
+       //下工
+       if(isMesRecorWorkEnd(rwId)){
+           //更新上工记录表结束时间
+           updateMesRecordWorkEndTime(iotMachineOutput,staffId);
+       }
+
+   }
+
+    /**
+     * 获取职员信息
+     * @param staffId
+     * @return
+     */
+   protected BaseStaff findBaseStaffById(String staffId){
+       return baseStaffService.findById(staffId).orElse(null);
+   }
+
 
 }

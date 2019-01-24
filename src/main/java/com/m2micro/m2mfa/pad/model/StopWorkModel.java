@@ -11,4 +11,6 @@ import lombok.Data;
 @ApiModel(description="pad 下工返回的参数")
 @Data
 public class StopWorkModel {
+    //返回结果提示信息
+    private String msg;
 }
