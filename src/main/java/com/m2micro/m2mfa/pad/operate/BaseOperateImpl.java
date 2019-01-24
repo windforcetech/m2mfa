@@ -17,8 +17,6 @@ import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
-import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
-import com.m2micro.m2mfa.mo.entity.MesMoScheduleStaff;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
@@ -94,6 +92,11 @@ public class BaseOperateImpl implements BaseOperate {
     MesRecordStaffRepository mesRecordStaffRepository;
     @Autowired
     MesRecordMoldRepository mesRecordMoldRepository ;
+
+
+    protected MesMoSchedule findMesMoScheduleById(String scheduleId){
+        return mesMoScheduleRepository.findById(scheduleId).orElse(null);
+    }
 
     @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
@@ -890,6 +893,14 @@ public class BaseOperateImpl implements BaseOperate {
      */
     protected MesMoSchedule getFirstMesMoScheduleByMachineId(String machineId){
         return mesMoScheduleRepository.getFirstMesMoScheduleByMachineId(machineId,MoScheduleStatus.AUDITED.getKey());
+    }
+
+    protected MesRecordStaff findMesRecordStaffById(String recordStaffId){
+        return mesRecordStaffService.findById(recordStaffId).orElse(null);
+    }
+
+    protected MesRecordWork findMesRecordWorkById(String rwid){
+        return mesRecordWorkService.findById(rwid).orElse(null);
     }
 
   /**

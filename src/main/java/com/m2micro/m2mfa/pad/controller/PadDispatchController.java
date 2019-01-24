@@ -57,7 +57,8 @@ public class PadDispatchController {
     @ApiOperation(value="pad下工")
     @UserOperationLog("pad下工")
     public ResponseMessage<StopWorkModel> stopWork(@RequestBody StopWorkPara obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        return ResponseMessage.ok(padDispatchService.stopWork(obj));
+        //return ResponseMessage.ok(padDispatchService.stopWork(obj));
+        return ResponseMessage.ok();
     }
 
     /**
