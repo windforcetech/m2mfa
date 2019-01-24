@@ -25,7 +25,7 @@ swagger:
   license: Apache License, Version 2.0
   licenseUrl: https://www.apache.org/licenses/LICENSE-2.0.html
   termsOfServiceUrl: http://www.m2micro.com
-  base-package: com.m2micro
+  base-package: com.m2micro.m2mfa.pad
 
 scheduletask:
   companyID: process001

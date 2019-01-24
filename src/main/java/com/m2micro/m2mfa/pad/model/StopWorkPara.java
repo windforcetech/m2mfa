@@ -13,7 +13,8 @@ import lombok.Data;
 @ApiModel(description="pad 下工参数")
 @Data
 public class StopWorkPara {
-
+    @ApiModelProperty(value = "排产单Id")
+    private String scheduleId;
     @ApiModelProperty(value = "工位Id")
     private String stationId;
     @ApiModelProperty(value = "上工记录主键")

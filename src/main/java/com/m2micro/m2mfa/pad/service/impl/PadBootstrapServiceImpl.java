@@ -49,6 +49,7 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         Padbad padbad = new Padbad();
         padbad.setStationId(mesRecordWork.getStationId());
         padbad.setMesRecordFail(obj.getMesRecordFail());
+        obj.getMesRecordFail().setRwId(obj.getRwid());
         saveMesRocerdRail(padbad);
         //下工
         stopWorkForOutput(obj.getRwid(),PadStaffUtil.getStaff().getStaffId(),iotMachineOutput);

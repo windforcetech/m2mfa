@@ -107,6 +107,9 @@ public class BaseOperateImpl implements BaseOperate {
         if(StringUtils.isEmpty(stationId)){
             throw new MMException("当前岗位为空，请刷新！");
         }
+        MesMoSchedule mesMoSchedule = findMesMoScheduleById(scheduleId);
+        //校验排产单状态
+        isScheduleFlag(mesMoSchedule);
         BaseStaff baseStaff = PadStaffUtil.getStaff();
 
         OperationInfo operationInfo = new OperationInfo();
@@ -206,8 +209,11 @@ public class BaseOperateImpl implements BaseOperate {
                 "	mrs.staff_id = '" + staffId + "'\n" +
                 "AND mrw.schedule_id = '" + scheduleId + "'\n" +
                 "AND mrw.station_id = '" + stationId + "'\n" +
-                "ORDER BY mrs.start_time DESC\n"+
-                "LIMIT 1";
+                "AND mrs.start_time IS NOT NULL\n" +
+                "AND mrs.end_time IS NULL\n" +
+                "ORDER BY\n" +
+                "	mrs.start_time DESC";
+
         RowMapper<OperationInfo> rowMapper = BeanPropertyRowMapper.newInstance(OperationInfo.class);
         return jdbcTemplate.query(sql, rowMapper);
     }
@@ -229,8 +235,7 @@ public class BaseOperateImpl implements BaseOperate {
                 "AND mra.end_time IS NULL\n" +
                 "AND mrw.schedule_id = '" + scheduleId + "'\n" +
                 "AND mrw.station_id = '" + stationId + "'\n"+
-                "ORDER BY mra.start_time DESC\n"+
-                "LIMIT 1";
+                "ORDER BY mra.start_time DESC\n";
         RowMapper<OperationInfo> rowMapper = BeanPropertyRowMapper.newInstance(OperationInfo.class);
         return jdbcTemplate.query(sql, rowMapper);
     }
@@ -243,7 +248,7 @@ public class BaseOperateImpl implements BaseOperate {
      */
     private OperationInfo setWorkInfo(List<OperationInfo> recordWorks,OperationInfo operationInfo) {
         if(recordWorks!=null&&recordWorks.size()>1){
-            throw new MMException("人员作业记录数据库数据异常！");
+            throw new MMException("人员作业记录数据库数据异常！(上工多次未下工)");
         }
         //一次也没有上过工，可以上工
         if (recordWorks==null||recordWorks.size()==0) {
@@ -282,7 +287,7 @@ public class BaseOperateImpl implements BaseOperate {
     private OperationInfo setAbnormalInfo(List<OperationInfo> recordAbnormals,OperationInfo operationInfo) {
 
         if(recordAbnormals!=null&&recordAbnormals.size()>1){
-            throw new MMException("异常记录提报数据库数据异常！");
+            throw new MMException("异常记录提报数据库数据异常！(多次提报异常未解决)");
         }
         //一次也没有提报异常，可以提报异常
         if (recordAbnormals==null||recordAbnormals.size()==0) {
