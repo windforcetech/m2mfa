@@ -894,7 +894,7 @@ public class BaseOperateImpl implements BaseOperate {
         if(list.size()==0){
             return null;
         }
-        if(list.size()>0){
+        if(list.size()>1){
             throw new MMException("接班人员有多个，请先解决冲突！");
         }
         return list.get(0);

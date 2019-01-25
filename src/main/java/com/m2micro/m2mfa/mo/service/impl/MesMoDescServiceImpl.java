@@ -415,74 +415,73 @@ public class MesMoDescServiceImpl implements MesMoDescService {
 
     @Override
     public PageUtil<MesMoDesc>  schedulingDetails(ModescandpartsQuery query) {
-            String sql ="SELECT\n" +
-                        "	mmd.mo_id moId,\n" +
-                        "	mmd.mo_number moNumber,\n" +
-                        "	mmd.category category,\n" +
-                        "	mmd.part_id partId,\n" +
-                        "	IFNULL(mmd.target_qty,0) targetQty,\n" +
-                        "	mmd.revsion revsion,\n" +
-                        "	mmd.distinguish distinguish,\n" +
-                        "	mmd.parent_mo parentMo,\n" +
-                        "	mmd.bom_revsion bomRevsion,\n" +
-                        "	mmd.plan_input_date planInputDate,\n" +
-                        "	mmd.plan_close_date planCloseDate,\n" +
-                        "	mmd.actual_input_date actualInputDate,\n" +
-                        "	mmd.actualc_lose_date actualcLoseDate,\n" +
-                        "	mmd.route_id routeId,\n" +
-                        "	mmd.input_process_id inputProcessId,\n" +
-                        "	mmd.output_process_id outputProcessId,\n" +
-                        "	mmd.reach_date reachDate,\n" +
-                        "	mmd.machine_qty machineQty,\n" +
-                        "	mmd.customer_id customerId,\n" +
-                        "	mmd.order_id orderId,\n" +
-                        "	mmd.order_seq orderSeq,\n" +
-                        "	mmd.is_schedul isSchedul,\n" +
-                        "	IFNULL(mmd.schedul_qty,0)  schedulQty,\n" +
-                        "	mmd.input_qty inputQty,\n" +
-                        "	mmd.output_qty outputQty,\n" +
-                        "	mmd.scrapped_qty scrappedQty,\n" +
-                        "	mmd.fail_qty failQty,\n" +
-                        "	mmd.close_flag closeFlag,\n" +
-                        "	mmd.prefreezing_state prefreezingState,\n" +
-                        "	mmd.enabled enabled,\n" +
-                        "	mmd.description description,\n" +
-                        "	mmd.create_on createOn,\n" +
-                        "	mmd.create_by createBy,\n" +
-                        "	mmd.modified_on modifiedOn,\n" +
-                        "	mmd.modified_by modifiedBy,\n" +
-                        "	bp.name partName,\n" +
-                        "	bp.part_no partNo,\n" +
-                        "	bp.part_id partId,\n" +
-                        "	bp.name name,\n" +
-                        " ( IFNULL(mmd.target_qty,0)  -  IFNULL(mmd.schedul_qty ,0) )    notQty \n" +
-                        "FROM\n" +
-                        "	mes_mo_desc mmd\n" +
-                        "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id WHERE\n" ;
-               if(StringUtils.isNotEmpty(query.getPartNo())){
-                    sql +=" bp.part_no LIKE '%"+query.getPartNo()+"%'" ;
-                }
-              if(StringUtils.isNotEmpty(query.getMoNumber()) && StringUtils.isNotEmpty(query.getPartNo())){
-                    sql +="  and mmd.mo_number LIKE'%"+query.getMoNumber()+"%' " ;
-               }
-              if(StringUtils.isNotEmpty(query.getMoNumber()) && !StringUtils.isNotEmpty(query.getPartNo())){
-                   sql +="   mmd.mo_number LIKE'%"+query.getMoNumber()+"%' " ;
-              }
-             if(StringUtils.isNotEmpty(query.getMoNumber()) ||  StringUtils.isNotEmpty(query.getPartNo())){
-                   sql += " and ( 	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" ;
-              }else {
-                  sql += " ( 	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" ;
-              }
-              sql += "OR mmd.close_flag = " + MoStatus.SCHEDULED.getKey() + "\n" +
-                 "OR (\n" +
-                 "	mmd.close_flag = " + MoStatus.PRODUCTION.getKey() + "\n" +
-                 "	AND mmd.is_schedul = 0\n" +
-                 ") ) ";
-              RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDesc.class);
-              List<MesMoDesc>listcount = jdbcTemplate.query(sql,rm);
-             sql += "limit  " + (query.getPage() - 1) *query.getSize()+" , "+query.getSize();
-             List<MesMoDesc>list = jdbcTemplate.query(sql,rm);
-            return PageUtil.of(list,listcount.size(),query.getSize(),query.getPage());
+        String sql ="SELECT\n" +
+                "	mmd.mo_id moId,\n" +
+                "	mmd.mo_number moNumber,\n" +
+                "	mmd.category category,\n" +
+                "	mmd.part_id partId,\n" +
+                "	IFNULL(mmd.target_qty,0) targetQty,\n" +
+                "	mmd.revsion revsion,\n" +
+                "	mmd.distinguish distinguish,\n" +
+                "	mmd.parent_mo parentMo,\n" +
+                "	mmd.bom_revsion bomRevsion,\n" +
+                "	mmd.plan_input_date planInputDate,\n" +
+                "	mmd.plan_close_date planCloseDate,\n" +
+                "	mmd.actual_input_date actualInputDate,\n" +
+                "	mmd.actualc_lose_date actualcLoseDate,\n" +
+                "	mmd.route_id routeId,\n" +
+                "	mmd.input_process_id inputProcessId,\n" +
+                "	mmd.output_process_id outputProcessId,\n" +
+                "	mmd.reach_date reachDate,\n" +
+                "	mmd.machine_qty machineQty,\n" +
+                "	mmd.customer_id customerId,\n" +
+                "	mmd.order_id orderId,\n" +
+                "	mmd.order_seq orderSeq,\n" +
+                "	mmd.is_schedul isSchedul,\n" +
+                "	IFNULL(mmd.schedul_qty,0)  schedulQty,\n" +
+                "	mmd.input_qty inputQty,\n" +
+                "	mmd.output_qty outputQty,\n" +
+                "	mmd.scrapped_qty scrappedQty,\n" +
+                "	mmd.fail_qty failQty,\n" +
+                "	mmd.close_flag closeFlag,\n" +
+                "	mmd.prefreezing_state prefreezingState,\n" +
+                "	mmd.enabled enabled,\n" +
+                "	mmd.description description,\n" +
+                "	mmd.create_on createOn,\n" +
+                "	mmd.create_by createBy,\n" +
+                "	mmd.modified_on modifiedOn,\n" +
+                "	mmd.modified_by modifiedBy,\n" +
+                "	bp.name partName,\n" +
+                "	bp.part_no partNo,\n" +
+                "	bp.part_id partId,\n" +
+                "	bp.name name,\n" +
+                " ( IFNULL(mmd.target_qty,0)  -  IFNULL(mmd.schedul_qty ,0) )    notQty \n" +
+                "FROM\n" +
+                "	mes_mo_desc mmd\n" +
+                "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id WHERE\n" ;
+        if(StringUtils.isNotEmpty(query.getPartNo())){
+            sql +=" bp.part_no LIKE '%"+query.getPartNo()+"%'" ;
+        }
+        if(StringUtils.isNotEmpty(query.getMoNumber()) && StringUtils.isNotEmpty(query.getPartNo())){
+            sql +="  and mmd.mo_number LIKE'%"+query.getMoNumber()+"%' " ;
+        }
+        if(StringUtils.isNotEmpty(query.getMoNumber()) && !StringUtils.isNotEmpty(query.getPartNo())){
+            sql +="   mmd.mo_number LIKE'%"+query.getMoNumber()+"%' " ;
+        }
+        if(StringUtils.isNotEmpty(query.getMoNumber()) ||  StringUtils.isNotEmpty(query.getPartNo())){
+            sql += " and ( 	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" ;
+        }else {
+            sql += " ( 	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" ;
+        }
+        sql += " OR mmd.close_flag = "+ MoStatus.SCHEDULED.getKey() + "\n" +
+                "		OR mmd.close_flag = "+ MoStatus.PRODUCTION.getKey() + "\n" +
+                "	)\n" +
+                " AND IFNULL(mmd.is_schedul,0) <> 1\n";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDesc.class);
+        List<MesMoDesc> listcount = jdbcTemplate.query(sql,rm);
+        sql += "limit  " + (query.getPage() - 1) *query.getSize()+" , "+query.getSize();
+        List<MesMoDesc>list = jdbcTemplate.query(sql,rm);
+        return PageUtil.of(list,listcount.size(),query.getSize(),query.getPage());
     }
 
 
