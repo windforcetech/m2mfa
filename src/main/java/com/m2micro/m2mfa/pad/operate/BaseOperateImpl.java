@@ -1072,4 +1072,19 @@ public class BaseOperateImpl implements BaseOperate {
        return false;
     }
 
+    /**
+     * 判定当前员工是否能下工
+     * @param rwId
+     * @param staffId
+     * @return
+     */
+    protected  boolean isNotWork(String rwId,String staffId){
+       String sql ="SELECT count(*) FROM mes_record_staff WHERE rw_id = '"+rwId+"' AND start_time IS NOT NULL AND ISNULL(end_time) AND staff_id = '"+staffId+"'";
+        Integer countNotWork  =  jdbcTemplate.queryForObject(sql ,Integer.class);
+        if(countNotWork>0){
+            return true;
+        }
+        return false;
+    }
+
 }
