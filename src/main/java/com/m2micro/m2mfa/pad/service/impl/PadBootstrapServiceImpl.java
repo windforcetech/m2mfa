@@ -103,7 +103,12 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
             return stopWorkModel;
         }
         //更新接班人员 开始产量、开始电量
+        PadPara padPara = new PadPara();
+        padPara.setScheduleId(mesRecordWork.getScheduleId());
+        padPara.setProcessId(mesRecordWork.getProcessId());
+        padPara.setStationId(mesRecordWork.getStationId());
         MesRecordStaff mesRecordStaff = findMesRecordStaffById(obj.getRecordStaffId());
+        mesRecordStaff.setRwId(saveMesRecordWork(padPara));
         updateNextMesRecordStaff(iotMachineOutput,mesRecordStaff);
         return stopWorkModel;
     }
