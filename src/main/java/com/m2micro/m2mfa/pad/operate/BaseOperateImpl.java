@@ -615,6 +615,7 @@ public class BaseOperateImpl implements BaseOperate {
             }
         }
         mesRecordFail.setQty(mesRecordFail1.getQty());
+        mesRecordFail.setCreateOn(new Date());
         mesRecordFailRepository.save(mesRecordFail);
     }
 
@@ -1055,6 +1056,13 @@ public class BaseOperateImpl implements BaseOperate {
        return baseStaffService.findById(staffId).orElse(null);
    }
 
+  /**
+   * 判定当前员工是否有上工记录
+   * @param scheduleId
+   * @param staffId
+   * @param stationId
+   * @return
+   */
    protected  boolean isWork(String scheduleId,String staffId,String stationId){
        String sql ="SELECT count(*) FROM mes_record_work mrw, mes_record_staff mrs WHERE mrs.schedule_id = '"+scheduleId+"' AND mrs.staff_id = '"+staffId+"' AND mrw.station_id = '"+stationId+"' AND mrs.start_time IS NOT NULL AND ISNULL(mrs.end_time)";
           Integer countwork  =  jdbcTemplate.queryForObject(sql ,Integer.class);
