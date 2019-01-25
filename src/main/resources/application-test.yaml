@@ -18,5 +18,7 @@ spring:
 m2miot:
   client:
     url: http://192.168.1.111:8082
+file:
+  baseDir:
 labServer:
   url: http://192.168.2.16:9666/api/
