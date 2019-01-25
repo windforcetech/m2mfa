@@ -139,7 +139,7 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         BaseStaff baseStaffById = findBaseStaffById(nextMesRecordStaff.getStaffId());
         if(firstMesMoSchedule==null){
             //接班人员做下工处理
-            stopWorkForOutput(nextMesRecordStaff.getRwId(),nextMesRecordStaff.getStaffId(),iotMachineOutput);
+            stopWorkForNextBaseStaff(nextMesRecordStaff.getRwId(),nextMesRecordStaff.getStaffId(),iotMachineOutput);
             String msg = "当前排产单已结束，机台未安排新单，请重新安排接班人"+baseStaffById.getStaffName()+"的工作。 ";
             stopWorkModel.setMsg(msg);
             return stopWorkModel;
@@ -166,6 +166,11 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
 
         //删除只上工下工结束时间为空的人员记录(旧排产单记录)
         deleteMesRecordStaffAtlast(nextMesRecordStaff.getRwId());
+        //更新当前下工人员的上工结束时间
+        if(isMesRecorWorkEnd(mesRecordWork.getRwid())){
+            //更新上工记录表结束时间
+            updateMesRecordWorkEndTime(iotMachineOutput,PadStaffUtil.getStaff().getStaffId());
+        }
         //获取旧排产单上工纪录，赋值跟新排产单的纪录进行添加:模具信息
         generateMesRecordWorkandMesRecordMold(mesRecordWork.getScheduleId(),firstMesMoSchedule.getScheduleId(),mesRecordWork.getStationId(),iotMachineOutput);
 

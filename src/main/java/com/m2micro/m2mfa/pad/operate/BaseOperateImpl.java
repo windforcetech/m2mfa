@@ -1062,6 +1062,23 @@ public class BaseOperateImpl implements BaseOperate {
    }
 
     /**
+     * 带产量下工（更新上工记录和人员记录）
+     * @param rwId
+     * @param staffId
+     */
+    protected void stopWorkForNextBaseStaff(String rwId,String staffId, IotMachineOutput iotMachineOutput){
+        //更新职员作业记录表结束时间
+        //updateMesRecordStaffend(rwId,staffId,iotMachineOutput);
+
+        //下工
+        if(isMesRecorWorkEnd(rwId)){
+            //更新上工记录表结束时间
+            updateMesRecordWorkEndTime(iotMachineOutput,staffId);
+        }
+
+    }
+
+    /**
      * 获取职员信息
      * @param staffId
      * @return
