@@ -827,13 +827,10 @@ public class BaseOperateImpl implements BaseOperate {
    * @return
    */
    protected boolean isMesRecorWorkEnd(String rwId){
-      MesRecordWork mesRecordWork =  mesRecordWorkService.findById(rwId).orElse(null);
-      //获取工序对应的工位下面所有的职员人员数量
-      String sql="SELECT count(*)  FROM mes_mo_schedule_staff mmss WHERE mmss.schedule_id = '"+mesRecordWork.getScheduleId()+"' AND mmss.process_id = '"+mesRecordWork.getProcessId()+"'  AND  mmss.enabled=1  AND mmss.station_id = '"+mesRecordWork.getStationId()+"'";
-      Integer mesMoschedulestaffcount =  jdbcTemplate.queryForObject(sql ,Integer.class);
-     //获取工序对应工位的上班人员打卡结束记录   如果匹配的话说明该工位完成了
-      Integer mesRecordstaffcount = mesRecordStaffRepository.selectMesRecordstaffcount( rwId,  mesRecordWork.getScheduleId(), mesRecordWork.getProcessId() , mesRecordWork.getStationId());
-      if(mesMoschedulestaffcount.equals(mesRecordstaffcount)){
+
+      String sql="select count(*)   from  mes_record_staff where rw_id='"+rwId+"' and start_time is NOT NULL  and  ISNULL(end_time)";
+      Integer mesRecordstaffcount =jdbcTemplate.queryForObject(sql,Integer.class);
+    if(mesRecordstaffcount.equals(0)){
         return  true;
       }
       return  false;

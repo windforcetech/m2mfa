@@ -42,6 +42,5 @@ public interface MesRecordStaffRepository extends BaseRepository<MesRecordStaff,
     @Query(value = "SELECT  * from  mes_record_staff  where  staff_id=?1",nativeQuery = true)
     List<MesRecordStaff> findStaffId(String staffId);
 
-    @Query(value = "SELECT count(*) FROM mes_mo_schedule_staff mmss INNER JOIN mes_record_staff mrs ON mmss.staff_id = mrs.staff_id AND mrs.rw_id = ?1 WHERE mmss.schedule_id = ?2 AND mmss.process_id = ?3 AND mmss.station_id = ?4 AND mrs.end_time IS NOT NULL",nativeQuery = true)
-    Integer selectMesRecordstaffcount(String rwId,String  scheduleId,String processId ,String stationId);
+
 }
