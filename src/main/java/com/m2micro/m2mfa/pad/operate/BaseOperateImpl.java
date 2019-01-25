@@ -540,6 +540,10 @@ public class BaseOperateImpl implements BaseOperate {
     @Override
     @Transactional
     public StopWorkModel stopWork(StopWorkPara obj) {
+        //校验是否重复下工
+        if(!isNotWork(obj.getRwid(),PadStaffUtil.getStaff().getStaffId())){
+            throw new MMException("当前员工没有上工，不存在下工！");
+        }
         //更新职员作业记录表结束时间
         updateRecordStaffEndTime(obj.getRecordStaffId());
         if(isMesRecorWorkEnd(obj.getRwid())){
@@ -551,8 +555,18 @@ public class BaseOperateImpl implements BaseOperate {
 
     @Transactional
     protected StopWorkModel stopWorkForRecordFail(StopWorkPara obj) {
+        //校验是否重复下工
+        if(!isNotWork(obj.getRwid(),PadStaffUtil.getStaff().getStaffId())){
+            throw new MMException("当前员工没有上工，不存在下工！");
+        }
         saveRecordFail(obj);
-        return stopWork(obj);
+        //更新职员作业记录表结束时间
+        updateRecordStaffEndTime(obj.getRecordStaffId());
+        if(isMesRecorWorkEnd(obj.getRwid())){
+            //更新上工记录表结束时间
+            updateRecordWorkEndTime(obj.getRwid());
+        }
+        return new StopWorkModel();
     }
 
     /**

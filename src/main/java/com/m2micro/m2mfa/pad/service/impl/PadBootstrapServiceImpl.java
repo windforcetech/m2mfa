@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
@@ -38,6 +39,10 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
     @Override
     @Transactional
     public StopWorkModel stopWork(StopWorkPara obj) {
+        //校验是否重复下工
+        if(!isNotWork(obj.getRwid(),PadStaffUtil.getStaff().getStaffId())){
+            throw new MMException("当前员工没有上工，不存在下工！");
+        }
         //预留，现阶段内没用
         StopWorkModel stopWorkModel = new StopWorkModel();
 
