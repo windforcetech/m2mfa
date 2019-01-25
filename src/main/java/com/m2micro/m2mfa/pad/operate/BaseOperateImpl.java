@@ -1064,7 +1064,7 @@ public class BaseOperateImpl implements BaseOperate {
    * @return
    */
    protected  boolean isWork(String scheduleId,String staffId,String stationId){
-       String sql ="SELECT count(*) FROM mes_record_work mrw, mes_record_staff mrs WHERE mrs.schedule_id = '"+scheduleId+"' AND mrs.staff_id = '"+staffId+"' AND mrw.station_id = '"+stationId+"' AND mrs.start_time IS NOT NULL AND ISNULL(mrs.end_time)";
+       String sql ="SELECT count(*) FROM mes_record_work mrw, mes_record_staff mrs WHERE mrs.schedule_id = '"+scheduleId+"' AND mrs.staff_id = '"+staffId+"' AND mrw.station_id = '"+stationId+"' AND mrs.start_time IS NOT NULL AND ISNULL(mrs.end_time) AND mrw.rwid=mrs.rw_id";
           Integer countwork  =  jdbcTemplate.queryForObject(sql ,Integer.class);
           if(countwork.equals(0)){
             return true;
