@@ -608,8 +608,8 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordFail.setDefectCode(mesRecordFail1.getDefectCode());
         if(mesRecordFail1.getQty()<0){
             String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +mesRecordFail1.getRwId() + "'";
-            Integer badsum = jdbcTemplate.queryForObject(sql, Integer.class);
-           Integer qtynum= Math.abs(mesRecordFail1.getQty());
+            long badsum = jdbcTemplate.queryForObject(sql, Long.class);
+            long qtynum= Math.abs(mesRecordFail1.getQty());
             if (qtynum > badsum) {
                 throw new MMException("不良负数量不可大于原有数量");
             }
