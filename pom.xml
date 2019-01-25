@@ -5,7 +5,7 @@
 
     <groupId>com.m2micro</groupId>
     <artifactId>m2mfa</artifactId>
-    <version>2.0.0</version>
+    <version>${project.release.version}</version>
     <packaging>jar</packaging>
 
     <name>M2MFA</name>
@@ -18,16 +18,19 @@
     </parent>
 
     <properties>
+        <project.base.version>2.1.0</project.base.version>
+        <project.release.version>${project.base.version}-SNAPSHOT</project.release.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.locales>zh_CN</project.build.locales>
         <java.version>1.8</java.version>
         <project.build.jdk>${java.version}</project.build.jdk>
         <docker.image.prefix>m2micro</docker.image.prefix>
-        <m2micro.framework.version>1.0.0-SNAPSHOT</m2micro.framework.version>
+        <m2micro.framework.version>1.1.0-SNAPSHOT</m2micro.framework.version>
         <joda>2.10</joda>
         <mybatis.plus>3.0.1</mybatis.plus>
         <flowable.version>6.4.0</flowable.version>
+        <druid.version>1.1.10</druid.version>
     </properties>
 
     <dependencyManagement>
@@ -35,14 +38,29 @@
             <dependency>
                 <groupId>com.m2micro</groupId>
                 <artifactId>m2micro-framework</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${m2micro.framework.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
+    <profiles>
+        <profile>
+            <id>product</id>
+            <properties>
+                <project.release.version>${project.base.version}</project.release.version>
+            </properties>
+        </profile>
+    </profiles>
+
+
     <dependencies>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>${druid.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -87,6 +105,7 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>${mybatis.plus}</version>
+            <scope>provided</scope>
         </dependency>
 
 
@@ -117,10 +136,6 @@
             <version>${joda}</version>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-apt</artifactId>
             <scope>provided</scope>
@@ -133,29 +148,13 @@
         </dependency>
 
 
-
-
-
-        <!--<dependency>
-            <groupId>com.m2micro</groupId>
-            <artifactId>commons</artifactId>
-            <version>${project.version}</version>
-        </dependency>-->
         <dependency>
             <groupId>com.m2micro</groupId>
             <artifactId>starter</artifactId>
-            <version>${m2micro.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>com.m2micro</groupId>
             <artifactId>logging</artifactId>
-            <version>${m2micro.framework.version}</version>
-            <!--<exclusions>
-                <exclusion>
-                    <groupId>com.m2micro</groupId>
-                    <artifactId>authorization</artifactId>
-                </exclusion>
-            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>com.m2micro</groupId>
@@ -163,13 +162,67 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.squareup.retrofit2/retrofit -->
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>retrofit</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.squareup.retrofit2/converter-gson -->
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-gson</artifactId>
+            <version>2.3.0</version>
+        </dependency>
     </dependencies>
 
     <build>
+
         <plugins>
+            <plugin>
+                <groupId>com.m2micro.maven.plugin</groupId>
+                <artifactId>release-maven-plugin</artifactId>
+                <version>0.1.0-SNAPSHOT</version>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.mybatis</groupId>
+                            <artifactId>mybatis</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>org.mybatis</groupId>
+                            <artifactId>mybatis-spring</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus-annotation</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus-core</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus-boot-starter</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus-extension</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>com.baomidou</groupId>
+                            <artifactId>mybatis-plus-generator</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.mysema.maven</groupId>
@@ -218,7 +271,28 @@
                     </buildArgs>
                 </configuration>
             </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <excludes>
+                        <!--<exclude>**/com/m2micro/m2mfa/common/util/CodeGenerator*</exclude>-->
+                        <exclude>**/CodeGeneratorUtil*</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
         </plugins>
+        <!--<resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/java/com/m2micro/m2mfa/common/util</directory>
+                <excludes>
+                    <exclude>CodeGenerator*.class</exclude>
+                </excludes>
+            </resource>
+        </resources>-->
     </build>
 
     <repositories>

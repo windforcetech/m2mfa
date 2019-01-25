@@ -3,12 +3,21 @@ spring:
     url: jdbc:mysql://192.168.1.132:3306/factory_application?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
     username: root
     password:
+    druid:
+      max-active: 10
+      min-idle: 2
+      max-wait: 60000
+      initial-size: 5
   cache:
     type: redis
   redis:
-    host: 192.168.2.20
+    host: 192.168.1.111
     port: 6379
-  activemq:
-    user: admin
-    password: admin
-    broker-url: tcp://192.168.1.132:61616
+
+  m2miot:
+    client:
+      url: http://192.168.1.111:8082
+  file:
+    baseDir:
+  labServer:
+    url: http://192.168.2.16:9666/api/

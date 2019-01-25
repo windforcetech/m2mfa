@@ -1,10 +1,20 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
+import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
 import com.m2micro.m2mfa.base.repository.BaseMachineRepository;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
+import com.m2micro.m2mfa.iot.repository.IotMachineOutputRepository;
+import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
+import com.m2micro.m2mfa.mo.query.MesMachineQuery;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -16,7 +26,12 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.QBaseMachine;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+
 /**
  * 机台主档 服务实现类
  * @author liaotao
@@ -30,6 +45,10 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     JPAQueryFactory queryFactory;
     @Autowired
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    IotMachineOutputService iotMachineOutputService;
+    @Autowired
+    MesMoScheduleRepository mesMoScheduleRepository;
 
     public BaseMachineRepository getRepository() {
         return baseMachineRepository;
@@ -138,5 +157,103 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     public List<BaseMachine> findByCodeAndMachineIdNot(String code, String machineId) {
         return baseMachineRepository.findByCodeAndMachineIdNot(code,machineId);
     }
+
+    @Override
+    public PageUtil<BaseMachine> findbyMachine( MesMachineQuery query) {
+        String sql ="SELECT\n" +
+                "	bm.*, o.department_name departmentName\n" +
+                "FROM\n" +
+                "	base_machine bm\n" +
+                "LEFT JOIN base_items_target bit ON bm.flag = bit.id\n" +
+                "LEFT JOIN organization o ON bm.department_id = o.uuid\n" +
+                "WHERE\n" +
+                "	bit.item_name != '维修'\n" ;
+                if(StringUtils.isNotEmpty(query.getMachinCode())){
+                   sql += "  and bm.`code`  Like '%"+query.getMachinCode()+"%'";
+                }
+                sql +=  " AND bit.item_name != '保养' ";
+                sql += " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        String countsql ="SELECT\n" +
+                "	count(*) \n" +
+                "FROM\n" +
+                "	base_machine bm\n" +
+                "LEFT JOIN base_items_target bit ON bm.flag = bit.id\n" +
+                "WHERE\n" +
+                "	bit.item_name != '维修'\n" ;
+        if(StringUtils.isNotEmpty(query.getMachinCode())){
+            countsql += "  and bm.`code`  Like '%"+query.getMachinCode()+"%'";
+        }
+        countsql +=  " AND bit.item_name != '保养' ";
+        countsql += " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
+        List<BaseMachine> list= jdbcTemplate.query(sql,rm);
+        Long totalCount= jdbcTemplate.queryForObject(countsql,long.class);
+        if(list.isEmpty()){
+            throw  new MMException("未找到对应的机台信息。");
+        }
+        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+    }
+
+    @Override
+    @Transactional
+    public BaseMachine saveEntity(BaseMachine baseMachine) {
+        ValidatorUtil.validateEntity(baseMachine, AddGroup.class);
+        baseMachine.setMachineId(UUIDUtil.getUUID());
+        //校验code唯一性
+        List<BaseMachine> list = findAllByCode(baseMachine.getCode());
+        if(list!=null&&list.size()>0){
+            throw new MMException("编号不唯一！");
+        }
+        return save(baseMachine);
+    }
+
+    @Override
+    @Transactional
+    public void delete(String[] ids) {
+        //校验
+        valid(ids);
+        deleteByIds(ids);
+    }
+
+    @Override
+    public List<SelectNode> getNames(String machineId) {
+        String sql = "SELECT\n" +
+                    "	DISTINCT p.uuid id,\n" +
+                    "	p.propertyty_name name\n" +
+                    "FROM\n" +
+                    "	org_device_node odn,\n" +
+                    "	propertyty p\n" +
+                    "WHERE\n" +
+                    "	odn.org_id = p.uuid\n" +
+                    "AND p.uuid NOT IN (\n" +
+                    "	SELECT\n" +
+                    "		bm.id\n" +
+                    "	FROM\n" +
+                    "		base_machine bm\n" +
+                    ")";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(SelectNode.class);
+        List<SelectNode> list = jdbcTemplate.query(sql, rm);
+        if(StringUtils.isNotEmpty(machineId)){
+            BaseMachine baseMachine = findById(machineId).orElse(null);
+            SelectNode selectNode = new SelectNode(baseMachine.getId(),baseMachine.getName());
+            list.add(selectNode);
+        }
+        return list;
+    }
+
+    /**
+     * 校验排产单是否已经引用
+     * @param ids
+     */
+    private void valid(String[] ids) {
+        for (String id:ids){
+            Integer count = mesMoScheduleRepository.countByMachineId(id);
+            if(count>0){
+                BaseMachine baseMachine = findById(id).orElse(null);
+                throw new MMException("设备编号【"+baseMachine.getCode()+"】已产生业务，不允许删除！");
+            }
+        }
+    }
+
 
 }

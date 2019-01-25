@@ -18,17 +18,28 @@ public class BaseStaffQuery extends Query {
     private String code;
     @ApiModelProperty(value = "名称")
     private String name;
-    @ApiModelProperty(value = "岗位ids")
-    public List<String> getDutyIds() {
-        return dutyIds;
+//    @ApiModelProperty(value = "岗位ids")
+//    public List<String> getDutyIds() {
+//        return dutyIds;
+//    }
+//
+//    public void setDutyIds(List<String> dutyIds) {
+//        this.dutyIds = dutyIds;
+//    }
+
+//    @ApiModelProperty(value = "岗位类型")
+//    private List<String> dutyIds;
+
+    @ApiModelProperty(value = "部门ids")
+    private List<String> departmentIds;
+
+    public List<String> getDepartmentIds() {
+        return departmentIds;
     }
 
-    public void setDutyIds(List<String> dutyIds) {
-        this.dutyIds = dutyIds;
+    public void setDepartmentIds(List<String> departmentIds) {
+        this.departmentIds = departmentIds;
     }
-
-    @ApiModelProperty(value = "岗位类型")
-    private List<String> dutyIds;
 
     public String getCode() {
         return code;

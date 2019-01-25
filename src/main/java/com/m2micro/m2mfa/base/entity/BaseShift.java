@@ -9,6 +9,9 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
+import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -91,9 +94,25 @@ public class BaseShift extends BaseEntity implements Serializable {
     @Size(max=32,message = "描述字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String description;
 
+
+    @Transient
+    @ApiModelProperty(value = "职员")
+    private List<BaseStaff> staffs;
+
+
+    @Transient
+    @ApiModelProperty("岗位")
+    private List<Organization> organization;
+
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
     public String getShiftId() {
         return shiftId;
     }
+
     public void setShiftId(String shiftId) {
         this.shiftId = shiftId;
     }
@@ -101,6 +120,7 @@ public class BaseShift extends BaseEntity implements Serializable {
     public String getCode() {
         return code;
     }
+
     public void setCode(String code) {
         this.code = code;
     }
@@ -108,6 +128,7 @@ public class BaseShift extends BaseEntity implements Serializable {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -115,134 +136,17 @@ public class BaseShift extends BaseEntity implements Serializable {
     public String getCategory() {
         return category;
     }
+
+    public List<Organization> getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(List<Organization> organization) {
+        this.organization = organization;
+    }
+
     public void setCategory(String category) {
         this.category = category;
-    }
-
-    public String getOnTime1() {
-        return onTime1;
-    }
-    public void setOnTime1(String onTime1) {
-        this.onTime1 = onTime1;
-    }
-
-    public String getOffTime1() {
-        return offTime1;
-    }
-    public void setOffTime1(String offTime1) {
-        this.offTime1 = offTime1;
-    }
-
-    public Integer getRestTime1() {
-        return restTime1;
-    }
-    public void setRestTime1(Integer restTime1) {
-        this.restTime1 = restTime1;
-    }
-
-    public String getTimeCategory1() {
-        return timeCategory1;
-    }
-    public void setTimeCategory1(String timeCategory1) {
-        this.timeCategory1 = timeCategory1;
-    }
-
-    public String getOnTime2() {
-        return onTime2;
-    }
-    public void setOnTime2(String onTime2) {
-        this.onTime2 = onTime2;
-    }
-
-    public String getOffTime2() {
-        return offTime2;
-    }
-    public void setOffTime2(String offTime2) {
-        this.offTime2 = offTime2;
-    }
-
-    public Integer getRestTime2() {
-        return restTime2;
-    }
-    public void setRestTime2(Integer restTime2) {
-        this.restTime2 = restTime2;
-    }
-
-    public String getTimeCategory2() {
-        return timeCategory2;
-    }
-    public void setTimeCategory2(String timeCategory2) {
-        this.timeCategory2 = timeCategory2;
-    }
-
-    public String getOnTime3() {
-        return onTime3;
-    }
-    public void setOnTime3(String onTime3) {
-        this.onTime3 = onTime3;
-    }
-
-    public String getOffTime3() {
-        return offTime3;
-    }
-    public void setOffTime3(String offTime3) {
-        this.offTime3 = offTime3;
-    }
-
-    public Integer getRestTime3() {
-        return restTime3;
-    }
-    public void setRestTime3(Integer restTime3) {
-        this.restTime3 = restTime3;
-    }
-
-    public String getTimeCategory3() {
-        return timeCategory3;
-    }
-    public void setTimeCategory3(String timeCategory3) {
-        this.timeCategory3 = timeCategory3;
-    }
-
-    public String getOnTime4() {
-        return onTime4;
-    }
-    public void setOnTime4(String onTime4) {
-        this.onTime4 = onTime4;
-    }
-
-    public String getOffTime4() {
-        return offTime4;
-    }
-    public void setOffTime4(String offTime4) {
-        this.offTime4 = offTime4;
-    }
-
-    public Integer getRestTime4() {
-        return restTime4;
-    }
-    public void setRestTime4(Integer restTime4) {
-        this.restTime4 = restTime4;
-    }
-
-    public String getTimeCategory4() {
-        return timeCategory4;
-    }
-    public void setTimeCategory4(String timeCategory4) {
-        this.timeCategory4 = timeCategory4;
-    }
-
-    public Boolean getEnabled() {
-        return enabled;
-    }
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public String getCategoryName() {
@@ -251,5 +155,157 @@ public class BaseShift extends BaseEntity implements Serializable {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public String getOnTime1() {
+        return onTime1;
+    }
+
+    public void setOnTime1(String onTime1) {
+        this.onTime1 = onTime1;
+    }
+
+    public String getOffTime1() {
+        return offTime1;
+    }
+
+    public void setOffTime1(String offTime1) {
+        this.offTime1 = offTime1;
+    }
+
+    public Integer getRestTime1() {
+        return restTime1;
+    }
+
+    public void setRestTime1(Integer restTime1) {
+        this.restTime1 = restTime1;
+    }
+
+    public String getTimeCategory1() {
+        return timeCategory1;
+    }
+
+    public void setTimeCategory1(String timeCategory1) {
+        this.timeCategory1 = timeCategory1;
+    }
+
+    public String getOnTime2() {
+        return onTime2;
+    }
+
+    public void setOnTime2(String onTime2) {
+        this.onTime2 = onTime2;
+    }
+
+    public String getOffTime2() {
+        return offTime2;
+    }
+
+    public void setOffTime2(String offTime2) {
+        this.offTime2 = offTime2;
+    }
+
+    public Integer getRestTime2() {
+        return restTime2;
+    }
+
+    public void setRestTime2(Integer restTime2) {
+        this.restTime2 = restTime2;
+    }
+
+    public String getTimeCategory2() {
+        return timeCategory2;
+    }
+
+    public void setTimeCategory2(String timeCategory2) {
+        this.timeCategory2 = timeCategory2;
+    }
+
+    public String getOnTime3() {
+        return onTime3;
+    }
+
+    public void setOnTime3(String onTime3) {
+        this.onTime3 = onTime3;
+    }
+
+    public String getOffTime3() {
+        return offTime3;
+    }
+
+    public void setOffTime3(String offTime3) {
+        this.offTime3 = offTime3;
+    }
+
+    public Integer getRestTime3() {
+        return restTime3;
+    }
+
+    public void setRestTime3(Integer restTime3) {
+        this.restTime3 = restTime3;
+    }
+
+    public String getTimeCategory3() {
+        return timeCategory3;
+    }
+
+    public void setTimeCategory3(String timeCategory3) {
+        this.timeCategory3 = timeCategory3;
+    }
+
+    public String getOnTime4() {
+        return onTime4;
+    }
+
+    public void setOnTime4(String onTime4) {
+        this.onTime4 = onTime4;
+    }
+
+    public String getOffTime4() {
+        return offTime4;
+    }
+
+    public void setOffTime4(String offTime4) {
+        this.offTime4 = offTime4;
+    }
+
+    public Integer getRestTime4() {
+        return restTime4;
+    }
+
+    public void setRestTime4(Integer restTime4) {
+        this.restTime4 = restTime4;
+    }
+
+    public String getTimeCategory4() {
+        return timeCategory4;
+    }
+
+    public void setTimeCategory4(String timeCategory4) {
+        this.timeCategory4 = timeCategory4;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<BaseStaff> getStaffs() {
+        return staffs;
+    }
+
+    public void setStaffs(List<BaseStaff> staffs) {
+        this.staffs = staffs;
     }
 }

@@ -50,6 +50,45 @@ public interface MesMoDescRepository extends BaseRepository<MesMoDesc,String> {
     @Modifying
     @Query("update MesMoDesc m set m.closeFlag = ?1 where m.moId = ?2")
     Integer setCloseFlagFor(Integer closeFlag, String moId);
+    /**
+     * 更新工单状态及冻结前状态
+     * @param closeFlag
+     *          状态
+     * @param moId
+     *          工单id
+     * @return
+     */
+    @Modifying
+    @Query("update MesMoDesc m set m.closeFlag = ?1 , m.prefreezingState = ?2 where m.moId = ?3")
+    Integer setCloseFlagAndPrefreezingStateFor(Integer closeFlag,Integer prefreezingState, String moId);
+
+    /**
+     * 更新工单涂程信息
+     * @param routeId
+     *          涂程id
+     * @param moId
+     *          工单id
+     * @return  影响行数
+     */
+    @Modifying
+    @Query("update MesMoDesc m set m.routeId = ?1 where m.moId = ?2")
+    Integer setRouteIdFor(String routeId,String moId);
+
+    /**
+     * 更新工单已排产数量
+     * @param schedulQty
+     *          排产数量
+     * @param moId
+     *          工单id
+     * @return  影响行数
+     */
+    @Modifying
+    @Query(value = "update MesMoDesc m set m.schedulQty = ?1 where m.moId = ?2")
+    Integer setSchedulQtyFor(Integer schedulQty,String moId);
+
+    @Modifying
+    @Query(value = "update MesMoDesc m set m.isSchedul = ?1 where m.moId = ?2")
+    Integer updateIsSchedeul(Integer isSchedul,String moId);
 
 
 }

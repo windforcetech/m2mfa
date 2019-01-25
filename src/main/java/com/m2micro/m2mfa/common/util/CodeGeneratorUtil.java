@@ -21,9 +21,9 @@ public class CodeGeneratorUtil {
     //设置包名
     private final static String packageName = "com.m2micro.m2mfa";
     //设置模块名
-    private final static String moduleName = "base";
+    private final static String moduleName = "iot";
     //设置数据库要生成代码的表名
-    private final static String tableName = "base_abnormal";
+    private final static String tableName = "iot_machine_output";
     //文件覆盖:true 覆盖原有文件 false 不覆盖原有文件
     private final static boolean fileOverride = true;
     //设置数据库url

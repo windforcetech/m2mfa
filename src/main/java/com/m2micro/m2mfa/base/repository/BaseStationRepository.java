@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.repository;
 
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.framework.commons.BaseRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,5 +16,8 @@ import java.util.List;
 public interface BaseStationRepository extends BaseRepository<BaseStation,String> {
 
     List<BaseStation> findByCodeAndStationIdNot(String code,String stationId);
+
+    @Query(value = "select * from  base_station where `name`=?1",nativeQuery = true)
+    String selectName(String name );
 
 }

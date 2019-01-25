@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.mo.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.sysdebug.annotation.SysDebugLog;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
@@ -50,6 +51,7 @@ public class MesMoDescController {
     @RequestMapping("/list")
     @ApiOperation(value="工单主档列表")
     @UserOperationLog("工单主档列表")
+    //@SysDebugLog("工单主档列表")
     public ResponseMessage<PageUtil<MesMoDescModel>> list(MesMoDescQuery query){
         PageUtil<MesMoDescModel> page = mesMoDescService.list(query);
         return ResponseMessage.ok(page);
@@ -61,6 +63,7 @@ public class MesMoDescController {
     @RequestMapping("/info/{id}")
     @ApiOperation(value="工单主档详情")
     @UserOperationLog("工单主档详情")
+    //@SysDebugLog("工单主档详情")
     public ResponseMessage<MesMoDescModel> info(@PathVariable("id") String id){
         return ResponseMessage.ok(mesMoDescService.info(id));
     }
@@ -136,9 +139,9 @@ public class MesMoDescController {
         return ResponseMessage.ok();
     }
 
-    /**
+   /* *//**
      * 冻结
-     */
+     *//*
     @RequestMapping("/frozen/{id}")
     @ApiOperation(value="冻结工单")
     @UserOperationLog("冻结工单")
@@ -147,16 +150,16 @@ public class MesMoDescController {
         return ResponseMessage.ok();
     }
 
-    /**
+    *//**
      * 解冻
-     */
+     *//*
     @RequestMapping("/unfreeze/{id}")
     @ApiOperation(value="解冻工单")
     @UserOperationLog("解冻工单")
     public ResponseMessage<MesMoDesc> unfreeze(@PathVariable("id") String id){
         mesMoDescService.unfreeze(id);
         return ResponseMessage.ok();
-    }
+    }*/
 
 
     /**

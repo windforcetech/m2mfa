@@ -91,7 +91,7 @@ public class MesMoDescModel extends BaseEntity implements Serializable {
     private String partName;
     @ApiModelProperty(value = "规格")
     private String partSpec;
-    @ApiModelProperty(value = "工艺/涂程名称")
+    @ApiModelProperty(value = "/涂程名称")
     private String routeName;
     @ApiModelProperty(value = "投入工序名称")
     private String inputProcessName;

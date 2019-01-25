@@ -4,7 +4,9 @@ import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
+import com.m2micro.m2mfa.mo.query.MesMachineQuery;
 
 import java.util.List;
 
@@ -35,4 +37,30 @@ public interface BaseMachineService extends BaseService<BaseMachine,String> {
      * @return
      */
     List<BaseMachine> findByCodeAndMachineIdNot(String code ,String machineId);
+
+    /**
+     * 获取排产单的机台信息
+     * @return
+     */
+    PageUtil<BaseMachine>   findbyMachine( MesMachineQuery mesMachineQuery);
+
+    /**
+     * 保存机台信息
+     * @param baseMachine
+     * @return
+     */
+    BaseMachine saveEntity(BaseMachine baseMachine);
+
+    /**
+     * 删除机台信息
+     * @param ids
+     */
+    void delete(String[] ids);
+
+    /**
+     * 获取机台名称下拉选项
+     * @return 获取机台名称下拉选项
+     */
+    List<SelectNode> getNames(String machineId);
+
 }

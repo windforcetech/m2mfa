@@ -1,13 +1,9 @@
 package com.m2micro.m2mfa.pr.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.base.entity.BaseParts;
-import com.m2micro.m2mfa.base.entity.BaseProcess;
-import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
-import com.m2micro.m2mfa.base.service.BasePartsService;
-import com.m2micro.m2mfa.base.service.BaseProcessService;
-import com.m2micro.m2mfa.base.service.BaseRouteDescService;
-import com.m2micro.m2mfa.base.service.BaseStationService;
+import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
@@ -16,6 +12,7 @@ import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteProcess;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
+import com.m2micro.m2mfa.pr.entity.QMesPartRoute;
 import com.m2micro.m2mfa.pr.query.MesPartRouteQuery;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import com.m2micro.m2mfa.pr.service.MesPartRouteProcessService;
@@ -23,20 +20,18 @@ import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.service.MesPartRouteStationService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.pr.entity.QMesPartRoute;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 /**
  * 料件途程设定主档 服务实现类
  * @author liaotao
@@ -44,6 +39,9 @@ import java.util.List;
  */
 @Service
 public class MesPartRouteServiceImpl implements MesPartRouteService {
+
+    @Autowired
+    private BaseItemsTargetService baseItemsTargetService;
     @Autowired
     MesPartRouteRepository mesPartRouteRepository;
     @Autowired
@@ -100,6 +98,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             BaseProcess oprocess =   baseProcessService.findById(mesPartRoute.getOutputProcessId()).orElse(null);
             BaseRouteDesc baseRouteDesc =baseRouteDescService.findById(mesPartRoute.getRouteId()).orElse(null);
             BaseParts baseParts = basePartsService.findById(mesPartRoute.getPartId()).orElse(null);
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(mesPartRoute.getControlInformation()).orElse(null);
             if(iprocess !=null){
                 mesPartRoute.setInputProcessIdName(iprocess.getProcessName());
             }
@@ -111,6 +110,9 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             }
             if(baseParts !=null){
                 mesPartRoute.setPartNo(baseParts.getPartNo());
+            }
+            if(baseItemsTarget !=null ){
+                mesPartRoute.setControlInformationName(baseItemsTarget.getItemName());
             }
         }
         long totalCount = jq.fetchCount();
@@ -125,6 +127,9 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     @Override
     @Transactional
     public boolean save(MesPartRoute mesPartRoute, List<MesPartRouteProcess> mesPartRouteProcesss,List< MesPartRouteStation>  mesPartRouteStations) {
+        if(mesPartRouteRepository.is_experience(mesPartRoute.getRouteId(),mesPartRoute.getPartId())!=null){
+            throw new MMException("该图程信息已经存在。");
+        }
         String partRouteid =  UUIDUtil.getUUID();
         mesPartRoute.setPartRouteId(partRouteid);
          if(basePartsService.findById(mesPartRoute.getPartId()).orElse(null)==null){
@@ -227,7 +232,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             mesPartRouteProcessService.save(mesPartRouteProcess);
         }
         ValidatorUtil.validateEntity(mesPartRoute, AddGroup.class);
-        this.save(mesPartRoute);
+
         return true;
     }
 
@@ -238,6 +243,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         BaseProcess oprocess =   baseProcessService.findById(mesPartRoute.getOutputProcessId()).orElse(null);
         BaseRouteDesc baseRouteDesc =baseRouteDescService.findById(mesPartRoute.getRouteId()).orElse(null);
         BaseParts baseParts = basePartsService.findById(mesPartRoute.getPartId()).orElse(null);
+        BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(mesPartRoute.getControlInformation()).orElse(null);
         if(iprocess !=null){
             mesPartRoute.setInputProcessIdName(iprocess.getProcessName());
         }
@@ -250,12 +256,42 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         if(baseParts !=null){
             mesPartRoute.setPartNo(baseParts.getPartNo());
         }
-        String sql ="select * from mes_part_route_process where partrouteid ='"+partRouteId+"'";
-        RowMapper rm = BeanPropertyRowMapper.newInstance(MesPartRouteProcess.class);
-        String mesPartRouteStationsql ="select* from mes_part_route_station where part_route_id ='"+partRouteId+"'";
-        RowMapper mesPartRouteStationrm = BeanPropertyRowMapper.newInstance(MesPartRouteStation.class);
-        List<MesPartRouteProcess> mesPartRouteProcesses = jdbcTemplate.query(sql,rm);
-        List<MesPartRouteStation> mesPartRouteStations = jdbcTemplate.query(mesPartRouteStationsql,mesPartRouteStationrm);
+        if(baseItemsTarget !=null ){
+            mesPartRoute.setControlInformationName(baseItemsTarget.getItemName());
+        }
+        String sql ="select * from mes_part_route_process where partrouteid ='"+partRouteId+"'  ORDER BY setp ASC  ";
+         RowMapper rm = BeanPropertyRowMapper.newInstance(MesPartRouteProcess.class);
+         String mesPartRouteStationsql ="select* from mes_part_route_station where part_route_id ='"+partRouteId+"' ";
+         RowMapper mesPartRouteStationrm = BeanPropertyRowMapper.newInstance(MesPartRouteStation.class);
+         List<MesPartRouteProcess> mesPartRouteProcesses = jdbcTemplate.query(sql,rm);
+         List<MesPartRouteStation> mesPartRouteStations = jdbcTemplate.query(mesPartRouteStationsql,mesPartRouteStationrm);
+
+        for(MesPartRouteProcess mesPartRouteProcess:  mesPartRouteProcesses){
+            if(StringUtils.isNotEmpty(mesPartRouteProcess.getFailprocessid())){
+                mesPartRouteProcess.setFailprocessName(baseProcessService.findById(mesPartRouteProcess.getFailprocessid()).orElse(null).getProcessName());
+            }
+            BaseProcess baseProcess =  baseProcessService.findById(mesPartRouteProcess.getProcessid()).orElse(null);
+            if(baseProcess !=null){
+                mesPartRouteProcess.setProcessidName(baseProcess.getProcessName());
+                mesPartRouteProcess.setCategory(baseProcess.getCategory());
+                mesPartRouteProcess.setCategoryName(baseItemsTargetService.findById(baseProcess.getCategory()).get().getItemName());
+
+            }
+        }
+
+        for(MesPartRouteStation mesPartRouteStation :mesPartRouteStations){
+            mesPartRouteStation.setProcessName(baseProcessService.findById(mesPartRouteStation.getProcessId()).orElse(null).getProcessName());
+            mesPartRouteStation.setStationName(baseStationService.findById(mesPartRouteStation.getStationId()).orElse(null).getName());
+            String sqls ="select * from base_process_station where station_id ='"+mesPartRouteStation.getStationId()+"' and process_id='"+mesPartRouteStation.getProcessId()+"'  ";
+            RowMapper rms= BeanPropertyRowMapper.newInstance(BaseProcessStation.class);
+            List<BaseProcessStation> baseProcessStation = jdbcTemplate.query(sqls,rms);
+            mesPartRouteStation.setStationStep(baseProcessStation.get(0).getStep());
+            for(MesPartRouteProcess ps :mesPartRouteProcesses ){
+                if(ps.getProcessid().equals(mesPartRouteStation.getProcessId())){
+                    mesPartRouteStation.setProcessStep(ps.getSetp());
+                }
+            }
+        }
         return MesPartvo.builder().mesPartRouteProcesss(mesPartRouteProcesses).mesPartRoute(mesPartRoute).mesPartRouteStations(mesPartRouteStations).build();
     }
 
@@ -276,5 +312,19 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
             mesPartRouteProcessService.deleteParRouteID(id);
         }
         return msg;
+    }
+
+    @Override
+    public MesPartvo findparId(String partId) {
+
+        String sql ="select * from mes_part_route where part_id ='"+partId+"'";
+        RowMapper rms= BeanPropertyRowMapper.newInstance(MesPartRoute.class);
+        List<MesPartRoute> mesPartRoutes  = jdbcTemplate.query(sql ,rms);
+        if(!mesPartRoutes.isEmpty()){
+            return  info(mesPartRoutes.get(0).getPartRouteId());
+        }
+
+        return null;
+
     }
 }

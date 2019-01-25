@@ -20,6 +20,8 @@ public class DateUtil {
 	public final static String DATE_PATTERN = "yyyy-MM-dd";
 	/** 时间格式(yyyy-MM-dd HH:mm:ss) */
 	public final static String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    /** 时间格式(HH:mm:ss) */
+    public final static String TIME_PATTERN = "HH:mm:ss";
 
     /**
      * 日期格式化 日期格式为：yyyy-MM-dd HH:mm:ss
@@ -155,5 +157,15 @@ public class DateUtil {
     public static Date addDateYears(Date date, int years) {
         DateTime dateTime = new DateTime(date);
         return dateTime.plusYears(years).toDate();
+    }
+
+    /**
+     * 将时间字符串转化为毫秒
+     * @param dateStr
+     * @return
+     */
+    public static long timeToMilliseconds(String dateStr) {
+        Date date = stringToDate(dateStr,TIME_PATTERN);
+        return date.getTime();
     }
 }

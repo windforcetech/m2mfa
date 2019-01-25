@@ -1,34 +1,24 @@
 package com.m2micro.m2mfa.pr.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.commons.annotation.UserOperationLog;
+import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.BaseProcessStation;
 import com.m2micro.m2mfa.base.entity.BaseRouteDef;
-import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.base.service.BaseRouteDefService;
 import com.m2micro.m2mfa.base.service.BaseRouteDescService;
+import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.query.MesPartRouteQuery;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
-import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.common.util.ValidatorUtil;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
-import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
-import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
-import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
-import com.m2micro.m2mfa.pr.entity.MesPartRoute;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -110,7 +100,7 @@ public class MesPartRouteController {
                 msgs+=msg;
             }
         }
-        return  msgs.trim()==""? ResponseMessage.ok():  ResponseMessage.ok(msgs.trim()+"该料件途程已经安排生产，不允许删除。");
+        return  msgs.trim()==""? ResponseMessage.ok():  ResponseMessage.error(msgs.trim()+"该料件途程已经安排生产，不允许删除。");
     }
 
     @PostMapping("/addDetails")
@@ -121,6 +111,15 @@ public class MesPartRouteController {
         List<BaseProcessStation> baseProcessStations = baseRouteDescService.findbaseProcessStations(routId);
         List<BaseRouteDef> routeDefs = baseRouteDefService.findroutedef(routId);
         List<BaseParts> baseparts= basePartsService.findAll();
+        List<MesPartRoute> mesPartRoutes =mesPartRouteService.findAll();
+        for(int i=0;i<baseparts.size();i++ ){
+            for(MesPartRoute m: mesPartRoutes){
+                if(m.getPartId().equals(baseparts.get(i).getPartId())){
+                    baseparts.remove(i);
+                }
+            }
+        }
+
         map.put("routeDefs",routeDefs);
         map.put("baseProcessStations",baseProcessStations);
         map.put("baseparts",baseparts);

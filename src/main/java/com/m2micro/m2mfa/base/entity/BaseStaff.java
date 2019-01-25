@@ -45,11 +45,12 @@ public class BaseStaff extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "公司主键")
     //@NotEmpty(message="公司主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String companyId;
-    @ApiModelProperty(value = "mes职能主键")
-    //@NotEmpty(message="部门主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
-    private String departmentId;
     @NotEmpty(message="基础织架构岗位主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
+    //@NotEmpty(message="部门主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "基础组织架构岗位主键")
+    private String departmentId;
+
+    @ApiModelProperty(value = "mes职能主键")
     private String dutyId;
     @Size(max=50,message = "身份证号码字节不能大于50位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "身份证号码")
@@ -74,6 +75,42 @@ public class BaseStaff extends BaseEntity implements Serializable {
     private Boolean enabled;
     @ApiModelProperty(value = "删除标识")
     private Boolean deletionStateCode;
+
+    @Transient
+    @ApiModelProperty(value = "所属工位ID")
+    private String stationId;
+
+    @Transient
+    @ApiModelProperty(value = "工位名称")
+    private String  stationName;
+
+    @Size(max=15,message = "卡号长度不能大于15位",groups = {AddGroup.class, UpdateGroup.class})
+    @ApiModelProperty(value = "卡号")
+    private String icCard;
+
+    public String getIcCard() {
+        return icCard;
+    }
+
+    public void setIcCard(String icCard) {
+        this.icCard = icCard;
+    }
+
+    public String getStationId() {
+        return stationId;
+    }
+
+    public void setStationId(String stationId) {
+        this.stationId = stationId;
+    }
+
+    public String getStationName() {
+        return stationName;
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
+    }
 
     public static long getSerialVersionUID() {
         return serialVersionUID;

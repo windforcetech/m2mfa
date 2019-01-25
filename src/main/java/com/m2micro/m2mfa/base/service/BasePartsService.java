@@ -24,6 +24,14 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
     PageUtil<BaseParts> list(BasePartsQuery query);
 
     /**
+     * 分页查询过滤掉涂程中的料件
+     * @param query
+     *         查询参数
+     * @return  分页信息
+     */
+    PageUtil<BaseParts> listFilter(BasePartsQuery query);
+
+    /**
      * 校验partNo料件编号
      * @param partNo
      * @param partId
@@ -41,4 +49,7 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
     BaseParts selectpartNo(String partNo);
 
     int countByPartNo(String partNo);
+
+
+    PageUtil<BaseParts> findByNotUsedForPack(BasePartsQuery query);
 }

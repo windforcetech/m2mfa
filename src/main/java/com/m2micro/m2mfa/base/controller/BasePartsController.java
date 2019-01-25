@@ -59,6 +59,17 @@ public class BasePartsController {
     }
 
     /**
+     * 列表
+     */
+    @RequestMapping("/listFilter")
+    @ApiOperation(value="料件基本资料列表(过滤已关联的涂程)")
+    @UserOperationLog("料件基本资料列表(过滤已关联的涂程)")
+    public ResponseMessage<PageUtil<BaseParts>> listFilter(BasePartsQuery query){
+        PageUtil<BaseParts> page = basePartsService.listFilter(query);
+        return ResponseMessage.ok(page);
+    }
+
+    /**
      * 详情
      */
     @RequestMapping("/info/{id}")
@@ -143,5 +154,17 @@ public class BasePartsController {
     public ResponseMessage<BaseParts> selectpartNo(@ApiParam(value = "partNo",required=true) @RequestParam(required = true)  String partNo){
 
         return ResponseMessage.ok(basePartsService.selectpartNo(partNo));
+    }
+
+
+    /**
+     * 列表
+     */
+    @RequestMapping("/listNotUsed")
+    @ApiOperation(value="获取未使用的料件基本资料列表")
+    @UserOperationLog("获取未使用的料件基本资料列表")
+    public ResponseMessage<PageUtil<BaseParts>> listNotUsed(BasePartsQuery query){
+        PageUtil<BaseParts> page = basePartsService.findByNotUsedForPack(query);
+        return ResponseMessage.ok(page);
     }
 }

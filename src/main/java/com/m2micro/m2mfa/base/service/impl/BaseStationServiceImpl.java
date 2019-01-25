@@ -122,11 +122,14 @@ public class BaseStationServiceImpl implements BaseStationService {
     @Transactional
     public BaseStation saveEntity(BaseStation baseStation) {
         ValidatorUtil.validateEntity(baseStation, AddGroup.class);
+        if(baseStationRepository.selectName(baseStation.getName())!=null){
+          throw new MMException("工位名称【"+baseStation.getName()+"】已存在！");
+        }
         baseStation.setStationId(UUIDUtil.getUUID());
         //保存时[Station_Code]做唯 一验证。
         List<BaseStation> list = baseStationRepository.findByCodeAndStationIdNot(baseStation.getCode(),"");
         if(list!=null&&list.size()>0){
-            throw new MMException("编号"+baseStation.getCode()+"已存在！");
+            throw new MMException("工位代码【"+baseStation.getCode()+"】已存在！");
         }
         return save(baseStation);
     }
@@ -142,7 +145,7 @@ public class BaseStationServiceImpl implements BaseStationService {
         //更新时[Station_Code]做唯 一验证。
         List<BaseStation> list = baseStationRepository.findByCodeAndStationIdNot(baseStation.getCode(),baseStation.getStationId());
         if(list!=null&&list.size()>0){
-            throw new MMException("编号"+baseStation.getCode()+"已存在！");
+            throw new MMException("工位代码【"+baseStation.getCode()+"】已存在！");
         }
         PropertyUtil.copy(baseStation,baseStationOld);
         return save(baseStationOld);

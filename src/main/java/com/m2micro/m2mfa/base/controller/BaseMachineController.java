@@ -4,6 +4,7 @@ import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseUnit;
+import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
 import com.m2micro.m2mfa.base.service.BaseUnitService;
@@ -76,14 +77,7 @@ public class BaseMachineController {
     @ApiOperation(value="保存机台主档")
     @UserOperationLog("保存机台主档")
     public ResponseMessage<BaseMachine> save(@RequestBody BaseMachine baseMachine){
-        ValidatorUtil.validateEntity(baseMachine, AddGroup.class);
-        baseMachine.setMachineId(UUIDUtil.getUUID());
-        //校验code唯一性
-        List<BaseMachine> list = baseMachineService.findAllByCode(baseMachine.getCode());
-        if(list!=null&&list.size()>0){
-            throw new MMException("编号不唯一！");
-        }
-        return ResponseMessage.ok(baseMachineService.save(baseMachine));
+        return ResponseMessage.ok(baseMachineService.saveEntity(baseMachine));
     }
 
     /**
@@ -113,7 +107,7 @@ public class BaseMachineController {
     @ApiOperation(value="删除机台主档")
     @UserOperationLog("删除机台主档")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseMachineService.deleteByIds(ids);
+        baseMachineService.delete(ids);
         return ResponseMessage.ok();
     }
     @RequestMapping("/addDetails")
@@ -124,5 +118,12 @@ public class BaseMachineController {
         List<BaseUnit>  baseUnitList = baseUnitService.list();
         map.put("baseUnitList",baseUnitList);
         return ResponseMessage.ok(map);
+    }
+
+    @RequestMapping("/getNames")
+    @ApiOperation(value="获取机台名称下拉选项")
+    @UserOperationLog("获取机台名称下拉选项")
+    public ResponseMessage<List<SelectNode>> getNames(String machineId){
+        return ResponseMessage.ok(baseMachineService.getNames(machineId));
     }
 }

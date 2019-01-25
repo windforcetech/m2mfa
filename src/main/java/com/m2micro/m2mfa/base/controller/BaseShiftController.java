@@ -82,7 +82,7 @@ public class BaseShiftController {
         //校验编号唯一性
         List<BaseShift> list = baseShiftService.findByCodeAndShiftIdNot(baseShift.getCode(),"");
         if(list!=null&&list.size()>0){
-            throw new MMException("编号不唯一！");
+            throw new MMException("班别代码不唯一！");
         }
         return ResponseMessage.ok(baseShiftService.save(baseShift));
     }
@@ -102,7 +102,7 @@ public class BaseShiftController {
         //校验编号唯一性
         List<BaseShift> list = baseShiftService.findByCodeAndShiftIdNot(baseShift.getCode(),baseShift.getShiftId());
         if(list!=null&&list.size()>0){
-            throw new MMException("编号不唯一！");
+            throw new MMException("班别代码不唯一！");
         }
         PropertyUtil.copy(baseShift,baseShiftOld);
         return ResponseMessage.ok(baseShiftService.save(baseShiftOld));

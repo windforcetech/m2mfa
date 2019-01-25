@@ -16,4 +16,8 @@ import java.util.List;
 public interface MesRecordWorkRepository extends BaseRepository<MesRecordWork,String> {
     @Query(value="SELECT mrw.* FROM mes_record_work mrw WHERE mrw.schedule_id <> ?1 AND mrw.machine_id = ?2 AND mrw.end_time IS NOT NULL ORDER BY mrw.end_time DESC, mrw.rwid DESC LIMIT 1",nativeQuery = true)
     MesRecordWork getOldMesRecordWork(String scheduleId,String machineId);
+
+    @Query(value = "SELECT  mrw.rwid  FROM mes_record_work mrw WHERE mrw.schedule_id = ?1 AND mrw.station_id =?2 AND mrw.start_time IS NOT NULL AND ISNULL(mrw.end_time)", nativeQuery = true)
+    String  isStationisWork(String scheduleId, String stationId) ;
+
 }

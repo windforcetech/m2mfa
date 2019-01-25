@@ -1,18 +1,20 @@
 package com.m2micro.m2mfa.base.entity;
 
 
+import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import io.swagger.models.auth.In;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
-import com.m2micro.m2mfa.common.entity.BaseEntity;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 
 /**
  * 工位基本档
@@ -62,26 +64,27 @@ public class BaseStation extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "类型名称")
     private String postCategoryName;
 
-    public BaseStation(@NotEmpty(message = "主键不能为空", groups = {UpdateGroup.class}) String stationId, @NotEmpty(message = "编号不能为空", groups = {AddGroup.class, UpdateGroup.class}) String code, @NotEmpty(message = "名称不能为空", groups = {AddGroup.class, UpdateGroup.class}) String name, Integer leadTime, Integer waitingTime, Integer postTime, Integer jobPeoples, BigDecimal standardHours, BigDecimal coefficient, Integer controlPeoples, Integer controlMachines, String postCategory, Integer sortCode, Boolean enabled, String description, String postCategoryName) {
-        this.stationId = stationId;
-        this.code = code;
-        this.name = name;
-        this.leadTime = leadTime;
-        this.waitingTime = waitingTime;
-        this.postTime = postTime;
-        this.jobPeoples = jobPeoples;
-        this.standardHours = standardHours;
-        this.coefficient = coefficient;
-        this.controlPeoples = controlPeoples;
-        this.controlMachines = controlMachines;
-        this.postCategory = postCategory;
-        this.sortCode = sortCode;
-        this.enabled = enabled;
-        this.description = description;
-        this.postCategoryName = postCategoryName;
+
+    @Transient
+    @ApiModelProperty(value = "是否岗位")
+    private Boolean isStation;
+
+    @Transient
+    @ApiModelProperty(value = "是否岗位")
+    private Integer step;
+
+
+    @Transient
+    @ApiModelProperty("班别")
+    private List<BaseShift> shifts;
+
+
+    public Integer getStep() {
+        return step;
     }
 
-    public BaseStation() {
+    public void setStep(Integer step) {
+        this.step = step;
     }
 
     public static long getSerialVersionUID() {
@@ -215,4 +218,22 @@ public class BaseStation extends BaseEntity implements Serializable {
     public void setPostCategoryName(String postCategoryName) {
         this.postCategoryName = postCategoryName;
     }
+
+    public Boolean getIsStation() {
+        return isStation;
+    }
+
+    public void setIsStation(Boolean station) {
+        isStation = station;
+    }
+
+    public List<BaseShift> getShifts() {
+        return shifts;
+    }
+
+    public void setShifts(List<BaseShift> shifts) {
+        this.shifts = shifts;
+    }
+
+
 }

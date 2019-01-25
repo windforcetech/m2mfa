@@ -5,6 +5,8 @@ import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.query.BaseStaffQuery;
 import com.m2micro.m2mfa.base.vo.BaseStaffDetailObj;
+import com.m2micro.m2mfa.base.vo.BaseStaffQueryObj;
+import com.m2micro.m2mfa.base.vo.MesMoscheduleQueryObj;
 
 import java.util.List;
 
@@ -23,8 +25,28 @@ public interface BaseStaffService extends BaseService<BaseStaff,String> {
 
     PageUtil<BaseStaffDetailObj> list(BaseStaffQuery query);
 
+    List<BaseStaff>  productionlist(MesMoscheduleQueryObj query);
+
     List<BaseStaff> findByCodeAndStaffIdNot(String code, String staffId);
 
    // List<BaseStaff> findByCodeOrStaffNameOrdOrDutyIdIn(String code,String staffName,List<String> dutyIds);
 
+    BaseStaff  finydbStaffNo(String code);
+
+    //获取组织架构节点子树id 集合
+    List<String> getAllIDsOfDepartmentTree(String departmentId);
+
+    void deleteByStaffId(String[] ids);
+
+    Boolean isUsedForStaff(String[] ids);
+    /**
+     * 根据员工编号获取员工信息
+     * @param code
+     *          员工编号
+     * @return  员工信息
+     */
+    BaseStaff findByCode(String code);
+
+    boolean existByIcCard(String icCard);
+    boolean existByIcCardAndIdNot(String icCard,String id);
 }

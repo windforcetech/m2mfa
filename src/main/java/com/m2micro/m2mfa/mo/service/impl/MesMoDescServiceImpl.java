@@ -1,35 +1,31 @@
 package com.m2micro.m2mfa.mo.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.framework.commons.util.SpringContextUtil;
-import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.common.util.DateUtil;
+import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
+import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.model.PartsRouteModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
+import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
-import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.query.NativeQuery;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.m2mfa.mo.entity.QMesMoDesc;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 /**
  * 工单主档 服务实现类
@@ -38,6 +34,7 @@ import java.util.List;
  */
 @Service
 public class MesMoDescServiceImpl implements MesMoDescService {
+
     @Autowired
     MesMoDescRepository mesMoDescRepository;
     @Autowired
@@ -46,6 +43,9 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesPartRouteRepository mesPartRouteRepository;
+    @Autowired
+    MesMoScheduleService mesMoScheduleService;
+
 
     public MesMoDescRepository getRepository() {
         return mesMoDescRepository;
@@ -59,7 +59,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                     "	md.mo_number moNumber,\n" +
                     "	md.category category,\n" +
                     "	md.part_id partId,\n" +
-                    "	md.target_qty targetQty,\n" +
+                    "	 IFNULL(md.target_qty,0)  targetQty,\n" +
                     "	md.revsion revsion,\n" +
                     "	md.distinguish distinguish,\n" +
                     "	md.parent_mo parentMo,\n" +
@@ -77,7 +77,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                     "	md.order_id orderId,\n" +
                     "	md.order_seq orderSeq,\n" +
                     "	md.is_schedul isSchedul,\n" +
-                    "	md.schedul_qty schedulQty,\n" +
+                    "	 IFNULL( md.schedul_qty,0)  schedulQty,\n" +
                     "	md.input_qty inputQty,\n" +
                     "	md.output_qty outputQty,\n" +
                     "	md.scrapped_qty scrappedQty,\n" +
@@ -173,9 +173,11 @@ public class MesMoDescServiceImpl implements MesMoDescService {
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许审核！");
         }
         List<MesPartRoute> mesPartRoutes = mesPartRouteRepository.findByPartId(mesMoDesc.getPartId());
-        if(mesPartRoutes==null){
+        if(mesPartRoutes==null||mesPartRoutes.size()==0){
             throw new MMException("该料件未建好途程，请建途程!");
         }
+        //将最新的涂程id关联过来（料件后来修改了涂程，料件后来增加了涂程）
+        mesMoDescRepository.setRouteIdFor(mesPartRoutes.get(0).getPartRouteId(),mesMoDesc.getMoId());
         //更改为已审待排
         mesMoDescRepository.setCloseFlagFor(MoStatus.AUDITED.getKey(),mesMoDesc.getMoId());
     }
@@ -187,11 +189,11 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(mesMoDesc==null){
             throw new MMException("不存在该工单");
         }
-        //工单状态【Close_Flag】为：已审待排=1  已排产=2  时允许取消审核  SET Close_Flag=0
-        if(!(MoStatus.AUDITED.getKey().equals(mesMoDesc.getCloseFlag())||
-                MoStatus.SCHEDULED.getKey().equals(mesMoDesc.getCloseFlag()))){
+        //工单状态【Close_Flag】为：已审待排=1  时允许取消审核  SET Close_Flag=0
+        if(!MoStatus.AUDITED.getKey().equals(mesMoDesc.getCloseFlag())){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许反审！");
         }
+
         //更改为初始状态
         mesMoDescRepository.setCloseFlagFor(MoStatus.INITIAL.getKey(),mesMoDesc.getMoId());
     }
@@ -203,12 +205,37 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(mesMoDesc==null){
             throw new MMException("不存在该工单");
         }
-        //只有工单状态 close_flag=3时 ， 才可以冻结  SET close_flag=12
-        if(!MoStatus.PRODUCTION.getKey().equals(mesMoDesc.getCloseFlag())){
+        //只有工单状态 close_flag=1,2,3时 ， 才可以冻结  SET close_flag=12
+        if(!(MoStatus.AUDITED.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.SCHEDULED.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.PRODUCTION.getKey().equals(mesMoDesc.getCloseFlag()))){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许冻结！");
         }
-        //更改为冻结状态
-        mesMoDescRepository.setCloseFlagFor(MoStatus.FROZEN.getKey(),mesMoDesc.getMoId());
+        //更改为冻结状态及冻结前状态
+        mesMoDescRepository.setCloseFlagAndPrefreezingStateFor(MoStatus.FROZEN.getKey(),mesMoDesc.getCloseFlag(),mesMoDesc.getMoId());
+        //冻结工单相关的排产单
+        frozenSchedules(mesMoDesc);
+
+    }
+
+    /**
+     * 冻结工单相关的排产单
+     * @param mesMoDesc
+     *          工单
+     */
+    private void frozenSchedules(MesMoDesc mesMoDesc) {
+        //通过工单id获取能够冻结的排产单（排产单处于初始，已审待产，生产中的可以冻结）
+        List<Integer> flags = new ArrayList<>();
+        flags.add(MoScheduleStatus.INITIAL.getKey());
+        flags.add(MoScheduleStatus.AUDITED.getKey());
+        flags.add(MoScheduleStatus.PRODUCTION.getKey());
+        List<MesMoSchedule> mesMoSchedules = mesMoScheduleService.findByMoIdAndFlag(mesMoDesc.getMoId(), flags);
+        if(mesMoSchedules!=null&&mesMoSchedules.size()>0){
+            //调用排产单冻结接口
+            for(MesMoSchedule mesMoSchedule:mesMoSchedules){
+                mesMoScheduleService.frozen(mesMoSchedule.getScheduleId());
+            }
+        }
     }
 
     @Override
@@ -221,8 +248,29 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(!MoStatus.FROZEN.getKey().equals(mesMoDesc.getCloseFlag())){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不需要解冻！");
         }
-        //更改为生产状态
-        mesMoDescRepository.setCloseFlagFor(MoStatus.PRODUCTION.getKey(),mesMoDesc.getMoId());
+        //更改为冻结前状态
+        //mesMoDescRepository.setCloseFlagFor(mesMoDesc.getPrefreezingState(),mesMoDesc.getMoId());
+        mesMoDescRepository.setCloseFlagAndPrefreezingStateFor(mesMoDesc.getPrefreezingState(),null,mesMoDesc.getMoId());
+        //解冻工单相关的排产单
+        unfreezeSchedules(mesMoDesc);
+    }
+
+    /**
+     * 解冻工单相关的排产单
+     * @param mesMoDesc
+     *         工单
+     */
+    private void unfreezeSchedules(MesMoDesc mesMoDesc) {
+        //通过工单id获取能够解冻的排产单（排产单处于解冻）
+        List<Integer> flags = new ArrayList<>();
+        flags.add(MoScheduleStatus.FROZEN.getKey());
+        List<MesMoSchedule> mesMoSchedules = mesMoScheduleService.findByMoIdAndFlag(mesMoDesc.getMoId(), flags);
+        if(mesMoSchedules!=null&&mesMoSchedules.size()>0){
+            //调用排产单冻解冻接口
+            for(MesMoSchedule mesMoSchedule:mesMoSchedules){
+                mesMoScheduleService.unfreeze(mesMoSchedule.getScheduleId());
+            }
+        }
     }
 
     @Override
@@ -232,14 +280,37 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(mesMoDesc==null){
             throw new MMException("不存在该工单");
         }
-        //工单状态  若Close_Flag >=10 （结案10，强制结案11，冻结12） 不允许强制结案。
-        if(MoStatus.CLOSE.getKey().equals(mesMoDesc.getCloseFlag())||
-                MoStatus.FORCECLOSE.getKey().equals(mesMoDesc.getCloseFlag())||
-                MoStatus.FROZEN.getKey().equals(mesMoDesc.getCloseFlag())){
+        //工单状态  若Close_Flag != 2,3,12 不允许强制结案。
+        if(!(MoStatus.SCHEDULED.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.PRODUCTION.getKey().equals(mesMoDesc.getCloseFlag())||
+                MoStatus.FROZEN.getKey().equals(mesMoDesc.getCloseFlag()))){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许强制结案！");
         }
         //更改为强制结案状态
         mesMoDescRepository.setCloseFlagFor(MoStatus.FORCECLOSE.getKey(),mesMoDesc.getMoId());
+        //强制结案工单相关的排产单
+        forceCloseSchedules(mesMoDesc);
+    }
+
+    /**
+     * 强制结案工单相关的排产单
+     * @param mesMoDesc
+     *          工单
+     */
+    private void forceCloseSchedules(MesMoDesc mesMoDesc) {
+        //通过工单id获取能够强制结案的排产单（排产单处于初始，已审待产，生产中，冻结）
+        List<Integer> flags = new ArrayList<>();
+        flags.add(MoScheduleStatus.INITIAL.getKey());
+        flags.add(MoScheduleStatus.AUDITED.getKey());
+        flags.add(MoScheduleStatus.PRODUCTION.getKey());
+        flags.add(MoScheduleStatus.FROZEN.getKey());
+        List<MesMoSchedule> mesMoSchedules = mesMoScheduleService.findByMoIdAndFlag(mesMoDesc.getMoId(), flags);
+        if(mesMoSchedules!=null&&mesMoSchedules.size()>0){
+            //调用排产单强制结案接口
+            for(MesMoSchedule mesMoSchedule:mesMoSchedules){
+                mesMoScheduleService.forceClose(mesMoSchedule.getScheduleId());
+            }
+        }
     }
 
     @Override
@@ -317,7 +388,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                     "	bp.part_no partNo,\n" +
                     "	bp.`name` NAME,\n" +
                     "	bp.spec spec,\n" +
-                    "	brd.route_id routeId,\n" +
+                    "	mpr.part_route_id routeId,\n" +
                     "	brd.route_name routeName,\n" +
                     "	mpr.input_process_id inputProcessId,\n" +
                     "	bpr.process_name inputProcessName,\n" +
@@ -341,5 +412,77 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         }
         return list.get(0);
     }
+
+    @Override
+    public PageUtil<MesMoDesc>  schedulingDetails(ModescandpartsQuery query) {
+            String sql ="SELECT\n" +
+                        "	mmd.mo_id moId,\n" +
+                        "	mmd.mo_number moNumber,\n" +
+                        "	mmd.category category,\n" +
+                        "	mmd.part_id partId,\n" +
+                        "	IFNULL(mmd.target_qty,0) targetQty,\n" +
+                        "	mmd.revsion revsion,\n" +
+                        "	mmd.distinguish distinguish,\n" +
+                        "	mmd.parent_mo parentMo,\n" +
+                        "	mmd.bom_revsion bomRevsion,\n" +
+                        "	mmd.plan_input_date planInputDate,\n" +
+                        "	mmd.plan_close_date planCloseDate,\n" +
+                        "	mmd.actual_input_date actualInputDate,\n" +
+                        "	mmd.actualc_lose_date actualcLoseDate,\n" +
+                        "	mmd.route_id routeId,\n" +
+                        "	mmd.input_process_id inputProcessId,\n" +
+                        "	mmd.output_process_id outputProcessId,\n" +
+                        "	mmd.reach_date reachDate,\n" +
+                        "	mmd.machine_qty machineQty,\n" +
+                        "	mmd.customer_id customerId,\n" +
+                        "	mmd.order_id orderId,\n" +
+                        "	mmd.order_seq orderSeq,\n" +
+                        "	mmd.is_schedul isSchedul,\n" +
+                        "	IFNULL(mmd.schedul_qty,0)  schedulQty,\n" +
+                        "	mmd.input_qty inputQty,\n" +
+                        "	mmd.output_qty outputQty,\n" +
+                        "	mmd.scrapped_qty scrappedQty,\n" +
+                        "	mmd.fail_qty failQty,\n" +
+                        "	mmd.close_flag closeFlag,\n" +
+                        "	mmd.prefreezing_state prefreezingState,\n" +
+                        "	mmd.enabled enabled,\n" +
+                        "	mmd.description description,\n" +
+                        "	mmd.create_on createOn,\n" +
+                        "	mmd.create_by createBy,\n" +
+                        "	mmd.modified_on modifiedOn,\n" +
+                        "	mmd.modified_by modifiedBy,\n" +
+                        "	bp.name partName,\n" +
+                        "	bp.part_no partNo,\n" +
+                        "	bp.part_id partId,\n" +
+                        "	bp.name name,\n" +
+                        " ( IFNULL(mmd.target_qty,0)  -  IFNULL(mmd.schedul_qty ,0) )    notQty \n" +
+                        "FROM\n" +
+                        "	mes_mo_desc mmd\n" +
+                        "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id WHERE\n" ;
+               if(StringUtils.isNotEmpty(query.getPartNo())){
+                    sql +=" bp.part_no LIKE '%"+query.getPartNo()+"%'" ;
+                }
+              if(StringUtils.isNotEmpty(query.getMoNumber()) && StringUtils.isNotEmpty(query.getPartNo())){
+                    sql +="  and mmd.mo_number LIKE'%"+query.getMoNumber()+"%' " ;
+               }
+              if(StringUtils.isNotEmpty(query.getMoNumber()) && !StringUtils.isNotEmpty(query.getPartNo())){
+                   sql +="   mmd.mo_number LIKE'%"+query.getMoNumber()+"%' " ;
+              }
+             if(StringUtils.isNotEmpty(query.getMoNumber()) ||  StringUtils.isNotEmpty(query.getPartNo())){
+                   sql += " and ( 	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" ;
+              }else {
+                  sql += " ( 	mmd.close_flag = " + MoStatus.AUDITED.getKey() + "\n" ;
+              }
+              sql += " OR mmd.close_flag = "+ MoStatus.SCHEDULED.getKey() + "\n" +
+                      "		OR mmd.close_flag = "+ MoStatus.PRODUCTION.getKey() + "\n" +
+                      "	)\n" +
+                      " AND IFNULL(mmd.is_schedul,0) <> 1\n";
+              RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDesc.class);
+              List<MesMoDesc> listcount = jdbcTemplate.query(sql,rm);
+             sql += "limit  " + (query.getPage() - 1) *query.getSize()+" , "+query.getSize();
+             List<MesMoDesc>list = jdbcTemplate.query(sql,rm);
+            return PageUtil.of(list,listcount.size(),query.getSize(),query.getPage());
+    }
+
 
 }

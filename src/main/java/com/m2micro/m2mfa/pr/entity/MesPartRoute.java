@@ -1,18 +1,18 @@
 package com.m2micro.m2mfa.pr.entity;
 
 
+import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.Date;
-import com.m2micro.m2mfa.common.entity.BaseEntity;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 /**
  * 料件途程设定主档
@@ -36,8 +36,13 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     @NotNull(message="管制方式不能为空。",groups = {AddGroup.class, UpdateGroup.class})
     @Size(max=32,message = "料件id长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String controlInformation;
+
+    @Transient
+    @ApiModelProperty(value = "管制方式名称")
+    private String controlInformationName;
+
+
     @ApiModelProperty(value = "工艺主键")
-    @NotNull(message="管制方式不能为空。",groups = {AddGroup.class, UpdateGroup.class})
     @Size(max=32,message = "料件id长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     private String routeId;
 
@@ -69,10 +74,11 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "产出工序名称")
     private String outputProcessIdName;
 
-    public MesPartRoute(@NotNull(message = "主键不能为空。", groups = {AddGroup.class, UpdateGroup.class}) String partRouteId, @NotNull(message = "料件id不能为空。", groups = {AddGroup.class, UpdateGroup.class}) @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String partId, @NotNull(message = "管制方式不能为空。", groups = {AddGroup.class, UpdateGroup.class}) @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String controlInformation, @NotNull(message = "管制方式不能为空。", groups = {AddGroup.class, UpdateGroup.class}) @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String routeId, String inputProcessId, String outputProcessId, Integer enabled, String description, String touteName, String partNo, String inputProcessIdName, String outputProcessIdName) {
+    public MesPartRoute(@NotNull(message = "主键不能为空。", groups = {AddGroup.class, UpdateGroup.class}) String partRouteId, @NotNull(message = "料件id不能为空。", groups = {AddGroup.class, UpdateGroup.class}) @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String partId, @NotNull(message = "管制方式不能为空。", groups = {AddGroup.class, UpdateGroup.class}) @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String controlInformation, String controlInformationName, @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String routeId, String inputProcessId, String outputProcessId, Integer enabled, String description, String touteName, String partNo, String inputProcessIdName, String outputProcessIdName) {
         this.partRouteId = partRouteId;
         this.partId = partId;
         this.controlInformation = controlInformation;
+        this.controlInformationName = controlInformationName;
         this.routeId = routeId;
         this.inputProcessId = inputProcessId;
         this.outputProcessId = outputProcessId;
@@ -113,6 +119,14 @@ public class MesPartRoute extends BaseEntity implements Serializable {
 
     public void setControlInformation(String controlInformation) {
         this.controlInformation = controlInformation;
+    }
+
+    public String getControlInformationName() {
+        return controlInformationName;
+    }
+
+    public void setControlInformationName(String controlInformationName) {
+        this.controlInformationName = controlInformationName;
     }
 
     public String getRouteId() {

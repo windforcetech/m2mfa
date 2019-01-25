@@ -1,26 +1,35 @@
 package com.m2micro.m2mfa.mo.controller;
 
 import com.m2micro.framework.authorization.Authorize;
-import com.m2micro.m2mfa.base.entity.BaseStation;
-import com.m2micro.m2mfa.mo.model.OperationInfo;
-import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
-import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.common.util.ValidatorUtil;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.Api;
-import com.m2micro.m2mfa.common.util.UUIDUtil;
-import io.swagger.annotations.ApiOperation;
+import com.m2micro.framework.starter.entity.Organization;
+import com.m2micro.m2mfa.base.entity.BaseMachine;
+import com.m2micro.m2mfa.base.entity.BaseStation;
+import com.m2micro.m2mfa.base.service.BaseMachineService;
+import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
-import org.springframework.web.bind.annotation.RestController;
+import com.m2micro.m2mfa.mo.entity.MesMoScheduleStaff;
+import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
+import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
+import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.query.MesMachineQuery;
+import com.m2micro.m2mfa.mo.query.MesMoScheduleQuery;
+import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
+import com.m2micro.m2mfa.mo.service.MesMoDescService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.mo.vo.*;
+import com.m2micro.m2mfa.pr.vo.MesPartvo;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,97 +45,197 @@ import java.util.List;
 public class MesMoScheduleController {
     @Autowired
     MesMoScheduleService mesMoScheduleService;
+    @Autowired
+    private MesMoDescService mesMoDescService;
+    @Autowired
+    private BaseMachineService baseMachineService;
+
 
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @PostMapping("/list")
     @ApiOperation(value="生产排程表表头列表")
     @UserOperationLog("生产排程表表头列表")
-    public ResponseMessage<PageUtil<MesMoSchedule>> list(Query query){
-        PageUtil<MesMoSchedule> page = mesMoScheduleService.list(query);
+    public ResponseMessage<PageUtil<MesMoScheduleModel>> list(@RequestBody MesMoScheduleQuery query){
+        PageUtil<MesMoScheduleModel> page = mesMoScheduleService.list(query);
         return ResponseMessage.ok(page);
     }
 
     /**
      * 详情
      */
-    @RequestMapping("/info/{id}")
+    @PostMapping("/info")
     @ApiOperation(value="生产排程表表头详情")
     @UserOperationLog("生产排程表表头详情")
-    public ResponseMessage<MesMoSchedule> info(@PathVariable("id") String id){
-        MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(id).orElse(null);
-        return ResponseMessage.ok(mesMoSchedule);
+    public ResponseMessage<ProductionProcess> info(@ApiParam(value = "scheduleId",required=true) @RequestParam(required = true) String scheduleId){
+
+        return ResponseMessage.ok(mesMoScheduleService.info(scheduleId));
     }
 
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @PostMapping("/save")
     @ApiOperation(value="保存生产排程表表头")
     @UserOperationLog("保存生产排程表表头")
-    public ResponseMessage<MesMoSchedule> save(@RequestBody MesMoSchedule mesMoSchedule){
-        ValidatorUtil.validateEntity(mesMoSchedule, AddGroup.class);
-        mesMoSchedule.setScheduleId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(mesMoScheduleService.save(mesMoSchedule));
+    public ResponseMessage save(@RequestBody Productionorder productionorder){
+        mesMoScheduleService.save(productionorder.getMesMoSchedule(),productionorder.getMesMoScheduleStaffs(),productionorder.getMesMoScheduleProcesses(),productionorder.getMesMoScheduleStations());
+        return ResponseMessage.ok();
     }
 
     /**
      * 更新
      */
-    @RequestMapping("/update")
+    @PostMapping("/update")
     @ApiOperation(value="更新生产排程表表头")
     @UserOperationLog("更新生产排程表表头")
-    public ResponseMessage<MesMoSchedule> update(@RequestBody MesMoSchedule mesMoSchedule){
-        ValidatorUtil.validateEntity(mesMoSchedule, UpdateGroup.class);
-        MesMoSchedule mesMoScheduleOld = mesMoScheduleService.findById(mesMoSchedule.getScheduleId()).orElse(null);
-        if(mesMoScheduleOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        PropertyUtil.copy(mesMoSchedule,mesMoScheduleOld);
-        return ResponseMessage.ok(mesMoScheduleService.save(mesMoScheduleOld));
+    public ResponseMessage update(@RequestBody Productionorder productionorder){
+        mesMoScheduleService.updateMesMoSchedule(productionorder.getMesMoSchedule(),productionorder.getMesMoScheduleStaffs(),productionorder.getMesMoScheduleProcesses(),productionorder.getMesMoScheduleStations());
+        return ResponseMessage.ok();
     }
 
     /**
      * 删除
      */
-    @RequestMapping("/delete")
+    @PostMapping("/delete")
     @ApiOperation(value="删除生产排程表表头")
     @UserOperationLog("删除生产排程表表头")
     public ResponseMessage delete(@RequestBody String[] ids){
-        mesMoScheduleService.deleteByIds(ids);
+       String msg = mesMoScheduleService.deleteIds(ids);
+        ResponseMessage rm = ResponseMessage.ok();
+       if(msg.trim().equals("")){
+           return rm;
+       }
+        rm.setMessage( msg+"排产单已执行不可删除。");
+        return rm;
+    }
+
+    /**
+     * 审核
+     */
+    @RequestMapping("/auditing/{id}")
+    @ApiOperation(value="审核工单")
+    @UserOperationLog("审核工单")
+    public ResponseMessage<MesMoDesc> auditing(@PathVariable("id") String id){
+        mesMoScheduleService.auditing(id);
+        return ResponseMessage.ok();
+    }
+
+
+    /**
+     * 取消审核
+     */
+    @RequestMapping("/cancel/{id}")
+    @ApiOperation(value="取消审核工单")
+    @UserOperationLog("取消审核工单")
+    public ResponseMessage<MesMoDesc> cancel(@PathVariable("id") String id){
+        mesMoScheduleService.cancel(id);
         return ResponseMessage.ok();
     }
 
     /**
-     * 获取当前员工下的排产单
+     * 冻结
      */
-    @RequestMapping("/getMesMoScheduleByStaffId")
-    @ApiOperation(value="获取当前员工下的排产单")
-    @UserOperationLog("获取当前员工下的排产单")
-    public ResponseMessage getMesMoScheduleByStaffId(String staffId){
-        return ResponseMessage.ok(mesMoScheduleService.getMesMoScheduleByStaffId(staffId));
+    @RequestMapping("/frozen/{id}")
+    @ApiOperation(value="冻结工单")
+    @UserOperationLog("冻结工单")
+    public ResponseMessage<MesMoDesc> frozen(@PathVariable("id") String id){
+        mesMoScheduleService.frozen(id);
+        return ResponseMessage.ok();
     }
 
     /**
-     * 获取待处理的工位
+     * 解冻
      */
-    @RequestMapping("/getPendingStations")
-    @ApiOperation(value="获取待处理的工位")
-    @UserOperationLog("获取待处理的工位")
-    public ResponseMessage<List<BaseStation>> getPendingStations(String staffId, String scheduleId){
-        return ResponseMessage.ok(mesMoScheduleService.getPendingStations(staffId, scheduleId));
+    @RequestMapping("/unfreeze/{id}")
+    @ApiOperation(value="解冻工单")
+    @UserOperationLog("解冻工单")
+    public ResponseMessage<MesMoDesc> unfreeze(@PathVariable("id") String id){
+        mesMoScheduleService.unfreeze(id);
+        return ResponseMessage.ok();
     }
 
 
     /**
-     * 获取操作栏相关信息
+     * 强制结案
      */
-    @RequestMapping("/getOperationInfo")
-    @ApiOperation(value="获取操作栏相关信息")
-    @UserOperationLog("获取操作栏相关信息")
-    public ResponseMessage<OperationInfo> getOperationInfo(String staffId, String scheduleId, String stationId){
-        return ResponseMessage.ok(mesMoScheduleService.getOperationInfo(staffId, scheduleId,stationId));
+    @RequestMapping("/forceClose/{id}")
+    @ApiOperation(value="工单强制结案")
+    @UserOperationLog("工单强制结案")
+    public ResponseMessage<MesMoDesc> forceClose(@PathVariable("id") String id){
+        mesMoScheduleService.forceClose(id);
+        return ResponseMessage.ok();
     }
+
+
+
+    @PostMapping("/schedulingDetails")
+    @ApiOperation(value="工单信息")
+    @UserOperationLog("工单信息")
+    public ResponseMessage<PageUtil<MesMoDesc>> schedulingDetails(@RequestBody ModescandpartsQuery modescandpartsQuery){
+        return ResponseMessage.ok(  mesMoDescService.schedulingDetails(modescandpartsQuery));
+    }
+
+    @PostMapping("/findbymoId")
+    @ApiOperation(value="通过工单ID获取关联的图程数据")
+    @UserOperationLog("通过工单ID获取关联的图程数据")
+    public ResponseMessage<MesPartvo> findbymoId(@ApiParam(value = "moId",required=true) @RequestParam(required = true) String moId){
+
+        return ResponseMessage.ok(mesMoScheduleService.findbyMoId(moId));
+    }
+
+    @PostMapping("/addDetails")
+    @ApiOperation(value="排产单新增要返回的数据")
+    @UserOperationLog("排产单新增要返回的数据")
+    public ResponseMessage<MesMoScheduleInfoModel> addDetails(){
+        return ResponseMessage.ok(mesMoScheduleService.addDetails());
+    }
+
+    @PostMapping("/findbPosition")
+    @ApiOperation(value="岗位信息")
+    @UserOperationLog("岗位信息")
+    public ResponseMessage<List<Organization>> findbPosition(){
+
+        return ResponseMessage.ok(mesMoScheduleService.findbPosition());
+    }
+
+
+    @PostMapping("/findbyMachine")
+    @ApiOperation(value="机台信息")
+    @UserOperationLog("机台信息")
+    public ResponseMessage<PageUtil<BaseMachine>> findbyMachine(@RequestBody MesMachineQuery mesMachineQuery){
+
+        return ResponseMessage.ok(baseMachineService.findbyMachine(mesMachineQuery));
+    }
+
+    @PostMapping("/processEnd")
+    @ApiOperation(value="工序结束")
+    @UserOperationLog("工序结束")
+    public ResponseMessage processEnd(@RequestBody ProcessStatus processStatus){
+        mesMoScheduleService.processEnd(processStatus);
+        return ResponseMessage.ok();
+    }
+
+    @PostMapping("/processRestore")
+    @ApiOperation(value="工序恢复")
+    @UserOperationLog("工序恢复")
+    public ResponseMessage processRestore(@RequestBody ProcessStatus processStatus){
+        mesMoScheduleService.processRestore(processStatus);
+        return ResponseMessage.ok();
+    }
+
+
+    @PostMapping("/peopleDistributionsave")
+    @ApiOperation(value="排产单人员分配保存")
+    @UserOperationLog("排产单人员分配保存")
+    public ResponseMessage  peopleDistributionsave(@RequestBody SchedulerDistribution schedulerDistribution){
+        mesMoScheduleService.peopleDistributionsave(schedulerDistribution.getMesMoScheduleStaffs(),schedulerDistribution.getMesMoScheduleStations());
+        return ResponseMessage.ok();
+    }
+
+
+
+
 
 }
