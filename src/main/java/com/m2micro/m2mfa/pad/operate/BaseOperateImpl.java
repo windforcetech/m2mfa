@@ -828,7 +828,7 @@ public class BaseOperateImpl implements BaseOperate {
    */
    protected boolean isMesRecorWorkEnd(String rwId){
 
-      String sql="select count(*)   from  mes_record_staff where rw_id='"+rwId+"' and start_time is NOT NULL  and  ISNULL(end_time)";
+      String sql="select count(*)   from  mes_record_staff where rw_id='"+rwId+"' and start_time is NOT NULL  and end_time is null ";
       Integer mesRecordstaffcount =jdbcTemplate.queryForObject(sql,Integer.class);
     if(mesRecordstaffcount.equals(0)){
         return  true;
