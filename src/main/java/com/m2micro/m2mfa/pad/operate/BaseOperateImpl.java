@@ -22,6 +22,7 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleStaffService;
 import com.m2micro.m2mfa.pad.constant.PadConstant;
 import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
@@ -1121,6 +1122,23 @@ public class BaseOperateImpl implements BaseOperate {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 判断该人员是否包含在该排产单里面
+     * @param scheduleId
+     * @param staffId
+     * @param stationId
+     * @return
+     */
+    public boolean isMesMoScheduleisStaff(String scheduleId,String staffId,String stationId){
+
+        String sql ="select COUNT(*) from mes_mo_schedule_staff where  schedule_id='"+scheduleId+"' and  station_id = '"+stationId+"'  and  staff_id='"+staffId+"' ";
+        Integer mesmoscheulestaffcount = jdbcTemplate.queryForObject(sql ,Integer.class);
+        if(mesmoscheulestaffcount>0){
+            return  true;
+        }
+        return  false;
     }
 
 }
