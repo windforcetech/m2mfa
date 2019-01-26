@@ -606,7 +606,7 @@ public class BaseOperateImpl implements BaseOperate {
     }
 
     @Override
-    public Object finishHomework(Object obj) {
+    public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) {
         return null;
     }
 

@@ -34,7 +34,7 @@ public interface BaseOperate {
      * @param obj
      * @return
      */
-    Object finishHomework(Object obj);
+    FinishHomeworkModel finishHomework(FinishHomeworkPara obj);
     /**
      * 不良品数
      * @param obj

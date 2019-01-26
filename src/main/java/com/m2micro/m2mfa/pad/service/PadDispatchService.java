@@ -37,7 +37,7 @@ public interface PadDispatchService {
      * @param obj
      * @return
      */
-    Object finishHomework(Object obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException;
+    FinishHomeworkModel finishHomework(FinishHomeworkPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException;
     /**
      * 不良品数
      * @param obj

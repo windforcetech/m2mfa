@@ -61,15 +61,15 @@ public class PadDispatchServiceImpl implements PadDispatchService {
 
 
     @Override
-    public Object finishHomework(Object obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         String handle = "";
         if(StringUtils.isEmpty(handle)){
             throw new MMException("工位没有对应的操作！");
         }
         Class<?> clazz = Class.forName(handle);
         Object handleInstance = SpringContextUtil.getBean(clazz);
-        Method method = clazz.getMethod("finishHomework",Object.class);
-        return method.invoke(handleInstance,obj);
+        Method method = clazz.getMethod("finishHomework",FinishHomeworkPara.class);
+        return (FinishHomeworkModel)  method.invoke(handleInstance,obj);
     }
 
 

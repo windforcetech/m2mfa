@@ -3,9 +3,7 @@ package com.m2micro.m2mfa.pad.controller;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.m2mfa.pad.model.PadPara;
-import com.m2micro.m2mfa.pad.model.Padbad;
-import com.m2micro.m2mfa.pad.model.StopWorkPara;
+import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.service.PadFinalInspectionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -55,7 +53,7 @@ public class PadFinalInspectionController {
     @RequestMapping("/finishHomework")
     @ApiOperation(value="pad终检结束作业")
     @UserOperationLog("pad终检结束作业")
-    public ResponseMessage finishHomework(Object obj){
+    public ResponseMessage<FinishHomeworkModel> finishHomework(FinishHomeworkPara obj){
         return ResponseMessage.ok(padFinalInspectionService.finishHomework(obj));
     }
     /**
