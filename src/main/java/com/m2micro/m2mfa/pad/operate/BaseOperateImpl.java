@@ -932,7 +932,7 @@ public class BaseOperateImpl implements BaseOperate {
     protected Boolean isCompleted(IotMachineOutput iotMachineOutput,MesMoSchedule mesMoSchedule,MesRecordWork mesRecordWork){
         Integer scheduleQty = mesMoSchedule.getScheduleQty();
         BigDecimal qty = new BigDecimal(scheduleQty);
-        BigDecimal completedQty = getCompletedQty(iotMachineOutput,mesRecordWork);
+        BigDecimal completedQty = getCompletedQty(iotMachineOutput,mesRecordWork.getScheduleId(),mesRecordWork.getStationId());
         return completedQty.compareTo(qty)==-1?false:true;
     }
 
@@ -942,9 +942,9 @@ public class BaseOperateImpl implements BaseOperate {
      * @param mesRecordWork
      * @return
      */
-    protected BigDecimal getCompletedQty(IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork){
+    protected BigDecimal getCompletedQty(IotMachineOutput iotMachineOutput,String scheduleId,String stationId){
         BigDecimal completedQty = new BigDecimal(0);
-        List<MesRecordWork> mesRecordWorks = getMesRecordWork(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
+        List<MesRecordWork> mesRecordWorks = getMesRecordWork(scheduleId, stationId);
         if(mesRecordWorks!=null&&mesRecordWorks.size()>0){
            for (MesRecordWork m:mesRecordWorks){
                //已经下工
