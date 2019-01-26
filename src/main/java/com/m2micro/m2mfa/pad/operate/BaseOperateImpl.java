@@ -947,12 +947,13 @@ public class BaseOperateImpl implements BaseOperate {
         if(mesRecordWorks!=null&&mesRecordWorks.size()>0){
            for (MesRecordWork m:mesRecordWorks){
                //已经下工
-               if(m.getEndTime()!=null){
-                   BigDecimal singleQty = m.getEndMolds().subtract(m.getStartMolds());
+               if(m.getEndTime()!=null&&m.getStartMolds()!=null&&m.getEndMolds()!=null){
+                   BigDecimal singleQty = m.getEndMolds().subtract(m.getStartMolds()==null?new BigDecimal(0):m.getStartMolds());
                    completedQty = completedQty.add(singleQty);
-               }else {
+               }
+               if(m.getEndTime()==null&&m.getStartMolds()!=null){
                    //正在上工还未下工
-                   BigDecimal singleQty = iotMachineOutput.getOutput().subtract(m.getStartMolds());
+                   BigDecimal singleQty = iotMachineOutput.getOutput().subtract(m.getStartMolds()==null?new BigDecimal(0):m.getStartMolds());
                    completedQty = completedQty.add(singleQty);
                }
            }
