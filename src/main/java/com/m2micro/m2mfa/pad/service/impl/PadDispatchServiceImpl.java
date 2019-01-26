@@ -62,7 +62,8 @@ public class PadDispatchServiceImpl implements PadDispatchService {
 
     @Override
     public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        String handle = "";
+        BaseStation baseStation = baseStationService.findById(obj.getStationId()).orElse(null);
+        String handle = PadDispatchConstant.getHandle(baseStation.getCode());
         if(StringUtils.isEmpty(handle)){
             throw new MMException("工位没有对应的操作！");
         }

@@ -214,4 +214,18 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         //调用接班人员开机上工
         startWorkForOutputByBaseStaff(startPara,baseStaffById);
     }
+
+
+    @Override
+    @Transactional
+    public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) {
+        FinishHomeworkModel finishHomeworkModel = new FinishHomeworkModel();
+        StopWorkPara stopWorkPara = new StopWorkPara();
+        stopWorkPara.setScheduleId(obj.getScheduleId());
+        stopWorkPara.setRwid(obj.getRwid());
+        stopWorkPara.setStationId(obj.getStationId());
+        stopWorkPara.setRecordStaffId(obj.getRecordStaffId());
+        stopWork(stopWorkPara);
+        return  finishHomeworkModel;
+    }
 }
