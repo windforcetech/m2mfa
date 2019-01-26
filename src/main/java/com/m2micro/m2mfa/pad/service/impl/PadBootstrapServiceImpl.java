@@ -146,15 +146,35 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         }
         //新排单料号是否与结束相同
         if(!firstMesMoSchedule.getPartId().equals(mesMoSchedule.getPartId())){
+            //如果相同，处理新排产单(不跳过工位)
+            handleNewSchedule(iotMachineOutput, mesRecordWork, nextMesRecordStaff, firstMesMoSchedule, baseStaffById);
             return stopWorkModel;
         }
-        //如果相同，处理新排产单
-        handleNewSchedule(iotMachineOutput, mesRecordWork, nextMesRecordStaff, firstMesMoSchedule, baseStaffById);
+        //如果相同，处理新排产单(跳过)
+        handleNewScheduleForSkip(iotMachineOutput, mesRecordWork, nextMesRecordStaff, firstMesMoSchedule, baseStaffById);
         return stopWorkModel;
     }
 
     /**
-     * 处理新排产单
+     * 处理新排产单(跳过)
+     * @param iotMachineOutput
+     * @param mesRecordWork
+     * @param nextMesRecordStaff
+     * @param firstMesMoSchedule
+     * @param baseStaffById
+     */
+    private void handleNewScheduleForSkip(IotMachineOutput iotMachineOutput, MesRecordWork mesRecordWork, MesRecordStaff nextMesRecordStaff, MesMoSchedule firstMesMoSchedule, BaseStaff baseStaffById) {
+        //添加余料到新排产单
+
+        //获取旧排产单上工纪录，赋值跟新排产单的纪录进行添加:模具信息
+        generateMesRecordWorkandMesRecordMold(mesRecordWork.getScheduleId(),firstMesMoSchedule.getScheduleId(),mesRecordWork.getStationId(),iotMachineOutput);
+        //如果相同，处理新排产单(不跳过)
+        handleNewSchedule(iotMachineOutput, mesRecordWork, nextMesRecordStaff, firstMesMoSchedule, baseStaffById);
+
+    }
+
+    /**
+     * 处理新排产单(不跳过)
      * @param iotMachineOutput
      * @param mesRecordWork
      * @param nextMesRecordStaff
@@ -162,7 +182,6 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
      * @param baseStaffById
      */
     private void handleNewSchedule(IotMachineOutput iotMachineOutput, MesRecordWork mesRecordWork, MesRecordStaff nextMesRecordStaff, MesMoSchedule firstMesMoSchedule, BaseStaff baseStaffById) {
-        //添加余料到新排产单
 
         //删除只上工下工结束时间为空的人员记录(旧排产单记录)
         deleteMesRecordStaffAtlast(nextMesRecordStaff.getRwId());
@@ -171,9 +190,6 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
             //更新上工记录表结束时间
             updateMesRecordWorkEndTime(iotMachineOutput,PadStaffUtil.getStaff().getStaffId());
         }
-        //获取旧排产单上工纪录，赋值跟新排产单的纪录进行添加:模具信息
-        generateMesRecordWorkandMesRecordMold(mesRecordWork.getScheduleId(),firstMesMoSchedule.getScheduleId(),mesRecordWork.getStationId(),iotMachineOutput);
-
         PadPara startPara = new PadPara();
         //新排产单
         startPara.setScheduleId(firstMesMoSchedule.getScheduleId());
