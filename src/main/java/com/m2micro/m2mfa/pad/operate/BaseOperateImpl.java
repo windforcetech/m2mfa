@@ -1009,26 +1009,30 @@ public class BaseOperateImpl implements BaseOperate {
      if(mesRecordWork==null){
        throw  new MMException("未找到对应的上工记录数据。");
      }
+      MesRecordWork mesRecordWorknew = new MesRecordWork();
      String newrwid= UUIDUtil.getUUID();
-     mesRecordWork.setRwid(newrwid);
-     mesRecordWork.setScheduleId(newscheduleId);
-     mesRecordWork.setStartMolds(iotMachineOutput.getOutput());
-     mesRecordWork.setStratPower(iotMachineOutput.getPower());
-     mesRecordWork.setStartTime(new Date());
-     mesRecordWork.setEndTime(null);
-     mesRecordWork.setEndMolds(null);
-     mesRecordWork.setEndPower(null);
-     if(mesRecordWork.getMoldId() == null){
-       throw  new MMException("该工序未有模具");
-     }
-     MesRecordMold  mesRecordMold =mesRecordMoldRepository.findRwId(mesRecordWork.getMoldId());
-     mesRecordMold.setRwId(newrwid);
-     mesRecordMold.setId(UUIDUtil.getUUID());
-     mesRecordMold.setCreateOn(new Date());
-     mesRecordMold.setUnderMold(0);
+      mesRecordWorknew.setRwid(newrwid);
+      mesRecordWorknew.setScheduleId(newscheduleId);
+      mesRecordWorknew.setStartMolds(iotMachineOutput.getOutput());
+      mesRecordWorknew.setStratPower(iotMachineOutput.getPower());
+      mesRecordWorknew.setStartTime(new Date());
+      mesRecordWorknew.setEndTime(null);
+      mesRecordWorknew.setEndMolds(null);
+      mesRecordWorknew.setEndPower(null);
+      mesRecordWorknew.setMachineId(mesRecordWork.getMachineId());
 
-     mesRecordWorkService.save(mesRecordWork);
-     mesRecordMoldRepository.save(mesRecordMold);
+     if(mesRecordWork.getMoldId() !=null){
+         MesRecordMold mesRecordMold = mesRecordMoldRepository.findRwId(mesRecordWork.getMoldId());
+         MesRecordMold mesRecordMoldnew = new MesRecordMold();
+         mesRecordMoldnew.setRwId(newrwid);
+         mesRecordMoldnew.setId(UUIDUtil.getUUID());
+         mesRecordMoldnew.setCreateOn(new Date());
+         mesRecordMoldnew.setUnderMold(0);
+         mesRecordMoldnew.setMoldId(mesRecordMold.getMoldId());
+         mesRecordMoldRepository.save(mesRecordMoldnew);
+     }
+      mesRecordWorkService.save(mesRecordWorknew);
+      //throw  new MMException("该工序未有模具");
    }
 
   /**
