@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
 import com.m2micro.m2mfa.common.util.DateUtil;
+import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
@@ -1010,6 +1011,7 @@ public class BaseOperateImpl implements BaseOperate {
        throw  new MMException("未找到对应的上工记录数据。");
      }
       MesRecordWork mesRecordWorknew = new MesRecordWork();
+      PropertyUtil.copyToNew(mesRecordWorknew,mesRecordWork);
      String newrwid= UUIDUtil.getUUID();
       mesRecordWorknew.setRwid(newrwid);
       mesRecordWorknew.setScheduleId(newscheduleId);
@@ -1019,16 +1021,15 @@ public class BaseOperateImpl implements BaseOperate {
       mesRecordWorknew.setEndTime(null);
       mesRecordWorknew.setEndMolds(null);
       mesRecordWorknew.setEndPower(null);
-      mesRecordWorknew.setMachineId(mesRecordWork.getMachineId());
 
      if(mesRecordWork.getMoldId() !=null){
          MesRecordMold mesRecordMold = mesRecordMoldRepository.findRwId(mesRecordWork.getMoldId());
          MesRecordMold mesRecordMoldnew = new MesRecordMold();
+         PropertyUtil.copyToNew(mesRecordMoldnew,mesRecordMold);
          mesRecordMoldnew.setRwId(newrwid);
          mesRecordMoldnew.setId(UUIDUtil.getUUID());
          mesRecordMoldnew.setCreateOn(new Date());
          mesRecordMoldnew.setUnderMold(0);
-         mesRecordMoldnew.setMoldId(mesRecordMold.getMoldId());
          mesRecordMoldRepository.save(mesRecordMoldnew);
      }
       mesRecordWorkService.save(mesRecordWorknew);
