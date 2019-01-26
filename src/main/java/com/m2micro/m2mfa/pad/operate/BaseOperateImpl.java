@@ -22,6 +22,7 @@ import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleStaffService;
 import com.m2micro.m2mfa.pad.constant.PadConstant;
 import com.m2micro.m2mfa.pad.model.*;
+import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.record.entity.MesRecordFail;
@@ -55,6 +56,8 @@ import java.util.List;
  */
 @Component("baseOperate")
 public class BaseOperateImpl implements BaseOperate {
+    @Autowired
+    PadDispatchService padDispatchService;
     @Autowired
     PadConstant padConstant;
     @Autowired
@@ -608,7 +611,36 @@ public class BaseOperateImpl implements BaseOperate {
 
     @Override
     public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) {
-        return null;
+        FinishHomeworkModel finishHomeworkModel = new FinishHomeworkModel();
+        //是否是扫描或继承站
+        if(isProcessCollection(obj.getProcessId())){
+            //预留
+            return finishHomeworkModel;
+        }
+        return handleFinishHomework(obj, finishHomeworkModel);
+    }
+
+    @Transactional
+    protected FinishHomeworkModel handleFinishHomework(FinishHomeworkPara obj, FinishHomeworkModel finishHomeworkModel) {
+        //是否有职员未下工
+        if(!isMesRecorWorkEnd(obj.getRwid())){
+            //下工
+            StopWorkPara stopWorkPara = new StopWorkPara();
+            stopWorkPara.setScheduleId(obj.getScheduleId());
+            stopWorkPara.setRwid(obj.getRwid());
+            stopWorkPara.setStationId(obj.getStationId());
+            stopWorkPara.setRecordStaffId(obj.getRecordStaffId());
+            stopWork(stopWorkPara);
+        }
+        MesMoSchedule mesMoSchedule = findMesMoScheduleById(obj.getScheduleId());
+        MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
+        IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        //产出量>=目标量
+        if(isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork)){
+            //结束工序
+            endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
+        }
+        return finishHomeworkModel;
     }
 
     @Override
