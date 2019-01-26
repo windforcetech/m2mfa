@@ -1,12 +1,8 @@
 package com.m2micro.m2mfa.pad.operate;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.base.entity.BaseParts;
-import com.m2micro.m2mfa.base.entity.BaseShift;
-import com.m2micro.m2mfa.base.entity.BaseStaff;
-import com.m2micro.m2mfa.base.service.BasePartsService;
-import com.m2micro.m2mfa.base.service.BaseStaffService;
-import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
+import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
@@ -39,6 +35,7 @@ import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
 import com.m2micro.m2mfa.record.service.MesRecordFailService;
 import com.m2micro.m2mfa.record.service.MesRecordStaffService;
 import com.m2micro.m2mfa.record.service.MesRecordWorkService;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -94,6 +91,10 @@ public class BaseOperateImpl implements BaseOperate {
     MesRecordFailRepository mesRecordFailRepository;
     @Autowired
     BaseStaffService baseStaffService;
+    @Autowired
+    BaseProcessService baseProcessService;
+    @Autowired
+    BaseItemsTargetService baseItemsTargetService;
 
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
@@ -1157,5 +1158,22 @@ public class BaseOperateImpl implements BaseOperate {
         }
         return  false;
     }
+
+    /**
+     * 是否扫描或继承站
+     * @param processId
+     * @return
+     */
+    protected boolean isProcessCollection(String processId){
+
+        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
+        BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null);
+        String itemValue= baseItemsTarget.getItemValue();
+        if(itemValue.equals("scan")||itemValue.equals("succeed" )){
+            return  true;
+        }
+        return  false;
+    }
+
 
 }
