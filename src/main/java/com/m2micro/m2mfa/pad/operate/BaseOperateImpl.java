@@ -620,6 +620,12 @@ public class BaseOperateImpl implements BaseOperate {
         return handleFinishHomework(obj, finishHomeworkModel);
     }
 
+    /**
+     * 处理作业结束
+     * @param obj
+     * @param finishHomeworkModel
+     * @return
+     */
     @Transactional
     protected FinishHomeworkModel handleFinishHomework(FinishHomeworkPara obj, FinishHomeworkModel finishHomeworkModel) {
         //是否有职员未下工
