@@ -147,6 +147,14 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
             stopWorkModel.setMsg(msg);
             return stopWorkModel;
         }
+        //判断该人员是否包含在该排产单里面
+        if(!isMesMoScheduleisStaff(firstMesMoSchedule.getScheduleId(),nextMesRecordStaff.getStaffId(),obj.getStationId())){
+            //接班人员做下工处理
+            stopWorkForNextBaseStaff(nextMesRecordStaff,iotMachineOutput);
+            String msg = "当前排产单已结束，机台未安排新单，请重新安排接班人"+baseStaffById.getStaffName()+"的工作。 ";
+            stopWorkModel.setMsg(msg);
+            return stopWorkModel;
+        }
         //新排单料号是否与结束相同
         if(!firstMesMoSchedule.getPartId().equals(mesMoSchedule.getPartId())){
             //如果相同，处理新排产单(不跳过工位)
@@ -189,7 +197,8 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
     public void handleNewSchedule(IotMachineOutput iotMachineOutput, MesRecordWork mesRecordWork, MesRecordStaff nextMesRecordStaff, MesMoSchedule firstMesMoSchedule, BaseStaff baseStaffById) {
 
         //删除只上工下工结束时间为空的人员记录(旧排产单记录)
-        deleteMesRecordStaffAtlast(nextMesRecordStaff.getRwId());
+        //deleteMesRecordStaffAtlast(nextMesRecordStaff.getRwId());
+        deleteMesRecordStaffById(nextMesRecordStaff.getId());
         //更新当前下工人员的上工结束时间
         if(isMesRecorWorkEnd(mesRecordWork.getRwid())){
             //更新上工记录表结束时间

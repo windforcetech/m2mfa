@@ -823,19 +823,25 @@ public class BaseOperateImpl implements BaseOperate {
         jdbcTemplate.update(sql);
     }
 
-  /**
-   * 判断该工位作业是否已经完成
-   * @param rwId
-   * @return
-   */
-   protected boolean isMesRecorWorkEnd(String rwId){
+    /**
+     * 判断该工位作业是否已经完成
+     *
+     * @param rwId
+     * @return
+     */
+    protected boolean isMesRecorWorkEnd(String rwId) {
 
-      String sql="select count(*)   from  mes_record_staff where rw_id='"+rwId+"' and start_time is NOT NULL  and end_time is null ";
-      Integer mesRecordstaffcount =jdbcTemplate.queryForObject(sql,Integer.class);
-    if(mesRecordstaffcount.equals(0)){
-        return  true;
-      }
-      return  false;
+        /*String sql = "select count(*)   from  mes_record_staff where rw_id='" + rwId + "' and start_time is NOT NULL  and end_time is null ";
+        Integer mesRecordstaffcount = jdbcTemplate.queryForObject(sql, Integer.class);
+        if (mesRecordstaffcount.equals(0)) {
+            return true;
+        }
+        return false;*/
+        MesRecordStaff mesRecordStaff = mesRecordStaffRepository.findByRwIdAndStartTimeNotNullAndEndTimeIsNull(rwId);
+        if(mesRecordStaff==null){
+            return true;
+        }
+        return false;
     }
 
   /**
@@ -986,14 +992,20 @@ public class BaseOperateImpl implements BaseOperate {
         return mesRecordWorkService.findById(rwid).orElse(null);
     }
 
-  /**
-   * 删除只上工下工结束时间为空的人员记录   （用于新排产单替换）
-   * @param rwId
-   */
+    /**
+     * 删除只上工下工结束时间为空的人员记录   （用于新排产单替换）
+     *
+     * @param rwId
+     */
     @Transactional
-    protected void deleteMesRecordStaffAtlast(String rwId){
-        String sql ="DELETE FROM mes_record_work WHERE rwid = '"+rwId+"' AND start_time IS NOT NULL AND ISNULL(end_time)";
+    protected void deleteMesRecordStaffAtlast(String rwId) {
+        String sql = "DELETE FROM mes_record_work WHERE rwid = '" + rwId + "' AND start_time IS NOT NULL AND ISNULL(end_time)";
         jdbcTemplate.update(sql);
+    }
+
+    @Transactional
+    protected void deleteMesRecordStaffById(String recordStaffId) {
+        mesRecordStaffService.deleteById(recordStaffId);
     }
 
   /**
@@ -1004,37 +1016,37 @@ public class BaseOperateImpl implements BaseOperate {
    * @param iotMachineOutput
    */
   @Transactional
-   protected  void generateMesRecordWorkandMesRecordMold(String oldscheduleId ,String newscheduleId , String stationId,IotMachineOutput iotMachineOutput){
+  protected void generateMesRecordWorkandMesRecordMold(String oldscheduleId, String newscheduleId, String stationId, IotMachineOutput iotMachineOutput) {
       //copy的上工记录数据，必须的上个工序已经更新endTime 下工记录时间的
-     MesRecordWork mesRecordWork =  mesRecordWorkRepository.selectMesRecordWork(oldscheduleId,stationId);
-     if(mesRecordWork==null){
-       throw  new MMException("未找到对应的上工记录数据。");
-     }
-      MesRecordWork mesRecordWorknew = new MesRecordWork();
-      PropertyUtil.copyToNew(mesRecordWorknew,mesRecordWork);
-     String newrwid= UUIDUtil.getUUID();
-      mesRecordWorknew.setRwid(newrwid);
-      mesRecordWorknew.setScheduleId(newscheduleId);
-      mesRecordWorknew.setStartMolds(iotMachineOutput.getOutput());
-      mesRecordWorknew.setStratPower(iotMachineOutput.getPower());
-      mesRecordWorknew.setStartTime(new Date());
-      mesRecordWorknew.setEndTime(null);
-      mesRecordWorknew.setEndMolds(null);
-      mesRecordWorknew.setEndPower(null);
+      MesRecordWork mesRecordWork = mesRecordWorkRepository.selectMesRecordWork(oldscheduleId, stationId);
+      if (mesRecordWork == null) {
+          throw new MMException("未找到对应的上工记录数据。");
+      }
+      MesRecordWork newMesRecordWork = new MesRecordWork();
+      PropertyUtil.copyToNew(newMesRecordWork, mesRecordWork);
+      String newRwid = UUIDUtil.getUUID();
+      newMesRecordWork.setRwid(newRwid);
+      newMesRecordWork.setScheduleId(newscheduleId);
+      newMesRecordWork.setStartMolds(iotMachineOutput.getOutput());
+      newMesRecordWork.setStratPower(iotMachineOutput.getPower());
+      newMesRecordWork.setStartTime(new Date());
+      newMesRecordWork.setEndTime(new Date());
+      newMesRecordWork.setEndMolds(null);
+      newMesRecordWork.setEndPower(null);
 
-     if(mesRecordWork.getMoldId() !=null){
-         MesRecordMold mesRecordMold = mesRecordMoldRepository.findRwId(mesRecordWork.getMoldId());
-         MesRecordMold mesRecordMoldnew = new MesRecordMold();
-         PropertyUtil.copyToNew(mesRecordMoldnew,mesRecordMold);
-         mesRecordMoldnew.setRwId(newrwid);
-         mesRecordMoldnew.setId(UUIDUtil.getUUID());
-         mesRecordMoldnew.setCreateOn(new Date());
-         mesRecordMoldnew.setUnderMold(0);
-         mesRecordMoldRepository.save(mesRecordMoldnew);
-     }
-      mesRecordWorkService.save(mesRecordWorknew);
+      MesRecordMold mesRecordMold = mesRecordMoldRepository.findRwId(mesRecordWork.getMoldId());
+      if (mesRecordMold != null) {
+          MesRecordMold mesRecordMoldnew = new MesRecordMold();
+          PropertyUtil.copyToNew(mesRecordMoldnew, mesRecordMold);
+          mesRecordMoldnew.setRwId(newRwid);
+          mesRecordMoldnew.setId(UUIDUtil.getUUID());
+          mesRecordMoldnew.setCreateOn(new Date());
+          mesRecordMoldnew.setUnderMold(0);
+          mesRecordMoldRepository.save(mesRecordMoldnew);
+      }
+      mesRecordWorkService.save(newMesRecordWork);
       //throw  new MMException("该工序未有模具");
-   }
+  }
 
   /**
    * 结束上工记录人员表
