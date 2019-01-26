@@ -939,7 +939,6 @@ public class BaseOperateImpl implements BaseOperate {
     /**
      * 获取当前工位当前排产单完成的产量
      * @param iotMachineOutput
-     * @param mesRecordWork
      * @return
      */
     protected BigDecimal getCompletedQty(IotMachineOutput iotMachineOutput,String scheduleId,String stationId){
