@@ -62,7 +62,8 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
      * @param iotMachineOutput
      * @return
      */
-    private StopWorkModel stopWorkForReal(StopWorkPara obj, StopWorkModel stopWorkModel, MesRecordWork mesRecordWork, MesMoSchedule mesMoSchedule, IotMachineOutput iotMachineOutput) {
+    @Transactional
+    public StopWorkModel stopWorkForReal(StopWorkPara obj, StopWorkModel stopWorkModel, MesRecordWork mesRecordWork, MesMoSchedule mesMoSchedule, IotMachineOutput iotMachineOutput) {
         //保存不良输入
         if(obj.getMesRecordFail()!=null){
             Padbad padbad = new Padbad();
@@ -91,7 +92,8 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
      * @param mesRecordWork
      * @return
      */
-    private StopWorkModel stopWorkForUnCompleted(StopWorkPara obj,StopWorkModel stopWorkModel,IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork ){
+    @Transactional
+    public StopWorkModel stopWorkForUnCompleted(StopWorkPara obj,StopWorkModel stopWorkModel,IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork ){
         //是否交接班
         if(!isChangeShifts(PadStaffUtil.getStaff().getStaffId())){
             //不交接班
@@ -117,7 +119,8 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
      * @param mesMoSchedule
      * @return
      */
-    private StopWorkModel stopWorkForCompleted(StopWorkPara obj,StopWorkModel stopWorkModel,IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork,MesMoSchedule mesMoSchedule){
+    @Transactional
+    public StopWorkModel stopWorkForCompleted(StopWorkPara obj,StopWorkModel stopWorkModel,IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork,MesMoSchedule mesMoSchedule){
         //退料
 
         //下模
@@ -139,7 +142,7 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         BaseStaff baseStaffById = findBaseStaffById(nextMesRecordStaff.getStaffId());
         if(firstMesMoSchedule==null){
             //接班人员做下工处理
-            stopWorkForNextBaseStaff(nextMesRecordStaff.getRwId(),nextMesRecordStaff.getStaffId(),iotMachineOutput);
+            stopWorkForNextBaseStaff(nextMesRecordStaff,iotMachineOutput);
             String msg = "当前排产单已结束，机台未安排新单，请重新安排接班人"+baseStaffById.getStaffName()+"的工作。 ";
             stopWorkModel.setMsg(msg);
             return stopWorkModel;
@@ -163,7 +166,8 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
      * @param firstMesMoSchedule
      * @param baseStaffById
      */
-    private void handleNewScheduleForSkip(IotMachineOutput iotMachineOutput, MesRecordWork mesRecordWork, MesRecordStaff nextMesRecordStaff, MesMoSchedule firstMesMoSchedule, BaseStaff baseStaffById) {
+    @Transactional
+    public void handleNewScheduleForSkip(IotMachineOutput iotMachineOutput, MesRecordWork mesRecordWork, MesRecordStaff nextMesRecordStaff, MesMoSchedule firstMesMoSchedule, BaseStaff baseStaffById) {
         //添加余料到新排产单
 
         //获取旧排产单上工纪录，赋值跟新排产单的纪录进行添加:模具信息
@@ -181,7 +185,8 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
      * @param firstMesMoSchedule
      * @param baseStaffById
      */
-    private void handleNewSchedule(IotMachineOutput iotMachineOutput, MesRecordWork mesRecordWork, MesRecordStaff nextMesRecordStaff, MesMoSchedule firstMesMoSchedule, BaseStaff baseStaffById) {
+    @Transactional
+    public void handleNewSchedule(IotMachineOutput iotMachineOutput, MesRecordWork mesRecordWork, MesRecordStaff nextMesRecordStaff, MesMoSchedule firstMesMoSchedule, BaseStaff baseStaffById) {
 
         //删除只上工下工结束时间为空的人员记录(旧排产单记录)
         deleteMesRecordStaffAtlast(nextMesRecordStaff.getRwId());

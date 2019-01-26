@@ -942,11 +942,11 @@ public class BaseOperateImpl implements BaseOperate {
                //已经下工
                if(m.getEndTime()!=null){
                    BigDecimal singleQty = m.getEndMolds().subtract(m.getStartMolds());
-                   completedQty.add(singleQty);
+                   completedQty = completedQty.add(singleQty);
                }else {
                    //正在上工还未下工
                    BigDecimal singleQty = iotMachineOutput.getOutput().subtract(m.getStartMolds());
-                   completedQty.add(singleQty);
+                   completedQty = completedQty.add(singleQty);
                }
            }
         }
@@ -1047,34 +1047,38 @@ public class BaseOperateImpl implements BaseOperate {
      * @param rwId
      * @param staffId
      */
+    @Transactional
    protected void stopWorkForOutput(String rwId,String staffId, IotMachineOutput iotMachineOutput){
        //更新职员作业记录表结束时间
        updateMesRecordStaffend(rwId,staffId,iotMachineOutput);
        //下工
        if(isMesRecorWorkEnd(rwId)){
            //更新上工记录表结束时间
-           updateMesRecordWorkEndTime(iotMachineOutput,staffId);
+           updateMesRecordWorkEndTime(iotMachineOutput,rwId);
        }
 
    }
 
     /**
      * 没有排产单时，接班做下工处理
-     * @param rwId
-     * @param staffId
+     * @param nextMesRecordStaff
+     * @param iotMachineOutput
      */
-    protected void stopWorkForNextBaseStaff(String rwId,String staffId, IotMachineOutput iotMachineOutput){
+    @Transactional
+    protected void stopWorkForNextBaseStaff(MesRecordStaff nextMesRecordStaff,IotMachineOutput iotMachineOutput){
         //更新职员作业记录表结束时间
-        MesRecordStaff mesRecordStaff= findMesRecordStaffById(staffId);
-        mesRecordStaff.setEndTime(new Date());
-        mesRecordStaff.setEndPower(mesRecordStaff.getStratPower());
-        mesRecordStaff.setEndMolds(mesRecordStaff.getStartMolds());
-        mesRecordStaffService.save(mesRecordStaff);
+        /*nextMesRecordStaff.setEndTime(new Date());
+        nextMesRecordStaff.setEndPower(nextMesRecordStaff.getStratPower());
+        nextMesRecordStaff.setEndMolds(nextMesRecordStaff.getStartMolds());
+        mesRecordStaffService.save(nextMesRecordStaff);*/
 
+        iotMachineOutput.setPower(nextMesRecordStaff.getStratPower());
+        iotMachineOutput.setOutput(nextMesRecordStaff.getStartMolds());
+        updateMesRecordStaffend(nextMesRecordStaff.getRwId(),nextMesRecordStaff.getStaffId(),iotMachineOutput);
         //下工
-        if(isMesRecorWorkEnd(rwId)){
+        if(isMesRecorWorkEnd(nextMesRecordStaff.getRwId())){
             //更新上工记录表结束时间
-            updateMesRecordWorkEndTime(iotMachineOutput,staffId);
+            updateMesRecordWorkEndTime(iotMachineOutput,nextMesRecordStaff.getRwId());
         }
 
     }
