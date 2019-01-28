@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.repository;
 
 import com.m2micro.m2mfa.base.entity.BaseDefect;
 import com.m2micro.framework.commons.BaseRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 /**
  * 不良現象代碼 Repository 接口
@@ -10,5 +11,10 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface BaseDefectRepository extends BaseRepository<BaseDefect,String> {
+
+  @Query(value = "select distinct bd.ect_code from base_defect bd  LEFT JOIN  mes_record_fail mrf  on bd.ect_code=mrf.defect_code where bd.ect_code=?1",nativeQuery = true)
+  String  findEctCode(String ectCode);
+
+ BaseDefect findByEctId(String ectId);
 
 }

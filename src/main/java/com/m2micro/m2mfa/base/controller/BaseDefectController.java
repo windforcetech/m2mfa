@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.query.BaseDefectQuery;
 import com.m2micro.m2mfa.base.service.BaseDefectService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -39,8 +40,8 @@ public class BaseDefectController {
     @RequestMapping("/list")
     @ApiOperation(value="不良現象代碼列表")
     @UserOperationLog("不良現象代碼列表")
-    public ResponseMessage<PageUtil<BaseDefect>> list(Query query){
-        PageUtil<BaseDefect> page = baseDefectService.list(query);
+    public ResponseMessage<PageUtil<BaseDefect>> list(BaseDefectQuery query){
+        PageUtil<BaseDefect> page = baseDefectService.listQuery(query);
         return ResponseMessage.ok(page);
     }
 
@@ -62,8 +63,10 @@ public class BaseDefectController {
     @ApiOperation(value="保存不良現象代碼")
     @UserOperationLog("保存不良現象代碼")
     public ResponseMessage<BaseDefect> save(@RequestBody BaseDefect baseDefect){
-        ValidatorUtil.validateEntity(baseDefect, AddGroup.class);
-        baseDefect.setEctCode(UUIDUtil.getUUID());
+        BaseDefect baseDefect1 =baseDefectService.findById(baseDefect.getEctCode()).orElse(null);
+        if(baseDefect1!=null){
+            throw  new MMException(baseDefect.getEctCode()+"该编码已被应用。");
+        }
         return ResponseMessage.ok(baseDefectService.save(baseDefect));
     }
 
@@ -90,8 +93,12 @@ public class BaseDefectController {
     @ApiOperation(value="删除不良現象代碼")
     @UserOperationLog("删除不良現象代碼")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseDefectService.deleteByIds(ids);
-        return ResponseMessage.ok();
+      String msg =  baseDefectService.deleteIds(ids);
+        ResponseMessage rm = ResponseMessage.ok();
+        if(msg.trim()!=""){
+            rm.setMessage(msg.trim()+"已被引用不可删除。");
+        }
+        return  rm;
     }
 
 }
