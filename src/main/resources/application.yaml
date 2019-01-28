@@ -25,7 +25,7 @@ swagger:
   license: Apache License, Version 2.0
   licenseUrl: https://www.apache.org/licenses/LICENSE-2.0.html
   termsOfServiceUrl: http://www.m2micro.com
-  base-package: com.m2micro
+  base-package: com.m2micro.m2mfa.pad
 
 scheduletask:
   companyID: process001
@@ -36,7 +36,7 @@ m2mfa:
   iot:
     processId: F5A936ED96074714AEA9E90E9B5B2F35 #(注塑成型工艺id)排产单ID找模具ID是只找注塑成型工序的模具
   pad:
-    changeTime: 10  #交班间隙时间
+    changeTime: 360  #交班间隙时间
 file:
   baseDir:
 labServer:

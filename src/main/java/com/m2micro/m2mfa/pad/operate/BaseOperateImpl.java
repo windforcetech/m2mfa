@@ -1,16 +1,11 @@
 package com.m2micro.m2mfa.pad.operate;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.base.entity.BaseParts;
-import com.m2micro.m2mfa.base.entity.BaseShift;
-import com.m2micro.m2mfa.base.entity.BaseStaff;
-import com.m2micro.m2mfa.base.service.BasePartsService;
-import com.m2micro.m2mfa.base.service.BaseStaffService;
-import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
+import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
+import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
-import com.m2micro.m2mfa.common.util.ValidatorUtil;
-import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
@@ -24,8 +19,10 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleStaffService;
 import com.m2micro.m2mfa.pad.constant.PadConstant;
 import com.m2micro.m2mfa.pad.model.*;
+import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.record.entity.MesRecordFail;
@@ -39,6 +36,7 @@ import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
 import com.m2micro.m2mfa.record.service.MesRecordFailService;
 import com.m2micro.m2mfa.record.service.MesRecordStaffService;
 import com.m2micro.m2mfa.record.service.MesRecordWorkService;
+import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -46,7 +44,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -59,6 +56,8 @@ import java.util.List;
  */
 @Component("baseOperate")
 public class BaseOperateImpl implements BaseOperate {
+    @Autowired
+    PadDispatchService padDispatchService;
     @Autowired
     PadConstant padConstant;
     @Autowired
@@ -95,6 +94,10 @@ public class BaseOperateImpl implements BaseOperate {
     MesRecordFailRepository mesRecordFailRepository;
     @Autowired
     BaseStaffService baseStaffService;
+    @Autowired
+    BaseProcessService baseProcessService;
+    @Autowired
+    BaseItemsTargetService baseItemsTargetService;
 
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
@@ -110,6 +113,9 @@ public class BaseOperateImpl implements BaseOperate {
         if(StringUtils.isEmpty(stationId)){
             throw new MMException("当前岗位为空，请刷新！");
         }
+        MesMoSchedule mesMoSchedule = findMesMoScheduleById(scheduleId);
+        //校验排产单状态
+        isScheduleFlag(mesMoSchedule);
         BaseStaff baseStaff = PadStaffUtil.getStaff();
 
         OperationInfo operationInfo = new OperationInfo();
@@ -209,8 +215,11 @@ public class BaseOperateImpl implements BaseOperate {
                 "	mrs.staff_id = '" + staffId + "'\n" +
                 "AND mrw.schedule_id = '" + scheduleId + "'\n" +
                 "AND mrw.station_id = '" + stationId + "'\n" +
-                "ORDER BY mrs.start_time DESC\n"+
-                "LIMIT 1";
+                "AND mrs.start_time IS NOT NULL\n" +
+                "AND mrs.end_time IS NULL\n" +
+                "ORDER BY\n" +
+                "	mrs.start_time DESC";
+
         RowMapper<OperationInfo> rowMapper = BeanPropertyRowMapper.newInstance(OperationInfo.class);
         return jdbcTemplate.query(sql, rowMapper);
     }
@@ -232,8 +241,7 @@ public class BaseOperateImpl implements BaseOperate {
                 "AND mra.end_time IS NULL\n" +
                 "AND mrw.schedule_id = '" + scheduleId + "'\n" +
                 "AND mrw.station_id = '" + stationId + "'\n"+
-                "ORDER BY mra.start_time DESC\n"+
-                "LIMIT 1";
+                "ORDER BY mra.start_time DESC\n";
         RowMapper<OperationInfo> rowMapper = BeanPropertyRowMapper.newInstance(OperationInfo.class);
         return jdbcTemplate.query(sql, rowMapper);
     }
@@ -246,7 +254,7 @@ public class BaseOperateImpl implements BaseOperate {
      */
     private OperationInfo setWorkInfo(List<OperationInfo> recordWorks,OperationInfo operationInfo) {
         if(recordWorks!=null&&recordWorks.size()>1){
-            throw new MMException("人员作业记录数据库数据异常！");
+            throw new MMException("人员作业记录数据库数据异常！(上工多次未下工)");
         }
         //一次也没有上过工，可以上工
         if (recordWorks==null||recordWorks.size()==0) {
@@ -285,7 +293,7 @@ public class BaseOperateImpl implements BaseOperate {
     private OperationInfo setAbnormalInfo(List<OperationInfo> recordAbnormals,OperationInfo operationInfo) {
 
         if(recordAbnormals!=null&&recordAbnormals.size()>1){
-            throw new MMException("异常记录提报数据库数据异常！");
+            throw new MMException("异常记录提报数据库数据异常！(多次提报异常未解决)");
         }
         //一次也没有提报异常，可以提报异常
         if (recordAbnormals==null||recordAbnormals.size()==0) {
@@ -323,6 +331,10 @@ public class BaseOperateImpl implements BaseOperate {
         }
         //更新员工作业时间
         updateStaffOperationTime(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId());
+
+        if(!isWork(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId())){
+            throw  new MMException("当前职员已经上工，不允许重复上工。");
+        }
         //新增人员作业记录 新增上工记录返回人员记录id
         startWorkPara.setRecordStaffId(saveMesRecordStaff(obj.getScheduleId(), mesRecordWorkRepository.isStationisWork(obj.getScheduleId(),obj.getStationId()), PadStaffUtil.getStaff().getStaffId()));
         // 跟新排产单状态为执行中
@@ -371,6 +383,9 @@ public class BaseOperateImpl implements BaseOperate {
         }
         //更新员工作业时间
         updateStaffOperationTime(obj.getScheduleId(), baseStaff.getStaffId(),obj.getStationId());
+        if(!isWork(obj.getScheduleId(), PadStaffUtil.getStaff().getStaffId(),obj.getStationId())){
+            throw  new MMException("当前职员已经上工，不允许重复上工。");
+        }
         //新增人员作业记录 新增上工记录返回人员记录id
         startWorkPara.setRecordStaffId(saveMesRecordStaffForOutput(obj.getScheduleId(), mesRecordWorkRepository.isStationisWork(obj.getScheduleId(),obj.getStationId()), baseStaff.getStaffId(),mesMoSchedule.getMachineId()));
 
@@ -531,19 +546,33 @@ public class BaseOperateImpl implements BaseOperate {
     @Override
     @Transactional
     public StopWorkModel stopWork(StopWorkPara obj) {
+        //校验是否重复下工
+        if(!isNotWork(obj.getRwid(),PadStaffUtil.getStaff().getStaffId())){
+            throw new MMException("当前员工没有上工，不存在下工！");
+        }
+        //更新职员作业记录表结束时间
+        updateRecordStaffEndTime(obj.getRecordStaffId());
         if(isMesRecorWorkEnd(obj.getRwid())){
           //更新上工记录表结束时间
           updateRecordWorkEndTime(obj.getRwid());
         }
-        //更新职员作业记录表结束时间
-        updateRecordStaffEndTime(obj.getRecordStaffId());
         return new StopWorkModel();
     }
 
     @Transactional
     protected StopWorkModel stopWorkForRecordFail(StopWorkPara obj) {
+        //校验是否重复下工
+        if(!isNotWork(obj.getRwid(),PadStaffUtil.getStaff().getStaffId())){
+            throw new MMException("当前员工没有上工，不存在下工！");
+        }
         saveRecordFail(obj);
-        return stopWork(obj);
+        //更新职员作业记录表结束时间
+        updateRecordStaffEndTime(obj.getRecordStaffId());
+        if(isMesRecorWorkEnd(obj.getRwid())){
+            //更新上工记录表结束时间
+            updateRecordWorkEndTime(obj.getRwid());
+        }
+        return new StopWorkModel();
     }
 
     /**
@@ -551,12 +580,11 @@ public class BaseOperateImpl implements BaseOperate {
      * @param obj
      */
     protected void saveRecordFail(StopWorkPara obj) {
-        MesRecordFail mesRecordFail = obj.getMesRecordFail();
-        mesRecordFail.setId(UUIDUtil.getUUID());
-        mesRecordFail.setRwId(obj.getRwid());
-        mesRecordFail.setCreateOn(new Date());
-        ValidatorUtil.validateEntity(mesRecordFail, AddGroup.class);
-        mesRecordFailService.save(mesRecordFail);
+        MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
+        Padbad padbad = new Padbad();
+        padbad.setStationId(mesRecordWork.getStationId());
+        padbad.setMesRecordFail(obj.getMesRecordFail());
+        saveMesRocerdRail(padbad);
     }
 
     /**
@@ -582,30 +610,67 @@ public class BaseOperateImpl implements BaseOperate {
     }
 
     @Override
-    public Object finishHomework(Object obj) {
-        return null;
+    public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) {
+        FinishHomeworkModel finishHomeworkModel = new FinishHomeworkModel();
+        //是否是扫描或继承站
+        if(isProcessCollection(obj.getProcessId())){
+            //预留
+            return finishHomeworkModel;
+        }
+        return handleFinishHomework(obj, finishHomeworkModel);
+    }
+
+    /**
+     * 处理作业结束
+     * @param obj
+     * @param finishHomeworkModel
+     * @return
+     */
+    @Transactional
+    protected FinishHomeworkModel handleFinishHomework(FinishHomeworkPara obj, FinishHomeworkModel finishHomeworkModel) {
+        //是否有职员未下工
+        if(!isMesRecorWorkEnd(obj.getRwid())){
+            //下工
+            StopWorkPara stopWorkPara = new StopWorkPara();
+            stopWorkPara.setScheduleId(obj.getScheduleId());
+            stopWorkPara.setRwid(obj.getRwid());
+            stopWorkPara.setStationId(obj.getStationId());
+            stopWorkPara.setRecordStaffId(obj.getRecordStaffId());
+            stopWork(stopWorkPara);
+        }
+        MesMoSchedule mesMoSchedule = findMesMoScheduleById(obj.getScheduleId());
+        MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
+        IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        //产出量>=目标量
+        if(isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork)){
+            //结束工序
+            endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
+        }
+        return finishHomeworkModel;
     }
 
     @Override
     public Object defectiveProducts(Padbad padbad) {
-        saveMesRocerdRail(padbad.getRwId(),padbad.getDctCode(),padbad.getQty());
+        saveMesRocerdRail(padbad);
         return null;
     }
 
-    private void saveMesRocerdRail(String rwId,String dctCode,Integer qty) {
+    protected void saveMesRocerdRail(Padbad padbad) {
+        MesRecordFail mesRecordFail1 = padbad.getMesRecordFail();
         MesRecordFail mesRecordFail = new MesRecordFail();
-        mesRecordFail.setRwId(rwId);
+        mesRecordFail.setRwId(mesRecordFail1.getRwId());
         mesRecordFail.setId(UUIDUtil.getUUID());
-        mesRecordFail.setDefectCode(dctCode);
-        if(qty<0){
-            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +rwId + "'";
-            Integer badsum = jdbcTemplate.queryForObject(sql, Integer.class);
-           Integer qtynum= Math.abs(qty);
+        mesRecordFail.setDefectCode(mesRecordFail1.getDefectCode());
+        if(mesRecordFail1.getQty()<0){
+            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +mesRecordFail1.getRwId() + "'";
+            long badsum = jdbcTemplate.queryForObject(sql, Long.class);
+            long qtynum= Math.abs(mesRecordFail1.getQty());
             if (qtynum > badsum) {
-                throw new MMException("不良数量不能负数量不可大于原有数量");
+                throw new MMException("不良负数量不可大于原有数量");
             }
         }
-        mesRecordFail.setQty(qty);
+        mesRecordFail.setQty(mesRecordFail1.getQty());
+        mesRecordFail.setCreateOn(new Date());
         mesRecordFailRepository.save(mesRecordFail);
     }
 
@@ -797,22 +862,25 @@ public class BaseOperateImpl implements BaseOperate {
         jdbcTemplate.update(sql);
     }
 
-  /**
-   * 判断该工位作业是否已经完成
-   * @param rwId
-   * @return
-   */
-   protected boolean isMesRecorWorkEnd(String rwId){
-      MesRecordWork mesRecordWork =  mesRecordWorkService.findById(rwId).orElse(null);
-      //获取工序对应的工位下面所有的职员人员数量
-      String sql="SELECT count(*)  FROM mes_mo_schedule_staff mmss WHERE mmss.schedule_id = '"+mesRecordWork.getScheduleId()+"' AND mmss.process_id = '"+mesRecordWork.getProcessId()+"'  AND  mmss.enabled=1  AND mmss.station_id = '"+mesRecordWork.getStationId()+"'";
-      Integer mesMoschedulestaffcount =  jdbcTemplate.queryForObject(sql ,Integer.class);
-     //获取工序对应工位的上班人员打卡结束记录   如果匹配的话说明该工位完成了
-      Integer mesRecordstaffcount = mesRecordStaffRepository.selectMesRecordstaffcount( rwId,  mesRecordWork.getScheduleId(), mesRecordWork.getProcessId() , mesRecordWork.getStationId());
-      if(mesMoschedulestaffcount.equals(mesRecordstaffcount)){
-        return  true;
-      }
-      return  false;
+    /**
+     * 判断该工位作业是否已经完成
+     *
+     * @param rwId
+     * @return
+     */
+    protected boolean isMesRecorWorkEnd(String rwId) {
+
+        /*String sql = "select count(*)   from  mes_record_staff where rw_id='" + rwId + "' and start_time is NOT NULL  and end_time is null ";
+        Integer mesRecordstaffcount = jdbcTemplate.queryForObject(sql, Integer.class);
+        if (mesRecordstaffcount.equals(0)) {
+            return true;
+        }
+        return false;*/
+        MesRecordStaff mesRecordStaff = mesRecordStaffRepository.findByRwIdAndStartTimeNotNullAndEndTimeIsNull(rwId);
+        if(mesRecordStaff==null){
+            return true;
+        }
+        return false;
     }
 
   /**
@@ -873,7 +941,7 @@ public class BaseOperateImpl implements BaseOperate {
         if(list.size()==0){
             return null;
         }
-        if(list.size()>0){
+        if(list.size()>1){
             throw new MMException("接班人员有多个，请先解决冲突！");
         }
         return list.get(0);
@@ -903,29 +971,29 @@ public class BaseOperateImpl implements BaseOperate {
     protected Boolean isCompleted(IotMachineOutput iotMachineOutput,MesMoSchedule mesMoSchedule,MesRecordWork mesRecordWork){
         Integer scheduleQty = mesMoSchedule.getScheduleQty();
         BigDecimal qty = new BigDecimal(scheduleQty);
-        BigDecimal completedQty = getCompletedQty(iotMachineOutput,mesRecordWork);
+        BigDecimal completedQty = getCompletedQty(iotMachineOutput,mesRecordWork.getScheduleId(),mesRecordWork.getStationId());
         return completedQty.compareTo(qty)==-1?false:true;
     }
 
     /**
      * 获取当前工位当前排产单完成的产量
      * @param iotMachineOutput
-     * @param mesRecordWork
      * @return
      */
-    protected BigDecimal getCompletedQty(IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork){
+    protected BigDecimal getCompletedQty(IotMachineOutput iotMachineOutput,String scheduleId,String stationId){
         BigDecimal completedQty = new BigDecimal(0);
-        List<MesRecordWork> mesRecordWorks = getMesRecordWork(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
+        List<MesRecordWork> mesRecordWorks = getMesRecordWork(scheduleId, stationId);
         if(mesRecordWorks!=null&&mesRecordWorks.size()>0){
            for (MesRecordWork m:mesRecordWorks){
                //已经下工
-               if(m.getEndTime()!=null){
-                   BigDecimal singleQty = m.getEndMolds().subtract(m.getStartMolds());
-                   completedQty.add(singleQty);
-               }else {
+               if(m.getEndTime()!=null&&m.getStartMolds()!=null&&m.getEndMolds()!=null){
+                   BigDecimal singleQty = m.getEndMolds().subtract(m.getStartMolds()==null?new BigDecimal(0):m.getStartMolds());
+                   completedQty = completedQty.add(singleQty);
+               }
+               if(m.getEndTime()==null&&m.getStartMolds()!=null){
                    //正在上工还未下工
-                   BigDecimal singleQty = iotMachineOutput.getOutput().subtract(m.getStartMolds());
-                   completedQty.add(singleQty);
+                   BigDecimal singleQty = iotMachineOutput.getOutput().subtract(m.getStartMolds()==null?new BigDecimal(0):m.getStartMolds());
+                   completedQty = completedQty.add(singleQty);
                }
            }
         }
@@ -963,14 +1031,20 @@ public class BaseOperateImpl implements BaseOperate {
         return mesRecordWorkService.findById(rwid).orElse(null);
     }
 
-  /**
-   * 删除只上工下工结束时间为空的人员记录   （用于新排产单替换）
-   * @param rwId
-   */
+    /**
+     * 删除只上工下工结束时间为空的人员记录   （用于新排产单替换）
+     *
+     * @param rwId
+     */
     @Transactional
-    protected void deleteMesRecordStaffAtlast(String rwId){
-        String sql ="DELETE FROM mes_record_work WHERE rwid = '"+rwId+"' AND start_time IS NOT NULL AND ISNULL(end_time)";
+    protected void deleteMesRecordStaffAtlast(String rwId) {
+        String sql = "DELETE FROM mes_record_work WHERE rwid = '" + rwId + "' AND start_time IS NOT NULL AND ISNULL(end_time)";
         jdbcTemplate.update(sql);
+    }
+
+    @Transactional
+    protected void deleteMesRecordStaffById(String recordStaffId) {
+        mesRecordStaffService.deleteById(recordStaffId);
     }
 
   /**
@@ -981,33 +1055,37 @@ public class BaseOperateImpl implements BaseOperate {
    * @param iotMachineOutput
    */
   @Transactional
-   protected  void generateMesRecordWorkandMesRecordMold(String oldscheduleId ,String newscheduleId , String stationId,IotMachineOutput iotMachineOutput){
+  protected void generateMesRecordWorkandMesRecordMold(String oldscheduleId, String newscheduleId, String stationId, IotMachineOutput iotMachineOutput) {
       //copy的上工记录数据，必须的上个工序已经更新endTime 下工记录时间的
-     MesRecordWork mesRecordWork =  mesRecordWorkRepository.selectMesRecordWork(oldscheduleId,stationId);
-     if(mesRecordWork==null){
-       throw  new MMException("未找到对应的上工记录数据。");
-     }
-     String newrwid= UUIDUtil.getUUID();
-     mesRecordWork.setRwid(newrwid);
-     mesRecordWork.setScheduleId(newscheduleId);
-     mesRecordWork.setStartMolds(iotMachineOutput.getOutput());
-     mesRecordWork.setStratPower(iotMachineOutput.getPower());
-     mesRecordWork.setStartTime(new Date());
-     mesRecordWork.setEndTime(null);
-     mesRecordWork.setEndMolds(null);
-     mesRecordWork.setEndPower(null);
-     if(mesRecordWork.getMoldId() == null){
-       throw  new MMException("该工序未有模具");
-     }
-     MesRecordMold  mesRecordMold =mesRecordMoldRepository.findRwId(mesRecordWork.getMoldId());
-     mesRecordMold.setRwId(newrwid);
-     mesRecordMold.setId(UUIDUtil.getUUID());
-     mesRecordMold.setCreateOn(new Date());
-     mesRecordMold.setUnderMold(0);
+      MesRecordWork mesRecordWork = mesRecordWorkRepository.selectMesRecordWork(oldscheduleId, stationId);
+      if (mesRecordWork == null) {
+          throw new MMException("未找到对应的上工记录数据。");
+      }
+      MesRecordWork newMesRecordWork = new MesRecordWork();
+      PropertyUtil.copyToNew(newMesRecordWork, mesRecordWork);
+      String newRwid = UUIDUtil.getUUID();
+      newMesRecordWork.setRwid(newRwid);
+      newMesRecordWork.setScheduleId(newscheduleId);
+      newMesRecordWork.setStartMolds(iotMachineOutput.getOutput());
+      newMesRecordWork.setStratPower(iotMachineOutput.getPower());
+      newMesRecordWork.setStartTime(new Date());
+      newMesRecordWork.setEndTime(new Date());
+      newMesRecordWork.setEndMolds(null);
+      newMesRecordWork.setEndPower(null);
 
-     mesRecordWorkService.save(mesRecordWork);
-     mesRecordMoldRepository.save(mesRecordMold);
-   }
+      MesRecordMold mesRecordMold = mesRecordMoldRepository.findRwId(mesRecordWork.getMoldId());
+      if (mesRecordMold != null) {
+          MesRecordMold mesRecordMoldnew = new MesRecordMold();
+          PropertyUtil.copyToNew(mesRecordMoldnew, mesRecordMold);
+          mesRecordMoldnew.setRwId(newRwid);
+          mesRecordMoldnew.setId(UUIDUtil.getUUID());
+          mesRecordMoldnew.setCreateOn(new Date());
+          mesRecordMoldnew.setUnderMold(0);
+          mesRecordMoldRepository.save(mesRecordMoldnew);
+      }
+      mesRecordWorkService.save(newMesRecordWork);
+      //throw  new MMException("该工序未有模具");
+  }
 
   /**
    * 结束上工记录人员表
@@ -1017,7 +1095,7 @@ public class BaseOperateImpl implements BaseOperate {
    */
    @Transactional
    protected  void updateMesRecordStaffend(String rwId,String staffId,IotMachineOutput iotMachineOutput){
-     String sql ="update  mes_record_staff  set end_time =  '"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'   ,end_power='"+iotMachineOutput.getPower()+"' end_molds='"+iotMachineOutput.getOutput()+"'  where rw_id= '"+rwId+"' and staff_id='"+staffId+"'  and ISNULL(end_time)  and  start_time  is NOT null";
+     String sql ="update  mes_record_staff  set end_time =  '"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'   ,end_power='"+iotMachineOutput.getPower()+"', end_molds='"+iotMachineOutput.getOutput()+"'  where rw_id= '"+rwId+"' and staff_id='"+staffId+"'  and ISNULL(end_time)  and  start_time  is NOT null";
      jdbcTemplate.update(sql);
    }
 
@@ -1026,16 +1104,41 @@ public class BaseOperateImpl implements BaseOperate {
      * @param rwId
      * @param staffId
      */
+    @Transactional
    protected void stopWorkForOutput(String rwId,String staffId, IotMachineOutput iotMachineOutput){
        //更新职员作业记录表结束时间
        updateMesRecordStaffend(rwId,staffId,iotMachineOutput);
        //下工
        if(isMesRecorWorkEnd(rwId)){
            //更新上工记录表结束时间
-           updateMesRecordWorkEndTime(iotMachineOutput,staffId);
+           updateMesRecordWorkEndTime(iotMachineOutput,rwId);
        }
 
    }
+
+    /**
+     * 没有排产单时，接班做下工处理
+     * @param nextMesRecordStaff
+     * @param iotMachineOutput
+     */
+    @Transactional
+    protected void stopWorkForNextBaseStaff(MesRecordStaff nextMesRecordStaff,IotMachineOutput iotMachineOutput){
+        //更新职员作业记录表结束时间
+        /*nextMesRecordStaff.setEndTime(new Date());
+        nextMesRecordStaff.setEndPower(nextMesRecordStaff.getStratPower());
+        nextMesRecordStaff.setEndMolds(nextMesRecordStaff.getStartMolds());
+        mesRecordStaffService.save(nextMesRecordStaff);*/
+
+        iotMachineOutput.setPower(nextMesRecordStaff.getStratPower());
+        iotMachineOutput.setOutput(nextMesRecordStaff.getStartMolds());
+        updateMesRecordStaffend(nextMesRecordStaff.getRwId(),nextMesRecordStaff.getStaffId(),iotMachineOutput);
+        //下工
+        if(isMesRecorWorkEnd(nextMesRecordStaff.getRwId())){
+            //更新上工记录表结束时间
+            updateMesRecordWorkEndTime(iotMachineOutput,nextMesRecordStaff.getRwId());
+        }
+
+    }
 
     /**
      * 获取职员信息
@@ -1045,6 +1148,70 @@ public class BaseOperateImpl implements BaseOperate {
    protected BaseStaff findBaseStaffById(String staffId){
        return baseStaffService.findById(staffId).orElse(null);
    }
+
+  /**
+   * 判定当前员工是否有上工记录
+   * @param scheduleId
+   * @param staffId
+   * @param stationId
+   * @return
+   */
+   protected  boolean isWork(String scheduleId,String staffId,String stationId){
+       String sql ="SELECT count(*) FROM mes_record_work mrw, mes_record_staff mrs WHERE mrs.schedule_id = '"+scheduleId+"' AND mrs.staff_id = '"+staffId+"' AND mrw.station_id = '"+stationId+"' AND mrs.start_time IS NOT NULL AND ISNULL(mrs.end_time) AND mrw.rwid=mrs.rw_id";
+          Integer countwork  =  jdbcTemplate.queryForObject(sql ,Integer.class);
+          if(countwork.equals(0)){
+            return true;
+          }
+       return false;
+    }
+
+    /**
+     * 判定当前员工是否能下工
+     * @param rwId
+     * @param staffId
+     * @return
+     */
+    protected  boolean isNotWork(String rwId,String staffId){
+       String sql ="SELECT count(*) FROM mes_record_staff WHERE rw_id = '"+rwId+"' AND start_time IS NOT NULL AND ISNULL(end_time) AND staff_id = '"+staffId+"'";
+        Integer countNotWork  =  jdbcTemplate.queryForObject(sql ,Integer.class);
+        if(countNotWork>0){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断该人员是否包含在该排产单里面
+     * @param scheduleId
+     * @param staffId
+     * @param stationId
+     * @return
+     */
+    public boolean isMesMoScheduleisStaff(String scheduleId,String staffId,String stationId){
+
+        String sql ="select COUNT(*) from mes_mo_schedule_staff where  schedule_id='"+scheduleId+"' and  station_id = '"+stationId+"'  and  staff_id='"+staffId+"' ";
+        Integer mesmoscheulestaffcount = jdbcTemplate.queryForObject(sql ,Integer.class);
+        if(mesmoscheulestaffcount>0){
+            return  true;
+        }
+        return  false;
+    }
+
+    /**
+     * 是否扫描或继承站
+     * @param processId
+     * @return
+     */
+    protected boolean isProcessCollection(String processId){
+
+        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
+        BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null);
+        String itemValue= baseItemsTarget.getItemValue();
+        if(itemValue.equals("scan")||itemValue.equals("succeed" )){
+            return  true;
+        }
+        return  false;
+    }
 
 
 }

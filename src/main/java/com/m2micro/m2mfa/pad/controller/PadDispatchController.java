@@ -68,7 +68,7 @@ public class PadDispatchController {
     @RequestMapping("/finishHomework")
     @ApiOperation(value="pad结束作业")
     @UserOperationLog("pad结束作业")
-    public ResponseMessage finishHomework(Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public ResponseMessage<FinishHomeworkModel> finishHomework(FinishHomeworkPara obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.finishHomework(obj));
     }
     /**
@@ -77,7 +77,7 @@ public class PadDispatchController {
     @RequestMapping("/defectiveProducts")
     @ApiOperation(value="pad不良品数")
     @UserOperationLog("pad不良品数")
-    public ResponseMessage defectiveProducts (Padbad obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public ResponseMessage defectiveProducts (@RequestBody Padbad obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.defectiveProducts(obj));
     }
     /**

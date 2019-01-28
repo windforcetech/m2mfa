@@ -61,15 +61,16 @@ public class PadDispatchServiceImpl implements PadDispatchService {
 
 
     @Override
-    public Object finishHomework(Object obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        String handle = "";
+    public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        BaseStation baseStation = baseStationService.findById(obj.getStationId()).orElse(null);
+        String handle = PadDispatchConstant.getHandle(baseStation.getCode());
         if(StringUtils.isEmpty(handle)){
             throw new MMException("工位没有对应的操作！");
         }
         Class<?> clazz = Class.forName(handle);
         Object handleInstance = SpringContextUtil.getBean(clazz);
-        Method method = clazz.getMethod("finishHomework",Object.class);
-        return method.invoke(handleInstance,obj);
+        Method method = clazz.getMethod("finishHomework",FinishHomeworkPara.class);
+        return (FinishHomeworkModel)  method.invoke(handleInstance,obj);
     }
 
 
@@ -79,7 +80,9 @@ public class PadDispatchServiceImpl implements PadDispatchService {
         String handle = PadDispatchConstant.getHandle(baseStation.getCode());
         Class<?> clazz = Class.forName(handle);
         Object handleInstance = SpringContextUtil.getBean(clazz);
-        try {
+        Method method = clazz.getMethod("defectiveProducts",Padbad.class);
+        return method.invoke(handleInstance,obj);
+        /*try {
             Method method = clazz.getMethod("defectiveProducts",Padbad.class);
             return method.invoke(handleInstance,obj);
         }catch (InvocationTargetException ex){
@@ -88,7 +91,7 @@ public class PadDispatchServiceImpl implements PadDispatchService {
                 throw (MMException)t;
             }
             throw ex;
-        }
+        }*/
 
     }
 
