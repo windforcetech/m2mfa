@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
@@ -20,20 +21,31 @@ public class BaseSymptom extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @ApiModelProperty(value = "主键")
+    @Id
     private String symptomId;
     @ApiModelProperty(value = "编号")
-    @Id
     private String symptomCode;
     @ApiModelProperty(value = "名称")
     private String symptomName;
     @ApiModelProperty(value = "类型")
     private String category;
+    @Transient
+    @ApiModelProperty(value = "类型名称")
+    private String categoryName;
     @ApiModelProperty(value = "排序码")
     private Integer sortCode;
     @ApiModelProperty(value = "有效否")
     private Integer enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 
     public String getSymptomId() {
         return symptomId;

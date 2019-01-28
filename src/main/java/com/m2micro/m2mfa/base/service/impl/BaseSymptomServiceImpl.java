@@ -67,6 +67,7 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
                         "	bs.symptom_code symptomCode,\n" +
                         "	bs.symptom_name symptomName,\n" +
                         "	bs.category category,\n" +
+                        "	bi.item_name categoryName,\n" +
                         "	bs.sort_code sortCode,\n" +
                         "	bs.enabled enabled,\n" +
                         "	bs.description description,\n" +
@@ -114,7 +115,7 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
         if(listByName!=null&&listByName.size()>0){
             throw new MMException("不良原因名称不唯一！");
         }
-        baseSymptom.setSymptomCode(UUIDUtil.getUUID());
+        baseSymptom.setSymptomId(UUIDUtil.getUUID());
         return save(baseSymptom);
     }
 
@@ -122,7 +123,7 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
     @Transactional
     public BaseSymptom updateEntity(BaseSymptom baseSymptom) {
         ValidatorUtil.validateEntity(baseSymptom, UpdateGroup.class);
-        BaseSymptom baseSymptomOld = findById(baseSymptom.getSymptomCode()).orElse(null);
+        BaseSymptom baseSymptomOld = findById(baseSymptom.getSymptomId()).orElse(null);
         if(baseSymptomOld==null){
             throw new MMException("数据库不存在该记录");
         }
