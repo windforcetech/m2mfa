@@ -3,12 +3,14 @@ package com.m2micro.m2mfa.base.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseQualityItems;
 import com.m2micro.m2mfa.base.entity.BaseQualitySolutionDef;
+import com.m2micro.m2mfa.base.entity.BaseUnit;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseQualityItemsQuery;
 import com.m2micro.m2mfa.base.repository.BaseQualityItemsRepository;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDefRepository;
 import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.base.service.BaseQualityItemsService;
+import com.m2micro.m2mfa.base.service.BaseUnitService;
 import com.m2micro.m2mfa.base.vo.BaseQualityItemsAddDetails;
 import com.m2micro.m2mfa.base.vo.BaseQualityItemsModel;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
@@ -44,6 +46,8 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
     BaseItemsTargetService baseItemsTargetService;
     @Autowired
     BaseQualitySolutionDefRepository baseQualitySolutionDefRepository;
+    @Autowired
+    BaseUnitService baseUnitService;
 
     public BaseQualityItemsRepository getRepository() {
         return baseQualityItemsRepository;
@@ -82,12 +86,12 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
                     "	bqi.modified_by modifiedBy,\n" +
                     "	bi1.item_name gaugeName,\n" +
                     "	bi2.item_name categoryName,\n" +
-                    "	bi3.item_name limitUnitName\n" +
+                    "	bi3.unit limitUnitName\n" +
                     "FROM\n" +
                     "	base_quality_items bqi\n" +
                     "LEFT JOIN base_items_target bi1 ON bqi.gauge = bi1.id\n" +
                     "LEFT JOIN base_items_target bi2 ON bqi.category = bi2.id\n" +
-                    "LEFT JOIN base_items_target bi3 ON bqi.limit_unit = bi3.id\n" +
+                    "LEFT JOIN base_unit bi3 ON bqi.limit_unit = bi3.unit_id\n" +
                     "WHERE\n" +
                     "	1 = 1\n";
 
@@ -111,7 +115,7 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         BaseQualityItemsAddDetails baseQualityItemsAddDetails = new BaseQualityItemsAddDetails();
         List<SelectNode> gauge = baseItemsTargetService.getSelectNode("gauge_category");
         List<SelectNode> category = baseItemsTargetService.getSelectNode("data_type");
-        List<SelectNode> limitUnit = baseItemsTargetService.getSelectNode("parts_unit");
+        List<BaseUnit> limitUnit = baseUnitService.findAll();
         baseQualityItemsAddDetails.setGauge(gauge);
         baseQualityItemsAddDetails.setCategory(category);
         baseQualityItemsAddDetails.setLimitUnit(limitUnit);
@@ -126,7 +130,7 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         if(byItemCode!=null&&byItemCode.size()>0){
             throw new MMException("项目编号不唯一");
         }
-        List<BaseQualityItems> byItemName = baseQualityItemsRepository.findByItemNameAndItemIdNot(baseQualityItems.getItemCode(), "");
+        List<BaseQualityItems> byItemName = baseQualityItemsRepository.findByItemNameAndItemIdNot(baseQualityItems.getItemName(), "");
         if(byItemName!=null&&byItemName.size()>0){
             throw new MMException("项目名称不唯一");
         }
@@ -140,7 +144,7 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         BaseQualityItems baseQualityItems = findById(id).orElse(null);
         List<SelectNode> gauge = baseItemsTargetService.getSelectNode("gauge_category");
         List<SelectNode> category = baseItemsTargetService.getSelectNode("data_type");
-        List<SelectNode> limitUnit = baseItemsTargetService.getSelectNode("parts_unit");
+        List<BaseUnit> limitUnit = baseUnitService.findAll();
         baseQualityItemsModel.setBaseQualityItems(baseQualityItems);
         baseQualityItemsModel.setGauge(gauge);
         baseQualityItemsModel.setCategory(category);

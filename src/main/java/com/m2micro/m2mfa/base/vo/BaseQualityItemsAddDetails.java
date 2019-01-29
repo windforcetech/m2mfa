@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.vo;
 
+import com.m2micro.m2mfa.base.entity.BaseUnit;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,5 +21,5 @@ public class BaseQualityItemsAddDetails {
     @ApiModelProperty(value = "检验值类型")
     private List<SelectNode> category;
     @ApiModelProperty(value = "检验单位")
-    private List<SelectNode> limitUnit;
+    private List<BaseUnit> limitUnit;
 }
