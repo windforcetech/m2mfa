@@ -3,7 +3,6 @@ package com.m2micro.m2mfa.base.service;
 import com.m2micro.m2mfa.base.entity.BaseQualityItems;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.query.BaseQualityItemsQuery;
 import com.m2micro.m2mfa.base.vo.BaseQualityItemsAddDetails;
 import com.m2micro.m2mfa.base.vo.BaseQualityItemsModel;

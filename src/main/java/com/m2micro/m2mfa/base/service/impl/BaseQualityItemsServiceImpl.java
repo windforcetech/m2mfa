@@ -1,10 +1,8 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseQualityItems;
 import com.m2micro.m2mfa.base.entity.BaseQualitySolutionDef;
-import com.m2micro.m2mfa.base.entity.BaseSymptom;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseQualityItemsQuery;
 import com.m2micro.m2mfa.base.repository.BaseQualityItemsRepository;
@@ -25,10 +23,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBaseQualityItems;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
