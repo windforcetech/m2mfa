@@ -14,6 +14,7 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 /**
@@ -62,6 +63,7 @@ public class BaseDefectServiceImpl implements BaseDefectService {
     }
 
     @Override
+    @Transactional
     public String deleteIds(String[] ids) {
         String msg ="";
         for(int i=0; i<ids.length;i++){
