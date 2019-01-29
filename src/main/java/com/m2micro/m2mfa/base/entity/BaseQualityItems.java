@@ -3,10 +3,14 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -24,13 +28,21 @@ public class BaseQualityItems extends BaseEntity implements Serializable {
     @Id
     private String itemId;
     @ApiModelProperty(value = "编号")
+    @NotEmpty(message="编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String itemCode;
+    @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "名称")
     private String itemName;
     @ApiModelProperty(value = "量具名称")
     private String gauge;
+    @Transient
+    @ApiModelProperty(value = "量具名称name")
+    private String gaugeName;
     @ApiModelProperty(value = "检验值类型")
     private String category;
+    @Transient
+    @ApiModelProperty(value = "检验值类型名称")
+    private String categoryName;
     @ApiModelProperty(value = "上限值")
     private BigDecimal upperLimit;
     @ApiModelProperty(value = "下限值")
@@ -39,10 +51,37 @@ public class BaseQualityItems extends BaseEntity implements Serializable {
     private BigDecimal centralLimit;
     @ApiModelProperty(value = "检验单位")
     private String limitUnit;
+    @Transient
+    @ApiModelProperty(value = "检验单位名称")
+    private String limitUnitName;
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+
+    public String getGaugeName() {
+        return gaugeName;
+    }
+
+    public void setGaugeName(String gaugeName) {
+        this.gaugeName = gaugeName;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public String getLimitUnitName() {
+        return limitUnitName;
+    }
+
+    public void setLimitUnitName(String limitUnitName) {
+        this.limitUnitName = limitUnitName;
+    }
 
     public String getItemId() {
         return itemId;
