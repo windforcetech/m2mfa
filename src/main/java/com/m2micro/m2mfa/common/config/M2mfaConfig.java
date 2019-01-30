@@ -1,13 +1,17 @@
 package com.m2micro.m2mfa.common.config;
 
+import com.alibaba.druid.support.http.StatViewServlet;
 import com.querydsl.jpa.HQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import javax.persistence.EntityManager;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Auther: liaotao
@@ -32,5 +36,21 @@ public class M2mfaConfig {
             labServerConfig.setLabServerUrl(labserverurl);
         }
         return labServerConfig;
+    }
+
+    @Bean
+    public ServletRegistrationBean druidServlet() {
+        ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean();
+        servletRegistrationBean.setServlet(new StatViewServlet());
+        servletRegistrationBean.addUrlMappings("/druid/*");
+        Map<String, String> initParameters = new HashMap<>();
+        //initParameters.put("resetEnable", "false"); //禁用HTML页面上的“Rest All”功能
+        //initParameters.put("allow", "10.8.9.115");  //ip白名单（没有配置或者为空，则允许所有访问）
+        initParameters.put("loginUsername", "admin");  //++监控页面登录用户名
+        initParameters.put("loginPassword", "admin");  //++监控页面登录用户密码
+        initParameters.put("deny", ""); //ip黑名单
+        //如果某个ip同时存在，deny优先于allow
+        servletRegistrationBean.setInitParameters(initParameters);
+        return servletRegistrationBean;
     }
 }
