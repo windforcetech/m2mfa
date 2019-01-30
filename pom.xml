@@ -52,7 +52,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <project.release.version>${project.base.version}</project.release.version>
+                <project.release.version>${project.base.version}-SNAPSHOT</project.release.version>
             </properties>
         </profile>
         <profile>
@@ -164,11 +164,11 @@
             <groupId>com.m2micro</groupId>
             <artifactId>logging</artifactId>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>com.m2micro</groupId>
             <artifactId>m2mfa-ui</artifactId>
             <version>${project.version}</version>
-        </dependency>-->
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.squareup.retrofit2/retrofit -->
         <dependency>
