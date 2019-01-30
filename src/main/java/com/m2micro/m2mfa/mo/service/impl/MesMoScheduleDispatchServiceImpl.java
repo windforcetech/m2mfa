@@ -111,15 +111,18 @@ public class MesMoScheduleDispatchServiceImpl implements MesMoScheduleDispatchSe
     private List<TreeNode> getAllDepart() {
         String sql= "SELECT\n" +
                     "	o.uuid id,\n" +
-                    "	o.department_name name\n" +
+                    "	o.department_name NAME\n" +
                     "FROM\n" +
-                    "	base_machine bm,\n" +
                     "	organization o\n" +
                     "WHERE\n" +
-                    "	bm.department_id = o.uuid\n" +
-                    "GROUP BY\n" +
-                    "	bm.department_id\n" +
-                    "ORDER BY o.create_date desc ";
+                    "	o.uuid IN (\n" +
+                    "		SELECT\n" +
+                    "			bma.department_id\n" +
+                    "		FROM\n" +
+                    "			base_machine bma\n" +
+                    "	)\n" +
+                    "ORDER BY\n" +
+                    "	o.create_date DESC";
         RowMapper<TreeNode> rowMapper = BeanPropertyRowMapper.newInstance(TreeNode.class);
         return jdbcTemplate.query(sql, rowMapper);
     }
