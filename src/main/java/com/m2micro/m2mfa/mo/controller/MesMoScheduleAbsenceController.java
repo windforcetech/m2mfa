@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 @RestController
-@RequestMapping("/mo/mesMoScheduleAbsence")
+@RequestMapping("/mo/工号不唯一")
 @Api(value="生产排程缺勤 前端控制器")
 @Authorize
 

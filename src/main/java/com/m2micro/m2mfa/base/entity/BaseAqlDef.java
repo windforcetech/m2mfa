@@ -19,15 +19,24 @@ import io.swagger.annotations.ApiModelProperty;
 public class BaseAqlDef extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    @ApiModelProperty(value = "主键")
     @Id
     private String id;
+    @ApiModelProperty(value = "方案单头主键")
     private String aqlId;
+    @ApiModelProperty(value = "项次")
     private Integer seq;
+    @ApiModelProperty(value = "批量最小数量")
     private Integer batchMin;
+    @ApiModelProperty(value = "批量最大数量")
     private Integer batchMax;
+    @ApiModelProperty(value = "抽取数量")
     private Integer extraction;
+    @ApiModelProperty(value = "拒收数量")
     private Integer rejected;
+    @ApiModelProperty(value = "有效否")
     private Boolean enabled;
+    @ApiModelProperty(value = "描述")
     private String description;
 
     public String getId() {

@@ -942,8 +942,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 MesMoDesc moDesc= mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
                 //把排产量更新到工单
                 try {
-                    Integer scheduQty =  moDesc.getSchedulQty()-mesMoSchedule.getScheduleQty();
-                    mesMoDescRepository.setSchedulQtyFor(scheduQty,moDesc.getMoId());
+                    moDesc.setSchedulQty( moDesc.getSchedulQty()-mesMoSchedule.getScheduleQty());
+                    mesMoDescRepository.save(moDesc);
                     mesMoDescRepository.updateIsSchedeul(0,moDesc.getMoId());
                 }catch (Exception e){
                     //工单排产总量为null所以更新进行忽略
