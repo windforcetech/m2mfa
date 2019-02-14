@@ -100,7 +100,12 @@ public class MesPartRouteController {
                 msgs+=msg;
             }
         }
-        return  msgs.trim()==""? ResponseMessage.ok():  ResponseMessage.error(msgs.trim()+"该料件途程已经安排生产，不允许删除。");
+        ResponseMessage rm = ResponseMessage.ok();
+        if(msgs.trim()!=""){
+            rm.setMessage(msgs.trim()+"该料件途程已经安排生产，不允许删除。");
+        }
+        return  rm;
+
     }
 
     @PostMapping("/addDetails")

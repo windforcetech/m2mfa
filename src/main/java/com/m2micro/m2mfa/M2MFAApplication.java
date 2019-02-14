@@ -8,9 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jms.annotation.EnableJms;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.m2micro.*"})
 @EnableSwagger2Doc
-@ComponentScan(basePackages="com.m2micro.*")
 @EnableJpaRepositories(basePackages = "com.m2micro.*")
 @EntityScan(basePackages = "com.m2micro.*")
 @EnableJms

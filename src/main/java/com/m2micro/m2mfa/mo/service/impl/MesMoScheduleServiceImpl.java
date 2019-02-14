@@ -236,9 +236,9 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
 
     @Override
-    public List<MesMoSchedule> findpartID(String partID) {
-        String sql ="select * from mes_mo_schedule where part_id='"+partID+"'";
-        RowMapper<MesMoSchedule> rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
+    public List<MesMoDesc> findpartID(String partID) {
+        String sql ="select * from mes_mo_desc where part_id='"+partID+"'";
+        RowMapper<MesMoDesc> rm = BeanPropertyRowMapper.newInstance(MesMoDesc.class);
         return jdbcTemplate.query(sql,rm);
     }
 

@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
@@ -299,7 +300,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     @Transactional
     public String delete(String id) {
        MesPartRoute mesPartRoute = this.findById(id).orElse(null);
-       List<MesMoSchedule> list=  mesMoScheduleService.findpartID(mesPartRoute.getPartId());
+       List<MesMoDesc> list=  mesMoScheduleService.findpartID(mesPartRoute.getPartId());
         String msg="";
         if(list!= null && !list.isEmpty()){
             BaseRouteDesc baseRouteDesc =baseRouteDescService.findById(mesPartRoute.getRouteId()).orElse(null);
