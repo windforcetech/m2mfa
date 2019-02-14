@@ -131,4 +131,25 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
         deleteByIds(ids);
     }
 
+    @Override
+    @Transactional
+    public void deleteEntitys(String[] ids) {
+        valid(ids);
+        deleteByIds(ids);
+    }
+
+    /**
+     * 校验
+     * @param ids
+     */
+    private void valid(String[] ids) {
+        for(String id:ids){
+            Integer count = mesMoDescRepository.countByCustomerId(id);
+            if(count>0){
+                BaseCustomer baseCustomer = findById(id).orElse(null);
+                throw new MMException("客户编号【"+baseCustomer.getCode()+"】已产生业务，不允许删除！");
+            }
+        }
+    }
+
 }

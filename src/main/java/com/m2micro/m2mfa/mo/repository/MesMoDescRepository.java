@@ -90,5 +90,10 @@ public interface MesMoDescRepository extends BaseRepository<MesMoDesc,String> {
     @Query(value = "update MesMoDesc m set m.isSchedul = ?1 where m.moId = ?2")
     Integer updateIsSchedeul(Integer isSchedul,String moId);
 
-
+    /**
+     * 根据客户id查找工单
+     * @param customerId
+     * @return
+     */
+    Integer countByCustomerId(String customerId);
 }

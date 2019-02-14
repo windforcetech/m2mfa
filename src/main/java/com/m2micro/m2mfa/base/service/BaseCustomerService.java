@@ -37,4 +37,10 @@ public interface BaseCustomerService extends BaseService<BaseCustomer,String> {
      * @param ids
      */
     void deleteAllByIds(String[] ids);
+
+    /**
+     * 删除客户资料
+     * @param ids
+     */
+    void deleteEntitys(String[] ids);
 }
