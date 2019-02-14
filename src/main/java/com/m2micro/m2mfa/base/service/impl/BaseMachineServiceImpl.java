@@ -161,17 +161,48 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     @Override
     public PageUtil<BaseMachine> findbyMachine( MesMachineQuery query) {
         String sql ="SELECT\n" +
-                "	bm.*, o.department_name departmentName\n" +
-                "FROM\n" +
+            "	bm.machine_id machineId,\n" +
+            "	bm.code code,\n" +
+            "	bm.name name,\n" +
+            "	bm.id id,\n" +
+            "	bm.assdt_id assdtId,\n" +
+            "	bm.serial_number serialNumber,\n" +
+            "	bm.category_id categoryId,\n" +
+            "	bm.placement placement,\n" +
+            "	bm.flag flag,\n" +
+            "	bm.department_id departmentId,\n" +
+            "	bm.purchase_date purchaseDate,\n" +
+            "	bm.purchase_cost purchaseCost,\n" +
+            "	bm.life life,\n" +
+            "	bm.utilization_time utilizationTime,\n" +
+            "	bm.tank_capacity tankCapacity,\n" +
+            "	bm.unit unit,\n" +
+            "	bm.maintenance_staff maintenanceStaff,\n" +
+            "	bm.technical_staff technicalStaff,\n" +
+            "	bm.manager_staff managerStaff,\n" +
+            "	bm.new_mono newMono,\n" +
+            "	bm.image image,\n" +
+            "	bm.sort_code sortCode,\n" +
+            "	bm.enabled enabled,\n" +
+            "	bm.description description,\n" +
+            "	bm.create_on createOn,\n" +
+            "	bm.create_by createBy,\n" +
+            "	bm.modified_on modifiedOn,\n" +
+            "	bm.modified_by modifiedBy,\n" +
+            "	bi.item_name flagName,\n" +
+            "	bi2.item_name placementName,\n" +
+            "	o.department_name\n" +
+            "FROM\n" +
                 "	base_machine bm\n" +
-                "LEFT JOIN base_items_target bit ON bm.flag = bit.id\n" +
+            "LEFT JOIN base_items_target bi ON bi.id = bm.flag\n" +
+            "LEFT JOIN base_items_target bi2 ON bi2.id = bm.placement\n" +
                 "LEFT JOIN organization o ON bm.department_id = o.uuid\n" +
                 "WHERE\n" +
-                "	bit.item_name != '维修'\n" ;
+                "	bi.item_name != '维修'\n" ;
                 if(StringUtils.isNotEmpty(query.getMachinCode())){
                    sql += "  and bm.`code`  Like '%"+query.getMachinCode()+"%'";
                 }
-                sql +=  " AND bit.item_name != '保养' ";
+                sql +=  " AND bi.item_name != '保养' ";
                 sql += " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         String countsql ="SELECT\n" +
                 "	count(*) \n" +

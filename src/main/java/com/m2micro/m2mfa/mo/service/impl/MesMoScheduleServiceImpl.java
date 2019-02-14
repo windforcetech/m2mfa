@@ -987,6 +987,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(moDesc.getTargetQty().equals(scheduleQtysum) || scheduleQtysum> moDesc.getTargetQty()){
             mesMoDescRepository.updateIsSchedeul(1,moDesc.getMoId());
         }
+        mesMoDescRepository.setCloseFlagFor(MoStatus.SCHEDULED.getKey(),moDesc.getMoId());
     }
 
     /**
