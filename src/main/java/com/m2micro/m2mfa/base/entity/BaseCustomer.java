@@ -69,7 +69,7 @@ public class BaseCustomer extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
-    @Size(max=32,message = "描述字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=200,message = "描述不能大于200位",groups = {AddGroup.class, UpdateGroup.class})
     private String description;
 
     public String getCustomerId() {
