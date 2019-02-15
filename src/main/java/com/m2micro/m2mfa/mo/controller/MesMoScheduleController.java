@@ -107,7 +107,7 @@ public class MesMoScheduleController {
        if(msg.trim().equals("")){
            return rm;
        }
-        rm.setMessage( msg+"排产单已执行不可删除。");
+        rm.setMessage( msg+"不可删除。");
         return rm;
     }
 
