@@ -950,7 +950,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 }
 
             }else {
-                msg+= mesMoSchedule.getScheduleNo() +",";
+                msg+= mesMoSchedule.getScheduleNo() +"排产单"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+",";
             }
         }
         return msg;

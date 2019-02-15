@@ -75,7 +75,9 @@ public class BaseStaffServiceImpl implements BaseStaffService {
             //  Organization department = organizationService.findById(duty.getParentNode()).get();
             item.setId(one.getStaffId());
             item.setCode(one.getCode());
-            item.setDepartment(department.getDepartmentName());
+            if(department!=null){
+                item.setDepartment(department.getDepartmentName());
+            }
             item.setDimission(one.getDimission());
             String sql = "select item_name from base_items_target where id='" + one.getDutyId() + "'";
 
