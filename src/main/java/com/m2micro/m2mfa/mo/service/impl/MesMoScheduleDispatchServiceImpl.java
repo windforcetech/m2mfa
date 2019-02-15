@@ -9,6 +9,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.ScheduleSequenceModel;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleDispatchService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -38,6 +39,8 @@ public class MesMoScheduleDispatchServiceImpl implements MesMoScheduleDispatchSe
     BaseMachineRepository baseMachineRepository;
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Autowired
+    MesMoScheduleService mesMoScheduleService;
 
 
     @Override
@@ -102,6 +105,12 @@ public class MesMoScheduleDispatchServiceImpl implements MesMoScheduleDispatchSe
     public void updateSequence(ScheduleSequenceModel[] scheduleSequenceModels) {
         if(scheduleSequenceModels==null||scheduleSequenceModels.length==0){
             throw new MMException("没有排产单需要调整顺序！");
+        }
+        for(ScheduleSequenceModel scheduleSequenceModel:scheduleSequenceModels){
+            MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleSequenceModel.getScheduleId()).orElse(null);
+            if(!(MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())||MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag()))){
+                throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许调整顺序,请刷新页面！");
+            }
         }
         SqlParameterSource[] beanSources  = SqlParameterSourceUtils.createBatch(scheduleSequenceModels);
         String sql = "UPDATE mes_mo_schedule mms set mms.sequence=:sequence WHERE mms.schedule_id=:scheduleId";
