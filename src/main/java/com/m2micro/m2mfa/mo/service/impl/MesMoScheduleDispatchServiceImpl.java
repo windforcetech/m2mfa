@@ -103,18 +103,41 @@ public class MesMoScheduleDispatchServiceImpl implements MesMoScheduleDispatchSe
     @Override
     @Transactional
     public void updateSequence(ScheduleSequenceModel[] scheduleSequenceModels) {
-        if(scheduleSequenceModels==null||scheduleSequenceModels.length==0){
+        if(scheduleSequenceModels==null||scheduleSequenceModels.length==0||scheduleSequenceModels.length==1){
             throw new MMException("没有排产单需要调整顺序！");
         }
-        for(ScheduleSequenceModel scheduleSequenceModel:scheduleSequenceModels){
-            MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleSequenceModel.getScheduleId()).orElse(null);
-            if(!(MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())||MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag()))){
-                throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许调整顺序,请刷新页面！");
-            }
-        }
+        ScheduleSequenceModel scheduleSequenceModel1 = scheduleSequenceModels[0];
+        ScheduleSequenceModel scheduleSequenceModel2 = scheduleSequenceModels[1];
+        sequenceValid(scheduleSequenceModel1);
+        sequenceValid(scheduleSequenceModel2);
+        //交换顺序
+        changeSequence(scheduleSequenceModel1, scheduleSequenceModel2);
         SqlParameterSource[] beanSources  = SqlParameterSourceUtils.createBatch(scheduleSequenceModels);
         String sql = "UPDATE mes_mo_schedule mms set mms.sequence=:sequence WHERE mms.schedule_id=:scheduleId";
         namedParameterJdbcTemplate.batchUpdate(sql,beanSources);
+    }
+
+    /**
+     * 交换顺序
+     * @param scheduleSequenceModel1
+     * @param scheduleSequenceModel2
+     */
+    private void changeSequence(ScheduleSequenceModel scheduleSequenceModel1, ScheduleSequenceModel scheduleSequenceModel2) {
+        Integer sequence1=scheduleSequenceModel1.getSequence();
+        scheduleSequenceModel1.setSequence(scheduleSequenceModel2.getSequence());
+        scheduleSequenceModel2.setSequence(sequence1);
+    }
+
+    /**
+     * 校验并设置顺序
+     * @param scheduleSequenceModel
+     */
+    private void sequenceValid(ScheduleSequenceModel scheduleSequenceModel) {
+        MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleSequenceModel.getScheduleId()).orElse(null);
+        if(!(MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())||MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag()))){
+            throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许调整顺序,请刷新页面！");
+        }
+        scheduleSequenceModel.setSequence(mesMoSchedule.getSequence());
     }
 
     private List<TreeNode> getAllDepart() {
