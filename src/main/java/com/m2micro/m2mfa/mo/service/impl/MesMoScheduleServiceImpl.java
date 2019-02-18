@@ -229,7 +229,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             "LEFT JOIN mes_mo_schedule_process msp ON (\n" +
             "	msp.process_id = mpr.output_process_id\n" +
             "	AND msp.schedule_id = mms.schedule_id\n" +
-            ")";
+            ")\n"+
+            "WHERE\n" +
+            "	1 = 1\n";
+
+        if(StringUtils.isNotEmpty(query.getFlag())){
+            countSql = countSql+" AND mms.flag = " + Integer.valueOf(query.getFlag())+ "\n";
+        }
+        if(query.getStartTime()!=null){
+            countSql = countSql+" AND mms.create_on >= "+ "'"+ DateUtil.format(query.getStartTime())+"'\n" ;
+        }
+        if(query.getEndTime()!=null){
+            countSql = countSql+" AND mms.create_on <= "+ "'"+ DateUtil.format(query.getEndTime())+"'\n" ;
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
