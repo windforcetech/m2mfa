@@ -1,9 +1,6 @@
 package com.m2micro.m2mfa.mo.controller;
 
 import com.m2micro.framework.authorization.Authorize;
-import com.m2micro.framework.sysdebug.annotation.SysDebugLog;
-import com.m2micro.m2mfa.base.node.SelectNode;
-import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.m2micro.m2mfa.mo.model.PartsRouteModel;
@@ -12,15 +9,12 @@ import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
@@ -28,9 +22,7 @@ import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 工单主档 前端控制器
@@ -92,17 +84,7 @@ public class MesMoDescController {
     @ApiOperation(value="更新工单主档")
     @UserOperationLog("更新工单主档")
     public ResponseMessage<MesMoDesc> update(@RequestBody MesMoDesc mesMoDesc){
-        ValidatorUtil.validateEntity(mesMoDesc, UpdateGroup.class);
-        MesMoDesc mesMoDescOld = mesMoDescService.findById(mesMoDesc.getMoId()).orElse(null);
-        if(mesMoDescOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        List<MesMoDesc> list = mesMoDescService.findByMoNumberAndMoIdNot(mesMoDesc.getMoNumber(),mesMoDesc.getMoId());
-        if(list!=null&&list.size()>0){
-            throw new MMException("工单号码不唯一！");
-        }
-        PropertyUtil.copy(mesMoDesc,mesMoDescOld);
-        return ResponseMessage.ok(mesMoDescService.save(mesMoDescOld));
+        return ResponseMessage.ok(mesMoDescService.updateEntity(mesMoDesc));
     }
 
     /**

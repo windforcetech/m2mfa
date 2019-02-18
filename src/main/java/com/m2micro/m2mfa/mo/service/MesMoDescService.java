@@ -100,6 +100,11 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      */
     PageUtil<MesMoDesc> schedulingDetails(ModescandpartsQuery modescandpartsQuery);
 
-
+    /**
+     * 更新工单
+     * @param mesMoDesc
+     * @return
+     */
+    MesMoDesc updateEntity(MesMoDesc mesMoDesc);
 
 }

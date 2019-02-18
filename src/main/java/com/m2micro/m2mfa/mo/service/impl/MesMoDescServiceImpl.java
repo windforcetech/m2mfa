@@ -3,6 +3,9 @@ package com.m2micro.m2mfa.mo.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.common.util.DateUtil;
+import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
@@ -482,6 +485,25 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         sql += "limit  " + (query.getPage() - 1) *query.getSize()+" , "+query.getSize();
         List<MesMoDesc>list = jdbcTemplate.query(sql,rm);
         return PageUtil.of(list,listcount.size(),query.getSize(),query.getPage());
+    }
+
+    @Override
+    @Transactional
+    public MesMoDesc updateEntity(MesMoDesc mesMoDesc) {
+        ValidatorUtil.validateEntity(mesMoDesc, UpdateGroup.class);
+        MesMoDesc mesMoDescOld = findById(mesMoDesc.getMoId()).orElse(null);
+        if(mesMoDescOld==null){
+            throw new MMException("数据库不存在该记录");
+        }
+        List<MesMoDesc> list = findByMoNumberAndMoIdNot(mesMoDesc.getMoNumber(),mesMoDesc.getMoId());
+        if(list!=null&&list.size()>0){
+            throw new MMException("工单号码不唯一！");
+        }
+        /*if(mesMoDescOld.getTargetQty()>mesMoDesc.getTargetQty()){
+            throw new MMException("工单目标量不能低于原有目标量！");
+        }*/
+        PropertyUtil.copy(mesMoDesc,mesMoDescOld);
+        return save(mesMoDescOld);
     }
 
 

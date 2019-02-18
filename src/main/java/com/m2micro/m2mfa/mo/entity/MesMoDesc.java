@@ -105,7 +105,7 @@ public class MesMoDesc extends BaseEntity implements Serializable {
     private Integer prefreezingState;
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
-    @Size(max=32,message = "描述信息不能大于200位",groups = {AddGroup.class, UpdateGroup.class})
+    @Size(max=200,message = "描述信息不能大于200位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "描述")
     private String description;
 
