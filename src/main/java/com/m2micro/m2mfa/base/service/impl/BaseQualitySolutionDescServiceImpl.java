@@ -2,7 +2,12 @@ package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.m2mfa.base.entity.BaseQualitySolutionDesc;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDescRepository;
+import com.m2micro.m2mfa.base.service.BaseQualitySolutionDefService;
 import com.m2micro.m2mfa.base.service.BaseQualitySolutionDescService;
+import com.m2micro.m2mfa.base.vo.BaseQualitySolutionDescModel;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -22,6 +27,8 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
     BaseQualitySolutionDescRepository baseQualitySolutionDescRepository;
     @Autowired
     JPAQueryFactory queryFactory;
+    @Autowired
+    BaseQualitySolutionDefService baseQualitySolutionDefService;
 
     public BaseQualitySolutionDescRepository getRepository() {
         return baseQualitySolutionDescRepository;
@@ -36,6 +43,19 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
         List<BaseQualitySolutionDesc> list = jq.fetch();
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    @Override
+    public void saveEntity(BaseQualitySolutionDescModel baseQualitySolutionDescModel) {
+        ValidatorUtil.validateEntity(baseQualitySolutionDescModel.getBaseQualitySolutionDesc(), AddGroup.class);
+        ValidatorUtil.validateEntity(baseQualitySolutionDescModel.getBaseQualitySolutionDefs(), AddGroup.class);
+
+        baseQualitySolutionDescModel.getBaseQualitySolutionDesc().setSolutionId(UUIDUtil.getUUID());
+        baseQualitySolutionDescModel.getBaseQualitySolutionDefs().stream().forEach(baseQualitySolutionDef->{
+            baseQualitySolutionDef.setId(UUIDUtil.getUUID());
+        });
+        save(baseQualitySolutionDescModel.getBaseQualitySolutionDesc());
+        baseQualitySolutionDefService.saveAll(baseQualitySolutionDescModel.getBaseQualitySolutionDefs());
     }
 
 }

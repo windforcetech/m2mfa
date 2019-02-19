@@ -4,6 +4,10 @@ import com.m2micro.m2mfa.base.entity.BaseQualitySolutionDesc;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.vo.BaseQualitySolutionDescModel;
+
+import java.util.List;
+
 /**
  * 检验方案主档 服务类
  * @author liaotao
@@ -17,4 +21,10 @@ public interface BaseQualitySolutionDescService extends BaseService<BaseQualityS
      * @return  分页信息
      */
     PageUtil<BaseQualitySolutionDesc> list(Query query);
+
+    /**
+     * 保存
+     * @return
+     */
+    void saveEntity(BaseQualitySolutionDescModel baseQualitySolutionDescModel);
 }

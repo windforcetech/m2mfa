@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.controller;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.service.BaseQualitySolutionDescService;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.vo.BaseQualitySolutionDescModel;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -61,10 +62,9 @@ public class BaseQualitySolutionDescController {
     @RequestMapping("/save")
     @ApiOperation(value="保存检验方案主档")
     @UserOperationLog("保存检验方案主档")
-    public ResponseMessage<BaseQualitySolutionDesc> save(@RequestBody BaseQualitySolutionDesc baseQualitySolutionDesc){
-        ValidatorUtil.validateEntity(baseQualitySolutionDesc, AddGroup.class);
-        baseQualitySolutionDesc.setSolutionId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(baseQualitySolutionDescService.save(baseQualitySolutionDesc));
+    public ResponseMessage<BaseQualitySolutionDesc> save(@RequestBody BaseQualitySolutionDescModel baseQualitySolutionDescModel){
+        baseQualitySolutionDescService.saveEntity(baseQualitySolutionDescModel);
+        return ResponseMessage.ok();
     }
 
     /**
