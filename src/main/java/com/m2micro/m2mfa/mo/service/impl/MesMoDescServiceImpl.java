@@ -491,6 +491,8 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     @Transactional
     public MesMoDesc updateEntity(MesMoDesc mesMoDesc) {
         ValidatorUtil.validateEntity(mesMoDesc, UpdateGroup.class);
+
+        mesMoDesc.setMoNumber(mesMoDesc.getMoNumber().trim());
         MesMoDesc mesMoDescOld = findById(mesMoDesc.getMoId()).orElse(null);
         if(mesMoDescOld==null){
             throw new MMException("数据库不存在该记录");

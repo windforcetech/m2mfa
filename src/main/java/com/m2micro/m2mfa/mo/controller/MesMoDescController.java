@@ -69,6 +69,7 @@ public class MesMoDescController {
     public ResponseMessage<MesMoDesc> save(@RequestBody MesMoDesc mesMoDesc){
         ValidatorUtil.validateEntity(mesMoDesc, AddGroup.class);
         mesMoDesc.setMoId(UUIDUtil.getUUID());
+        mesMoDesc.setMoNumber(mesMoDesc.getMoNumber().trim());
         List<MesMoDesc> list = mesMoDescService.findByMoNumberAndMoIdNot(mesMoDesc.getMoNumber(),"");
         if(list!=null&&list.size()>0){
             throw new MMException("工单号码不唯一！");
