@@ -18,10 +18,6 @@ import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteStationRepository;
-import com.m2micro.m2mfa.record.entity.MesRecordLotparts;
-import com.m2micro.m2mfa.record.entity.MesRecordStaff;
-import com.m2micro.m2mfa.record.repository.MesRecordLotpartsRepository;
-import com.m2micro.m2mfa.record.repository.MesRecordStaffRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -30,16 +26,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class PadHomeServiceImpl  implements PadHomeService {
   @Autowired
   private MesMoScheduleService mesMoScheduleService;
-  @Autowired
-  private MesRecordLotpartsRepository mesRecordLotpartsRepository;
   @Autowired
   private MesMoScheduleStaffRepository mesMoScheduleStaffRepository;
   @Autowired
@@ -48,8 +40,6 @@ public class PadHomeServiceImpl  implements PadHomeService {
   private MesPartRouteRepository mesPartRouteRepository;
   @Autowired
   private MesMoDescService mesMoDescService;
-  @Autowired
-  private MesRecordStaffRepository mesRecordStaffRepository;
   @Autowired
   BaseMachineService baseMachineService;
   @Autowired
@@ -93,6 +83,8 @@ public class PadHomeServiceImpl  implements PadHomeService {
     BaseStaff baseStaff= baseStaffService.findById(padHomePara.getStaffId()).orElse(null);
     //班别资料
     BaseShift baseShift =baseShiftService.findById(mesMoScheduleStaffs.get(0).getShiftId()).orElse(null);
+
+    //职员上班工时
     long hours = baseShiftService.findbhours(baseShift.getShiftId());
 
     BigDecimal standardHours = mesPartRouteStation.getStandardHours();
