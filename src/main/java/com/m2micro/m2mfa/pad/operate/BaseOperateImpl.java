@@ -980,7 +980,7 @@ public class BaseOperateImpl implements BaseOperate {
      * @param iotMachineOutput
      * @return
      */
-    protected BigDecimal getCompletedQty(IotMachineOutput iotMachineOutput,String scheduleId,String stationId){
+    public BigDecimal getCompletedQty(IotMachineOutput iotMachineOutput,String scheduleId,String stationId){
         BigDecimal completedQty = new BigDecimal(0);
         List<MesRecordWork> mesRecordWorks = getMesRecordWork(scheduleId, stationId);
         if(mesRecordWorks!=null&&mesRecordWorks.size()>0){

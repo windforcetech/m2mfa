@@ -33,7 +33,7 @@ public class MesRecordFail implements Serializable {
     @ApiModelProperty(value = "不良现象代码")
     private String defectCode;
     @ApiModelProperty(value = "数量")
-    private long qty;
+    private Long qty;
     @ApiModelProperty(value = "维修状态")
     private Integer repairFlag;
     @ApiModelProperty(value = "回流数量")

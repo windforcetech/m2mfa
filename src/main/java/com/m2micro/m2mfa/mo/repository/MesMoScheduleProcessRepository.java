@@ -66,4 +66,12 @@ public interface MesMoScheduleProcessRepository extends BaseRepository<MesMoSche
      */
     @Query(value = "SELECT distinct mmsp.mold_id from mes_mo_schedule_process mmsp WHERE mmsp.schedule_id=?1 and mmsp.process_id=?2",nativeQuery = true)
     String getProductionMoldId(String scheduleId,String processId);
+
+    /**
+     * 根据排产单及工序id获取生产排程工序信息
+     * @param scheduleIds
+     * @param processId
+     * @return
+     */
+    List<MesMoScheduleProcess> findByScheduleIdInAndProcessId(List<String> scheduleIds,String processId);
 }

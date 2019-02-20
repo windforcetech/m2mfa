@@ -107,4 +107,12 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      */
     @Query(value = "SELECT mms.* FROM mes_mo_schedule mms WHERE mms.machine_id = ?1 AND mms.flag = ?2 ORDER BY sequence ASC, create_on ASC LIMIT 1",nativeQuery = true)
     MesMoSchedule getFirstMesMoScheduleByMachineId(String machineId,Integer flag);
+
+    /**
+     * 根据工单查找排产单
+     * @param moId
+     *          工单id
+     * @return
+     */
+    List<MesMoSchedule> findByMoId(String moId);
 }

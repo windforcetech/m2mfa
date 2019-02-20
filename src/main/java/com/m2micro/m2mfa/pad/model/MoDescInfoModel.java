@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 
+
 /**
  * @Auther: liaotao
  * @Date: 2019/2/19 14:03
@@ -25,4 +26,13 @@ public class MoDescInfoModel {
     private String partName;
     @ApiModelProperty(value = "规格")
     private String spec;
+    @ApiModelProperty(value = "目标量(计划)")
+    private Integer targetQty;
+    @ApiModelProperty(value = "完工")
+    private Integer completedQty;
+    @ApiModelProperty(value = "不良数量")
+    private Long qty;
+    @ApiModelProperty(value = "报废数量")
+    private Integer scrapQty;
+
 }
