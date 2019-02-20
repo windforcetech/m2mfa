@@ -22,4 +22,20 @@ public interface MesPartRouteStationRepository extends BaseRepository<MesPartRou
     @Modifying
     @Query(value = "delete from mes_part_route_station where  part_route_id=?1",nativeQuery = true)
     void deletemesParRouteID(String partrouteid);
+
+    /**
+     * 获取料件途程设定工位
+     * @param partRouteId
+     * @return
+     */
+    List<MesPartRouteStation> findByPartRouteId(String partRouteId);
+
+    /**
+     * 获取该工序对应的途程
+     * @param partRouteId
+     * @param processId
+     * @param stationId
+     * @return
+     */
+    List<MesPartRouteStation> findByPartRouteIdAndProcessIdAndStationId(String partRouteId,String processId,String stationId);
 }

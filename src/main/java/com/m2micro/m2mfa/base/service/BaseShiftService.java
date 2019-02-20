@@ -30,4 +30,11 @@ public interface BaseShiftService extends BaseService<BaseShift,String> {
      * @return     班别基本资料
      */
     List<BaseShift> findByCodeAndShiftIdNot(String code , String shiftId);
+
+    /**
+     * 获取当前班别的有效工时
+     * @param shiftId
+     * @return
+     */
+    long  findbhours(String shiftId);
 }

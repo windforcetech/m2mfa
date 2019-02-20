@@ -4,6 +4,7 @@ import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.m2mfa.base.repository.BaseShiftRepository;
 import com.m2micro.m2mfa.base.service.BaseShiftService;
+import com.m2micro.m2mfa.common.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +16,8 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.QBaseShift;
+
+import java.util.Date;
 import java.util.List;
 /**
  * 班别基本资料 服务实现类
@@ -94,5 +97,36 @@ public class BaseShiftServiceImpl implements BaseShiftService {
     public List<BaseShift> findByCodeAndShiftIdNot(String code, String shiftId) {
         return baseShiftRepository.findByCodeAndShiftIdNot(code, shiftId);
     }
+
+    @Override
+    public long findbhours(String shiftId) {
+        BaseShift baseShift = this.findById(shiftId).orElse(null);
+        Date OnTime1 = DateUtil.stringToDate( baseShift.getOnTime1(), DateUtil.TIME_PATTERN);
+        Date OnTime2 = DateUtil.stringToDate( baseShift.getOnTime2(), DateUtil.TIME_PATTERN);
+        Date OnTime3 = DateUtil.stringToDate( baseShift.getOnTime3(), DateUtil.TIME_PATTERN);
+        Date OnTime4 = DateUtil.stringToDate( baseShift.getOnTime4(), DateUtil.TIME_PATTERN);
+        Date OffTime1 = DateUtil.stringToDate( baseShift.getOffTime1(), DateUtil.TIME_PATTERN);
+        Date OffTime2 = DateUtil.stringToDate( baseShift.getOffTime2(), DateUtil.TIME_PATTERN);
+        Date OffTime3 = DateUtil.stringToDate( baseShift.getOffTime3(), DateUtil.TIME_PATTERN);
+        Date OffTime4 = DateUtil.stringToDate( baseShift.getOffTime4(), DateUtil.TIME_PATTERN);
+        long time1 =  subtraction(OffTime1.getTime(),OnTime1.getTime());
+        long time2 =  subtraction(OffTime2.getTime(),OnTime2.getTime());
+        long time3 =  subtraction(OffTime3.getTime(),OnTime3.getTime());
+        long time4 =  subtraction(OffTime4.getTime(),OnTime4.getTime());
+        return (time1+time2+time3+time4);
+    }
+
+    /**
+     * 时间戳相减
+     * @param onTime
+     * @param offTime
+     * @return
+     */
+    public long subtraction(long onTime ,long offTime){
+
+        return onTime-offTime;
+    }
+
+
 
 }

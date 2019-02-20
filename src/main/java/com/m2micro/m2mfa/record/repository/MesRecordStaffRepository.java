@@ -49,5 +49,13 @@ public interface MesRecordStaffRepository extends BaseRepository<MesRecordStaff,
      */
     MesRecordStaff findByRwIdAndStartTimeNotNullAndEndTimeIsNull(String rwId);
 
+    /**
+     * 获取单个员工作业记录
+     * @param rwId
+     * @param staffId
+     * @return
+     */
+    List<MesRecordStaff>findByRwIdAndStaffId(String rwId,String staffId );
+
 
 }
