@@ -34,9 +34,9 @@ public class StationInfoModel {
     @ApiModelProperty(value = "报废数量")
     private Integer scrapQty;
     @ApiModelProperty(value = "完成率")
-    private String completionRate;
+    private Integer completionRate;
     @ApiModelProperty(value = "不良率")
-    private String failRate;
+    private Integer failRate;
     @ApiModelProperty(value = "报废率")
-    private String scrapRate;
+    private Integer scrapRate;
 }
