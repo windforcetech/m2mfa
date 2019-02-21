@@ -113,7 +113,7 @@ public class BaseShiftServiceImpl implements BaseShiftService {
         long time2 =  subtraction(OffTime2.getTime(),OnTime2.getTime());
         long time3 =  subtraction(OffTime3.getTime(),OnTime3.getTime());
         long time4 =  subtraction(OffTime4.getTime(),OnTime4.getTime());
-        return (time1+time2+time3+time4);
+        return ((time1+time2+time3+time4)/1000);
     }
 
     /**
