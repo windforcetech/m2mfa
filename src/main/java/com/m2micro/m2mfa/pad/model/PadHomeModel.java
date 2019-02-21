@@ -51,6 +51,6 @@ public class PadHomeModel {
   private long actualOutput;
 
   @ApiModelProperty(value = "达成率")
-  private float  rate;
+  private long  rate;
 
 }
