@@ -726,6 +726,38 @@ public class BaseOperateImpl implements BaseOperate {
         return false;
     }
 
+    /**
+     * 获取工序首尾工位
+     * @param processId
+     * @return
+     */
+    public BaseStation atlastStation(String processId) {
+        String sql ="SELECT\n" +
+            "	*\n" +
+            "FROM\n" +
+            "	base_station\n" +
+            "WHERE\n" +
+            "	station_id = (\n" +
+            "		SELECT\n" +
+            "			station_id\n" +
+            "		FROM\n" +
+            "			base_process_station\n" +
+            "		WHERE\n" +
+            "			step IN (\n" +
+            "				SELECT\n" +
+            "					MAX(bps.step)\n" +
+            "				FROM\n" +
+            "					base_process_station bps\n" +
+            "				WHERE\n" +
+            "					process_id = '"+processId+"'\n" +
+            "			)\n" +
+            "		AND process_id = '"+processId+"'\n" +
+            "	)";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseStation.class);
+        return (BaseStation) jdbcTemplate.query(sql,rm).get(0);
+    }
+
+
 
     /**
      * 工位是否有上工记录
