@@ -9,6 +9,7 @@ import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,14 +26,14 @@ public class PadBottomDisplayController {
     @Autowired
     PadBottomDisplayService padBottomDisplayService;
 
-    @RequestMapping("/getMoDescInfo")
-    @ApiOperation(value="获取工单相关信息")
-    @UserOperationLog("获取工单相关信息")
+    @GetMapping("/getMoDescInfo")
+    @ApiOperation(value="工单状态相关信息")
+    @UserOperationLog("工单状态相关信息")
     public ResponseMessage<MoDescInfoModel> getMoDescInfo(String scheduleId){
         return ResponseMessage.ok(padBottomDisplayService.getMoDescInfo(scheduleId));
     }
 
-    @RequestMapping("/getStationInfo")
+    @GetMapping("/getStationInfo")
     @ApiOperation(value="获取工位作业信息及进度")
     @UserOperationLog("获取工位作业信息及进度")
     public ResponseMessage<StationInfoModel> getStationInfo(String scheduleId,String stationId){
