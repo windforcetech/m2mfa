@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.starter.services.OrganizationService;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.service.*;
@@ -78,8 +79,11 @@ public class PadHomeServiceImpl  implements PadHomeService {
     BaseProcess baseProcess = baseProcessService.findById(padHomePara.getProcessId()).orElse(null);
 
     //执行标准
-    MesPartRouteStation mesPartRouteStation = mesPartRouteStationRepository.findByPartRouteIdAndProcessIdAndStationId(mesPartRoute.getPartRouteId(),padHomePara.getProcessId(),padHomePara.getStationId()).get(0);
-
+    List<MesPartRouteStation> mesPartRouteStations = mesPartRouteStationRepository.findByPartRouteIdAndProcessIdAndStationId(mesPartRoute.getPartRouteId(), padHomePara.getProcessId(), padHomePara.getStationId());
+    if(mesPartRouteStations.isEmpty()){
+      throw  new MMException("工位有误");
+    }
+    MesPartRouteStation mesPartRouteStation =mesPartRouteStations.get(0);
     //机台产量信息
     IotMachineOutput iotMachineOutput  = iotMachineOutputService.findIotMachineOutputByMachineId(baseMachine.getMachineId());
 
