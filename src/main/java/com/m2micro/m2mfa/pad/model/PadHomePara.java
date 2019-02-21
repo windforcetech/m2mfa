@@ -15,14 +15,7 @@ public class PadHomePara {
   @ApiModelProperty(value = "工序Id")
   private String processId;
 
-
   @ApiModelProperty(value = "工位Id")
   private String stationId;
 
-
-  @ApiModelProperty(value = "上工记录表rwId")
-  private String rwId;
-
-  @ApiModelProperty(value = "员工staffId")
-  private String staffId;
 }
