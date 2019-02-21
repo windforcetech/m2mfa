@@ -105,7 +105,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
     nt.setMinimumFractionDigits(0);
     float rate = (float)actualOutput.longValue()/standardOutput.longValue();
     return PadHomeModel.builder().staffCode(baseStaff.getCode()).staffName(baseStaff.getStaffName()).staffDepartmentName(organizationService.findByUUID(baseStaff.getDepartmentId()).getDepartmentName())
-        .staffShiftName(baseShift.getName()).staffOnTime(onTime(PadStaffUtil.getStaff().getStaffId())).standardOutput(standardOutput.longValue()).actualOutput(actualOutput.longValue()).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
+        .staffShiftName(baseShift.getName()).staffOnTime(new Date()).standardOutput(standardOutput.longValue()).actualOutput(actualOutput.longValue()).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
         .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate(nt.format(rate)).build();
   }
 
