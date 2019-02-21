@@ -733,28 +733,22 @@ public class BaseOperateImpl implements BaseOperate {
      */
     public BaseStation atlastStation(String processId) {
         String sql ="SELECT\n" +
-            "	*\n" +
+            "	bs.*\n" +
             "FROM\n" +
-            "	base_station\n" +
+            "	base_station bs,\n" +
+            "	base_process_station bps\n" +
             "WHERE\n" +
-            "	station_id = (\n" +
-            "		SELECT\n" +
-            "			station_id\n" +
-            "		FROM\n" +
-            "			base_process_station\n" +
-            "		WHERE\n" +
-            "			step IN (\n" +
-            "				SELECT\n" +
-            "					MAX(bps.step)\n" +
-            "				FROM\n" +
-            "					base_process_station bps\n" +
-            "				WHERE\n" +
-            "					process_id = '"+processId+"'\n" +
-            "			)\n" +
-            "		AND process_id = '"+processId+"'\n" +
-            "	)";
+            "	bps.station_id = bs.station_id\n" +
+            "AND bps.process_id = '"+processId+"'\n" +
+            "ORDER BY\n" +
+            "	bps.step DESC\n" +
+            "LIMIT 1";
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseStation.class);
-        return (BaseStation) jdbcTemplate.query(sql,rm).get(0);
+        List query = jdbcTemplate.query(sql, rm);
+        if(query.isEmpty()){
+           return null;
+        }
+        return (BaseStation) query.get(0);
     }
 
 
