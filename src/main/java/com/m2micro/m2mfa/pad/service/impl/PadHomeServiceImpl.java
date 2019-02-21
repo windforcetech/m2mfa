@@ -94,16 +94,16 @@ public class PadHomeServiceImpl  implements PadHomeService {
 
     //职员上班工时
     long hours = baseShiftService.findbhours(baseShift.getShiftId());
-
+    String rwId =newRwid(padHomePara.getScheduleId(),padHomePara.getStationId());
     BigDecimal standardHours = mesPartRouteStation.getStandardHours();
     BigDecimal bdhours = new BigDecimal(hours);
     BigDecimal standardOutput = bdhours.divide(standardHours, 2, RoundingMode.HALF_UP);
     //获取当前员工开始模数
-    BigDecimal startMolds=startMolds(padHomePara.getScheduleId(),PadStaffUtil.getStaff().getStaffId());
+    BigDecimal startMolds=startMolds(rwId,PadStaffUtil.getStaff().getStaffId());
     //实际产出
     BigDecimal actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
 
-    Integer partInput = partInput(newRwid(padHomePara.getScheduleId(),padHomePara.getStationId()));
+    Integer partInput = partInput(rwId);
     Integer partOutput = 0;
     NumberFormat nt = NumberFormat.getPercentInstance();
     nt.setMinimumFractionDigits(0);
