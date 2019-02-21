@@ -1,22 +1,22 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.framework.sysdebug.entity.SysDebugLog;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDescRepository;
 import com.m2micro.m2mfa.base.service.BaseStationService;
+import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
-import com.m2micro.m2mfa.mo.entity.MesMoScheduleStaff;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleStaffRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.model.MoDescInfoModel;
 import com.m2micro.m2mfa.pad.model.StationInfoModel;
-import com.m2micro.m2mfa.pad.operate.BaseOperate;
 import com.m2micro.m2mfa.pad.operate.BaseOperateImpl;
 import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
+import com.m2micro.m2mfa.record.entity.MesRecordWork;
+import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -25,9 +25,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +50,8 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     BaseStationService baseStationService;
     @Autowired
     MesMoScheduleStaffRepository mesMoScheduleStaffRepository;
+    @Autowired
+    MesRecordWorkRepository mesRecordWorkRepository;
 
     @Override
     public MoDescInfoModel getMoDescInfo(String scheduleId) {
@@ -61,9 +61,9 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleId).orElse(null);
         List<MesMoSchedule> mesMoSchedules = mesMoScheduleRepository.findByMoId(mesMoSchedule.getMoId());
         List<String> scheduleIds = mesMoSchedules.stream().map(MesMoSchedule::getScheduleId).collect(Collectors.toList());
-        //获取工单完工数量
-        Integer completedQty = getCompletedQty(scheduleId,scheduleIds );
-        moDescInfoModel.setCompletedQty(completedQty);
+        //获取工单完工数量（产出）
+        Integer outPutQtys = getOutPutQtys(scheduleId,scheduleIds );
+        moDescInfoModel.setCompletedQty(outPutQtys);
         //获取工单不良数据及报废数量
         MoDescInfoModel moDescForFail = getMoDescForFail(scheduleIds);
         moDescInfoModel.setQty(moDescForFail.getQty());
@@ -98,9 +98,8 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         stationInfoModel.setAbnormalFlag(abnormal);
         //完工数量
         Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
-
         stationInfoModel.setCompletedQty(completedQty);
-        //不良数量,报废数量
+        //不良数量,报废数量（不良数量是每个工位的和）
         MoDescInfoModel moDescForStationFail = getMoDescForStationFail(scheduleId, stationId);
         stationInfoModel.setQty(moDescForStationFail.getQty());
         stationInfoModel.setScrapQty(moDescForStationFail.getScrapQty());
@@ -109,7 +108,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
           报废率:报废数量/完工数量*100%*/
         //完成率
         Integer completionRate = completedQty*100/stationInfoModel.getScheduleQty();
-        stationInfoModel.setCompletionRate(String.valueOf(completionRate)+"%");
+        stationInfoModel.setCompletionRate(String.valueOf(completionRate));
         //不良率,报废率
         if(completedQty.equals(0)){
             stationInfoModel.setFailRate("");
@@ -117,10 +116,10 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         }else{
             //不良率
             Long failRate = stationInfoModel.getQty()*100/ completedQty;
-            stationInfoModel.setFailRate(String.valueOf(failRate)+"%");
+            stationInfoModel.setFailRate(String.valueOf(failRate));
             //报废率
             Integer scrapRate = stationInfoModel.getScrapQty()*100/completedQty;
-            stationInfoModel.setScrapRate(String.valueOf(scrapRate)+"%");
+            stationInfoModel.setScrapRate(String.valueOf(scrapRate));
         }
         return stationInfoModel;
     }
@@ -130,18 +129,28 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
      * @param scheduleId
      * @return
      */
-    private Integer getCompletedQty(String scheduleId,List<String> scheduleIds) {
+    private Integer getOutPutQtys(String scheduleId,List<String> scheduleIds) {
         //获取工单的产出工序
         String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
-        //获取工单完工数量
-        Integer completedQty=0;
-        List<MesMoScheduleProcess> mesMoScheduleProcesss = mesMoScheduleProcessRepository.findByScheduleIdInAndProcessId(scheduleIds, outputProcessId);
-        for (MesMoScheduleProcess mesMoScheduleProcess:mesMoScheduleProcesss){
-            Integer outputQty = mesMoScheduleProcess.getOutputQty();
-            outputQty = outputQty==null?0:outputQty;
-            completedQty=completedQty+outputQty;
+        //获取产出工序的最后一个工位
+        BaseStation baseStation = atlastStation(outputProcessId);
+        String stationId=baseStation.getStationId();
+
+        //获取工单完工数量(包含不良数量)
+        BigDecimal completedQty = new BigDecimal(0);
+        for(String scheduleIdForcompleted:scheduleIds){
+            //注意：每个排产单绑定的机器id不一样，这里只能循环计算
+            MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleId).orElse(null);
+            IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+            completedQty = completedQty.add(getCompletedQty(iotMachineOutput, scheduleIdForcompleted, stationId));
         }
-        return  completedQty;
+        //获取不良数量(产出工位的不良)
+        Integer failQty = getFailQty(scheduleIds, stationId);
+        failQty = failQty==null?0:failQty;
+        if(failQty>completedQty.intValue()){
+            throw new MMException("不良数量大于完工数量");
+        }
+        return  completedQty.intValue()-failQty;
     }
 
     /**
@@ -198,13 +207,14 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
                 ")";
         RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
         List<MoDescInfoModel> moDescInfoModels = jdbcTemplate.query(sql, rowMapper);
-        if(moDescInfoModels==null||moDescInfoModels.size()==0){
-            MoDescInfoModel moDescInfoModel = new MoDescInfoModel();
+        MoDescInfoModel moDescInfoModel = moDescInfoModels.get(0);
+        if(moDescInfoModel.getQty()==null){
             moDescInfoModel.setQty(0l);
-            moDescInfoModel.setScrapQty(0);
-            return moDescInfoModel;
         }
-        return moDescInfoModels.get(0);
+        if(moDescInfoModel.getScrapQty()==null){
+            moDescInfoModel.setScrapQty(0);
+        }
+        return moDescInfoModel;
     }
 
 
@@ -225,8 +235,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
                     "WHERE mmss.staff_id=bs.staff_id\n" +
                     "AND mmss.schedule_id='" + scheduleId + "'\n" +
                     "AND mmss.station_id='" + stationId + "'";
-        RowMapper<String> rowMapper = BeanPropertyRowMapper.newInstance(String.class);
-        return jdbcTemplate.query(sql, rowMapper);
+        return jdbcTemplate.queryForList(sql, String.class);
     }
 
 
@@ -282,4 +291,29 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         }
         return moDescInfoModel;
     }
+
+    /**
+     * 获取不良数
+     * @param scheduleIds
+     * @param stationId
+     * @return
+     */
+    private Integer getFailQty(List<String> scheduleIds,String stationId) {
+        String para = String.join("','",scheduleIds);
+        String sql = "SELECT\n" +
+                "	sum(IFNULL(mrf.qty,0))\n" +
+                "FROM\n" +
+                "	mes_record_work mrw,\n" +
+                "	mes_record_fail mrf\n" +
+                "WHERE\n" +
+                "	mrw.rwid = mrf.rw_id\n" +
+                "AND mrw.schedule_id IN (\n" +
+                "'" + para +"'\n" +
+                ")\n"+
+                "AND mrw.station_id='" + stationId + "'\n";
+        return jdbcTemplate.queryForObject(sql ,Integer.class);
+    }
+
+
+
 }

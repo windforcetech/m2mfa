@@ -1007,8 +1007,12 @@ public class BaseOperateImpl implements BaseOperate {
      * @return
      */
     public BigDecimal getCompletedQty(IotMachineOutput iotMachineOutput,String scheduleId,String stationId){
-        BigDecimal completedQty = new BigDecimal(0);
         List<MesRecordWork> mesRecordWorks = getMesRecordWork(scheduleId, stationId);
+        return getCompletedQty(iotMachineOutput, mesRecordWorks);
+    }
+
+    public BigDecimal getCompletedQty(IotMachineOutput iotMachineOutput, List<MesRecordWork> mesRecordWorks) {
+        BigDecimal completedQty = new BigDecimal(0);
         if(mesRecordWorks!=null&&mesRecordWorks.size()>0){
            for (MesRecordWork m:mesRecordWorks){
                //已经下工
@@ -1016,7 +1020,7 @@ public class BaseOperateImpl implements BaseOperate {
                    BigDecimal singleQty = m.getEndMolds().subtract(m.getStartMolds()==null?new BigDecimal(0):m.getStartMolds());
                    completedQty = completedQty.add(singleQty);
                }
-               if(m.getEndTime()==null&&m.getStartMolds()!=null){
+               if(m.getEndMolds()==null&&m.getStartMolds()!=null){
                    //正在上工还未下工
                    BigDecimal singleQty = iotMachineOutput.getOutput().subtract(m.getStartMolds()==null?new BigDecimal(0):m.getStartMolds());
                    completedQty = completedQty.add(singleQty);

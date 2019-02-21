@@ -31,4 +31,12 @@ public interface MesRecordWorkRepository extends BaseRepository<MesRecordWork,St
      */
     List<MesRecordWork> findByScheduleIdAndStationIdAndStartTimeNotNull(String scheduleId, String stationId);
 
+    /**
+     * 根据排产单ids和工位id获取上工记录
+     * @param scheduleIds
+     * @param stationId
+     * @return
+     */
+    List<MesRecordWork> findByScheduleIdInAndStationId(List<String> scheduleIds,String stationId);
+
 }
