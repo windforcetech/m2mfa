@@ -94,15 +94,19 @@ public class PadHomeServiceImpl  implements PadHomeService {
     BigDecimal standardHours = mesPartRouteStation.getStandardHours();
     BigDecimal bdhours = new BigDecimal(hours);
     BigDecimal standardOutput = bdhours.divide(standardHours, 2, RoundingMode.HALF_UP);
-    BigDecimal actualOutput =iotMachineOutput.getOutput();
+    //获取当前员工开始模数
+    BigDecimal startMolds=startMolds(padHomePara.getScheduleId(),PadStaffUtil.getStaff().getStaffId());
+    //实际产出
+    BigDecimal actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
+
     Integer partInput = partInput(newRwid(padHomePara.getScheduleId(),padHomePara.getStationId()));
     Integer partOutput = 0;
     NumberFormat nt = NumberFormat.getPercentInstance();
     nt.setMinimumFractionDigits(0);
-    long rate = actualOutput.longValue()/standardOutput.longValue();
+    float rate = (float)actualOutput.longValue()/standardOutput.longValue();
     return PadHomeModel.builder().staffCode(baseStaff.getCode()).staffName(baseStaff.getStaffName()).staffDepartmentName(organizationService.findByUUID(baseStaff.getDepartmentId()).getDepartmentName())
         .staffShiftName(baseShift.getName()).staffOnTime(onTime(PadStaffUtil.getStaff().getStaffId())).standardOutput(standardOutput.longValue()).actualOutput(actualOutput.longValue()).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
-        .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate(rate).build();
+        .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate(nt.format(rate)).build();
   }
 
 
@@ -143,6 +147,19 @@ public class PadHomeServiceImpl  implements PadHomeService {
       }
   }
 
-
+  /**
+   * 获取当前员工上工的开始模数
+   * @param rwId
+   * @param staffId
+   * @return
+   */
+  public BigDecimal startMolds(String rwId,String staffId){
+    String sql ="SELECT IFNULL(start_molds,0) FROM  mes_record_staff where rw_id='"+rwId+"' and  staff_id='"+staffId+"' and start_time is NOT null and end_time is NULL";
+    try {
+      return jdbcTemplate.queryForObject(sql, BigDecimal.class);
+    }catch (Exception e) {
+      return null ;
+    }
+  }
 
 }
