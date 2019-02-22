@@ -370,6 +370,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
         //更改为强制结案状态
         mesMoScheduleRepository.setFlagFor(MoScheduleStatus.FORCECLOSE.getKey(),mesMoSchedule.getScheduleId());
+        mesMoScheduleRepository.updateactualStartTime(new Date() , mesMoSchedule.getScheduleId());
         //做强制结案的额外业务逻辑操作
         stopWorkForAll(mesMoSchedule);
 

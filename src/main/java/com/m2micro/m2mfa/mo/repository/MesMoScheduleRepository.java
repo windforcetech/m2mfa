@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import static com.m2micro.m2mfa.mo.constant.MoScheduleStatus.AUDITED;
@@ -36,6 +37,9 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
     @Query("update MesMoSchedule m set m.flag = ?1 where m.scheduleId = ?2")
     Integer setFlagFor(Integer flag, String scheduleId);
 
+    @Modifying
+    @Query("update MesMoSchedule m set m.actualEndTime = ?1 where m.scheduleId = ?2")
+    void updateactualStartTime(Date actualEndTime,String scheduleId);
 
     /**
      * 更新工单状态及冻结前状态
