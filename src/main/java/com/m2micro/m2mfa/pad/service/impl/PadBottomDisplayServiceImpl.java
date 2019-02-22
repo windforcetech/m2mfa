@@ -264,33 +264,6 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     }
 
 
-    /**
-     *  获取当前排产单当前工位的不良数量及报废数量
-     * @param scheduleId
-     * @param stationId
-     * @return
-     */
-    private MoDescInfoModel getMoDescForStationFail(String scheduleId,String stationId) {
-        String sql = "SELECT\n" +
-                    "	sum(IFNULL(mrf.qty,0)) qty,\n" +
-                    "	sum(IFNULL(mrf.scrap_qty,0)) scrapQty\n" +
-                    "FROM\n" +
-                    "	mes_record_work mrw,\n" +
-                    "	mes_record_fail mrf\n" +
-                    "WHERE\n" +
-                    "	mrw.rwid = mrf.rw_id\n" +
-                    "AND mrw.schedule_id='" + scheduleId + "'\n" +
-                    "AND mrw.station_id='" + stationId + "'";
-        RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
-        MoDescInfoModel moDescInfoModel = jdbcTemplate.queryForObject(sql, rowMapper);
-        if(moDescInfoModel.getQty()==null){
-            moDescInfoModel.setQty(0l);
-        }
-        if(moDescInfoModel.getScrapQty()==null){
-            moDescInfoModel.setScrapQty(0);
-        }
-        return moDescInfoModel;
-    }
 
     /**
      * 获取不良数
