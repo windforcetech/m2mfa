@@ -96,13 +96,15 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         //提报异常
         Boolean abnormal = isAbnormal(scheduleId, stationId);
         stationInfoModel.setAbnormalFlag(abnormal);
-        //完工数量
-        Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
-        stationInfoModel.setCompletedQty(completedQty);
+
         //不良数量,报废数量（不良数量是每个工位的和）
         MoDescInfoModel moDescForStationFail = getMoDescForStationFail(scheduleId, stationId);
         stationInfoModel.setQty(moDescForStationFail.getQty());
         stationInfoModel.setScrapQty(moDescForStationFail.getScrapQty());
+
+        //完工数量
+        Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
+        stationInfoModel.setCompletedQty(completedQty-moDescForStationFail.getQty().intValue());
         /*完成比 :完工数量/排产数量 *100%
           不良率:不良数量/完工数量*100%
           报废率:报废数量/完工数量*100%*/
