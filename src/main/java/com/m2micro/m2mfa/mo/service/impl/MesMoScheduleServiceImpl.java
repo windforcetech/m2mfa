@@ -604,7 +604,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         String sqlprocesses ="SELECT\n" +
             "	msp.*, bp.process_name processName,\n" +
             "	bs.`name` stationName,\n" +
-            "	bm.`name` moldName\n" +
+            "	bm.`name` moldName,\n" +
+            "	bp.category  category\n" +
             "FROM\n" +
             "	mes_mo_schedule_process msp\n" +
             "LEFT JOIN base_process bp ON msp.process_id = bp.process_id\n" +
