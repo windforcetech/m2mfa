@@ -109,7 +109,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
           不良率:不良数量/完工数量*100%
           报废率:报废数量/完工数量*100%*/
         //完成率
-        Integer completionRate = completedQty*100/stationInfoModel.getScheduleQty();
+        Integer completionRate = stationInfoModel.getCompletedQty()*100/stationInfoModel.getScheduleQty();
         stationInfoModel.setCompletionRate(completionRate);
         //不良率,报废率
         if(completedQty.equals(0)){
