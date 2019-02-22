@@ -94,8 +94,8 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      *              机台id
      * @return
      */
-    @Query(value = "SELECT mms.*  from mes_mo_schedule mms WHERE mms.actual_start_time is not null AND mms.actual_end_time is NULL AND mms.machine_id=?1",nativeQuery = true)
-    List<MesMoSchedule> getProductionMesMoScheduleByMachineId(String machineId);
+    @Query(value = "SELECT mms.*  from mes_mo_schedule mms WHERE mms.flag =?2 and mms.machine_id=?1",nativeQuery = true)
+    List<MesMoSchedule> getProductionMesMoScheduleByMachineId(String machineId,Integer flag);
 
     /**
      * 获取当前机台优先级最高的排产单
