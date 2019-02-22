@@ -794,12 +794,14 @@ public class BaseOperateImpl implements BaseOperate {
 
 
     /**
-     * 跟新排产单状态为执行中
+     * 跟新排产单状态为执行中 实际开始状态为null 的话更新为当前时间
      * @param scheduleId
      */
     @Transactional
     protected void updateMesMoScheduleFlag(String scheduleId) {
-        String sql ="update mes_mo_schedule  mms   set  mms.flag="+ MoStatus.SCHEDULED.getKey()+"   ,  mms.sequence=0    where  mms.schedule_id='"+scheduleId+"' and mms.flag="+ MoScheduleStatus.AUDITED.getKey()+"";
+
+        String sql ="update mes_mo_schedule  mms   set mms.actual_start_time=(case when mms.actual_start_time is null then '"+DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"' else mms.actual_start_time end), mms.flag="+ MoStatus.SCHEDULED.getKey()+"   ,  mms.sequence=0    where  mms.schedule_id='"+scheduleId+"' and mms.flag="+ MoScheduleStatus.AUDITED.getKey()+"";
+
         jdbcTemplate.update(sql);
     }
 
@@ -896,12 +898,7 @@ public class BaseOperateImpl implements BaseOperate {
      */
     protected boolean isMesRecorWorkEnd(String rwId) {
 
-        /*String sql = "select count(*)   from  mes_record_staff where rw_id='" + rwId + "' and start_time is NOT NULL  and end_time is null ";
-        Integer mesRecordstaffcount = jdbcTemplate.queryForObject(sql, Integer.class);
-        if (mesRecordstaffcount.equals(0)) {
-            return true;
-        }
-        return false;*/
+
         MesRecordStaff mesRecordStaff = mesRecordStaffRepository.findByRwIdAndStartTimeNotNullAndEndTimeIsNull(rwId);
         if(mesRecordStaff==null){
             return true;
