@@ -179,6 +179,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
                 "AND mms.schedule_id = mmsp.schedule_id\n" +
                 "AND mmsp.mold_id IS NOT NULL\n" +
                 "AND mmd.part_id = bp.part_id\n" +
+                "AND bm.mold_id=mmsp.mold_id\n" +
                 "AND mms.schedule_id = '" + scheduleId+ "'\n" ;
         RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
         List<MoDescInfoModel> moDescInfoModels = jdbcTemplate.query(sql, rowMapper);
