@@ -96,18 +96,20 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         //提报异常
         Boolean abnormal = isAbnormal(scheduleId, stationId);
         stationInfoModel.setAbnormalFlag(abnormal);
-        //完工数量
-        Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
-        stationInfoModel.setCompletedQty(completedQty);
+
         //不良数量,报废数量（不良数量是每个工位的和）
         MoDescInfoModel moDescForStationFail = getMoDescForStationFail(scheduleId, stationId);
         stationInfoModel.setQty(moDescForStationFail.getQty());
         stationInfoModel.setScrapQty(moDescForStationFail.getScrapQty());
+
+        //完工数量
+        Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
+        stationInfoModel.setCompletedQty(completedQty-moDescForStationFail.getQty().intValue());
         /*完成比 :完工数量/排产数量 *100%
           不良率:不良数量/完工数量*100%
           报废率:报废数量/完工数量*100%*/
         //完成率
-        Integer completionRate = completedQty*100/stationInfoModel.getScheduleQty();
+        Integer completionRate = stationInfoModel.getCompletedQty()*100/stationInfoModel.getScheduleQty();
         stationInfoModel.setCompletionRate(completionRate);
         //不良率,报废率
         if(completedQty.equals(0)){
@@ -264,33 +266,6 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     }
 
 
-    /**
-     *  获取当前排产单当前工位的不良数量及报废数量
-     * @param scheduleId
-     * @param stationId
-     * @return
-     */
-    private MoDescInfoModel getMoDescForStationFail(String scheduleId,String stationId) {
-        String sql = "SELECT\n" +
-                    "	sum(IFNULL(mrf.qty,0)) qty,\n" +
-                    "	sum(IFNULL(mrf.scrap_qty,0)) scrapQty\n" +
-                    "FROM\n" +
-                    "	mes_record_work mrw,\n" +
-                    "	mes_record_fail mrf\n" +
-                    "WHERE\n" +
-                    "	mrw.rwid = mrf.rw_id\n" +
-                    "AND mrw.schedule_id='" + scheduleId + "'\n" +
-                    "AND mrw.station_id='" + stationId + "'";
-        RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
-        MoDescInfoModel moDescInfoModel = jdbcTemplate.queryForObject(sql, rowMapper);
-        if(moDescInfoModel.getQty()==null){
-            moDescInfoModel.setQty(0l);
-        }
-        if(moDescInfoModel.getScrapQty()==null){
-            moDescInfoModel.setScrapQty(0);
-        }
-        return moDescInfoModel;
-    }
 
     /**
      * 获取不良数
