@@ -44,6 +44,7 @@ public class BaseFileServiceImpl implements BaseFileService {
     private FileLocation fileLocation;
 
     @Autowired
+    @Qualifier("getLabServerConfig")
     private LabServerConfig labServerConfig;
     @Override
     public String uploadFile(MultipartFile file) throws IOException {
