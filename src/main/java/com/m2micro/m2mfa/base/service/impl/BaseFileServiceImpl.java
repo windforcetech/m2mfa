@@ -11,8 +11,10 @@ import com.m2micro.m2mfa.common.util.FileLocation;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import retrofit2.Call;
@@ -24,6 +26,7 @@ import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 上传文件 服务实现类
@@ -37,6 +40,7 @@ public class BaseFileServiceImpl implements BaseFileService {
     private BaseFileRepository baseFileRepository;
 
     @Autowired
+    @Qualifier("fileLocationBean")
     private FileLocation fileLocation;
 
     @Autowired
@@ -49,8 +53,9 @@ public class BaseFileServiceImpl implements BaseFileService {
         }
         String basePath = fileLocation.getBaseDir();
         String originalFilename = file.getOriginalFilename();
-        File dest = new File(fileLocation.getFilePath(originalFilename));
-        File dir = new File(basePath);
+        String uuidDir=UUID.randomUUID().toString();
+        File dest = new File(fileLocation.getFilePath(originalFilename,uuidDir));
+        File dir = new File(basePath+File.separator+uuidDir);
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -83,7 +88,9 @@ public class BaseFileServiceImpl implements BaseFileService {
         response.setHeader("Content-Disposition", "attachment;filename=" + name);
         //  response.addHeader("Content-Disposition","attachment;fileName="+name);
         byte[] buffer = new byte[1024];
-        BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(new File(fileLocation.getFilePath(name))));        int read = bufferedInputStream.read(buffer);
+//        BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(new File(fileLocation.getFilePath(name))));
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(new File(baseFile.getFilePath())));
+        int read = bufferedInputStream.read(buffer);
         while (read > 0) {
             response.getOutputStream().write(buffer, 0, read);
             read = bufferedInputStream.read(buffer);
@@ -94,7 +101,11 @@ public class BaseFileServiceImpl implements BaseFileService {
     @Override
     public List<String> analysisLabFile(String filePath) throws IOException {
         String labServerUrl = labServerConfig.getLabServerUrl();
-        Retrofit retrofit = new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .readTimeout(5, TimeUnit.MINUTES)
+                .build();
+
+        Retrofit retrofit = new Retrofit.Builder().client(okHttpClient).addConverterFactory(GsonConverterFactory.create())
                 //基础地址，这里我以本地测试进行
                 .baseUrl(labServerUrl)
                 .build();
