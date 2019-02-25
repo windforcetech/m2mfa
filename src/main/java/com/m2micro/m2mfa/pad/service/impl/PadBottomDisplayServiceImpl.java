@@ -131,7 +131,8 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
      * @param scheduleId
      * @return
      */
-    private Integer getOutPutQtys(String scheduleId,List<String> scheduleIds) {
+    @Override
+    public Integer getOutPutQtys(String scheduleId,List<String> scheduleIds) {
         //获取工单的产出工序
         String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
         //获取产出工序的最后一个工位
@@ -142,7 +143,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         BigDecimal completedQty = new BigDecimal(0);
         for(String scheduleIdForcompleted:scheduleIds){
             //注意：每个排产单绑定的机器id不一样，这里只能循环计算
-            MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleId).orElse(null);
+            MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleIdForcompleted).orElse(null);
             IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
             completedQty = completedQty.add(getCompletedQty(iotMachineOutput, scheduleIdForcompleted, stationId));
         }

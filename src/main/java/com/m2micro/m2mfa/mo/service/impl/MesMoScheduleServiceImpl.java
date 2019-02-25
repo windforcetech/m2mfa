@@ -23,6 +23,7 @@ import com.m2micro.m2mfa.mo.service.*;
 import com.m2micro.m2mfa.mo.vo.Absence;
 import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
+import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
@@ -111,6 +112,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private MesMoScheduleStationRepository mesMoScheduleStationRepository;
     @Autowired
     private MesMoScheduleShiftRepository mesMoScheduleShiftRepository;
+    @Autowired
+    PadBottomDisplayService padBottomDisplayService;
 
     @Override@SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
@@ -218,6 +221,16 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoScheduleModel.class);
         List<MesMoScheduleModel> list = jdbcTemplate.query(sql,rm);
+
+        if(list!=null&&list.size()>0){
+            for (int i=0;i<list.size();i++){
+                MesMoScheduleModel mesMoScheduleModel = list.get(i);
+                List scheduleIds = new ArrayList();
+                scheduleIds.add(mesMoScheduleModel.getScheduleId());
+                Integer outPutQtys = padBottomDisplayService.getOutPutQtys(mesMoScheduleModel.getScheduleId(), scheduleIds);
+                mesMoScheduleModel.setOutputQty(outPutQtys);
+            }
+        }
 
         String countSql =   "SELECT\n" +
             "	count(*)\n" +
