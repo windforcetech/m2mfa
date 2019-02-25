@@ -14,7 +14,7 @@ spring:
     show-sql: true
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss #如果使用字符串表示，用这行设置格式
-    #timezone: GMT+8
+    timezone: GMT+8
 
   resources:
     static-locations: classpath:/META-INF/resources/webjars/m2mfa-ui, classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/, classpath:/public/
