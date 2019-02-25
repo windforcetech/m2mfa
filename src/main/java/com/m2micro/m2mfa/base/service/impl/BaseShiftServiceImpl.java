@@ -1,21 +1,20 @@
 package com.m2micro.m2mfa.base.service.impl;
 
-import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.m2mfa.base.repository.BaseShiftRepository;
 import com.m2micro.m2mfa.base.service.BaseShiftService;
 import com.m2micro.m2mfa.common.util.DateUtil;
-import org.apache.commons.lang3.StringUtils;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleShiftRepository;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBaseShift;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -32,6 +31,8 @@ public class BaseShiftServiceImpl implements BaseShiftService {
     JPAQueryFactory queryFactory;
     @Autowired
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    MesMoScheduleShiftRepository mesMoScheduleShiftRepository;
 
     public BaseShiftRepository getRepository() {
         return baseShiftRepository;
@@ -115,6 +116,19 @@ public class BaseShiftServiceImpl implements BaseShiftService {
         long time4 =  subtraction(OffTime4.getTime(),OnTime4.getTime());
         long time = (time1+time2+time3+time4);
         return time==0 ? time : time/1000;
+    }
+
+    @Override
+    @Transactional
+    public void deleteEntity(String[] ids) {
+        for(String id:ids){
+            Integer integer = mesMoScheduleShiftRepository.countByShiftId(id);
+            if(integer>0){
+                BaseShift baseShift = findById(id).orElse(null);
+                throw new MMException("班别【"+baseShift.getName()+"】已产生业务，不允许删除！");
+            }
+        }
+        deleteByIds(ids);
     }
 
     /**

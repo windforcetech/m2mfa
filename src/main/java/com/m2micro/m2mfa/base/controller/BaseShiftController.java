@@ -115,7 +115,7 @@ public class BaseShiftController {
     @ApiOperation(value="删除班别基本资料")
     @UserOperationLog("删除班别基本资料")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseShiftService.deleteByIds(ids);
+        baseShiftService.deleteEntity(ids);
         return ResponseMessage.ok();
     }
     @RequestMapping("/addDetails")

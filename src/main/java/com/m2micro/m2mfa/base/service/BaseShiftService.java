@@ -37,4 +37,10 @@ public interface BaseShiftService extends BaseService<BaseShift,String> {
      * @return
      */
     long  findbhours(String shiftId);
+
+    /**
+     * 删除班别
+     * @param ids
+     */
+    void deleteEntity(String[] ids);
 }
