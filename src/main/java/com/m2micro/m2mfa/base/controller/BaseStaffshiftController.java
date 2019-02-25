@@ -226,18 +226,23 @@ public class BaseStaffshiftController {
             staffShiftResult.setShiftCode(baseShift.getCode());
 
             if (staffShiftObj.getForceUpdate()) {
-
+                //强制更新，先删除原来所有，再新增一条
                 QBaseStaffshift qBaseStaff = QBaseStaffshift.baseStaffshift;
                 BooleanExpression expression = qBaseStaff.shiftDate.eq(baseStaffshift.getShiftDate())
-                        .and(qBaseStaff.shiftId.eq(baseStaffshift.getShiftId()))
+                        //.and(qBaseStaff.shiftId.eq(baseStaffshift.getShiftId()))
                         .and(qBaseStaff.staffId.eq(baseStaffshift.getStaffId()));
                 ArrayList<BaseStaffshift> baseStaffs = Lists.newArrayList(baseStaffshiftService.findAll(expression));
                 if (baseStaffs.size() > 0) {
 
-                    BaseStaffshift baseStaffshift1 = baseStaffs.get(0);
-                    baseStaffshift1.setShiftId(baseStaffshift.getShiftId());
-                    baseStaffshiftService.updateById(baseStaffshift1.getId(), baseStaffshift1);
+                    //先删除所有
+                    baseStaffshiftService.deleteAll(baseStaffs);
 
+                    /*BaseStaffshift baseStaffshift1 = baseStaffs.get(0);
+                    baseStaffshift1.setShiftId(baseStaffshift.getShiftId());
+                    baseStaffshiftService.updateById(baseStaffshift1.getId(), baseStaffshift1);*/
+
+                    //再新增一条
+                    baseStaffshiftService.save(baseStaffshift);
                     staffShiftResult.setResult("更新成功");
 
                 } else {
@@ -290,7 +295,7 @@ public class BaseStaffshiftController {
                 list.add(baseStaffshiftOld);
             }
         }
-        baseStaffshiftService.deleteByIds(listDelete.toArray(new String [0]));
+        baseStaffshiftService.deleteByIds(listDelete.toArray(new String[0]));
         return ResponseMessage.ok(baseStaffshiftService.saveAll(list));
     }
 
