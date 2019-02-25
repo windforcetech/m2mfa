@@ -112,11 +112,26 @@ public class PadHomeServiceImpl  implements PadHomeService {
 
     Integer partInput = partInput(rwId);
     Integer partOutput = 0;
-    NumberFormat nt = NumberFormat.getPercentInstance();
-    nt.setMinimumFractionDigits(0);
     return PadHomeModel.builder().staffCode(baseStaff.getCode()).staffName(baseStaff.getStaffName()).staffDepartmentName(organizationService.findByUUID(baseStaff.getDepartmentId()).getDepartmentName())
         .staffShiftName(baseShift.getName()).staffOnTime(startTime).standardOutput(standardOutput.longValue()).actualOutput(actualOutput.longValue()).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
-        .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate(Long.parseLong(nt.format(rate).replace("%",""))).build();
+        .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate( getReach(rate)).build();
+  }
+
+  /**
+   * 获取达成效
+   * @param rate
+   * @return
+   */
+  private long getReach(float rate) {
+    NumberFormat nt = NumberFormat.getPercentInstance();
+    nt.setMinimumFractionDigits(0);
+    long reach =0;
+    try {
+      reach= Long.parseLong(nt.format(rate).replace("%","").split(",")[0]);
+    }catch (Exception  e){
+
+    }
+    return reach;
   }
 
 
@@ -186,4 +201,8 @@ public class PadHomeServiceImpl  implements PadHomeService {
       return null ;
     }
   }
+
+
 }
+
+
