@@ -83,6 +83,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
     if(mesPartRouteStations.isEmpty()){
       throw  new MMException("工位有误");
     }
+
     MesPartRouteStation mesPartRouteStation =mesPartRouteStations.get(0);
     //机台产量信息
     IotMachineOutput iotMachineOutput  = iotMachineOutputService.findIotMachineOutputByMachineId(baseMachine.getMachineId());
@@ -92,24 +93,29 @@ public class PadHomeServiceImpl  implements PadHomeService {
     //班别资料
     BaseShift baseShift =baseShiftService.findById(mesMoScheduleStaffs.get(0).getShiftId()).orElse(null);
 
-    //职员上班工时
-    long hours = baseShiftService.findbhours(baseShift.getShiftId());
     String rwId =newRwid(padHomePara.getScheduleId(),padHomePara.getStationId());
-    BigDecimal standardHours = mesPartRouteStation.getStandardHours();
-    BigDecimal bdhours = new BigDecimal(hours);
-    BigDecimal standardOutput = bdhours.divide(standardHours, 2, RoundingMode.HALF_UP);
-    //获取当前员工开始模数
-    BigDecimal startMolds=startMolds(rwId,PadStaffUtil.getStaff().getStaffId());
-    //实际产出
-    BigDecimal actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
+    //获取职员上工时间
+    Date  startTime = startTime(rwId,PadStaffUtil.getStaff().getStaffId());
+    BigDecimal standardOutput = new BigDecimal(0);
+    BigDecimal actualOutput  = new BigDecimal(0);
+    float rate=0;
+    if(startTime !=null){
+      BigDecimal standardHours = mesPartRouteStation.getStandardHours();
+      BigDecimal bdhours = new BigDecimal((new Date().getTime()-startTime.getTime())/1000);
+       standardOutput = bdhours.divide(standardHours, 2, RoundingMode.HALF_UP);
+      //获取当前员工开始模数
+      BigDecimal startMolds=startMolds(rwId,PadStaffUtil.getStaff().getStaffId());
+      //实际产出
+       actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
+       rate = (float)actualOutput.longValue()/standardOutput.longValue();
+    }
 
     Integer partInput = partInput(rwId);
     Integer partOutput = 0;
     NumberFormat nt = NumberFormat.getPercentInstance();
     nt.setMinimumFractionDigits(0);
-    float rate = (float)actualOutput.longValue()/standardOutput.longValue();
     return PadHomeModel.builder().staffCode(baseStaff.getCode()).staffName(baseStaff.getStaffName()).staffDepartmentName(organizationService.findByUUID(baseStaff.getDepartmentId()).getDepartmentName())
-        .staffShiftName(baseShift.getName()).staffOnTime(new Date()).standardOutput(standardOutput.longValue()).actualOutput(actualOutput.longValue()).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
+        .staffShiftName(baseShift.getName()).staffOnTime(startTime).standardOutput(standardOutput.longValue()).actualOutput(actualOutput.longValue()).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
         .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate(Long.parseLong(nt.format(rate).replace("%",""))).build();
   }
 
@@ -166,4 +172,18 @@ public class PadHomeServiceImpl  implements PadHomeService {
     }
   }
 
+  /**
+   * 获取当前员工上工时间
+   * @param rwId
+   * @param staffId
+   * @return
+   */
+  public Date startTime(String rwId,String staffId){
+    String sql ="select start_time  from  mes_record_staff  where rw_id='"+rwId+"' and  staff_id='"+staffId+"' and start_time is NOT null and end_time is NULL";
+    try {
+      return jdbcTemplate.queryForObject(sql, Date.class);
+    }catch (Exception e) {
+      return null ;
+    }
+  }
 }
