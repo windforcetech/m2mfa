@@ -7,7 +7,7 @@ import com.m2micro.m2mfa.base.service.BaseFileService;
 import com.m2micro.m2mfa.base.service.LabService;
 import com.m2micro.m2mfa.base.vo.ResultInfo;
 import com.m2micro.m2mfa.common.config.LabServerConfig;
-import com.m2micro.m2mfa.common.util.FileLocation;
+//import com.m2micro.m2mfa.common.util.FileLocation;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -21,6 +21,7 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.text.DateFormat;
@@ -39,24 +40,29 @@ public class BaseFileServiceImpl implements BaseFileService {
     @Autowired
     private BaseFileRepository baseFileRepository;
 
-    @Autowired
-    @Qualifier("fileLocationBean")
-    private FileLocation fileLocation;
+//    @Autowired
+//    @Qualifier("fileLocationBean")
+//    private FileLocation fileLocation;
 
     @Autowired
     @Qualifier("getLabServerConfig")
     private LabServerConfig labServerConfig;
+
+    @Autowired
+    @Qualifier("multipartConfigElement")
+    MultipartConfigElement multipartConfigElement;
+
     @Override
     public String uploadFile(MultipartFile file) throws IOException {
 
         if (file.isEmpty()) {
             throw new MMException("上传文件异常.");
         }
-        String basePath = fileLocation.getBaseDir();
+     //   String basePath = fileLocation.getBaseDir();
         String originalFilename = file.getOriginalFilename();
-        String uuidDir=UUID.randomUUID().toString();
-        File dest = new File(fileLocation.getFilePath(originalFilename,uuidDir));
-        File dir = new File(basePath+File.separator+uuidDir);
+        String uuidDir = UUID.randomUUID().toString();
+        File dest = new File(multipartConfigElement.getLocation()+File.separator+ uuidDir+File.separator+originalFilename);
+        File dir = new File(multipartConfigElement.getLocation()+File.separator+ uuidDir);
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -118,10 +124,10 @@ public class BaseFileServiceImpl implements BaseFileService {
         MultipartBody.Part file1 = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
         LabService labService = retrofit.create(LabService.class);
         Call<ResultInfo> calls = labService.getValue(file1);
-            ResultInfo body = calls.execute().body();
+        ResultInfo body = calls.execute().body();
         String data = body.getData();
-        List<String> rs=new ArrayList<>();
-        if(data!=null&&data!=""){
+        List<String> rs = new ArrayList<>();
+        if (data != null && data != "") {
             String[] split = data.split(";");
             List<String> strings = Arrays.asList(split);
             rs.addAll(strings);
