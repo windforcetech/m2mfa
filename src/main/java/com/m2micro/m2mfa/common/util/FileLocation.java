@@ -16,17 +16,19 @@ public class FileLocation {
 
     public void setBaseDir(String baseDir) {
         // 创建文件夹
-        File dir=new File(baseDir);
-        dir.mkdirs();
+        File dir = new File(baseDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
         this.baseDir = baseDir;
     }
 
     public FileLocation() {
-        this.baseDir =  FileLocation.class.getResource("/").getPath();
+        this.baseDir = FileLocation.class.getResource("/").getPath();
     }
 
-    public String getFilePath(String fileName,String uuidDir){
+    public String getFilePath(String fileName, String uuidDir) {
 
-        return this.baseDir+ File.separator+ uuidDir+File.separator +fileName;
+        return this.baseDir + File.separator + uuidDir + File.separator + fileName;
     }
 }
