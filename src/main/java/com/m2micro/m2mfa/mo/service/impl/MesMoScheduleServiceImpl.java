@@ -347,11 +347,23 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         //IotMachineOutput iotMachineOutput = iotMachineOutputRepository.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         if(iotMachineOutput==null){
-            throw new MMException("没有对应机台产出信息！");
+            mesRecordStaffRepository.setEndAll(new Date(),null,null,mesMoSchedule.getScheduleId());
         }
-        mesRecordStaffRepository.setEndAll(new Date(),iotMachineOutput.getPower(),iotMachineOutput.getMolds(),mesMoSchedule.getScheduleId());
+        mesRecordStaffRepository.setEndAll(new Date(),iotMachineOutput.getPower(),iotMachineOutput.getOutput(),mesMoSchedule.getScheduleId());
     }
 
+
+    /**
+     * 上下工记录表下工
+     * @param mesMoSchedule
+     */
+    private void stopRecordWork(MesMoSchedule mesMoSchedule) {
+        IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        if(iotMachineOutput==null){
+            mesRecordWorkRepository.setEndAll(new Date(),null,null,mesMoSchedule.getScheduleId());
+        }
+        mesRecordWorkRepository.setEndAll(new Date(),iotMachineOutput.getPower(),iotMachineOutput.getOutput(),mesMoSchedule.getScheduleId());
+    }
 
     @Override
     @Transactional
@@ -401,6 +413,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoScheduleStaffRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
             //人员记录下工（1.冻结状态并且冻结前状态为生产中2.生产中，两种情况做此操作，不然人员记录表没有相关数据，这里没有做判定但不影响，人员记录表没有记录更新0条）
             stopWorkForStaff(mesMoSchedule);
+            //上下工记录下工
+            stopRecordWork(mesMoSchedule);
             //工艺结束
             mesMoScheduleProcessRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
             //获取未完成的排产单产量
