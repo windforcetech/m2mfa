@@ -78,10 +78,25 @@ public class PadScheduleServiceImpl implements PadScheduleService {
         //获取生产中的排产单并且对该员工至少有一个工位没完成（排除掉所有分配给该员工的工位都已完成的排产单）
         List<PadScheduleModel> production = getProductionScheduleModels(baseStaff);
         if(production!=null&&production.size()>0){
-            return production;
+            List<PadScheduleModel> list = getScheduleModels(production);
+            if (list != null) return list;
         }
         //获取已审待产的在同一机台上的优先级最高的排产单(过滤掉排产单不是当前机台优先级最高的排产单)
         return getFilterScheduleModels(baseStaff);
+    }
+
+    private List<PadScheduleModel> getScheduleModels(List<PadScheduleModel> production) {
+        List<PadScheduleModel> list = new ArrayList<>();
+        for (PadScheduleModel pro : production) {
+            List<PadStationModel> pendingStations = getPendingStations(pro.getScheduleId());
+            if (pendingStations != null && pendingStations.size() > 0) {
+                list.add(pro);
+            }
+        }
+        if (list.size() > 0) {
+            return list;
+        }
+        return null;
     }
 
     /**
@@ -146,7 +161,12 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 }
             }
         }
-        return filterPadScheduleModel;
+        List<PadScheduleModel> list = new ArrayList<>();
+        if(filterPadScheduleModel!=null&&filterPadScheduleModel.size()>0){
+            list = getScheduleModels(filterPadScheduleModel);
+        }
+        if (list == null) throw new MMException("当前没有可处理的排产单！");
+        return list;
     }
 
     /**
