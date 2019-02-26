@@ -328,7 +328,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                             "AND mss.schedule_id = mmss.schedule_id\n" +
                             "AND mss.station_id = mmss.station_id\n" +
                             "AND mss.enabled = 1 \n" +
-                            "AND mmss.jump = 0\n" +
+                            "AND mmss.jump = 1\n" +
                             "ORDER BY\n" +
                             "	mps.step ASC";
         RowMapper<PadStationModel> rowMapper = BeanPropertyRowMapper.newInstance(PadStationModel.class);
