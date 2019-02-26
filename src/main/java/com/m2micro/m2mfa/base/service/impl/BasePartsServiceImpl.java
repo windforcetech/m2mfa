@@ -236,7 +236,8 @@ public class BasePartsServiceImpl implements BasePartsService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_parts bp where 1=1 ";
+        String countSql = "select count(*) from base_parts bp where 1=1 AND bp.enabled=true \n"+
+            "AND not EXISTS (SELECT mpr.part_id part_id from mes_part_route mpr where mpr.part_id=bp.part_id)\n";
 
         if(StringUtils.isNotEmpty(query.getPartNo())){
             countSql = countSql+" and bp.part_no like '%"+query.getPartNo()+"%'";
