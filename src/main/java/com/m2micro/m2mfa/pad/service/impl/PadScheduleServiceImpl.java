@@ -104,6 +104,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "FROM\n" +
                 "	mes_mo_schedule ms,\n" +
                 "	mes_mo_schedule_staff mss,\n" +
+                "   mes_mo_schedule_process mmsp,\n" +
                 "	base_machine bm,\n" +
                 "	base_parts bp\n" +
                 "WHERE\n" +
@@ -113,6 +114,9 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "AND bp.part_id=ms.part_id\n" +
                 "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
                 "AND mss.enabled = 1 \n" +
+                "AND mmsp.process_id=mss.process_id\n" +
+                "AND ms.schedule_id = mmsp.schedule_id\n" +
+                "AND mmsp.actual_end_time IS NULL \n" +
                 "GROUP BY\n" +
                 "	ms.machine_id\n" +
                 "ORDER BY\n" +
