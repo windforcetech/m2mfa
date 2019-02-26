@@ -143,7 +143,22 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
         List<BaseMachine> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_machine";
+        String countSql = "select count(*) from base_machine bm where 1=1 \n";
+        if(StringUtils.isNotEmpty(query.getCode())){
+            countSql = countSql + " and bm.code like '%"+query.getCode()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            countSql = countSql + " and bm.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getFlag())){
+            countSql = countSql + " and bm.flag = '"+query.getFlag()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getDepartmentId())){
+            countSql = countSql + " and bm.department_id = '"+query.getDepartmentId()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getPlacement())){
+            countSql = countSql + " and bm.placement= '"+query.getPlacement()+"'";
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }

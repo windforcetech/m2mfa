@@ -222,9 +222,27 @@ public class BaseMoldServiceImpl implements BaseMoldService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMold.class);
         List<BaseMold> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_mold";
+        String countSql = "select count(*) from base_mold bm where 1=1 \n";
+        if(StringUtils.isNotEmpty(query.getCode())){
+            countSql = countSql+" and bm.code like '%"+query.getCode()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            countSql = countSql+" and bm.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getCustomerId())){
+            countSql = countSql+" and bm.customer_id = '"+query.getCustomerId()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getFlag())){
+            countSql = countSql+" and bm.flag = '"+query.getFlag()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getCategoryId())){
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategoryId()).orElse(null);
+            //不等于全部，全部特殊处理
+            if(!(baseItemsTarget!=null&&"全部".equals(baseItemsTarget.getItemName()))){
+                countSql = countSql+" and bm.category_id = '"+query.getCategoryId()+"'";
+            }
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
-
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 

@@ -127,6 +127,7 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
 
         //结束工序
         endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
+        endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
         //是否交接班
         if(!isChangeShifts(PadStaffUtil.getStaff().getStaffId())){
             //不交接班

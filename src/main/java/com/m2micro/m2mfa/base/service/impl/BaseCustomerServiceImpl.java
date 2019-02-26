@@ -103,7 +103,13 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseCustomer.class);
         List<BaseCustomer> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_customer";
+        String countSql = "select count(*) from base_customer bc where 1=1 \n";
+        if(StringUtils.isNotEmpty(query.getCode())){
+            countSql = countSql+" and bc.code like '%"+query.getCode()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            countSql = countSql+" and (bc.name like '%"+query.getName()+"%'"+" or bc.fullname like '%"+query.getName()+"%')";
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }

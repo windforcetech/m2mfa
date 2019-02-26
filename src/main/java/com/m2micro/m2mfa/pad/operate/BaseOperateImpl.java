@@ -671,6 +671,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         if(isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork)){
             //结束工序
             endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
+            endStationTime(obj.getScheduleId(),obj.getProcessId());
         }
         return finishHomeworkModel;
     }
