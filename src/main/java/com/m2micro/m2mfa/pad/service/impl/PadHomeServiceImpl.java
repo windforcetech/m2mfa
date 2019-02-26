@@ -107,6 +107,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
       BigDecimal startMolds=startMolds(rwId,PadStaffUtil.getStaff().getStaffId());
       //实际产出
        actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
+       //达成率
        rate = (float)actualOutput.longValue()/standardOutput.longValue();
     }
 
@@ -128,7 +129,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
     long reach =0;
     try {
       reach= Long.parseLong(nt.format(rate).replace("%","").split(",")[0]);
-    }catch (Exception  e){
+        }catch (Exception  e){
 
     }
     return reach;

@@ -21,6 +21,7 @@ import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleStaffService;
 import com.m2micro.m2mfa.pad.constant.PadConstant;
+import com.m2micro.m2mfa.pad.constant.StationConstant;
 import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
@@ -56,7 +57,8 @@ import java.util.List;
  */
 @Component("baseOperate")
 public class BaseOperateImpl implements BaseOperate {
-    @Autowired
+
+@Autowired
     PadDispatchService padDispatchService;
     @Autowired
     PadConstant padConstant;
@@ -99,12 +101,12 @@ public class BaseOperateImpl implements BaseOperate {
     @Autowired
     BaseItemsTargetService baseItemsTargetService;
 
-
-    protected MesMoSchedule findMesMoScheduleById(String scheduleId){
+protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return mesMoScheduleRepository.findById(scheduleId).orElse(null);
     }
 
-    @Override
+
+@Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
 
         if(StringUtils.isEmpty(scheduleId)){
@@ -136,7 +138,8 @@ public class BaseOperateImpl implements BaseOperate {
         return operationInfo;
     }
 
-    /**
+
+/**
      * 根据上下工标志设置其他按钮是否置灰
      * @param operationInfo
      */
@@ -158,7 +161,8 @@ public class BaseOperateImpl implements BaseOperate {
         }
     }
 
-    /**
+
+/**
      * 根据提报异常标志设置其他按钮是否置灰
      * @param operationInfo
      */
@@ -172,7 +176,8 @@ public class BaseOperateImpl implements BaseOperate {
         }
     }
 
-    /**
+
+/**
      * 初始化，默认全部都有
      * @param operationInfo
      */
@@ -195,7 +200,8 @@ public class BaseOperateImpl implements BaseOperate {
         operationInfo.setFinishHomework("1");
     }
 
-    /**
+
+/**
      * 获取当前员工在当前排产单的当前岗位上的上工最新时间信息
      * @param staffId
      * @param scheduleId
@@ -224,7 +230,8 @@ public class BaseOperateImpl implements BaseOperate {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    /**
+
+/**
      *获取在当前排产单的当前岗位上的提报异常最新信息
      * @param scheduleId
      * @param stationId
@@ -246,7 +253,8 @@ public class BaseOperateImpl implements BaseOperate {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    /**
+
+/**
      * 设置上下工标志
      * @param recordWorks
      * @param operationInfo
@@ -282,7 +290,8 @@ public class BaseOperateImpl implements BaseOperate {
         return operationInfo;
     }
 
-    /**
+
+/**
      * 设置提报异常标志
      * @param recordAbnormals
      *
@@ -316,7 +325,8 @@ public class BaseOperateImpl implements BaseOperate {
         return operationInfo;
     }
 
-    @Override
+
+@Override
     @Transactional
     public StartWorkPara startWork(PadPara obj) {
         MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(obj.getScheduleId()).orElse(null);
@@ -344,7 +354,8 @@ public class BaseOperateImpl implements BaseOperate {
         return startWorkPara;
     }
 
-    /**
+
+/**
     * 上工模具添加
     * @param moId
     * @param rwId
@@ -366,7 +377,8 @@ public class BaseOperateImpl implements BaseOperate {
         return startWorkForOutputByBaseStaff(obj,baseStaff);
     }
 
-    @Transactional
+
+@Transactional
     protected StartWorkPara startWorkForOutputByBaseStaff(PadPara obj,BaseStaff baseStaff) {
         MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(obj.getScheduleId()).orElse(null);
         isScheduleFlag(mesMoSchedule);
@@ -396,7 +408,8 @@ public class BaseOperateImpl implements BaseOperate {
         return startWorkPara;
     }
 
-    /**
+
+/**
      * 工单校验已审待排
      * @param moDesc
      */
@@ -407,7 +420,8 @@ public class BaseOperateImpl implements BaseOperate {
         }
     }
 
-    /**
+
+/**
      * 校验排产单是否已审待排
      * @param mesMoSchedule
      */
@@ -418,7 +432,8 @@ public class BaseOperateImpl implements BaseOperate {
         }
     }
 
-    /**
+
+/**
      * 根据排产单Id获取对应的图称信息
      * @param moId
      * @return
@@ -434,7 +449,8 @@ public class BaseOperateImpl implements BaseOperate {
         return  mesPartRoutes.get(0);
     }
 
-    /**
+
+/**
      * 新增人员作业记录
      * @param scheduleId
      * @param rwId
@@ -455,7 +471,8 @@ public class BaseOperateImpl implements BaseOperate {
         return  id;
     }
 
-    /**
+
+/**
      * 新增人员作业记录,带产量
      * @param scheduleId
      * @param rwId
@@ -481,7 +498,8 @@ public class BaseOperateImpl implements BaseOperate {
         return  id;
     }
 
-    /**
+
+/**
      * 新增上工记录
      * @param obj
      * @return
@@ -511,7 +529,8 @@ public class BaseOperateImpl implements BaseOperate {
         return  rwId;
     }
 
-    /**
+
+/**
      * 新增上工记录,带产量
      * @param obj
      * @return
@@ -543,7 +562,8 @@ public class BaseOperateImpl implements BaseOperate {
         return  rwId;
     }
 
-    @Override
+
+@Override
     @Transactional
     public StopWorkModel stopWork(StopWorkPara obj) {
         //校验是否重复下工
@@ -559,7 +579,8 @@ public class BaseOperateImpl implements BaseOperate {
         return new StopWorkModel();
     }
 
-    @Transactional
+
+@Transactional
     protected StopWorkModel stopWorkForRecordFail(StopWorkPara obj) {
         //校验是否重复下工
         if(!isNotWork(obj.getRwid(),PadStaffUtil.getStaff().getStaffId())){
@@ -575,7 +596,8 @@ public class BaseOperateImpl implements BaseOperate {
         return new StopWorkModel();
     }
 
-    /**
+
+/**
      * 保存不良输入
      * @param obj
      */
@@ -587,7 +609,8 @@ public class BaseOperateImpl implements BaseOperate {
         saveMesRocerdRail(padbad);
     }
 
-    /**
+
+/**
      * 更新职员作业记录表结束时间
      * @param recordStaffId
      */
@@ -598,7 +621,8 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordStaffService.save(mesRecordStaff);
     }
 
-    /**
+
+/**
      * 更新上工记录表结束时间
      * @param rwid
      */
@@ -609,7 +633,8 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordWorkService.save(mesRecordWork);
     }
 
-    @Override
+
+@Override
     public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) {
         FinishHomeworkModel finishHomeworkModel = new FinishHomeworkModel();
         //是否是扫描或继承站
@@ -620,7 +645,8 @@ public class BaseOperateImpl implements BaseOperate {
         return handleFinishHomework(obj, finishHomeworkModel);
     }
 
-    /**
+
+/**
      * 处理作业结束
      * @param obj
      * @param finishHomeworkModel
@@ -649,13 +675,15 @@ public class BaseOperateImpl implements BaseOperate {
         return finishHomeworkModel;
     }
 
-    @Override
+
+@Override
     public Object defectiveProducts(Padbad padbad) {
         saveMesRocerdRail(padbad);
         return null;
     }
 
-    protected void saveMesRocerdRail(Padbad padbad) {
+
+protected void saveMesRocerdRail(Padbad padbad) {
         MesRecordFail mesRecordFail1 = padbad.getMesRecordFail();
         MesRecordFail mesRecordFail = new MesRecordFail();
         mesRecordFail.setRwId(mesRecordFail1.getRwId());
@@ -674,27 +702,32 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordFailRepository.save(mesRecordFail);
     }
 
-    @Override
+
+@Override
     public Object reportingAnomalies(Object obj) {
         return null;
     }
 
-    @Override
+
+@Override
     public Object jobInput(Object obj) {
         return null;
     }
 
-    @Override
+
+@Override
     public Object homeworkGuidance(Object obj) {
         return null;
     }
 
-    @Override
+
+@Override
     public Object operationHistory(Object obj) {
         return null;
     }
 
-    /**
+
+/**
      * 是否工序的首工位
      * @param processId
      * @param stationId
@@ -709,7 +742,8 @@ public class BaseOperateImpl implements BaseOperate {
         return false;
     }
 
-    /**
+
+/**
      * 是否首工序的首工位
      * @param partRoutId
      * @param processId
@@ -726,7 +760,8 @@ public class BaseOperateImpl implements BaseOperate {
         return false;
     }
 
-    /**
+
+/**
      * 获取工序首尾工位
      * @param processId
      * @return
@@ -752,8 +787,7 @@ public class BaseOperateImpl implements BaseOperate {
     }
 
 
-
-    /**
+/**
      * 工位是否有上工记录
      * @param scheduleId
      * @param stationId
@@ -767,7 +801,8 @@ public class BaseOperateImpl implements BaseOperate {
         return false;
     }
 
-    /**
+
+/**
      * 跟新排产单工序开始时间
      * @param scheduleId
      * @param processId
@@ -779,8 +814,7 @@ public class BaseOperateImpl implements BaseOperate {
     }
 
 
-
-    /**
+/**
      * 跟新排产单员工作业时间
      * @param scheduleId
      * @param staffId
@@ -805,7 +839,8 @@ public class BaseOperateImpl implements BaseOperate {
         jdbcTemplate.update(sql);
     }
 
-    /**
+
+/**
      * 通过机台id查找机台产量信息
      * @param machineId
      *          机台id
@@ -815,7 +850,8 @@ public class BaseOperateImpl implements BaseOperate {
         return iotMachineOutputService.findIotMachineOutputByMachineId(machineId);
     }
 
-    /**
+
+/**
      * 是否交接班
      * @param staffId
      *          员工id
@@ -836,7 +872,8 @@ public class BaseOperateImpl implements BaseOperate {
         return false;
     }
 
-    /**
+
+/**
      * 下工时间是否处于下班的排班交接时间段内(只要满足一个交班时间就可以了)
      * @param baseShift
      *              班别信息
@@ -860,7 +897,8 @@ public class BaseOperateImpl implements BaseOperate {
         return false;
     }
 
-    /**
+
+/**
      * 下工时间是否处于下班的排班交接时间段内(单个下工时间判定)
      * @param offTime
      *          下班时间
@@ -879,7 +917,9 @@ public class BaseOperateImpl implements BaseOperate {
         }
         return false;
     }
-    /**
+
+
+/**
      * 结束工序
      * @param scheduleId
      * @param processId
@@ -891,14 +931,30 @@ public class BaseOperateImpl implements BaseOperate {
     }
 
     /**
+     * 结束工序下开机工位以外的所有工位
+     * @param scheduleId
+     * @param processId
+     */
+    @Transactional
+    protected  void endStationTime(String scheduleId,String processId ){
+        String sql ="SELECT mrw.rwid FROM mes_record_work mrw WHERE mrw.schedule_id = '"+scheduleId+"' AND mrw.process_id = '"+processId+"' AND mrw.station_id != ( SELECT bs.station_id FROM base_station bs WHERE bs. CODE = '"+StationConstant.BOOT.getKey()+"' ) AND start_time IS NOT NULL AND end_time IS NULL";
+            List<String> rwids = jdbcTemplate.queryForList(sql, String.class);
+            if( !rwids.isEmpty()){
+                for(String rwid :rwids){
+                    sql ="update mes_record_staff  set end_time='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  where start_time is NOT NULL  and end_time is NULL and rw_id='"+rwid+"'";
+                    jdbcTemplate.update(sql);
+                    sql ="update mes_record_work   set end_time='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  where start_time is NOT NULL  and end_time is NULL and rwid='"+rwid+"'";
+                    jdbcTemplate.update(sql);
+                }
+            }
+    }
+    /**
      * 判断该工位作业是否已经完成
      *
      * @param rwId
      * @return
      */
     protected boolean isMesRecorWorkEnd(String rwId) {
-
-
         MesRecordStaff mesRecordStaff = mesRecordStaffRepository.findByRwIdAndStartTimeNotNullAndEndTimeIsNull(rwId);
         if(mesRecordStaff==null){
             return true;
@@ -1272,3 +1328,5 @@ public class BaseOperateImpl implements BaseOperate {
 
 
 }
+
+
