@@ -602,8 +602,9 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
      * @param obj
      */
     protected void saveRecordFail(StopWorkPara obj) {
-      ;
-        saveMesRecordFail(obj.getMesRecordFail());
+        Padbad padbad= new Padbad();
+        padbad.setMesRecordFails(obj.getMesRecordFails());
+        saveMesRocerdRail(padbad);
     }
 
 
