@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.m2mfa.base.entity.BaseMold;
 import com.m2micro.m2mfa.base.entity.BaseParts;
@@ -24,6 +25,8 @@ import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.QBaseParts;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 /**
  * 料件基本资料 服务实现类
@@ -272,10 +275,12 @@ public class BasePartsServiceImpl implements BasePartsService {
 
     @Override
     @Transactional
-    public void deleteAllByIds(String[] ids) {
+    public ResponseMessage deleteAllByIds(String[] ids) {
         //删除物料时检查有没有发生业务，通过物料编号【Part_Id】，查询工单主表【Mes_Mo_Desc】。
         //如已产生业务，提示已有业务不允许删除。
         //这里可以优化，做关联查询。
+        List<BaseParts> enableDelete = new ArrayList<>();
+        List<BaseParts> disableDelete = new ArrayList<>();
         for (String id:ids){
             BaseParts bp = findById(id).orElse(null);
             if(bp==null){
@@ -283,13 +288,24 @@ public class BasePartsServiceImpl implements BasePartsService {
             }
             List<MesMoDesc> list = mesMoDescRepository.findByPartId(bp.getPartId());
             if(list!=null&&list.size()>0){
-                throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
+                disableDelete.add(bp);
+                continue;
+                //throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
             }
+
+            enableDelete.add(bp);
         }
         //如无业务则删除。同时删除相关的表【Mes_Part_Route】【Mes_Part_Route_Process】【Mes_Part_Route_Station】
         //【Base_Bom_Desc】 【Base_Bom_Def】【Base_Bom_Substitute】
         //删除Base_Parts表
-        deleteByIds(ids);
+        //deleteByIds(ids);
+        deleteAll(enableDelete);
+        if(disableDelete.size()>0){
+            String[] strings = disableDelete.stream().map(BaseParts::getPartNo).toArray(String[]::new);
+            return ResponseMessage.ok("操作成功，物料编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+        }else{
+            return ResponseMessage.ok("操作成功");
+        }
         //删除Mes_Part_Route表
         //删除Mes_Part_Route_Process表
         //删除Mes_Part_Route_Station表
