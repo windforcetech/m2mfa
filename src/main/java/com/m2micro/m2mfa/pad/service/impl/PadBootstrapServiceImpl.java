@@ -66,11 +66,8 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
     public StopWorkModel stopWorkForReal(StopWorkPara obj, StopWorkModel stopWorkModel, MesRecordWork mesRecordWork, MesMoSchedule mesMoSchedule, IotMachineOutput iotMachineOutput) {
         //保存不良输入
         if(obj.getMesRecordFail()!=null){
-            Padbad padbad = new Padbad();
-            padbad.setStationId(mesRecordWork.getStationId());
-            padbad.setMesRecordFail(obj.getMesRecordFail());
             obj.getMesRecordFail().setRwId(obj.getRwid());
-            saveMesRocerdRail(padbad);
+            saveMesRecordFail(obj.getMesRecordFail());
         }
 
         //下工

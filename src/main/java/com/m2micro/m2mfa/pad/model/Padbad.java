@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @ApiModel(value = "Padbad", description = "Pad不良参数")
 public class Padbad {
@@ -12,5 +14,5 @@ public class Padbad {
   @ApiModelProperty(value = "工位Id")
   private String stationId;
   @ApiModelProperty(value = "不良输入")
-  private MesRecordFail mesRecordFail;
+  private List<MesRecordFail> mesRecordFails;
 }

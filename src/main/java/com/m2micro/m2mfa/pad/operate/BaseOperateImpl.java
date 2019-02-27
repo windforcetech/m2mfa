@@ -602,11 +602,8 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
      * @param obj
      */
     protected void saveRecordFail(StopWorkPara obj) {
-        MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
-        Padbad padbad = new Padbad();
-        padbad.setStationId(mesRecordWork.getStationId());
-        padbad.setMesRecordFail(obj.getMesRecordFail());
-        saveMesRocerdRail(padbad);
+      ;
+        saveMesRecordFail(obj.getMesRecordFail());
     }
 
 
@@ -683,9 +680,14 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return null;
     }
 
-
-protected void saveMesRocerdRail(Padbad padbad) {
-        MesRecordFail mesRecordFail1 = padbad.getMesRecordFail();
+    @Transactional
+    protected void saveMesRocerdRail(Padbad padbad) {
+        for(MesRecordFail mesRecordFail1 :  padbad.getMesRecordFails()){
+            saveMesRecordFail(mesRecordFail1);
+        }
+   }
+    @Transactional
+    public  void saveMesRecordFail(MesRecordFail mesRecordFail1) {
         MesRecordFail mesRecordFail = new MesRecordFail();
         mesRecordFail.setRwId(mesRecordFail1.getRwId());
         mesRecordFail.setId(UUIDUtil.getUUID());
@@ -704,7 +706,7 @@ protected void saveMesRocerdRail(Padbad padbad) {
     }
 
 
-@Override
+    @Override
     public Object reportingAnomalies(Object obj) {
         return null;
     }
