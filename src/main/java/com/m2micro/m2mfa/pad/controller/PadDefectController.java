@@ -48,4 +48,7 @@ public class PadDefectController {
 
 
     //判断 总量数据，跟实际产出
+
+   // public ResponseMessage<Boolean>
+
 }
