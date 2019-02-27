@@ -14,6 +14,7 @@ import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.model.PadHomeModel;
 import com.m2micro.m2mfa.pad.model.PadHomePara;
+import com.m2micro.m2mfa.pad.model.PadYieldPara;
 import com.m2micro.m2mfa.pad.service.PadHomeService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
@@ -116,6 +117,22 @@ public class PadHomeServiceImpl  implements PadHomeService {
     return PadHomeModel.builder().staffCode(baseStaff.getCode()).staffName(baseStaff.getStaffName()).staffDepartmentName(organizationService.findByUUID(baseStaff.getDepartmentId()).getDepartmentName())
         .staffShiftName(baseShift.getName()).staffOnTime(startTime).standardOutput(standardOutput.longValue()).actualOutput(actualOutput.longValue()).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
         .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate( getReach(rate)).build();
+  }
+
+  @Override
+  public Boolean isScheduleYield(PadYieldPara padHomePara) {
+    //获取排产单
+    MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(padHomePara.getScheduleId()).orElse(null);
+    //获取机台信息
+    BaseMachine baseMachine = baseMachineService.findById(mesMoSchedule.getMachineId()).orElse(null);
+    //机台产量信息
+    IotMachineOutput iotMachineOutput  = iotMachineOutputService.findIotMachineOutputByMachineId(baseMachine.getMachineId());
+    String rwId =newRwid(padHomePara.getScheduleId(),padHomePara.getStationId());
+      //获取当前员工开始模数
+    BigDecimal startMolds=startMolds(rwId,PadStaffUtil.getStaff().getStaffId());
+      //实际产出
+    BigDecimal  actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
+    return padHomePara.getTotalamount()>actualOutput.longValue() ? true : false;
   }
 
   /**

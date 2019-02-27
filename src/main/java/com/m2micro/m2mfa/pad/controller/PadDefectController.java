@@ -13,7 +13,9 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import com.m2micro.m2mfa.pad.model.PadYieldPara;
 import com.m2micro.m2mfa.pad.service.PadDefectServie;
+import com.m2micro.m2mfa.pad.service.PadHomeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class PadDefectController {
     @Autowired
     PadDefectServie padDefectServie;
+    @Autowired
+    PadHomeService padHomeService;
 
     /**
      * 列表
@@ -48,7 +52,12 @@ public class PadDefectController {
 
 
     //判断 总量数据，跟实际产出
+    @RequestMapping("/isScheduleYield")
+    @ApiOperation(value = "判断总量是否大于实际产出")
+    @UserOperationLog("判断总量是否大于实际产出")
+    public ResponseMessage<Boolean> isScheduleYield(@RequestBody  PadYieldPara padHomePara){
 
-   // public ResponseMessage<Boolean>
+        return ResponseMessage.ok(padHomeService.isScheduleYield(padHomePara));
+    }
 
 }
