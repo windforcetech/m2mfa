@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.util.SpringContextUtil;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.service.BaseStationService;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.constant.PadDispatchConstant;
 import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
@@ -23,12 +24,18 @@ import java.lang.reflect.Method;
  */
 @Service
 public class PadDispatchServiceImpl implements PadDispatchService {
+    @Autowired
+    MesMoScheduleService mesMoScheduleService;
 
     @Autowired
     BaseStationService baseStationService;
 
     @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
+        if(!mesMoScheduleService.isScheduleFlag(scheduleId)){
+            throw  new MMException("排产单状态不可执行");
+        }
         BaseStation baseStation = baseStationService.findById(stationId).orElse(null);
         String handle = PadDispatchConstant.getHandle(baseStation.getCode());
         Class<?> clazz = Class.forName(handle);
@@ -40,6 +47,9 @@ public class PadDispatchServiceImpl implements PadDispatchService {
 
     @Override
     public StartWorkPara startWork(PadPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if(!mesMoScheduleService.isScheduleFlag(obj.getScheduleId())){
+            throw  new MMException("排产单状态不可执行");
+        }
         BaseStation baseStation = baseStationService.findById(obj.getStationId()).orElse(null);
         String handle = PadDispatchConstant.getHandle(baseStation.getCode());
         Class<?> clazz = Class.forName(handle);
@@ -62,6 +72,9 @@ public class PadDispatchServiceImpl implements PadDispatchService {
 
     @Override
     public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        if(!mesMoScheduleService.isScheduleFlag(obj.getScheduleId())){
+            throw  new MMException("排产单状态不可执行");
+        }
         BaseStation baseStation = baseStationService.findById(obj.getStationId()).orElse(null);
         String handle = PadDispatchConstant.getHandle(baseStation.getCode());
         if(StringUtils.isEmpty(handle)){
@@ -76,6 +89,7 @@ public class PadDispatchServiceImpl implements PadDispatchService {
 
     @Override
     public Object defectiveProducts(Padbad obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
         BaseStation baseStation = baseStationService.findById(obj.getStationId()).orElse(null);
         String handle = PadDispatchConstant.getHandle(baseStation.getCode());
         Class<?> clazz = Class.forName(handle);

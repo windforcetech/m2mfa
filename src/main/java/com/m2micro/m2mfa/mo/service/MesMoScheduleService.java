@@ -179,5 +179,11 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     void peopleDistributionsave( List<MesMoScheduleStaff> mesMoScheduleStaffs,List<MesMoScheduleStation> mesMoScheduleStations);
 
+    /**
+     * 判断排产单为生产中或已审待产
+     * @param scheduleId
+     * @return
+     */
+    boolean  isScheduleFlag(String  scheduleId);
 
 }

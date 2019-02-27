@@ -182,6 +182,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     }
 
+    @Override
+    public boolean isScheduleFlag(String scheduleId) {
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(scheduleId).orElse(null);
+        return mesMoSchedule.getFlag().equals(MoScheduleStatus.AUDITED.getKey())||mesMoSchedule.getFlag().equals(MoScheduleStatus.PRODUCTION.getKey()) ? true :false ;
+    }
+
 
     @Override
     public PageUtil<MesMoScheduleModel> list(MesMoScheduleQuery query) {
