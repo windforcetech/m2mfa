@@ -130,6 +130,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(StringUtils.isNotEmpty(query.getSource())){
             sql = sql+" and bp.source = '"+query.getSource()+"'";
         }
+        if(query.getEnabled()!=null){
+            sql = sql+" and bp.enabled = "+query.getEnabled()+"";
+        }
 
         if(StringUtils.isNotEmpty(query.getCategory())){
             BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
@@ -156,6 +159,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         }
         if(StringUtils.isNotEmpty(query.getSource())){
             countSql = countSql+" and bp.source = '"+query.getSource()+"'";
+        }
+        if(query.getEnabled()!=null){
+            countSql = countSql+" and bp.enabled = "+query.getEnabled()+"";
         }
         if(StringUtils.isNotEmpty(query.getCategory())){
             BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
@@ -214,7 +220,7 @@ public class BasePartsServiceImpl implements BasePartsService {
                 "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
                 "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
                 "WHERE 1 = 1\n" +
-                "AND bp.enabled=true \n" +
+                "AND bp.enabled=1 \n" +
                 "AND not EXISTS (SELECT mpr.part_id part_id from mes_part_route mpr where mpr.part_id=bp.part_id)\n";
 
         if(StringUtils.isNotEmpty(query.getPartNo())){
@@ -236,7 +242,7 @@ public class BasePartsServiceImpl implements BasePartsService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_parts bp where 1=1 AND bp.enabled=true \n"+
+        String countSql = "select count(*) from base_parts bp where 1=1 AND bp.enabled=1 \n"+
             "AND not EXISTS (SELECT mpr.part_id part_id from mes_part_route mpr where mpr.part_id=bp.part_id)\n";
 
         if(StringUtils.isNotEmpty(query.getPartNo())){
@@ -305,8 +311,8 @@ public class BasePartsServiceImpl implements BasePartsService {
 
     @Override
     public PageUtil<BaseParts> findByNotUsedForPack(BasePartsQuery query) {
-        String sql ="SELECT t.* FROM base_parts t where t.part_no not in(select distinct part_id from base_pack) ";
-       String sqlCount="Select count(*) FROM base_parts t where t.part_no not in(select distinct part_id from base_pack) ";
+        String sql ="SELECT t.* FROM base_parts t where t.part_no not in(select distinct part_id from base_pack) AND t.enabled=1 ";
+       String sqlCount="Select count(*) FROM base_parts t where t.part_no not in(select distinct part_id from base_pack) AND t.enabled=1 ";
         if( query.getPartNo()!=null&&query.getPartNo()!=""){
             sql+=" and t.part_no like '%"+query.getPartNo()+"%' ";
             sqlCount+=" and t.part_no like '%"+query.getPartNo()+"%' ";
