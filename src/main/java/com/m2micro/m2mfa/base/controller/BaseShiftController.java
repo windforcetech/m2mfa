@@ -4,6 +4,7 @@ import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.node.TreeNode;
+import com.m2micro.m2mfa.base.query.BaseShiftQuery;
 import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.base.service.BaseShiftService;
 import com.m2micro.framework.commons.exception.MMException;
@@ -48,7 +49,7 @@ public class BaseShiftController {
     @RequestMapping("/list")
     @ApiOperation(value="班别基本资料列表")
     @UserOperationLog("班别基本资料列表")
-    public ResponseMessage<PageUtil<BaseShift>> list(Query query){
+    public ResponseMessage<PageUtil<BaseShift>> list(BaseShiftQuery query){
         PageUtil<BaseShift> page = baseShiftService.list(query);
         return ResponseMessage.ok(page);
     }
@@ -115,8 +116,8 @@ public class BaseShiftController {
     @ApiOperation(value="删除班别基本资料")
     @UserOperationLog("删除班别基本资料")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseShiftService.deleteEntity(ids);
-        return ResponseMessage.ok();
+
+        return  baseShiftService.deleteEntity(ids);
     }
     @RequestMapping("/addDetails")
     @ApiOperation(value="获取班别添加基本信息")

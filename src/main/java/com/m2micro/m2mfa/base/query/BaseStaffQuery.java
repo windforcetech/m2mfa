@@ -18,6 +18,9 @@ public class BaseStaffQuery extends Query {
     private String code;
     @ApiModelProperty(value = "名称")
     private String name;
+
+    @ApiModelProperty(value = "是否有效 ")
+    private boolean enabled;
 //    @ApiModelProperty(value = "岗位ids")
 //    public List<String> getDutyIds() {
 //        return dutyIds;
@@ -57,5 +60,11 @@ public class BaseStaffQuery extends Query {
         this.name = name;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

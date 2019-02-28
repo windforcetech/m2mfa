@@ -1,9 +1,12 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.framework.starter.services.OrganizationService;
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
+import com.m2micro.m2mfa.base.entity.BaseStaffshift;
 import com.m2micro.m2mfa.base.entity.QBaseStaff;
 import com.m2micro.m2mfa.base.query.BaseStaffQuery;
 import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
@@ -45,6 +48,7 @@ public class BaseStaffServiceImpl implements BaseStaffService {
     @Autowired
     OrganizationService organizationService;
 
+
     @Autowired
     BaseStaffshiftRepository baseStaffshiftRepository;
     public BaseStaffRepository getRepository() {
@@ -62,6 +66,9 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         }
         if (StringUtils.isNotEmpty(query.getName())) {
             condition.and(qBaseStaff.staffName.like("%" + query.getName() + "%"));
+        }
+        if (query.isEnabled()==true) {
+            condition.and(qBaseStaff.enabled.eq(true));
         }
         if (query.getDepartmentIds() != null && query.getDepartmentIds().size() > 0) {
             condition.and(qBaseStaff.departmentId.in(query.getDepartmentIds()));
@@ -171,9 +178,29 @@ public class BaseStaffServiceImpl implements BaseStaffService {
 
     @Transactional
     @Override
-    public void deleteByStaffId(String[] ids) {
-        for (String id : ids) {
-            baseStaffRepository.deleteByStaffId(id);
+    public ResponseMessage deleteByStaffId(String[] ids) {
+
+        List<BaseStaff> enableDelete = new ArrayList<>();
+        List<BaseStaff> disableDelete = new ArrayList<>();
+        for( String id :  ids ){
+            BaseStaff baseStaff = baseStaffRepository.findById(id).orElse(null);
+            List<BaseStaffshift> list = baseStaffshiftRepository.findByStaffId(id);
+            if(list!=null&&list.size()>0){
+                disableDelete.add(baseStaff);
+                continue;
+                //throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
+            }
+            enableDelete.add(baseStaff);
+        }
+
+        deleteAll(enableDelete);
+        ResponseMessage re =   ResponseMessage.ok("操作成功");
+        if(disableDelete.size()>0){
+            String[] strings = disableDelete.stream().map(BaseStaff::getCode).toArray(String[]::new);
+            re.setMessage("职员编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return re;
+        }else{
+            return re;
         }
     }
 }
