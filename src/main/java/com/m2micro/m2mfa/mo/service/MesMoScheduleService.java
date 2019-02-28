@@ -47,7 +47,7 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
     List<MesMoSchedule> findByMoIdAndFlag(String moId,List<Integer> flags);
 
     /**
-     * 审核工单
+     * 审核排产单
      * @param id
      *      工单id
      */

@@ -303,6 +303,9 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(mesMoSchedule==null){
             throw new MMException("不存在该排产单！");
         }
+        if(mesMoSchedule.getEnabled().equals(false)){
+            throw new MMException("排产单为无效状态不可进行审核");
+        }
         // 当排产单状态为  初始时flag=0  才可以进行审核 flag=1
         if(!MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())){
             throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许审核！");

@@ -171,6 +171,10 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(mesMoDesc==null){
             throw new MMException("不存在该工单");
         }
+
+        if(mesMoDesc.getEnabled().equals(false)){
+            throw new MMException("工单为无效状态不可进行审核");
+        }
         // 当工单状态为  初始时Close_flag=0  才可以进行审核 Close_flag=1
         if(!MoStatus.INITIAL.getKey().equals(mesMoDesc.getCloseFlag())){
             throw new MMException("用户工单【"+mesMoDesc.getMoNumber()+"】当前状态【"+MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue()+"】,不允许审核！");
