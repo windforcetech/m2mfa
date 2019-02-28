@@ -23,7 +23,7 @@ public interface BasePartsRepository extends BaseRepository<BaseParts,String> {
      */
     List<BaseParts> findByPartNoAndPartIdNot(String partNo,String partId);
 
-    @Query(value = "select * from base_parts  where  part_no=?1 ",nativeQuery=true)
+    @Query(value = "select * from base_parts  where  part_no=?1 and enabled=1 ",nativeQuery=true)
     BaseParts selectpartNo(String partNo);
     int countByPartNo(String partNo);
 }

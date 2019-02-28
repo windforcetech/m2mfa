@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseMold;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -36,4 +37,17 @@ public interface BaseMoldService extends BaseService<BaseMold,String> {
      * @return
      */
     List<BaseMold> findByCodeAndMoldIdNot(String code, String moldId);
+
+    /**
+     * 模具删除
+     * @param ids
+     * @return
+     */
+    ResponseMessage  delete(String [] ids );
+
+    /**
+     * 排产单显示
+     * @return
+     */
+    List<BaseMold>findbyisMold();
 }

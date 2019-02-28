@@ -1,10 +1,14 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseMoldQuery;
 import com.m2micro.m2mfa.base.repository.BaseMoldRepository;
 import com.m2micro.m2mfa.base.service.BaseMoldService;
+import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
 import com.m2micro.m2mfa.mo.model.MesMoDescModel;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +22,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 
+import java.util.ArrayList;
 import java.util.List;
 /**
  * 模具主档 服务实现类
@@ -34,6 +39,8 @@ public class BaseMoldServiceImpl implements BaseMoldService {
     JdbcTemplate jdbcTemplate;
     @Autowired
     BaseItemsTargetServiceImpl baseItemsTargetService;
+    @Autowired
+    MesMoScheduleProcessRepository mesMoScheduleProcessRepository;
 
     public BaseMoldRepository getRepository() {
         return baseMoldRepository;
@@ -254,6 +261,37 @@ public class BaseMoldServiceImpl implements BaseMoldService {
     @Override
     public List<BaseMold> findByCodeAndMoldIdNot(String code, String moldId) {
         return baseMoldRepository.findByCodeAndMoldIdNot(code,moldId);
+    }
+
+    @Override
+    public ResponseMessage delete(String[] ids) {
+        //根据ID删除模具，删除时查询【Mes_Record_Mold】表是否已产生业务，如果已有记录，提示用户已产生业务不允许删除。
+        List<BaseMold> enableDelete = new ArrayList<>();
+        List<BaseMold> disableDelete = new ArrayList<>();
+        for (String id:ids){
+            BaseMold baseMold = baseMoldRepository.findById(id).orElse(null);
+            List<MesMoScheduleProcess> list = mesMoScheduleProcessRepository.findByMoldId(id);
+            if(list!=null&&list.size()>0){
+                disableDelete.add(baseMold);
+                continue;
+                //throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
+            }
+            enableDelete.add(baseMold);
+        }
+        deleteAll(enableDelete);
+        ResponseMessage re =   ResponseMessage.ok("操作成功");
+        if(disableDelete.size()>0){
+            String[] strings = disableDelete.stream().map(BaseMold::getCode).toArray(String[]::new);
+            re.setMessage("模具编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return re;
+        }else{
+            return re;
+        }
+    }
+
+    @Override
+    public List<BaseMold> findbyisMold() {
+        return baseMoldRepository.findByEnabled(true);
     }
 
 }

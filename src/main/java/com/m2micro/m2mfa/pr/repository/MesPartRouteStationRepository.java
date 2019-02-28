@@ -18,6 +18,8 @@ import java.util.List;
 public interface MesPartRouteStationRepository extends BaseRepository<MesPartRouteStation,String> {
 
     List<MesPartRouteStation> findByStationIdIn(List stationIds);
+
+    List<MesPartRouteStation>findByStationId(String stationId);
     @Transactional
     @Modifying
     @Query(value = "delete from mes_part_route_station where  part_route_id=?1",nativeQuery = true)

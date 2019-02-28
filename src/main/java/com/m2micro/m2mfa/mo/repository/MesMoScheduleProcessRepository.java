@@ -81,4 +81,11 @@ public interface MesMoScheduleProcessRepository extends BaseRepository<MesMoSche
      * @return
      */
     List<MesMoScheduleProcess> findByScheduleIdAndMoldIdNotNull(String scheduleId);
+
+    /**
+     * 判断模具是否被引用
+     * @param moldId
+     * @return
+     */
+    List<MesMoScheduleProcess> findByMoldId(String moldId);
 }

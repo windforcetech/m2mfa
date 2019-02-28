@@ -1,8 +1,10 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
 import com.m2micro.m2mfa.base.repository.BaseMachineRepository;
@@ -29,6 +31,7 @@ import com.m2micro.m2mfa.base.entity.QBaseMachine;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -217,7 +220,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
                 if(StringUtils.isNotEmpty(query.getMachinCode())){
                    sql += "  and bm.`code`  Like '%"+query.getMachinCode()+"%'";
                 }
-                sql +=  " AND bi.item_name != '保养' ";
+                sql +=  " AND bi.item_name != '保养' and bm.enabled=1 ";
                 sql += " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         String countsql ="SELECT\n" +
                 "	count(*) \n" +
@@ -225,7 +228,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
                 "	base_machine bm\n" +
                 "LEFT JOIN base_items_target bit ON bm.flag = bit.id\n" +
                 "WHERE\n" +
-                "	bit.item_name != '维修'\n" ;
+                "	bit.item_name != '维修' and bm.enabled=1\n" ;
         if(StringUtils.isNotEmpty(query.getMachinCode())){
             countsql += "  and bm.`code`  Like '%"+query.getMachinCode()+"%'";
         }
@@ -255,10 +258,10 @@ public class BaseMachineServiceImpl implements BaseMachineService {
 
     @Override
     @Transactional
-    public void delete(String[] ids) {
+    public ResponseMessage delete(String[] ids) {
         //校验
-        valid(ids);
-        deleteByIds(ids);
+       return  valid(ids);
+
     }
 
     @Override
@@ -291,13 +294,26 @@ public class BaseMachineServiceImpl implements BaseMachineService {
      * 校验排产单是否已经引用
      * @param ids
      */
-    private void valid(String[] ids) {
+    private ResponseMessage valid(String[] ids) {
+        List<BaseMachine> enableDelete = new ArrayList<>();
+        List<BaseMachine> disableDelete = new ArrayList<>();
         for (String id:ids){
+            BaseMachine baseMachine = findById(id).orElse(null);
             Integer count = mesMoScheduleRepository.countByMachineId(id);
             if(count>0){
-                BaseMachine baseMachine = findById(id).orElse(null);
-                throw new MMException("设备编号【"+baseMachine.getCode()+"】已产生业务，不允许删除！");
+                disableDelete.add(baseMachine);
+                continue;
             }
+            enableDelete.add(baseMachine);
+        }
+        deleteAll(enableDelete);
+        ResponseMessage re =   ResponseMessage.ok("操作成功");
+        if(disableDelete.size()>0){
+            String[] strings = disableDelete.stream().map(BaseMachine::getCode).toArray(String[]::new);
+            re.setMessage("机台编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return re;
+        }else{
+            return re;
         }
     }
 

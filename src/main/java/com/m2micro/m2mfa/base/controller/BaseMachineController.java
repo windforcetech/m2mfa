@@ -107,8 +107,8 @@ public class BaseMachineController {
     @ApiOperation(value="删除机台主档")
     @UserOperationLog("删除机台主档")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseMachineService.delete(ids);
-        return ResponseMessage.ok();
+
+        return  baseMachineService.delete(ids);
     }
     @RequestMapping("/addDetails")
     @ApiOperation(value="单位基本基本信息")

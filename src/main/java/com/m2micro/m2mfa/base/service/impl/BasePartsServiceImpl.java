@@ -2,11 +2,11 @@ package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
-import com.m2micro.m2mfa.base.entity.BaseMold;
-import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BasePartsQuery;
+import com.m2micro.m2mfa.base.repository.BasePackRepository;
 import com.m2micro.m2mfa.base.repository.BasePartsRepository;
+import com.m2micro.m2mfa.base.service.BasePackService;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
@@ -22,7 +22,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBaseParts;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -45,6 +44,8 @@ public class BasePartsServiceImpl implements BasePartsService {
     JdbcTemplate jdbcTemplate;
     @Autowired
     BaseItemsTargetServiceImpl baseItemsTargetService;
+    @Autowired
+    BasePackRepository basePackRepository;
 
     public BasePartsRepository getRepository() {
         return basePartsRepository;
@@ -287,10 +288,20 @@ public class BasePartsServiceImpl implements BasePartsService {
                 throw new MMException("数据库不存在数据！");
             }
             List<MesMoDesc> list = mesMoDescRepository.findByPartId(bp.getPartId());
+            List<BasePack> basePacks = basePackRepository.findByPartId(bp.getPartId());
+
+
             if(list!=null&&list.size()>0){
                 disableDelete.add(bp);
                 continue;
                 //throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
+            }else {
+                //过滤完工单是否有业务，再过滤包装
+                if(basePacks!=null&&basePacks.size()>0){
+                    disableDelete.add(bp);
+                    continue;
+                    //throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
+                }
             }
 
             enableDelete.add(bp);

@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -40,6 +41,6 @@ public interface BaseStationService extends BaseService<BaseStation,String> {
      * 删除工位
      * @param ids
      */
-    void deleteAll(String[] ids);
+    ResponseMessage deleteAll(String[] ids);
 
 }

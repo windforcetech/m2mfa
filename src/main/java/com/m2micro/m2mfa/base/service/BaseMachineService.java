@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -55,7 +56,7 @@ public interface BaseMachineService extends BaseService<BaseMachine,String> {
      * 删除机台信息
      * @param ids
      */
-    void delete(String[] ids);
+    ResponseMessage delete(String[] ids);
 
     /**
      * 获取机台名称下拉选项

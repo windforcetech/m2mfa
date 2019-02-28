@@ -1,27 +1,24 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
-import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.query.BaseCustomerQuery;
 import com.m2micro.m2mfa.base.repository.BaseCustomerRepository;
 import com.m2micro.m2mfa.base.service.BaseCustomerService;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
-import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBaseCustomer;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 /**
  * 客户基本资料档 服务实现类
@@ -139,23 +136,36 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
 
     @Override
     @Transactional
-    public void deleteEntitys(String[] ids) {
-        valid(ids);
-        deleteByIds(ids);
+    public ResponseMessage deleteEntitys(String[] ids) {
+       return  valid(ids);
+
     }
 
     /**
      * 校验
      * @param ids
      */
-    private void valid(String[] ids) {
+    private ResponseMessage valid(String[] ids) {
+        List<BaseCustomer> enableDelete = new ArrayList<>();
+        List<BaseCustomer> disableDelete = new ArrayList<>();
         for(String id:ids){
+            BaseCustomer baseCustomer = findById(id).orElse(null);
             Integer count = mesMoDescRepository.countByCustomerId(id);
             if(count>0){
-                BaseCustomer baseCustomer = findById(id).orElse(null);
-                throw new MMException("客户编号【"+baseCustomer.getCode()+"】已产生业务，不允许删除！");
+                disableDelete.add(baseCustomer);
+                continue;
             }
+          enableDelete.add(baseCustomer);
         }
+      deleteAll(enableDelete);
+      ResponseMessage re =   ResponseMessage.ok("操作成功");
+      if(disableDelete.size()>0){
+        String[] strings = disableDelete.stream().map(BaseCustomer::getCode).toArray(String[]::new);
+        re.setMessage("用户编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+        return re;
+      }else{
+        return re;
+      }
     }
 
 }
