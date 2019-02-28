@@ -300,11 +300,13 @@ public class BasePartsServiceImpl implements BasePartsService {
         //删除Base_Parts表
         //deleteByIds(ids);
         deleteAll(enableDelete);
+        ResponseMessage re =   ResponseMessage.ok("操作成功");
         if(disableDelete.size()>0){
             String[] strings = disableDelete.stream().map(BaseParts::getPartNo).toArray(String[]::new);
-            return ResponseMessage.ok("操作成功，物料编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            re.setMessage("物料编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return re;
         }else{
-            return ResponseMessage.ok("操作成功");
+            return re;
         }
         //删除Mes_Part_Route表
         //删除Mes_Part_Route_Process表
