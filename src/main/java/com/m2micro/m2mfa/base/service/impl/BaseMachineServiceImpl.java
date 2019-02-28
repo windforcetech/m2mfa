@@ -290,6 +290,15 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         return list;
     }
 
+    @Override
+    public boolean isMachineandDepartment(String departmentId) {
+        List<BaseMachine> baseMachines = baseMachineRepository.findByDepartmentId(departmentId);
+        if(baseMachines.isEmpty()){
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 校验排产单是否已经引用
      * @param ids

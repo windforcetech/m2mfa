@@ -64,4 +64,11 @@ public interface BaseMachineService extends BaseService<BaseMachine,String> {
      */
     List<SelectNode> getNames(String machineId);
 
+    /**
+     * 判断该部门下面是否有关联机台
+     * @param departmentId
+     * @return
+     */
+    boolean isMachineandDepartment(String departmentId);
+
 }
