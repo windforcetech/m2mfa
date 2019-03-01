@@ -504,7 +504,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @return
      */
     private List<BaseShiftModel> getBaseShiftModels() {
-        List<BaseShift> all = baseShiftRepository.findAll();
+        List<BaseShift> all = baseShiftRepository.findByEnabled(true);
         List<BaseShiftModel> baseShiftModels = new ArrayList<>();
         all.stream().forEach(baseShift->{
             BaseShiftModel baseShiftModel = new BaseShiftModel();
