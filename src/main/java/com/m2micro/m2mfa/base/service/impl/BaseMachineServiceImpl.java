@@ -291,8 +291,8 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     }
 
     @Override
-    public boolean isMachineandDepartment(String departmentId) {
-        List<BaseMachine> baseMachines = baseMachineRepository.findByOrgIds(departmentId);
+    public boolean isMachineandDepartment(String uuid) {
+        List<BaseMachine> baseMachines = baseMachineRepository.findByOrgIds(uuid);
         if(baseMachines.isEmpty()){
             return true;
         }
