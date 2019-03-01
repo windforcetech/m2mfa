@@ -130,7 +130,7 @@ public class BaseMachineController {
     @RequestMapping("/isMachineandDepartment")
     @ApiOperation(value="判断部门下面有关联机台")
     @UserOperationLog("判断部门下面有关联机台")
-    public ResponseMessage<Boolean> isMachineandDepartment(String departmentId){
-        return ResponseMessage.ok(baseMachineService.isMachineandDepartment(departmentId));
+    public ResponseMessage<Boolean> isMachineandDepartment(String uuid){
+        return ResponseMessage.ok(baseMachineService.isMachineandDepartment(uuid));
     }
 }
