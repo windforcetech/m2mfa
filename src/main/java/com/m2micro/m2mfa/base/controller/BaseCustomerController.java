@@ -111,8 +111,8 @@ public class BaseCustomerController {
     @ApiOperation(value="删除客户基本资料档")
     @UserOperationLog("删除客户基本资料档")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseCustomerService.deleteByIds(ids);
-        return ResponseMessage.ok();
+
+        return  baseCustomerService.deleteEntitys(ids);
     }
 
     @RequestMapping("/addDetails")

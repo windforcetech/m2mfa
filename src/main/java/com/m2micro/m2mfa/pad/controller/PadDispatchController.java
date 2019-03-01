@@ -4,14 +4,13 @@ import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
-import com.m2micro.m2mfa.pad.model.PadPara;
-import com.m2micro.m2mfa.pad.model.StopWorkModel;
-import com.m2micro.m2mfa.pad.model.StopWorkPara;
-import com.m2micro.m2mfa.pad.model.StartWorkPara;
+import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.lang.reflect.InvocationTargetException;
@@ -55,8 +54,12 @@ public class PadDispatchController {
     @RequestMapping("/stopWork")
     @ApiOperation(value="pad下工")
     @UserOperationLog("pad下工")
-    public ResponseMessage<StopWorkModel> stopWork(StopWorkPara obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        return ResponseMessage.ok(padDispatchService.stopWork(obj));
+    public ResponseMessage<StopWorkModel> stopWork(@RequestBody StopWorkPara obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        StopWorkModel stopWorkModel = padDispatchService.stopWork(obj);
+        if(StringUtils.isNotEmpty(stopWorkModel.getMsg())){
+            return ResponseMessage.error(stopWorkModel.getMsg());
+        }
+        return ResponseMessage.ok();
     }
 
     /**
@@ -65,7 +68,7 @@ public class PadDispatchController {
     @RequestMapping("/finishHomework")
     @ApiOperation(value="pad结束作业")
     @UserOperationLog("pad结束作业")
-    public ResponseMessage finishHomework(Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public ResponseMessage<FinishHomeworkModel> finishHomework(FinishHomeworkPara obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.finishHomework(obj));
     }
     /**
@@ -74,7 +77,7 @@ public class PadDispatchController {
     @RequestMapping("/defectiveProducts")
     @ApiOperation(value="pad不良品数")
     @UserOperationLog("pad不良品数")
-    public ResponseMessage defectiveProducts (Object obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public ResponseMessage defectiveProducts (@RequestBody Padbad obj) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return ResponseMessage.ok(padDispatchService.defectiveProducts(obj));
     }
     /**

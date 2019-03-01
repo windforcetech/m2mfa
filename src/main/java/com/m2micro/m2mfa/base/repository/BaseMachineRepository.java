@@ -32,4 +32,7 @@ public interface BaseMachineRepository extends BaseRepository<BaseMachine,String
 
     @Query(value = "SELECT bm.* FROM base_machine bm WHERE bm.id = ?1",nativeQuery = true)
     BaseMachine findByOrgId(String orgId);
+
+    @Query(value = "SELECT bm.* FROM base_machine bm WHERE bm.id = ?1",nativeQuery = true)
+    List<BaseMachine> findByOrgIds(String orgId);
 }

@@ -1,7 +1,9 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.query.BaseStationQuery;
 import com.m2micro.m2mfa.base.repository.BaseStationRepository;
@@ -28,6 +30,7 @@ import com.m2micro.m2mfa.base.entity.QBaseStation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -152,12 +155,28 @@ public class BaseStationServiceImpl implements BaseStationService {
     }
 
     @Override
-    public void deleteAll(String[] ids) {
-        List<MesPartRouteStation> list = mesPartRouteStationRepository.findByStationIdIn(Arrays.asList(ids));
+    public ResponseMessage deleteAll(String[] ids) {
+      List<BaseStation> enableDelete = new ArrayList<>();
+      List<BaseStation> disableDelete = new ArrayList<>();
+      for(String id : ids ){
+        BaseStation baseStation = baseStationRepository.findById(id).orElse(null);
+        List<MesPartRouteStation> list = mesPartRouteStationRepository.findByStationId(id);
         if(list!=null&&list.size()>0){
-            throw new MMException("工位已产生业务记录，不允许删除！");
+          disableDelete.add(baseStation);
+          continue;
+          //throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
         }
-        deleteByIds(ids);
+        enableDelete.add(baseStation);
+      }
+      deleteAll(enableDelete);
+      ResponseMessage re =   ResponseMessage.ok("操作成功");
+      if(disableDelete.size()>0){
+        String[] strings = disableDelete.stream().map(BaseStation::getCode).toArray(String[]::new);
+        re.setMessage("工位编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+        return re;
+      }else{
+        return re;
+      }
     }
 
 }

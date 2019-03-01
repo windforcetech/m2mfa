@@ -64,6 +64,10 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
         if(StringUtils.isNotEmpty(query.getRouteName())){
             condition.and(qBaseRouteDesc.routeName.like("%"+query.getRouteName()+"%"));
         }
+        if(StringUtils.isNotEmpty(query.getType())){
+            condition.and(qBaseRouteDesc.enabled.eq(true));
+        }
+
         jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
         List<BaseRouteDesc> list = jq.fetch();
         for(BaseRouteDesc baseRouteDesc :list){

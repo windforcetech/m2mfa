@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.service;
 
 import com.m2micro.framework.commons.BaseService;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.query.BaseStaffQuery;
@@ -36,7 +37,7 @@ public interface BaseStaffService extends BaseService<BaseStaff,String> {
     //获取组织架构节点子树id 集合
     List<String> getAllIDsOfDepartmentTree(String departmentId);
 
-    void deleteByStaffId(String[] ids);
+    ResponseMessage deleteByStaffId(String[] ids);
 
     Boolean isUsedForStaff(String[] ids);
     /**

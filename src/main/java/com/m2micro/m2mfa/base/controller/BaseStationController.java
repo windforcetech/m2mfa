@@ -83,8 +83,8 @@ public class BaseStationController {
     @ApiOperation(value="删除工位基本档")
     @UserOperationLog("删除工位基本档")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseStationService.deleteAll(ids);
-        return ResponseMessage.ok();
+
+        return   baseStationService.deleteAll(ids);
     }
 
 }

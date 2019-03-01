@@ -23,4 +23,10 @@ public interface BaseShiftRepository extends BaseRepository<BaseShift,String> {
      * @return     班别基本资料
      */
     List<BaseShift> findByCodeAndShiftIdNot(String code ,String shiftId);
+
+    /**
+     * 获取有效的班班信息
+     * @return
+     */
+    List<BaseShift>findByEnabled(boolean enabled);
 }

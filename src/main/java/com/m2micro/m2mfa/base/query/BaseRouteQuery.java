@@ -13,10 +13,8 @@ public class BaseRouteQuery  extends Query {
     @ApiModelProperty(value = "工艺名称 ")
     private String routeName;
 
-    public BaseRouteQuery(String routeNo, String routeName) {
-        this.routeNo = routeNo;
-        this.routeName = routeName;
-    }
+    @ApiModelProperty(value = "请求类型 ")
+    private String type;
 
     public String getRouteNo() {
         return routeNo;
@@ -34,6 +32,11 @@ public class BaseRouteQuery  extends Query {
         this.routeName = routeName;
     }
 
-    public BaseRouteQuery() {
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

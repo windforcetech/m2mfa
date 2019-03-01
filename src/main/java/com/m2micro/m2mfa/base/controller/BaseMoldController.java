@@ -41,6 +41,7 @@ import java.util.Map;
 public class BaseMoldController {
     @Autowired
     BaseMoldService baseMoldService;
+
     @Autowired
     BaseItemsTargetService baseItemsTargetService;
 
@@ -128,15 +129,9 @@ public class BaseMoldController {
     @ApiOperation(value="删除模具主档")
     @UserOperationLog("删除模具主档")
     public ResponseMessage delete(@RequestBody  String[] ids){
-        //根据ID删除模具，删除时查询【Mes_Record_Mold】表是否已产生业务，如果已有记录，提示用户已产生业务不允许删除。
-        for (String id:ids){
-            // 预留，是否产生业务
-            if(false){
-                throw new MMException("用户已产生业务不允许删除。");
-            }
-        }
-        baseMoldService.deleteByIds(ids);
-        return ResponseMessage.ok();
+
+
+        return  baseMoldService.delete(ids);
     }
 
     @RequestMapping("/addDetails")
@@ -168,7 +163,7 @@ public class BaseMoldController {
     @ApiOperation(value="排产单需要的模具列表")
     @UserOperationLog("排产单需要的模具列表")
     public ResponseMessage<List<BaseMold>> mesMoScheduleMolds(){
-      List<BaseMold>molds = baseMoldService.findAll();
+      List<BaseMold>molds = baseMoldService.findbyisMold();
       if(molds.isEmpty()){
           throw  new MMException("模具信息不存在。");
       }

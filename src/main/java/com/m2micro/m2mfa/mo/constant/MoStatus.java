@@ -1,8 +1,5 @@
 package com.m2micro.m2mfa.mo.constant;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 工单状态
  */

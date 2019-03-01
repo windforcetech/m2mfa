@@ -3,13 +3,10 @@ package com.m2micro.m2mfa.mo.service;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.m2mfa.base.entity.BaseStation;
-import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.entity.*;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
-import com.m2micro.m2mfa.mo.entity.MesMoScheduleStaff;
-import com.m2micro.m2mfa.mo.entity.MesMoScheduleStation;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleInfoModel;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
@@ -39,7 +36,7 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      * @param partID
      * @return
      */
-    List<MesMoSchedule> findpartID(String partID);
+    List<MesMoDesc> findpartID(String partID);
 
     /**
      * 根据工单id排产单状态获取排产单信息
@@ -50,7 +47,7 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
     List<MesMoSchedule> findByMoIdAndFlag(String moId,List<Integer> flags);
 
     /**
-     * 审核工单
+     * 审核排产单
      * @param id
      *      工单id
      */
@@ -182,5 +179,11 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     void peopleDistributionsave( List<MesMoScheduleStaff> mesMoScheduleStaffs,List<MesMoScheduleStation> mesMoScheduleStations);
 
+    /**
+     * 判断排产单为生产中或已审待产
+     * @param scheduleId
+     * @return
+     */
+    boolean  isScheduleFlag(String  scheduleId);
 
 }

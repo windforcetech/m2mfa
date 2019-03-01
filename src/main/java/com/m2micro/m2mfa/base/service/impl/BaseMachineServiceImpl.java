@@ -1,8 +1,10 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
 import com.m2micro.m2mfa.base.repository.BaseMachineRepository;
@@ -29,6 +31,7 @@ import com.m2micro.m2mfa.base.entity.QBaseMachine;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -143,7 +146,22 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
         List<BaseMachine> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_machine";
+        String countSql = "select count(*) from base_machine bm where 1=1 \n";
+        if(StringUtils.isNotEmpty(query.getCode())){
+            countSql = countSql + " and bm.code like '%"+query.getCode()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            countSql = countSql + " and bm.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getFlag())){
+            countSql = countSql + " and bm.flag = '"+query.getFlag()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getDepartmentId())){
+            countSql = countSql + " and bm.department_id = '"+query.getDepartmentId()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getPlacement())){
+            countSql = countSql + " and bm.placement= '"+query.getPlacement()+"'";
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
@@ -161,17 +179,48 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     @Override
     public PageUtil<BaseMachine> findbyMachine( MesMachineQuery query) {
         String sql ="SELECT\n" +
-                "	bm.*, o.department_name departmentName\n" +
-                "FROM\n" +
+            "	bm.machine_id machineId,\n" +
+            "	bm.code code,\n" +
+            "	bm.name name,\n" +
+            "	bm.id id,\n" +
+            "	bm.assdt_id assdtId,\n" +
+            "	bm.serial_number serialNumber,\n" +
+            "	bm.category_id categoryId,\n" +
+            "	bm.placement placement,\n" +
+            "	bm.flag flag,\n" +
+            "	bm.department_id departmentId,\n" +
+            "	bm.purchase_date purchaseDate,\n" +
+            "	bm.purchase_cost purchaseCost,\n" +
+            "	bm.life life,\n" +
+            "	bm.utilization_time utilizationTime,\n" +
+            "	bm.tank_capacity tankCapacity,\n" +
+            "	bm.unit unit,\n" +
+            "	bm.maintenance_staff maintenanceStaff,\n" +
+            "	bm.technical_staff technicalStaff,\n" +
+            "	bm.manager_staff managerStaff,\n" +
+            "	bm.new_mono newMono,\n" +
+            "	bm.image image,\n" +
+            "	bm.sort_code sortCode,\n" +
+            "	bm.enabled enabled,\n" +
+            "	bm.description description,\n" +
+            "	bm.create_on createOn,\n" +
+            "	bm.create_by createBy,\n" +
+            "	bm.modified_on modifiedOn,\n" +
+            "	bm.modified_by modifiedBy,\n" +
+            "	bi.item_name flagName,\n" +
+            "	bi2.item_name placementName,\n" +
+            "	o.department_name\n" +
+            "FROM\n" +
                 "	base_machine bm\n" +
-                "LEFT JOIN base_items_target bit ON bm.flag = bit.id\n" +
+            "LEFT JOIN base_items_target bi ON bi.id = bm.flag\n" +
+            "LEFT JOIN base_items_target bi2 ON bi2.id = bm.placement\n" +
                 "LEFT JOIN organization o ON bm.department_id = o.uuid\n" +
                 "WHERE\n" +
-                "	bit.item_name != '维修'\n" ;
+                "	bi.item_name != '维修'\n" ;
                 if(StringUtils.isNotEmpty(query.getMachinCode())){
                    sql += "  and bm.`code`  Like '%"+query.getMachinCode()+"%'";
                 }
-                sql +=  " AND bit.item_name != '保养' ";
+                sql +=  " AND bi.item_name != '保养' and bm.enabled=1 ";
                 sql += " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         String countsql ="SELECT\n" +
                 "	count(*) \n" +
@@ -179,7 +228,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
                 "	base_machine bm\n" +
                 "LEFT JOIN base_items_target bit ON bm.flag = bit.id\n" +
                 "WHERE\n" +
-                "	bit.item_name != '维修'\n" ;
+                "	bit.item_name != '维修' and bm.enabled=1\n" ;
         if(StringUtils.isNotEmpty(query.getMachinCode())){
             countsql += "  and bm.`code`  Like '%"+query.getMachinCode()+"%'";
         }
@@ -209,10 +258,10 @@ public class BaseMachineServiceImpl implements BaseMachineService {
 
     @Override
     @Transactional
-    public void delete(String[] ids) {
+    public ResponseMessage delete(String[] ids) {
         //校验
-        valid(ids);
-        deleteByIds(ids);
+       return  valid(ids);
+
     }
 
     @Override
@@ -241,17 +290,39 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         return list;
     }
 
+    @Override
+    public boolean isMachineandDepartment(String uuid) {
+        List<BaseMachine> baseMachines = baseMachineRepository.findByOrgIds(uuid);
+        if(baseMachines.isEmpty()){
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 校验排产单是否已经引用
      * @param ids
      */
-    private void valid(String[] ids) {
+    private ResponseMessage valid(String[] ids) {
+        List<BaseMachine> enableDelete = new ArrayList<>();
+        List<BaseMachine> disableDelete = new ArrayList<>();
         for (String id:ids){
+            BaseMachine baseMachine = findById(id).orElse(null);
             Integer count = mesMoScheduleRepository.countByMachineId(id);
             if(count>0){
-                BaseMachine baseMachine = findById(id).orElse(null);
-                throw new MMException("设备编号【"+baseMachine.getCode()+"】已产生业务，不允许删除！");
+                disableDelete.add(baseMachine);
+                continue;
             }
+            enableDelete.add(baseMachine);
+        }
+        deleteAll(enableDelete);
+        ResponseMessage re =   ResponseMessage.ok("操作成功");
+        if(disableDelete.size()>0){
+            String[] strings = disableDelete.stream().map(BaseMachine::getCode).toArray(String[]::new);
+            re.setMessage("机台编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return re;
+        }else{
+            return re;
         }
     }
 

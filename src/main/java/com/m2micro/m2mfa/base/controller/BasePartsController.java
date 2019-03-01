@@ -130,8 +130,7 @@ public class BasePartsController {
     @ApiOperation(value="删除料件基本资料")
     @UserOperationLog("删除料件基本资料")
     public ResponseMessage delete(@RequestBody String[] ids){
-        basePartsService.deleteAllByIds(ids);
-        return ResponseMessage.ok();
+        return basePartsService.deleteAllByIds(ids);
     }
 
     @RequestMapping("/addDetails")

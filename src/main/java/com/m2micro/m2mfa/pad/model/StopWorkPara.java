@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Auther: liaotao
  * @Date: 2019/1/19 15:38
@@ -13,6 +15,8 @@ import lombok.Data;
 @ApiModel(description="pad 下工参数")
 @Data
 public class StopWorkPara {
+    @ApiModelProperty(value = "排产单Id")
+    private String scheduleId;
     @ApiModelProperty(value = "工位Id")
     private String stationId;
     @ApiModelProperty(value = "上工记录主键")
@@ -20,5 +24,5 @@ public class StopWorkPara {
     @ApiModelProperty(value = "人员作业记录主键")
     private String recordStaffId;
     @ApiModelProperty(value = "不良输入记录")
-    private MesRecordFail mesRecordFail;
+    private List<MesRecordFail> mesRecordFails;
 }

@@ -1,11 +1,12 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
-import com.m2micro.m2mfa.base.entity.BaseMold;
-import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BasePartsQuery;
+import com.m2micro.m2mfa.base.repository.BasePackRepository;
 import com.m2micro.m2mfa.base.repository.BasePartsRepository;
+import com.m2micro.m2mfa.base.service.BasePackService;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
@@ -21,9 +22,10 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBaseParts;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 /**
  * 料件基本资料 服务实现类
@@ -42,6 +44,8 @@ public class BasePartsServiceImpl implements BasePartsService {
     JdbcTemplate jdbcTemplate;
     @Autowired
     BaseItemsTargetServiceImpl baseItemsTargetService;
+    @Autowired
+    BasePackRepository basePackRepository;
 
     public BasePartsRepository getRepository() {
         return basePartsRepository;
@@ -130,6 +134,10 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(StringUtils.isNotEmpty(query.getSource())){
             sql = sql+" and bp.source = '"+query.getSource()+"'";
         }
+        if(query.getEnabled()!=null){
+            sql = sql+" and bp.enabled = "+query.getEnabled()+"";
+        }
+
         if(StringUtils.isNotEmpty(query.getCategory())){
             BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
             //不等于全部
@@ -142,7 +150,31 @@ public class BasePartsServiceImpl implements BasePartsService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_parts";
+        String countSql = "select count(*) from base_parts bp where 1=1 ";
+
+        if(StringUtils.isNotEmpty(query.getPartNo())){
+            countSql = countSql+" and bp.part_no like '%"+query.getPartNo()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            countSql = countSql+" and bp.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSpec())){
+            countSql = countSql+" and bp.spec like '%"+query.getSpec()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSource())){
+            countSql = countSql+" and bp.source = '"+query.getSource()+"'";
+        }
+        if(query.getEnabled()!=null){
+            countSql = countSql+" and bp.enabled = "+query.getEnabled()+"";
+        }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
+            //不等于全部
+            if(!(baseItemsTarget!=null&&"全部".equals(baseItemsTarget.getItemName()))){
+                countSql = countSql+" and bp.category = '"+query.getCategory()+"'";
+            }
+
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
 
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
@@ -192,6 +224,7 @@ public class BasePartsServiceImpl implements BasePartsService {
                 "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
                 "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
                 "WHERE 1 = 1\n" +
+                "AND bp.enabled=1 \n" +
                 "AND not EXISTS (SELECT mpr.part_id part_id from mes_part_route mpr where mpr.part_id=bp.part_id)\n";
 
         if(StringUtils.isNotEmpty(query.getPartNo())){
@@ -213,7 +246,24 @@ public class BasePartsServiceImpl implements BasePartsService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_parts";
+        String countSql = "select count(*) from base_parts bp where 1=1 AND bp.enabled=1 \n"+
+            "AND not EXISTS (SELECT mpr.part_id part_id from mes_part_route mpr where mpr.part_id=bp.part_id)\n";
+
+        if(StringUtils.isNotEmpty(query.getPartNo())){
+            countSql = countSql+" and bp.part_no like '%"+query.getPartNo()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            countSql = countSql+" and bp.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSpec())){
+            countSql = countSql+" and bp.spec like '%"+query.getSpec()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSource())){
+            countSql = countSql+" and bp.source = '"+query.getSource()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            countSql = countSql+" and bp.category = '"+query.getCategory()+"'";
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
 
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
@@ -226,24 +276,49 @@ public class BasePartsServiceImpl implements BasePartsService {
 
     @Override
     @Transactional
-    public void deleteAllByIds(String[] ids) {
+    public ResponseMessage deleteAllByIds(String[] ids) {
         //删除物料时检查有没有发生业务，通过物料编号【Part_Id】，查询工单主表【Mes_Mo_Desc】。
         //如已产生业务，提示已有业务不允许删除。
         //这里可以优化，做关联查询。
+        List<BaseParts> enableDelete = new ArrayList<>();
+        List<BaseParts> disableDelete = new ArrayList<>();
         for (String id:ids){
             BaseParts bp = findById(id).orElse(null);
             if(bp==null){
                 throw new MMException("数据库不存在数据！");
             }
             List<MesMoDesc> list = mesMoDescRepository.findByPartId(bp.getPartId());
+            List<BasePack> basePacks = basePackRepository.findByPartId(bp.getPartId());
+
+
             if(list!=null&&list.size()>0){
-                throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
+                disableDelete.add(bp);
+                continue;
+                //throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
+            }else {
+                //过滤完工单是否有业务，再过滤包装
+                if(basePacks!=null&&basePacks.size()>0){
+                    disableDelete.add(bp);
+                    continue;
+                    //throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
+                }
             }
+
+            enableDelete.add(bp);
         }
         //如无业务则删除。同时删除相关的表【Mes_Part_Route】【Mes_Part_Route_Process】【Mes_Part_Route_Station】
         //【Base_Bom_Desc】 【Base_Bom_Def】【Base_Bom_Substitute】
         //删除Base_Parts表
-        deleteByIds(ids);
+        //deleteByIds(ids);
+        deleteAll(enableDelete);
+        ResponseMessage re =   ResponseMessage.ok("操作成功");
+        if(disableDelete.size()>0){
+            String[] strings = disableDelete.stream().map(BaseParts::getPartNo).toArray(String[]::new);
+            re.setMessage("物料编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return re;
+        }else{
+            return re;
+        }
         //删除Mes_Part_Route表
         //删除Mes_Part_Route_Process表
         //删除Mes_Part_Route_Station表
@@ -265,8 +340,8 @@ public class BasePartsServiceImpl implements BasePartsService {
 
     @Override
     public PageUtil<BaseParts> findByNotUsedForPack(BasePartsQuery query) {
-        String sql ="SELECT t.*,bi.item_name categoryName FROM base_parts t left join base_items_target bi on bi.id = t.category   where t.part_no not in(select distinct part_id from base_pack) ";
-       String sqlCount="Select count(*) FROM base_parts t where t.part_no not in(select distinct part_id from base_pack) ";
+        String sql ="SELECT t.* FROM base_parts t where t.part_no not in(select distinct part_id from base_pack) AND t.enabled=1 ";
+       String sqlCount="Select count(*) FROM base_parts t where t.part_no not in(select distinct part_id from base_pack) AND t.enabled=1 ";
         if( query.getPartNo()!=null&&query.getPartNo()!=""){
             sql+=" and t.part_no like '%"+query.getPartNo()+"%' ";
             sqlCount+=" and t.part_no like '%"+query.getPartNo()+"%' ";

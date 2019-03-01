@@ -41,4 +41,21 @@ public interface MesRecordStaffRepository extends BaseRepository<MesRecordStaff,
 
     @Query(value = "SELECT  * from  mes_record_staff  where  staff_id=?1",nativeQuery = true)
     List<MesRecordStaff> findStaffId(String staffId);
+
+    /**
+     * 查找人员上工记录
+     * @param rwId
+     * @return
+     */
+    MesRecordStaff findByRwIdAndStartTimeNotNullAndEndTimeIsNull(String rwId);
+
+    /**
+     * 获取单个员工作业记录
+     * @param rwId
+     * @param staffId
+     * @return
+     */
+    List<MesRecordStaff>findByRwIdAndStaffId(String rwId,String staffId );
+
+
 }

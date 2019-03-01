@@ -1,27 +1,24 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
-import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.query.BaseCustomerQuery;
 import com.m2micro.m2mfa.base.repository.BaseCustomerRepository;
 import com.m2micro.m2mfa.base.service.BaseCustomerService;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
-import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBaseCustomer;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 /**
  * 客户基本资料档 服务实现类
@@ -103,7 +100,13 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseCustomer.class);
         List<BaseCustomer> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_customer";
+        String countSql = "select count(*) from base_customer bc where 1=1 \n";
+        if(StringUtils.isNotEmpty(query.getCode())){
+            countSql = countSql+" and bc.code like '%"+query.getCode()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            countSql = countSql+" and (bc.name like '%"+query.getName()+"%'"+" or bc.fullname like '%"+query.getName()+"%')";
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
@@ -129,6 +132,40 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
             }
         }
         deleteByIds(ids);
+    }
+
+    @Override
+    @Transactional
+    public ResponseMessage deleteEntitys(String[] ids) {
+       return  valid(ids);
+
+    }
+
+    /**
+     * 校验
+     * @param ids
+     */
+    private ResponseMessage valid(String[] ids) {
+        List<BaseCustomer> enableDelete = new ArrayList<>();
+        List<BaseCustomer> disableDelete = new ArrayList<>();
+        for(String id:ids){
+            BaseCustomer baseCustomer = findById(id).orElse(null);
+            Integer count = mesMoDescRepository.countByCustomerId(id);
+            if(count>0){
+                disableDelete.add(baseCustomer);
+                continue;
+            }
+          enableDelete.add(baseCustomer);
+        }
+      deleteAll(enableDelete);
+      ResponseMessage re =   ResponseMessage.ok("操作成功");
+      if(disableDelete.size()>0){
+        String[] strings = disableDelete.stream().map(BaseCustomer::getCode).toArray(String[]::new);
+        re.setMessage("用户编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+        return re;
+      }else{
+        return re;
+      }
     }
 
 }

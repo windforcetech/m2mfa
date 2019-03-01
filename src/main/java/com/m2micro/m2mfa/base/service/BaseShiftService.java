@@ -1,9 +1,11 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.query.BaseShiftQuery;
 
 import java.util.List;
 
@@ -19,7 +21,7 @@ public interface BaseShiftService extends BaseService<BaseShift,String> {
      *         查询参数
      * @return  分页信息
      */
-    PageUtil<BaseShift> list(Query query);
+    PageUtil<BaseShift> list(BaseShiftQuery query);
 
     /**
      * 根据编号和id查找班别
@@ -30,4 +32,17 @@ public interface BaseShiftService extends BaseService<BaseShift,String> {
      * @return     班别基本资料
      */
     List<BaseShift> findByCodeAndShiftIdNot(String code , String shiftId);
+
+    /**
+     * 获取当前班别的有效工时
+     * @param shiftId
+     * @return
+     */
+    long  findbhours(String shiftId);
+
+    /**
+     * 删除班别
+     * @param ids
+     */
+    ResponseMessage deleteEntity(String[] ids);
 }

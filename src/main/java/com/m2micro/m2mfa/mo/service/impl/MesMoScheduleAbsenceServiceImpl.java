@@ -50,57 +50,57 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
     @Transactional
     @Override
     public void save(AbsencePersonnel absencePersonnel) {
-                List<MesRecordStaff>mesRecordStaffs =  mesRecordStaffRepository.findStaffId(absencePersonnel.getLackstaffId());
-                if(!mesRecordStaffs.isEmpty()){
-                    for(MesRecordStaff mesRecordStaff:mesRecordStaffs){
-                        MesMoSchedule mesMoSchedule =  mesMoScheduleRepository.findById(mesRecordStaff.getScheduleId()).orElse(null);
-                        IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
-                        mesRecordStaff.setEndTime(new Date());
-                        if(iotMachineOutput !=null){
-                            mesRecordStaff.setEndMolds(iotMachineOutput.getOutput());
-                            mesRecordStaff.setEndPower(iotMachineOutput.getPower());
-                        }
-                        mesRecordStaffService.updateById(mesRecordStaff.getId(),mesRecordStaff);
-
-                    }
-
+        List<MesRecordStaff>mesRecordStaffs =  mesRecordStaffRepository.findStaffId(absencePersonnel.getLackstaffId());
+        if(!mesRecordStaffs.isEmpty()){
+            for(MesRecordStaff mesRecordStaff:mesRecordStaffs){
+                MesMoSchedule mesMoSchedule =  mesMoScheduleRepository.findById(mesRecordStaff.getScheduleId()).orElse(null);
+                IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+                mesRecordStaff.setEndTime(new Date());
+                if(iotMachineOutput !=null){
+                    mesRecordStaff.setEndMolds(iotMachineOutput.getOutput());
+                    mesRecordStaff.setEndPower(iotMachineOutput.getPower());
                 }
-                String []   ScheduleIds= absencePersonnel.getScheduleIds();
-                for(int i=0; i<ScheduleIds.length;i++){
-                    String ScheduleId =ScheduleIds[i];
-                    if(ScheduleId==null || mesMoScheduleRepository.findById(ScheduleId).orElse(null)==null){
-                        throw  new MMException("排产单ID有误。");
+                mesRecordStaffService.updateById(mesRecordStaff.getId(),mesRecordStaff);
+
+            }
+
+        }
+        String []   ScheduleIds= absencePersonnel.getScheduleIds();
+        for(int i=0; i<ScheduleIds.length;i++){
+            String ScheduleId =ScheduleIds[i];
+            if(ScheduleId==null || mesMoScheduleRepository.findById(ScheduleId).orElse(null)==null){
+                throw  new MMException("排产单ID有误。");
+            }
+            //缺勤替换
+            List<MesMoScheduleStaff>mesMoScheduleStaffs =  mesMoScheduleStaffRepository.findByScheduleIdandStafftId(ScheduleId,absencePersonnel.getLackstaffId());
+            for(MesMoScheduleStaff mesMoScheduleStaff :mesMoScheduleStaffs){
+
+                MesMoScheduleStaff newmesMoScheduleStaff= new MesMoScheduleStaff();
+                newmesMoScheduleStaff.setId(UUIDUtil.getUUID());
+                newmesMoScheduleStaff.setStaffId(absencePersonnel.getForstaffId());
+                newmesMoScheduleStaff.setScheduleId(mesMoScheduleStaff.getScheduleId());
+                newmesMoScheduleStaff.setStationId(mesMoScheduleStaff.getStationId());
+                newmesMoScheduleStaff.setIsStation(mesMoScheduleStaff.getIsStation());
+                newmesMoScheduleStaff.setShiftId(mesMoScheduleStaff.getShiftId());
+                newmesMoScheduleStaff.setProcessId(mesMoScheduleStaff.getProcessId());
+                newmesMoScheduleStaff.setEnabled(true);
+
+                String sql ="SELECT * FROM mes_mo_schedule_staff WHERE schedule_id = '"+mesMoScheduleStaff.getScheduleId()+"' AND staff_id = '"+absencePersonnel.getForstaffId()+"' AND shift_id = '"+mesMoScheduleStaff.getShiftId()+"' AND station_id = '"+mesMoScheduleStaff.getStationId()+"' AND is_station = "+mesMoScheduleStaff.getIsStation()+"";
+                RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoScheduleStaff.class);
+                List<MesMoScheduleStaff> list=jdbcTemplate.query(sql,rm);
+                if(list.isEmpty()){
+                    //添加替换人员信息
+                    mesMoScheduleStaffService.save(newmesMoScheduleStaff);
+                }else {
+                    for(MesMoScheduleStaff staff :list ){
+                        staff.setEnabled(true);
+                        mesMoScheduleStaffService.updateById(staff.getId(),staff);
                     }
-                        //缺勤替换
-                        List<MesMoScheduleStaff>mesMoScheduleStaffs =  mesMoScheduleStaffRepository.findByScheduleIdandStafftId(ScheduleId,absencePersonnel.getLackstaffId());
-                        for(MesMoScheduleStaff mesMoScheduleStaff :mesMoScheduleStaffs){
-
-                            MesMoScheduleStaff newmesMoScheduleStaff= new MesMoScheduleStaff();
-                            newmesMoScheduleStaff.setId(UUIDUtil.getUUID());
-                            newmesMoScheduleStaff.setStaffId(absencePersonnel.getForstaffId());
-                            newmesMoScheduleStaff.setScheduleId(mesMoScheduleStaff.getScheduleId());
-                            newmesMoScheduleStaff.setStationId(mesMoScheduleStaff.getStationId());
-                            newmesMoScheduleStaff.setIsStation(mesMoScheduleStaff.getIsStation());
-                            newmesMoScheduleStaff.setShiftId(mesMoScheduleStaff.getShiftId());
-                            newmesMoScheduleStaff.setProcessId(mesMoScheduleStaff.getProcessId());
-                            newmesMoScheduleStaff.setEnabled(true);
-
-                            String sql ="SELECT * FROM mes_mo_schedule_staff WHERE schedule_id = '"+mesMoScheduleStaff.getScheduleId()+"' AND staff_id = '"+absencePersonnel.getForstaffId()+"' AND shift_id = '"+mesMoScheduleStaff.getShiftId()+"' AND station_id = '"+mesMoScheduleStaff.getStationId()+"' AND is_station = "+mesMoScheduleStaff.getIsStation()+"";
-                            RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoScheduleStaff.class);
-                            List<MesMoScheduleStaff> list=jdbcTemplate.query(sql,rm);
-                            if(list.isEmpty()){
-                                //添加替换人员信息
-                                mesMoScheduleStaffService.save(newmesMoScheduleStaff);
-                            }else {
-                                for(MesMoScheduleStaff staff :list ){
-                                    staff.setEnabled(true);
-                                    mesMoScheduleStaffService.updateById(staff.getId(),staff);
-                                }
-                            }
-                            //缺勤人员状态修改false
-                            mesMoScheduleStaff.setEnabled(false);
-                            mesMoScheduleStaffService.updateById(mesMoScheduleStaff.getId(),mesMoScheduleStaff);
-                        }
+                }
+                //缺勤人员状态修改false
+                mesMoScheduleStaff.setEnabled(false);
+                mesMoScheduleStaffService.updateById(mesMoScheduleStaff.getId(),mesMoScheduleStaff);
+            }
 
         }
 

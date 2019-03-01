@@ -66,6 +66,7 @@ public class BaseStaffController {
         }
         query.setSize(baseStaffQueryObj.getSize());
         query.setPage(baseStaffQueryObj.getPage());
+        query.setEnabled(baseStaffQueryObj.isEnabled());
         PageUtil<BaseStaffDetailObj> page = baseStaffService.list(query);
 
         return ResponseMessage.ok(page);
@@ -190,17 +191,17 @@ public class BaseStaffController {
     @UserOperationLog("删除员工（职员）表")
     public ResponseMessage delete(@RequestBody String[] ids) {
         //baseStaffService.deleteByIds(ids);
-        if (baseStaffService.isUsedForStaff(ids)) {
-            throw new MMException("职员被使用不可删除！");
-        }
-        baseStaffService.deleteByStaffId(ids);
+//        if (baseStaffService.isUsedForStaff(ids)) {
+//            throw new MMException("职员被使用不可删除！");
+//        }
+
 //        for (String id :ids){
 //            BaseStaff baseStaff = baseStaffService.findById(id).get();
 //            baseStaff.setDeletionStateCode(true);
 //            baseStaffService.save(baseStaff);
 //        }
 
-        return ResponseMessage.ok();
+        return   baseStaffService.deleteByStaffId(ids);
     }
 
     /**

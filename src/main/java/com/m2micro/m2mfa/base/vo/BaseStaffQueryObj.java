@@ -30,4 +30,7 @@ public class BaseStaffQueryObj extends Query {
     @ApiModelProperty(value = "所属部门Id")
     private String departmentId;
 
+
+    @ApiModelProperty(value = "是否有效 ")
+    private boolean enabled;
 }

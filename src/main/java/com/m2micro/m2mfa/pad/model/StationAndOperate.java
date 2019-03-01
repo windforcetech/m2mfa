@@ -17,6 +17,10 @@ import java.util.List;
 public class StationAndOperate {
     @ApiModelProperty(value = "操作栏信息")
     private OperationInfo operationInfo;
+    @ApiModelProperty(value = "工序主键")
+    private String processId;
+    @ApiModelProperty(value = "工序名称")
+    private String processName;
     @ApiModelProperty(value = "工位信息")
     private List<PadStationModel> padStationModels;
 }

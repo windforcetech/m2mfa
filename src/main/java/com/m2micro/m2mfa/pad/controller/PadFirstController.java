@@ -3,8 +3,7 @@ package com.m2micro.m2mfa.pad.controller;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.m2mfa.pad.model.PadPara;
-import com.m2micro.m2mfa.pad.model.StopWorkPara;
+import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.service.PadFirstService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,7 +50,7 @@ public class PadFirstController {
     @RequestMapping("/finishHomework")
     @ApiOperation(value="pad首件结束作业")
     @UserOperationLog("pad首件结束作业")
-    public ResponseMessage finishHomework(Object obj){
+    public ResponseMessage<FinishHomeworkModel>  finishHomework(FinishHomeworkPara obj){
         return ResponseMessage.ok(padFirstService.finishHomework(obj));
     }
     /**
@@ -60,7 +59,7 @@ public class PadFirstController {
     @RequestMapping("/defectiveProducts")
     @ApiOperation(value="pad首件不良品数")
     @UserOperationLog("pad首件不良品数")
-    public ResponseMessage defectiveProducts (Object obj){
+    public ResponseMessage defectiveProducts (Padbad obj){
         return ResponseMessage.ok(padFirstService.defectiveProducts(obj));
     }
     /**

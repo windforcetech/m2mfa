@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -43,7 +44,7 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
      * 删除料件所有关联的数据
      * @param ids
      */
-    void deleteAllByIds(String[] ids);
+    ResponseMessage deleteAllByIds(String[] ids);
 
     //料件编号获取基本数据
     BaseParts selectpartNo(String partNo);
