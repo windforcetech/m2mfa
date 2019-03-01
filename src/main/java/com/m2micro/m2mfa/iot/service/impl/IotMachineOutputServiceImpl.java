@@ -16,7 +16,10 @@ import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.iot.repository.IotMachineOutputRepository;
 import com.m2micro.m2mfa.iot.service.IotMachineOutputService;
 import com.m2micro.m2mfa.iot.util.IotUtil;
+import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
+import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
@@ -130,7 +133,7 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
         BaseMachine baseMachine = baseMachineRepository.findByOrgId(orgId);
         if(baseMachine!=null){
             //通过mch_id找正在生产的排产单ID，如果拿不到(该机台上没有分配排产单)
-            List<MesMoSchedule> productionMesMoSchedule = mesMoScheduleRepository.getProductionMesMoScheduleByMachineId(baseMachine.getMachineId());
+            List<MesMoSchedule> productionMesMoSchedule = mesMoScheduleRepository.getProductionMesMoScheduleByMachineId(baseMachine.getMachineId(), MoScheduleStatus.PRODUCTION.getKey());
             //同一台机器上正在生产两个排产单，数据异常情况>1，不作处理
             if(productionMesMoSchedule.size()>1){
                 return;
@@ -138,7 +141,13 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
             if(productionMesMoSchedule!=null&&productionMesMoSchedule.size()==1){
                 //通过排产单ID找模具ID，如果拿不到(排产单工序中没有选模具)
                 String scheduleId = productionMesMoSchedule.get(0).getScheduleId();
-                String productionMoldId = mesMoScheduleProcessRepository.getProductionMoldId(scheduleId, iotConstant.getProcessId());
+                //String productionMoldId = mesMoScheduleProcessRepository.getProductionMoldId(scheduleId, iotConstant.getProcessId());
+                List<MesMoScheduleProcess> mesMoScheduleProcesses = mesMoScheduleProcessRepository.findByScheduleIdAndMoldIdNotNull(scheduleId);
+                if(mesMoScheduleProcesses==null||mesMoScheduleProcesses.size()!=1){
+                    return;
+                }
+
+                String productionMoldId = mesMoScheduleProcesses.get(0).getMoldId();
                 if(StringUtils.isNotEmpty(productionMoldId)){
                     //通过模具ID，得到cavity
                     BaseMold baseMold = baseMoldRepository.findById(productionMoldId).orElse(null);

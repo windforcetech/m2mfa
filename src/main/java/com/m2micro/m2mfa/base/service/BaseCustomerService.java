@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -37,4 +38,10 @@ public interface BaseCustomerService extends BaseService<BaseCustomer,String> {
      * @param ids
      */
     void deleteAllByIds(String[] ids);
+
+    /**
+     * 删除客户资料
+     * @param ids
+     */
+    ResponseMessage deleteEntitys(String[] ids);
 }

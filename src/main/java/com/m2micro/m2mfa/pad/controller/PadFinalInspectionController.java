@@ -3,14 +3,15 @@ package com.m2micro.m2mfa.pad.controller;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.m2mfa.pad.model.PadPara;
-import com.m2micro.m2mfa.pad.model.StopWorkPara;
+import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.service.PadFinalInspectionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * @Auther: liaotao
@@ -52,7 +53,7 @@ public class PadFinalInspectionController {
     @RequestMapping("/finishHomework")
     @ApiOperation(value="pad终检结束作业")
     @UserOperationLog("pad终检结束作业")
-    public ResponseMessage finishHomework(Object obj){
+    public ResponseMessage<FinishHomeworkModel> finishHomework(FinishHomeworkPara obj){
         return ResponseMessage.ok(padFinalInspectionService.finishHomework(obj));
     }
     /**
@@ -61,7 +62,7 @@ public class PadFinalInspectionController {
     @RequestMapping("/defectiveProducts")
     @ApiOperation(value="pad终检不良品数")
     @UserOperationLog("pad终检不良品数")
-    public ResponseMessage defectiveProducts (Object obj){
+    public ResponseMessage defectiveProducts (Padbad obj) throws InvocationTargetException {
         return ResponseMessage.ok(padFinalInspectionService.defectiveProducts(obj));
     }
     /**

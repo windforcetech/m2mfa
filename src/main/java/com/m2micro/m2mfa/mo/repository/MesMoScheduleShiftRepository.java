@@ -33,4 +33,11 @@ public interface MesMoScheduleShiftRepository extends BaseRepository<MesMoSchedu
      * @return  排程班别
      */
     List<MesMoScheduleShift> findByScheduleId(String scheduleId);
+
+    /**
+     * 根据shiftId查找排程班别数量
+     * @param shiftId
+     * @return
+     */
+    Integer countByShiftId(String shiftId);
 }

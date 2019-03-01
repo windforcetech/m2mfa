@@ -107,8 +107,8 @@ public class BaseMachineController {
     @ApiOperation(value="删除机台主档")
     @UserOperationLog("删除机台主档")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseMachineService.delete(ids);
-        return ResponseMessage.ok();
+
+        return  baseMachineService.delete(ids);
     }
     @RequestMapping("/addDetails")
     @ApiOperation(value="单位基本基本信息")
@@ -125,5 +125,12 @@ public class BaseMachineController {
     @UserOperationLog("获取机台名称下拉选项")
     public ResponseMessage<List<SelectNode>> getNames(String machineId){
         return ResponseMessage.ok(baseMachineService.getNames(machineId));
+    }
+
+    @RequestMapping("/isMachineandDepartment")
+    @ApiOperation(value="判断部门下面有关联机台")
+    @UserOperationLog("判断部门下面有关联机台")
+    public ResponseMessage<Boolean> isMachineandDepartment(String uuid){
+        return ResponseMessage.ok(baseMachineService.isMachineandDepartment(uuid));
     }
 }

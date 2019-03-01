@@ -29,4 +29,10 @@ public interface BaseMoldRepository extends BaseRepository<BaseMold,String> {
      */
     List<BaseMold> findByCodeAndMoldIdNot(String code, String moldId);
 
+    /**
+     * 获取有效模具
+     * @param enabled
+     * @return
+     */
+    List<BaseMold> findByEnabled(boolean enabled);
 }

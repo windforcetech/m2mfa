@@ -1,10 +1,10 @@
 package com.m2micro.m2mfa.pad.operate;
 
+import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
-import com.m2micro.m2mfa.pad.model.PadPara;
-import com.m2micro.m2mfa.pad.model.StartWorkPara;
-import com.m2micro.m2mfa.pad.model.StopWorkModel;
-import com.m2micro.m2mfa.pad.model.StopWorkPara;
+import com.m2micro.m2mfa.pad.model.*;
+
+import java.math.BigDecimal;
 
 /**
  * 基础操作接口
@@ -37,13 +37,13 @@ public interface BaseOperate {
      * @param obj
      * @return
      */
-    Object finishHomework(Object obj);
+    FinishHomeworkModel finishHomework(FinishHomeworkPara obj);
     /**
      * 不良品数
      * @param obj
      * @return
      */
-    Object defectiveProducts (Object obj);
+    Object defectiveProducts (Padbad obj);
     /**
      * 提报异常
      * @param obj
@@ -70,6 +70,5 @@ public interface BaseOperate {
      * @return
      */
     Object operationHistory (Object obj);
-
 
 }

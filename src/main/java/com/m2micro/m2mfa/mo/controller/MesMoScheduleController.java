@@ -107,7 +107,7 @@ public class MesMoScheduleController {
        if(msg.trim().equals("")){
            return rm;
        }
-        rm.setMessage( msg+"排产单已执行不可删除。");
+        rm.setMessage( msg+"不可删除。");
         return rm;
     }
 
@@ -115,8 +115,8 @@ public class MesMoScheduleController {
      * 审核
      */
     @RequestMapping("/auditing/{id}")
-    @ApiOperation(value="审核工单")
-    @UserOperationLog("审核工单")
+    @ApiOperation(value="审核排产单")
+    @UserOperationLog("审核排产单")
     public ResponseMessage<MesMoDesc> auditing(@PathVariable("id") String id){
         mesMoScheduleService.auditing(id);
         return ResponseMessage.ok();

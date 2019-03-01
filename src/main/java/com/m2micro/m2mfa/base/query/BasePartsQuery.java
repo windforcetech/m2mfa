@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.query;
 import com.m2micro.framework.commons.util.Query;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 
 /**
@@ -11,6 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @Description:
  */
 @ApiModel(description = "料件基本资料")
+@Data
 public class BasePartsQuery extends Query {
     @ApiModelProperty(value = "料件编号")
     private String partNo;
@@ -22,44 +24,9 @@ public class BasePartsQuery extends Query {
     private String source;
     @ApiModelProperty(value = "类型")
     private String category;
+    @ApiModelProperty(value = "有效否")
+    private Boolean enabled;
 
-    public String getPartNo() {
-        return partNo;
-    }
 
-    public void setPartNo(String partNo) {
-        this.partNo = partNo;
-    }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSpec() {
-        return spec;
-    }
-
-    public void setSpec(String spec) {
-        this.spec = spec;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
 }

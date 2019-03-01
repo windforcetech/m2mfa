@@ -38,7 +38,9 @@ public class MesMoScheduleProcess extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "工序名称")
     private String processName;
 
-
+    @Transient
+    @ApiModelProperty(value = "类型")
+    private String category;
 
     @ApiModelProperty(value = "作业工位")
     private String stationId;
@@ -235,5 +237,13 @@ public class MesMoScheduleProcess extends BaseEntity implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

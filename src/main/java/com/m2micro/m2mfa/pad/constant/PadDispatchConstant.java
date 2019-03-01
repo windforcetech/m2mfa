@@ -15,11 +15,11 @@ public class PadDispatchConstant {
     private static HashMap handle = new HashMap();
 
     static {
-        handle.put("KZ029", PadMachineService.class.getName());//调机
-        handle.put("KZ027", PadMoldService.class.getName());//架模
-        handle.put("ZS_CX_01", PadChargingService.class.getName());//加料
-        handle.put("KZ001", PadBootstrapService.class.getName());//开机
-        handle.put("ZS_CX_02", PadBakingService.class.getName());//烤料
+        handle.put(StationConstant.TUNING.getKey(), PadMachineService.class.getName());//调机
+        handle.put(StationConstant.FRAMEMOLD.getKey(), PadMoldService.class.getName());//架模
+        handle.put(StationConstant.FEEDING.getKey(), PadChargingService.class.getName());//加料
+        handle.put(StationConstant.BOOT.getKey(), PadBootstrapService.class.getName());//开机
+        handle.put(StationConstant.BAKING.getKey(), PadBakingService.class.getName());//烤料
 
         /*
         handle.put("10000023", PadFirstService.class.getName());//首件

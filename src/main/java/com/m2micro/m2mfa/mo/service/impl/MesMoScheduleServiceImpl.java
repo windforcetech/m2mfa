@@ -23,6 +23,7 @@ import com.m2micro.m2mfa.mo.service.*;
 import com.m2micro.m2mfa.mo.vo.Absence;
 import com.m2micro.m2mfa.mo.vo.ProcessStatus;
 import com.m2micro.m2mfa.mo.vo.ProductionProcess;
+import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
@@ -57,7 +58,7 @@ import java.util.List;
 @Transactional
 public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
-@Autowired
+    @Autowired
     private MesMoDescService mesMoDescService;
     @Autowired
     private MesPartRouteService mesPartRouteService;
@@ -111,14 +112,16 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private MesMoScheduleStationRepository mesMoScheduleStationRepository;
     @Autowired
     private MesMoScheduleShiftRepository mesMoScheduleShiftRepository;
+    @Autowired
+    PadBottomDisplayService padBottomDisplayService;
 
-@Override@SuppressWarnings("unchecked")
+    @Override@SuppressWarnings("unchecked")
     public MesMoScheduleRepository getRepository() {
         return mesMoScheduleRepository;
     }
 
 
-@Override
+    @Override
     public ScheduleAllInfoModel getScheduleAllInfoModel(String scheduleId) {
         MesMoSchedule mesMoSchedule = findById(scheduleId).orElse(null);
         List<MesMoScheduleShift> mesMoScheduleShifts = mesMoScheduleShiftRepository.findByScheduleId(scheduleId);
@@ -135,7 +138,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-@Override
+    @Override
     @Transactional
     public void saveScheduleAllInfoModel(ScheduleAllInfoModel scheduleAllInfoModel) {
         if(scheduleAllInfoModel.getMesMoSchedule()!=null){
@@ -156,14 +159,14 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-@Transactional
+    @Transactional
     @Override
     public void peopleDistributionsave(List<MesMoScheduleStaff> mesMoScheduleStaffs,List<MesMoScheduleStation> mesMoScheduleStations) {
         for( MesMoScheduleStaff mesMoScheduleStaff : mesMoScheduleStaffs){
-           List<MesRecordStaff>mesRecordStaffs =  mesRecordStaffRepository.findStaffId(mesMoScheduleStaff.getStaffId());
-           if(!mesRecordStaffs.isEmpty()){
-               throw  new MMException(baseStaffService.findById(mesMoScheduleStaff.getStaffId()).orElse(null).getStaffName()+"已上工不可添加。");
-           }
+            List<MesRecordStaff>mesRecordStaffs =  mesRecordStaffRepository.findStaffId(mesMoScheduleStaff.getStaffId());
+            if(!mesRecordStaffs.isEmpty()){
+                throw  new MMException(baseStaffService.findById(mesMoScheduleStaff.getStaffId()).orElse(null).getStaffName()+"已上工不可添加。");
+            }
         }
         String ScheduleId= mesMoScheduleStaffs.get(0).getScheduleId();
         if(ScheduleId==null || mesMoScheduleRepository.findById(ScheduleId).orElse(null)==null){
@@ -179,31 +182,37 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     }
 
+    @Override
+    public boolean isScheduleFlag(String scheduleId) {
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(scheduleId).orElse(null);
+        return mesMoSchedule.getFlag().equals(MoScheduleStatus.AUDITED.getKey())||mesMoSchedule.getFlag().equals(MoScheduleStatus.PRODUCTION.getKey()) ? true :false ;
+    }
 
-@Override
+
+    @Override
     public PageUtil<MesMoScheduleModel> list(MesMoScheduleQuery query) {
 
         String sql = "SELECT\n" +
-                    "	mms.schedule_id scheduleId,\n" +
-                    "	mms.schedule_no scheduleNo,\n" +
-                    "	mms.flag flag,\n" +
-                    "	mms.enabled enabled,\n" +
-                    "	bp.part_no partNo,\n" +
-                    "	bp. NAME partName,\n" +
-                    "	bm. NAME machineName,\n" +
-                    "	IFNULL(mms.schedule_qty, 0) scheduleQty,\n" +
-                    "	IFNULL(msp.output_qty, 0) outputQty\n" +
-                    "FROM\n" +
-                    "	mes_mo_schedule mms\n" +
-                    "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
-                    "LEFT JOIN base_machine bm ON mms.machine_id = bm.machine_id\n" +
-                    "LEFT JOIN mes_part_route mpr ON mms.part_id = mpr.part_id\n" +
-                    "LEFT JOIN mes_mo_schedule_process msp ON (\n" +
-                    "	msp.process_id = mpr.output_process_id\n" +
-                    "	AND msp.schedule_id = mms.schedule_id\n" +
-                    ")\n" +
-                    "WHERE\n" +
-                    "	1 = 1\n";
+            "	mms.schedule_id scheduleId,\n" +
+            "	mms.schedule_no scheduleNo,\n" +
+            "	mms.flag flag,\n" +
+            "	mms.enabled enabled,\n" +
+            "	bp.part_no partNo,\n" +
+            "	bp. NAME partName,\n" +
+            "	bm. NAME machineName,\n" +
+            "	IFNULL(mms.schedule_qty, 0) scheduleQty,\n" +
+            "	IFNULL(msp.output_qty, 0) outputQty\n" +
+            "FROM\n" +
+            "	mes_mo_schedule mms\n" +
+            "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
+            "LEFT JOIN base_machine bm ON mms.machine_id = bm.machine_id\n" +
+            "LEFT JOIN mes_part_route mpr ON mms.part_id = mpr.part_id\n" +
+            "LEFT JOIN mes_mo_schedule_process msp ON (\n" +
+            "	msp.process_id = mpr.output_process_id\n" +
+            "	AND msp.schedule_id = mms.schedule_id\n" +
+            ")\n" +
+            "WHERE\n" +
+            "	1 = 1\n";
 
         if(StringUtils.isNotEmpty(query.getFlag())){
             sql = sql+" AND mms.flag = " + Integer.valueOf(query.getFlag())+ "\n";
@@ -219,31 +228,53 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoScheduleModel.class);
         List<MesMoScheduleModel> list = jdbcTemplate.query(sql,rm);
 
+        if(list!=null&&list.size()>0){
+            for (int i=0;i<list.size();i++){
+                MesMoScheduleModel mesMoScheduleModel = list.get(i);
+                List scheduleIds = new ArrayList();
+                scheduleIds.add(mesMoScheduleModel.getScheduleId());
+                Integer outPutQtys = padBottomDisplayService.getOutPutQtys(mesMoScheduleModel.getScheduleId(), scheduleIds);
+                mesMoScheduleModel.setOutputQty(outPutQtys);
+            }
+        }
+
         String countSql =   "SELECT\n" +
-                            "	count(*)\n" +
-                            "FROM\n" +
-                            "	mes_mo_schedule mms\n" +
-                            "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
-                            "LEFT JOIN base_machine bm ON mms.machine_id = bm.machine_id\n" +
-                            "LEFT JOIN mes_part_route mpr ON mms.part_id = mpr.part_id\n" +
-                            "LEFT JOIN mes_mo_schedule_process msp ON (\n" +
-                            "	msp.process_id = mpr.output_process_id\n" +
-                            "	AND msp.schedule_id = mms.schedule_id\n" +
-                            ")";
+            "	count(*)\n" +
+            "FROM\n" +
+            "	mes_mo_schedule mms\n" +
+            "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
+            "LEFT JOIN base_machine bm ON mms.machine_id = bm.machine_id\n" +
+            "LEFT JOIN mes_part_route mpr ON mms.part_id = mpr.part_id\n" +
+            "LEFT JOIN mes_mo_schedule_process msp ON (\n" +
+            "	msp.process_id = mpr.output_process_id\n" +
+            "	AND msp.schedule_id = mms.schedule_id\n" +
+            ")\n"+
+            "WHERE\n" +
+            "	1 = 1\n";
+
+        if(StringUtils.isNotEmpty(query.getFlag())){
+            countSql = countSql+" AND mms.flag = " + Integer.valueOf(query.getFlag())+ "\n";
+        }
+        if(query.getStartTime()!=null){
+            countSql = countSql+" AND mms.create_on >= "+ "'"+ DateUtil.format(query.getStartTime())+"'\n" ;
+        }
+        if(query.getEndTime()!=null){
+            countSql = countSql+" AND mms.create_on <= "+ "'"+ DateUtil.format(query.getEndTime())+"'\n" ;
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
 
 
-@Override
-    public List<MesMoSchedule> findpartID(String partID) {
-        String sql ="select * from mes_mo_schedule where part_id='"+partID+"'";
-        RowMapper<MesMoSchedule> rm = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
+    @Override
+    public List<MesMoDesc> findpartID(String partID) {
+        String sql ="select * from mes_mo_desc where part_id='"+partID+"'";
+        RowMapper<MesMoDesc> rm = BeanPropertyRowMapper.newInstance(MesMoDesc.class);
         return jdbcTemplate.query(sql,rm);
     }
 
 
-@Override
+    @Override
     public List<MesMoSchedule> findByMoIdAndFlag(String moId, List<Integer> flags) {
 
         QMesMoSchedule qMesMoSchedule = QMesMoSchedule.mesMoSchedule;
@@ -265,12 +296,15 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-@Override
+    @Override
     @Transactional
     public void auditing(String id) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
         if(mesMoSchedule==null){
             throw new MMException("不存在该排产单！");
+        }
+        if(mesMoSchedule.getEnabled().equals(false)){
+            throw new MMException("排产单为无效状态不可进行审核");
         }
         // 当排产单状态为  初始时flag=0  才可以进行审核 flag=1
         if(!MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())){
@@ -280,7 +314,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-@Override
+    @Override
     @Transactional
     public void cancel(String id) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
@@ -295,7 +329,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-@Override
+    @Override
     @Transactional
     public void frozen(String id) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
@@ -304,7 +338,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
         //只有工单状态 close_flag=1,2时 ， 才可以冻结  SET close_flag=12
         if(!(MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())||
-                MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag()))){
+            MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag()))){
             throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许冻结！");
         }
         //更改为冻结状态及冻结前状态
@@ -314,7 +348,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-/**
+    /**
      * 人员记录表下工
      * @param mesMoSchedule
      */
@@ -322,13 +356,25 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         //IotMachineOutput iotMachineOutput = iotMachineOutputRepository.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         if(iotMachineOutput==null){
-            throw new MMException("没有对应机台产出信息！");
+            mesRecordStaffRepository.setEndAll(new Date(),null,null,mesMoSchedule.getScheduleId());
         }
-        mesRecordStaffRepository.setEndAll(new Date(),iotMachineOutput.getPower(),iotMachineOutput.getMolds(),mesMoSchedule.getScheduleId());
+        mesRecordStaffRepository.setEndAll(new Date(),iotMachineOutput.getPower(),iotMachineOutput.getOutput(),mesMoSchedule.getScheduleId());
     }
 
 
-@Override
+    /**
+     * 上下工记录表下工
+     * @param mesMoSchedule
+     */
+    private void stopRecordWork(MesMoSchedule mesMoSchedule) {
+        IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        if(iotMachineOutput==null){
+            mesRecordWorkRepository.setEndAll(new Date(),null,null,mesMoSchedule.getScheduleId());
+        }
+        mesRecordWorkRepository.setEndAll(new Date(),iotMachineOutput.getPower(),iotMachineOutput.getOutput(),mesMoSchedule.getScheduleId());
+    }
+
+    @Override
     @Transactional
     public void unfreeze(String id) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
@@ -342,7 +388,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-@Override
+    @Override
     @Transactional
     public void forceClose(String id) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(id).orElse(null);
@@ -351,20 +397,21 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
         //只有工单状态 close_flag=0,1,2,5时 ， 才可以强制结案  SET close_flag=10
         if(!(MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())||
-                MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())||
-                MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag())||
-                MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag()))){
+            MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())||
+            MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag())||
+            MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag()))){
             throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许强制结案！");
         }
         //更改为强制结案状态
         mesMoScheduleRepository.setFlagFor(MoScheduleStatus.FORCECLOSE.getKey(),mesMoSchedule.getScheduleId());
+        mesMoScheduleRepository.updateactualStartTime(new Date() , mesMoSchedule.getScheduleId());
         //做强制结案的额外业务逻辑操作
         stopWorkForAll(mesMoSchedule);
 
     }
 
 
-/**
+    /**
      *  所有下工操作及退产量
      * @param mesMoSchedule
      */
@@ -375,6 +422,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoScheduleStaffRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
             //人员记录下工（1.冻结状态并且冻结前状态为生产中2.生产中，两种情况做此操作，不然人员记录表没有相关数据，这里没有做判定但不影响，人员记录表没有记录更新0条）
             stopWorkForStaff(mesMoSchedule);
+            //上下工记录下工
+            stopRecordWork(mesMoSchedule);
             //工艺结束
             mesMoScheduleProcessRepository.setEndAll(new Date(),mesMoSchedule.getScheduleId());
             //获取未完成的排产单产量
@@ -403,29 +452,29 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-/**
+    /**
      * 获取未完成的排产单产量
      * @param scheduleId
      * @return
      */
     @Override public Integer getUncompletedQty(String scheduleId) {
         String sql ="SELECT\n" +
-                    "IFNULL(mms.schedule_qty, 0) - IFNULL(msp.output_qty, 0) UncompletedQty\n" +
-                    "FROM\n" +
-                    "	mes_mo_schedule mms,\n" +
-                    "	mes_part_route mpr,\n" +
-                    "	mes_mo_schedule_process msp\n" +
-                    "WHERE\n" +
-                    "	mms.part_id = mpr.part_id\n" +
-                    "AND msp.process_id = mpr.output_process_id\n" +
-                    "AND msp.schedule_id = mms.schedule_id\n" +
-                    "AND mms.schedule_id = '"+scheduleId+"'";
+            "IFNULL(mms.schedule_qty, 0) - IFNULL(msp.output_qty, 0) UncompletedQty\n" +
+            "FROM\n" +
+            "	mes_mo_schedule mms,\n" +
+            "	mes_part_route mpr,\n" +
+            "	mes_mo_schedule_process msp\n" +
+            "WHERE\n" +
+            "	mms.part_id = mpr.part_id\n" +
+            "AND msp.process_id = mpr.output_process_id\n" +
+            "AND msp.schedule_id = mms.schedule_id\n" +
+            "AND mms.schedule_id = '"+scheduleId+"'";
 
         return jdbcTemplate.queryForObject(sql,Integer.class);
     }
 
 
-@Override
+    @Override
     public MesPartvo findbyMoId(String moId) {
         MesMoDesc moDesc = mesMoDescService.findById(moId).orElse(null);
         if(moDesc == null){
@@ -441,7 +490,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-@Override
+    @Override
     public MesMoScheduleInfoModel addDetails() {
         List<BaseShiftModel> baseShiftModels = getBaseShiftModels();
         MesMoScheduleInfoModel mesMoScheduleInfoModel = new MesMoScheduleInfoModel();
@@ -450,12 +499,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-/**
+    /**
      * 获取所有班别信息及对应的有效时间
      * @return
      */
     private List<BaseShiftModel> getBaseShiftModels() {
-        List<BaseShift> all = baseShiftRepository.findAll();
+        List<BaseShift> all = baseShiftRepository.findByEnabled(true);
         List<BaseShiftModel> baseShiftModels = new ArrayList<>();
         all.stream().forEach(baseShift->{
             BaseShiftModel baseShiftModel = new BaseShiftModel();
@@ -469,7 +518,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-@Override
+    @Override
     public ProductionProcess info(String scheduleId) {
 
         MesMoSchedule mesMoSchedule = getMesMoSchedule(scheduleId);
@@ -484,23 +533,23 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
 
-private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
+    private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         String sqlstation ="SELECT\n" +
-                "	mss.*, bp.process_name processName,\n" +
-                "	bs.`name` stationName\n" +
-                "FROM\n" +
-                "	mes_mo_schedule_station mss\n" +
-                "LEFT JOIN base_process bp ON mss.process_id = bp.process_id\n" +
-                "LEFT JOIN base_station bs ON mss.station_id = bs.station_id\n" +
-                "WHERE\n" +
-                "	schedule_id = '"+scheduleId+"'";
+            "	mss.*, bp.process_name processName,\n" +
+            "	bs.`name` stationName\n" +
+            "FROM\n" +
+            "	mes_mo_schedule_station mss\n" +
+            "LEFT JOIN base_process bp ON mss.process_id = bp.process_id\n" +
+            "LEFT JOIN base_station bs ON mss.station_id = bs.station_id\n" +
+            "WHERE\n" +
+            "	schedule_id = '"+scheduleId+"'";
         RowMapper rmstation = BeanPropertyRowMapper.newInstance(MesMoScheduleStation.class);
 
         return jdbcTemplate.query(sqlstation,rmstation);
     }
 
 
-/**
+    /**
      * 获取排产主表信息以及所对应的班别信息
      * @param scheduleId
      * @return
@@ -508,25 +557,25 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
     private MesMoSchedule getMesMoSchedule(String scheduleId) {
 
         String sqlmesMoSchedule =     "SELECT\n" +
-                "	mms.*, bp.part_no partNo,\n" +
-                "	bp.`name` partName,\n" +
-                "	mmd.mo_number moNumber,\n" +
-                "  bm.`name` machineName,\n" +
-                " o.department_name  departmentName\n" +
-                "FROM\n" +
-                "	mes_mo_schedule mms\n" +
-                "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
-                "LEFT JOIN mes_mo_desc mmd ON mms.mo_id = mmd.mo_id\n" +
-                "LEFT JOIN base_machine bm on bm.machine_id = mms.machine_id\n" +
-                "LEFT JOIN organization o on o.uuid=bm.department_id\n" +
-                "WHERE\n" +
-                "	mms.schedule_id  ='"+scheduleId+"'";
+            "	mms.*, bp.part_no partNo,\n" +
+            "	bp.`name` partName,\n" +
+            "	mmd.mo_number moNumber,\n" +
+            "  bm.`name` machineName,\n" +
+            " o.department_name  departmentName\n" +
+            "FROM\n" +
+            "	mes_mo_schedule mms\n" +
+            "LEFT JOIN base_parts bp ON mms.part_id = bp.part_id\n" +
+            "LEFT JOIN mes_mo_desc mmd ON mms.mo_id = mmd.mo_id\n" +
+            "LEFT JOIN base_machine bm on bm.machine_id = mms.machine_id\n" +
+            "LEFT JOIN organization o on o.uuid=bm.department_id\n" +
+            "WHERE\n" +
+            "	mms.schedule_id  ='"+scheduleId+"'";
         RowMapper rmmesMoSchedule = BeanPropertyRowMapper.newInstance(MesMoSchedule.class);
         List<MesMoSchedule> mesMoSchedules = jdbcTemplate.query(sqlmesMoSchedule,rmmesMoSchedule);
         if(mesMoSchedules.isEmpty()){
             throw  new MMException("排产单ID非法。");
         }
-         MesMoSchedule mesMoSchedule =    mesMoSchedules.get(0);
+        MesMoSchedule mesMoSchedule =    mesMoSchedules.get(0);
         //排产计划计算量
         BigDecimal scheduleTime = mesMoScheduleRepository.getScheduleTime(mesMoSchedule.getMoId());
         Integer noitQty = findbnotQty(mesMoSchedule.getMoId());
@@ -536,9 +585,9 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         mesMoSchedule.setNotQty(noitQty);
         mesMoSchedule.setScheduleTime(scheduleTime);
         List<MesMoScheduleShift> mesMoScheduleShifts = getMesMoScheduleShifts(scheduleId);
-       for(MesMoScheduleShift mesMoScheduleShift :mesMoScheduleShifts){
-           BaseShift baseShift = baseShiftService.findById(mesMoScheduleShift.getShiftId()).orElse(null);
-           mesMoScheduleShift.setFfectiveTime(getSumEffectiveTime(baseShift));
+        for(MesMoScheduleShift mesMoScheduleShift :mesMoScheduleShifts){
+            BaseShift baseShift = baseShiftService.findById(mesMoScheduleShift.getShiftId()).orElse(null);
+            mesMoScheduleShift.setFfectiveTime(getSumEffectiveTime(baseShift));
         }
 
         mesMoSchedule.setMesMoScheduleShifts(mesMoScheduleShifts);
@@ -546,28 +595,28 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
     }
 
 
-/**
+    /**
      * 获取未排量
      * @param moId
      * @return
      */
     public Integer findbnotQty(String moId){
         String sql = "SELECT\n" +
-                " IFNULL(( IFNULL(mmd.target_qty,0)  -  IFNULL(mmd.schedul_qty ,0) ),0)    notQty \n" +
-                "FROM\n" +
-                "	mes_mo_desc mmd\n" +
-                "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id WHERE\n" +
-                " ( 	mmd.close_flag = "+MoStatus.AUDITED.getKey()+"\n" +
-                "OR mmd.close_flag = "+ MoStatus.SCHEDULED.getKey()+"\n" +
-                "OR (\n" +
-                "	mmd.close_flag = "+MoStatus.PRODUCTION.getKey()+"\n" +
-                "	AND mmd.is_schedul = 0\n" +
-                ") )  and  mmd.mo_id='"+moId+"'";
-       try {
-           return jdbcTemplate.queryForObject(sql,Integer.class);
-       }catch (Exception e){
-           return 0;
-       }
+            " IFNULL(( IFNULL(mmd.target_qty,0)  -  IFNULL(mmd.schedul_qty ,0) ),0)    notQty \n" +
+            "FROM\n" +
+            "	mes_mo_desc mmd\n" +
+            "LEFT JOIN base_parts bp ON mmd.part_id = bp.part_id WHERE\n" +
+            " ( 	mmd.close_flag = "+MoStatus.AUDITED.getKey()+"\n" +
+            "OR mmd.close_flag = "+ MoStatus.SCHEDULED.getKey()+"\n" +
+            "OR (\n" +
+            "	mmd.close_flag = "+MoStatus.PRODUCTION.getKey()+"\n" +
+            "	AND mmd.is_schedul = 0\n" +
+            ") )  and  mmd.mo_id='"+moId+"'";
+        try {
+            return jdbcTemplate.queryForObject(sql,Integer.class);
+        }catch (Exception e){
+            return 0;
+        }
 
     }
     /**
@@ -577,28 +626,29 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
      */
     private List<MesMoScheduleShift> getMesMoScheduleShifts(String scheduleId) {
         String sqlShifts ="SELECT\n" +
-                "	mmss.*, bs.`name` shiftName\n" +
-                "FROM\n" +
-                "	mes_mo_schedule_shift  mmss\n" +
-                "LEFT JOIN base_shift bs ON mmss.shift_id = bs.shift_id\n" +
-                "WHERE\n" +
-                "	mmss.schedule_id ='"+scheduleId+"'";
+            "	mmss.*, bs.`name` shiftName\n" +
+            "FROM\n" +
+            "	mes_mo_schedule_shift  mmss\n" +
+            "LEFT JOIN base_shift bs ON mmss.shift_id = bs.shift_id\n" +
+            "WHERE\n" +
+            "	mmss.schedule_id ='"+scheduleId+"'";
         RowMapper rmShifts = BeanPropertyRowMapper.newInstance(MesMoScheduleShift.class);
         return jdbcTemplate.query(sqlShifts,rmShifts);
     }
 
     private List<MesMoScheduleProcess> getMesMoScheduleProcesses(String scheduleId) {
         String sqlprocesses ="SELECT\n" +
-                "	msp.*, bp.process_name processName,\n" +
-                "	bs.`name` stationName,\n" +
-                "	bm.`name` moldName\n" +
-                "FROM\n" +
-                "	mes_mo_schedule_process msp\n" +
-                "LEFT JOIN base_process bp ON msp.process_id = bp.process_id\n" +
-                "LEFT JOIN base_station bs ON msp.station_id = bs.station_id\n" +
-                "LEFT JOIN base_mold bm ON msp.mold_id = bm.mold_id\n" +
-                "WHERE\n" +
-                "	msp.schedule_id='"+scheduleId+"'";
+            "	msp.*, bp.process_name processName,\n" +
+            "	bs.`name` stationName,\n" +
+            "	bm.`name` moldName,\n" +
+            "	bp.category  category\n" +
+            "FROM\n" +
+            "	mes_mo_schedule_process msp\n" +
+            "LEFT JOIN base_process bp ON msp.process_id = bp.process_id\n" +
+            "LEFT JOIN base_station bs ON msp.station_id = bs.station_id\n" +
+            "LEFT JOIN base_mold bm ON msp.mold_id = bm.mold_id\n" +
+            "WHERE\n" +
+            "	msp.schedule_id='"+scheduleId+"'";
         RowMapper rmprocesses = BeanPropertyRowMapper.newInstance(MesMoScheduleProcess.class);
         return jdbcTemplate.query(sqlprocesses,rmprocesses);
     }
@@ -619,7 +669,7 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
                 List<BaseShift> baseShifts = getBaseShifts(scheduleId, baseStation.getStationId(),false);
                 //获取多个岗位
                 if(baseShifts.isEmpty()){
-                   baseShifts = getBaseShifts(scheduleId, baseStation.getStationId(),true);
+                    baseShifts = getBaseShifts(scheduleId, baseStation.getStationId(),true);
                     for(BaseShift shift: baseShifts ){
                         List<Organization> organizations = getOrganizations(scheduleId, baseStation.getStationId(),shift.getShiftId());
                         shift.setOrganization(organizations);
@@ -648,37 +698,37 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
     private List<BaseProcess> getBaseProcesses(String  moId) {
         RowMapper baseprocessrm = BeanPropertyRowMapper.newInstance(BaseProcess.class);
         String sql = "SELECT\n" +
-               "	*\n" +
-               "FROM\n" +
-               "	base_process bp\n" +
-               "LEFT JOIN mes_part_route_process brd ON bp.process_id = brd.processid\n" +
-               "WHERE\n" +
-               "	bp.process_id IN (\n" +
-               "		SELECT\n" +
-               "			mprp.processid\n" +
-               "		FROM\n" +
-               "			mes_part_route_process mprp\n" +
-               "		WHERE\n" +
-               "			mprp.partrouteid IN (\n" +
-               "				SELECT\n" +
-               "					mpr.part_route_id\n" +
-               "				FROM\n" +
-               "					mes_part_route mpr\n" +
-               "				WHERE\n" +
-               "					mpr.part_id IN (\n" +
-               "						SELECT\n" +
-               "							mmd.part_id\n" +
-               "						FROM\n" +
-               "							mes_mo_desc mmd\n" +
-               "						WHERE\n" +
-               "							mo_id = '"+moId+"'\n" +
-               "					)\n" +
-               "			)\n" +
-               "	)\n" +
-               "GROUP BY\n" +
-               "	bp.process_id\n" +
-               "ORDER BY\n" +
-               "	brd.setp";
+            "	*\n" +
+            "FROM\n" +
+            "	base_process bp\n" +
+            "LEFT JOIN mes_part_route_process brd ON bp.process_id = brd.processid\n" +
+            "WHERE\n" +
+            "	bp.process_id IN (\n" +
+            "		SELECT\n" +
+            "			mprp.processid\n" +
+            "		FROM\n" +
+            "			mes_part_route_process mprp\n" +
+            "		WHERE\n" +
+            "			mprp.partrouteid IN (\n" +
+            "				SELECT\n" +
+            "					mpr.part_route_id\n" +
+            "				FROM\n" +
+            "					mes_part_route mpr\n" +
+            "				WHERE\n" +
+            "					mpr.part_id IN (\n" +
+            "						SELECT\n" +
+            "							mmd.part_id\n" +
+            "						FROM\n" +
+            "							mes_mo_desc mmd\n" +
+            "						WHERE\n" +
+            "							mo_id = '"+moId+"'\n" +
+            "					)\n" +
+            "			)\n" +
+            "	)\n" +
+            "GROUP BY\n" +
+            "	bp.process_id\n" +
+            "ORDER BY\n" +
+            "	brd.setp";
         return jdbcTemplate.query(sql,baseprocessrm);
     }
 
@@ -694,27 +744,27 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         RowMapper baseStationrm = BeanPropertyRowMapper.newInstance(BaseStation.class);
         String sql;
         sql ="SELECT\n" +
-                "	bs.*,\n" +
-                "	bps.step step,\n" +
-                "  mmss.is_station\n" +
-                "FROM\n" +
-                "	base_station bs\n" +
-                "LEFT JOIN base_process_station bps ON bs.station_id = bps.station_id\n" +
-                "LEFT JOIN  mes_mo_schedule_staff  mmss ON bs.station_id =  mmss.station_id\n" +
-                "WHERE\n" +
-                "	bs.station_id IN (\n" +
-                "		SELECT DISTINCT\n" +
-                "			nmprs.station_id\n" +
-                "		FROM\n" +
-                "			mes_part_route_station nmprs\n" +
-                "		WHERE\n" +
-                "			nmprs.process_id ='"+baseProcess.getProcessId()+"'\n" +
-                "	)\n" +
-                "and mmss.schedule_id='"+scheduleId+"'\n" +
-                "GROUP BY\n" +
-                "	bs.station_id\n" +
-                "ORDER BY\n" +
-                "	step";
+            "	bs.*,\n" +
+            "	bps.step step,\n" +
+            "  mmss.is_station\n" +
+            "FROM\n" +
+            "	base_station bs\n" +
+            "LEFT JOIN base_process_station bps ON bs.station_id = bps.station_id\n" +
+            "LEFT JOIN  mes_mo_schedule_staff  mmss ON bs.station_id =  mmss.station_id\n" +
+            "WHERE\n" +
+            "	bs.station_id IN (\n" +
+            "		SELECT DISTINCT\n" +
+            "			nmprs.station_id\n" +
+            "		FROM\n" +
+            "			mes_part_route_station nmprs\n" +
+            "		WHERE\n" +
+            "			nmprs.process_id ='"+baseProcess.getProcessId()+"'\n" +
+            "	)\n" +
+            "and mmss.schedule_id='"+scheduleId+"'\n" +
+            "GROUP BY\n" +
+            "	bs.station_id\n" +
+            "ORDER BY\n" +
+            "	step";
 
         //排产单对应的工位
         List<BaseStation> baseStations = jdbcTemplate.query(sql,baseStationrm);
@@ -739,25 +789,25 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         RowMapper baseStationrm = BeanPropertyRowMapper.newInstance(BaseStation.class);
         String sql;
         sql ="SELECT\n" +
-                "	bs.*,\n" +
-                "	bps.step step,\n" +
-                "  false isStation\n" +
-                "FROM\n" +
-                "	base_station bs\n" +
-                "LEFT JOIN base_process_station bps ON bs.station_id = bps.station_id\n" +
-                "WHERE\n" +
-                "	bs.station_id IN (\n" +
-                "		SELECT DISTINCT\n" +
-                "			nmprs.station_id\n" +
-                "		FROM\n" +
-                "			mes_part_route_station nmprs\n" +
-                "		WHERE\n" +
-                "			nmprs.process_id ='"+processId+"'\n" +
-                "	)\n" +
-                "GROUP BY\n" +
-                "	bs.station_id\n" +
-                "ORDER BY\n" +
-                "	step";
+            "	bs.*,\n" +
+            "	bps.step step,\n" +
+            "  false isStation\n" +
+            "FROM\n" +
+            "	base_station bs\n" +
+            "LEFT JOIN base_process_station bps ON bs.station_id = bps.station_id\n" +
+            "WHERE\n" +
+            "	bs.station_id IN (\n" +
+            "		SELECT DISTINCT\n" +
+            "			nmprs.station_id\n" +
+            "		FROM\n" +
+            "			mes_part_route_station nmprs\n" +
+            "		WHERE\n" +
+            "			nmprs.process_id ='"+processId+"'\n" +
+            "	)\n" +
+            "GROUP BY\n" +
+            "	bs.station_id\n" +
+            "ORDER BY\n" +
+            "	step";
         return jdbcTemplate.query(sql,baseStationrm);
     }
 
@@ -772,36 +822,36 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         String sql;
         if(isStation){
             sql = "SELECT\n" +
-                    "	*\n" +
-                    "FROM\n" +
-                    "	base_shift\n" +
-                    "WHERE\n" +
-                    "	shift_id IN (\n" +
-                    "		SELECT DISTINCT\n" +
-                    "			shift_id\n" +
-                    "		FROM\n" +
-                    "			mes_mo_schedule_staff\n" +
-                    "		WHERE\n" +
-                    "			schedule_id = '" + scheduleId + "'\n" +
-                    "		AND station_id = '" + stationId + "'\n" +
-                    "		AND is_station = 1\n" +
-                    "	)";
+                "	*\n" +
+                "FROM\n" +
+                "	base_shift\n" +
+                "WHERE\n" +
+                "	shift_id IN (\n" +
+                "		SELECT DISTINCT\n" +
+                "			shift_id\n" +
+                "		FROM\n" +
+                "			mes_mo_schedule_staff\n" +
+                "		WHERE\n" +
+                "			schedule_id = '" + scheduleId + "'\n" +
+                "		AND station_id = '" + stationId + "'\n" +
+                "		AND is_station = 1\n" +
+                "	)";
         }else {
             sql = "SELECT\n" +
-                    "	*\n" +
-                    "FROM\n" +
-                    "	base_shift\n" +
-                    "WHERE\n" +
-                    "	shift_id IN (\n" +
-                    "		SELECT DISTINCT\n" +
-                    "			shift_id\n" +
-                    "		FROM\n" +
-                    "			mes_mo_schedule_staff\n" +
-                    "		WHERE\n" +
-                    "			schedule_id = '" + scheduleId + "'\n" +
-                    "		AND station_id = '" + stationId + "'\n" +
-                    "		AND is_station = 0\n" +
-                    "	)";
+                "	*\n" +
+                "FROM\n" +
+                "	base_shift\n" +
+                "WHERE\n" +
+                "	shift_id IN (\n" +
+                "		SELECT DISTINCT\n" +
+                "			shift_id\n" +
+                "		FROM\n" +
+                "			mes_mo_schedule_staff\n" +
+                "		WHERE\n" +
+                "			schedule_id = '" + scheduleId + "'\n" +
+                "		AND station_id = '" + stationId + "'\n" +
+                "		AND is_station = 0\n" +
+                "	)";
 
         }
 
@@ -819,22 +869,22 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         RowMapper baseStaffrm = BeanPropertyRowMapper.newInstance(BaseStaff.class);
         String sql;
         sql="SELECT\n" +
-                "	*\n" +
-                "FROM\n" +
-                "	base_staff\n" +
-                "WHERE\n" +
-                "	staff_id IN (\n" +
-                "		SELECT DISTINCT\n" +
-                "			staff_id\n" +
-                "		FROM\n" +
-                "			mes_mo_schedule_staff\n" +
-                "		WHERE\n" +
-                "			schedule_id = '"+scheduleId+"'\n" +
-                "		AND station_id = '"+baseStation.getStationId()+"'\n" +
-                "		AND shift_id = '"+shift.getShiftId()+"'\n" +
-                "		AND is_station = 0 AND enabled=1 \n" +
-                "	)\n" +
-                "	";
+            "	*\n" +
+            "FROM\n" +
+            "	base_staff\n" +
+            "WHERE\n" +
+            "	staff_id IN (\n" +
+            "		SELECT DISTINCT\n" +
+            "			staff_id\n" +
+            "		FROM\n" +
+            "			mes_mo_schedule_staff\n" +
+            "		WHERE\n" +
+            "			schedule_id = '"+scheduleId+"'\n" +
+            "		AND station_id = '"+baseStation.getStationId()+"'\n" +
+            "		AND shift_id = '"+shift.getShiftId()+"'\n" +
+            "		AND is_station = 0 AND enabled=1 \n" +
+            "	)\n" +
+            "	";
         baseStation.setIsStation(false);
         return jdbcTemplate.query(sql, baseStaffrm);
     }
@@ -886,10 +936,10 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
 
     @Override
     public void processEnd(ProcessStatus processStatus) {
-       MesMoSchedule mesMoSchedule =  mesMoScheduleRepository.findById(processStatus.getScheduleId()).orElse(null);
-       if(mesMoSchedule==null || mesMoSchedule.getFlag() !=2){
-           throw  new MMException("工序已开始不可操作。");
-       }
+        MesMoSchedule mesMoSchedule =  mesMoScheduleRepository.findById(processStatus.getScheduleId()).orElse(null);
+        if(mesMoSchedule==null || mesMoSchedule.getFlag() !=2){
+            throw  new MMException("工序已开始不可操作。");
+        }
         MesMoScheduleProcess mesMoScheduleProcess = mesMoScheduleProcessRepository.findbscheduleIdProcessId(processStatus.getScheduleId(),processStatus.getProcessId());
         if(mesMoScheduleProcess==null || mesMoScheduleProcess.getActualStartTime()==null){
             throw  new MMException("工序未开始。");
@@ -919,7 +969,7 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         for(int i=0;i<ids.length;i++){
             msg = deleteMesMoschedule(ids[i], msg);
         }
-       return msg;
+        return msg;
 
     }
 
@@ -942,15 +992,15 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
                 MesMoDesc moDesc= mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
                 //把排产量更新到工单
                 try {
-                    Integer scheduQty =  moDesc.getSchedulQty()-mesMoSchedule.getScheduleQty();
-                    mesMoDescRepository.setSchedulQtyFor(scheduQty,moDesc.getMoId());
+                    moDesc.setSchedulQty( moDesc.getSchedulQty()-mesMoSchedule.getScheduleQty());
+                    mesMoDescRepository.save(moDesc);
                     mesMoDescRepository.updateIsSchedeul(0,moDesc.getMoId());
                 }catch (Exception e){
                     //工单排产总量为null所以更新进行忽略
                 }
 
             }else {
-                msg+= mesMoSchedule.getScheduleNo() +",";
+                msg+= mesMoSchedule.getScheduleNo() +"排产单"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+",";
             }
         }
         return msg;
@@ -987,6 +1037,7 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
         if(moDesc.getTargetQty().equals(scheduleQtysum) || scheduleQtysum> moDesc.getTargetQty()){
             mesMoDescRepository.updateIsSchedeul(1,moDesc.getMoId());
         }
+        mesMoDescRepository.setCloseFlagFor(MoStatus.SCHEDULED.getKey(),moDesc.getMoId());
     }
 
     /**
@@ -1035,12 +1086,12 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
     @Override
     public void updateMesMoSchedule(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations) {
         //删除
-       String msg= deleteMesMoschedule(mesMoSchedule.getScheduleId(),"");
-       if(msg.trim().equals("")){
-           save(mesMoSchedule,mesMoScheduleStaffs,mesMoScheduleProcesses,mesMoScheduleStations);
-       }else {
-           throw  new MMException("排产单已执行不可修改。");
-       }
+        String msg= deleteMesMoschedule(mesMoSchedule.getScheduleId(),"");
+        if(msg.trim().equals("")){
+            save(mesMoSchedule,mesMoScheduleStaffs,mesMoScheduleProcesses,mesMoScheduleStations);
+        }else {
+            throw  new MMException("排产单已执行不可修改。");
+        }
 
     }
 
@@ -1106,21 +1157,21 @@ private List<MesMoScheduleStation> getMesMoScheduleStations(String scheduleId) {
      * @param scheduleId
      */
     private void saveScheduleStation(List<MesMoScheduleStation> mesMoScheduleStations, String scheduleId) {
-    if(mesMoScheduleStations !=null){
-        for(MesMoScheduleStation mesMoScheduleStation : mesMoScheduleStations){
-            String  schedulestation  = UUIDUtil.getUUID();
-            mesMoScheduleStation.setId(schedulestation);
-            mesMoScheduleStation.setScheduleId(scheduleId);
-            ValidatorUtil.validateEntity(mesMoScheduleStation, AddGroup.class);
-            if(baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null)==null){
-                throw  new MMException("生产排程工序ID有误。");
+        if(mesMoScheduleStations !=null){
+            for(MesMoScheduleStation mesMoScheduleStation : mesMoScheduleStations){
+                String  schedulestation  = UUIDUtil.getUUID();
+                mesMoScheduleStation.setId(schedulestation);
+                mesMoScheduleStation.setScheduleId(scheduleId);
+                ValidatorUtil.validateEntity(mesMoScheduleStation, AddGroup.class);
+                if(baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null)==null){
+                    throw  new MMException("生产排程工序ID有误。");
+                }
+                if(baseStationService.findById(mesMoScheduleStation.getStationId()).orElse(null)== null){
+                    throw  new MMException("生产排程工位ID有误。");
+                }
+                mesMoScheduleStationService.save(mesMoScheduleStation);
             }
-            if(baseStationService.findById(mesMoScheduleStation.getStationId()).orElse(null)== null){
-                throw  new MMException("生产排程工位ID有误。");
-            }
-            mesMoScheduleStationService.save(mesMoScheduleStation);
         }
-    }
     }
 
     /**

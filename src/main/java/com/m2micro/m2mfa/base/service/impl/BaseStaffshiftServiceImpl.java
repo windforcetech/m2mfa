@@ -1,13 +1,17 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.m2mfa.base.entity.BaseStaffshift;
+import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseStaffshiftQuery;
 import com.m2micro.m2mfa.base.repository.BaseStaffshiftRepository;
 import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -51,6 +55,7 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
 
 
+
         List<Map<String, Object>> collect = list.stream()
                 .skip((query.getPage() - 1) * query.getSize()).limit(query.getSize())
                 .map(item -> {
@@ -87,6 +92,51 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
     @Override
     public List<BaseStaffshift> saveSome(List<BaseStaffshift> entities) {
         return null;
+    }
+
+    @Override
+    public List<BaseShift> findByStaffIdAndShiftDate(String staffId, Date shiftDate) {
+
+        if(shiftDate==null||StringUtils.isEmpty(staffId)){
+            return null;
+        }
+        String format = DateUtil.format(shiftDate, DateUtil.DATE_PATTERN);
+        String sql = "SELECT\n" +
+                "	bs.shift_id shiftId,\n" +
+                "	bs.code code,\n" +
+                "	bs.name name,\n" +
+                "	bs.category category,\n" +
+                "	bs.on_time1 onTime1,\n" +
+                "	bs.off_time1 offTime1,\n" +
+                "	bs.rest_time1 restTime1,\n" +
+                "	bs.time_category1 timeCategory1,\n" +
+                "	bs.on_time2 onTime2,\n" +
+                "	bs.off_time2 offTime2,\n" +
+                "	bs.rest_time2 restTime2,\n" +
+                "	bs.time_category2 timeCategory2,\n" +
+                "	bs.on_time3 onTime3,\n" +
+                "	bs.off_time3 offTime3,\n" +
+                "	bs.rest_time3 restTime3,\n" +
+                "	bs.time_category3 timeCategory3,\n" +
+                "	bs.on_time4 onTime4,\n" +
+                "	bs.off_time4 offTime4,\n" +
+                "	bs.rest_time4 restTime4,\n" +
+                "	bs.time_category4 timeCategory4,\n" +
+                "	bs.enabled enabled,\n" +
+                "	bs.description description,\n" +
+                "	bs.create_on createOn,\n" +
+                "	bs.create_by createBy,\n" +
+                "	bs.modified_on modifiedOn,\n" +
+                "	bs.modified_by modifiedBy\n" +
+                "FROM\n" +
+                "	base_staffshift bss,\n" +
+                "	base_shift bs\n" +
+                "WHERE\n" +
+                "	bss.shift_id = bs.shift_id\n" +
+                "AND bss.staff_id = '" + staffId + "'\n" +
+                "AND bss.shift_date = '" + format + "'\n" ;
+        RowMapper<BaseShift> rm = BeanPropertyRowMapper.newInstance(BaseShift.class);
+        return jdbcTemplate.query(sql, rm);
     }
 
     @Override

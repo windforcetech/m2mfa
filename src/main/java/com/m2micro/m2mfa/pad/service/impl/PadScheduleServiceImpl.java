@@ -1,9 +1,11 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
+import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
@@ -48,6 +50,8 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     MesRecordWorkRepository mesRecordWorkRepository;
     @Autowired
     PadDispatchService padDispatchService;
+    @Autowired
+    BaseProcessService baseProcessService;
 
     @Override
     public List<PadScheduleModel> getMesMoSchedule() {
@@ -74,10 +78,25 @@ public class PadScheduleServiceImpl implements PadScheduleService {
         //获取生产中的排产单并且对该员工至少有一个工位没完成（排除掉所有分配给该员工的工位都已完成的排产单）
         List<PadScheduleModel> production = getProductionScheduleModels(baseStaff);
         if(production!=null&&production.size()>0){
-            return production;
+            List<PadScheduleModel> list = getScheduleModels(production,baseStaff);
+            if (list != null) return list;
         }
         //获取已审待产的在同一机台上的优先级最高的排产单(过滤掉排产单不是当前机台优先级最高的排产单)
         return getFilterScheduleModels(baseStaff);
+    }
+
+    private List<PadScheduleModel> getScheduleModels(List<PadScheduleModel> production,BaseStaff baseStaff) {
+        List<PadScheduleModel> list = new ArrayList<>();
+        for (PadScheduleModel pro : production) {
+            List<PadStationModel> pendingStations = getPadStationModels(pro.getScheduleId(), baseStaff);
+            if (pendingStations != null && pendingStations.size() > 0) {
+                list.add(pro);
+            }
+        }
+        if (list.size() > 0) {
+            return list;
+        }
+        return null;
     }
 
     /**
@@ -100,6 +119,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "FROM\n" +
                 "	mes_mo_schedule ms,\n" +
                 "	mes_mo_schedule_staff mss,\n" +
+                "   mes_mo_schedule_process mmsp,\n" +
                 "	base_machine bm,\n" +
                 "	base_parts bp\n" +
                 "WHERE\n" +
@@ -108,6 +128,10 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "AND bm.machine_id = ms.machine_id\n" +
                 "AND bp.part_id=ms.part_id\n" +
                 "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
+                "AND mss.enabled = 1 \n" +
+                "AND mmsp.process_id=mss.process_id\n" +
+                "AND ms.schedule_id = mmsp.schedule_id\n" +
+                "AND mmsp.actual_end_time IS NULL \n" +
                 "GROUP BY\n" +
                 "	ms.machine_id\n" +
                 "ORDER BY\n" +
@@ -137,7 +161,12 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 }
             }
         }
-        return filterPadScheduleModel;
+        List<PadScheduleModel> list = new ArrayList<>();
+        if(filterPadScheduleModel!=null&&filterPadScheduleModel.size()>0){
+            list = getScheduleModels(filterPadScheduleModel,baseStaff);
+        }
+        if (list == null) throw new MMException("当前没有可处理的排产单！");
+        return list;
     }
 
     /**
@@ -168,6 +197,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "AND bm.machine_id = ms.machine_id\n" +
                 "AND bp.part_id=ms.part_id\n" +
                 "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
+                "AND mss.enabled = 1 \n" +
                 "GROUP BY\n" +
                 "	ms.machine_id\n" +
                 "ORDER BY\n" +
@@ -261,6 +291,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                             "	mss.station_id = bs.station_id\n" +
                             "AND mss.schedule_id = '" + scheduleId + "'\n" +
                             "AND mss.staff_id = '" + staffId + "'\n" +
+                            "AND mss.enabled = 1 \n" +
                             "AND mps.station_id = mss.station_id\n" +
                             "AND mps.process_id = mss.process_id\n" +
                             "ORDER BY\n" +
@@ -296,7 +327,8 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                             "AND mps.process_id = mss.process_id\n" +
                             "AND mss.schedule_id = mmss.schedule_id\n" +
                             "AND mss.station_id = mmss.station_id\n" +
-                            "AND mmss.jump = 0\n" +
+                            "AND mss.enabled = 1 \n" +
+                            "AND mmss.jump = 1\n" +
                             "ORDER BY\n" +
                             "	mps.step ASC";
         RowMapper<PadStationModel> rowMapper = BeanPropertyRowMapper.newInstance(PadStationModel.class);
@@ -306,8 +338,16 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     @Override
     public StationAndOperate getStationsAndOperate(String scheduleId) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         StationAndOperate stationAndOperate = new StationAndOperate();
+        //设置工位
         List<PadStationModel> pendingStations = getPendingStations(scheduleId);
         stationAndOperate.setPadStationModels(pendingStations);
+        //设置工艺
+        if(pendingStations!=null&&pendingStations.size()>0){
+            PadStationModel padStationModel = pendingStations.get(0);
+            BaseProcess baseProcess = baseProcessService.findById(padStationModel.getProcessId()).orElse(null);
+            stationAndOperate.setProcessId(baseProcess.getProcessId());
+            stationAndOperate.setProcessName(baseProcess.getProcessName());
+        }
         if(pendingStations==null||pendingStations.size()==0){
             OperationInfo operationInfo = new OperationInfo();
             //上工标志位/下工标志位(0:上工,1:下工)
