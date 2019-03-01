@@ -3,11 +3,15 @@ package com.m2micro.m2mfa.common.config;
 import com.querydsl.jpa.HQLTemplates;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import javax.persistence.EntityManager;
+import javax.servlet.MultipartConfigElement;
+import java.io.File;
+import java.nio.file.Path;
 
 /**
  * @Auther: liaotao
@@ -18,6 +22,8 @@ import javax.persistence.EntityManager;
 @EnableAsync
 public class M2mfaConfig {
 
+//    @Value("${}")
+//    private String baseFileDirectory;
     @Bean
     public JPAQueryFactory jpaQueryFactory(EntityManager entityManager) {
         return new JPAQueryFactory(new HQLTemplates(), entityManager);
@@ -33,4 +39,17 @@ public class M2mfaConfig {
         }
         return labServerConfig;
     }
+
+    @Bean
+    MultipartConfigElement multipartConfigElement(@Value("${file.baseDir}")String filepathDir) {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        //String path="/m2m_mes_files";
+        File file =new File(filepathDir);
+        if(!file.exists()){
+            file.mkdirs();
+        }
+        factory.setLocation(filepathDir);
+        return factory.createMultipartConfig();
+    }
+
 }

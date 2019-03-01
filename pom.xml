@@ -18,7 +18,7 @@
     </parent>
 
     <properties>
-        <project.base.version>2.1.0</project.base.version>
+        <project.base.version>2.2.0</project.base.version>
         <project.release.version>${project.base.version}-SNAPSHOT</project.release.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
