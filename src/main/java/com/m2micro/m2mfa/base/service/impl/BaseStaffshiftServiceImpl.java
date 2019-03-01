@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -15,10 +16,7 @@ import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.QBaseStaffshift;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -51,7 +49,6 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
             sql += "  and department_id='" + query.getDepartmentID() + "'";
         sql += ") AND shift_date >= '" + DateUtil.format(query.getStartTime()) + "' AND shift_date <= '" + DateUtil.format(query.getEndTime()) + "' and base_shift.shift_id =base_staffshift.shift_id) as tk  GROUP BY staff_id ) as zh , base_staff where base_staff.staff_id=zh.staff_id;";
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
-
 
 
         List<Map<String, Object>> collect = list.stream()
@@ -90,6 +87,29 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
     @Override
     public List<BaseStaffshift> saveSome(List<BaseStaffshift> entities) {
         return null;
+    }
+
+    @Override
+    public String[] findCanDelete(String[] ids) {
+        // String sql = "SELECT b.id, b.staff_id, b.shift_id, b.shift_date, m.plan_start_time, m.plan_end_time FROM base_staffshift b, mes_mo_schedule_staff m WHERE b.shift_date BETWEEN m.plan_start_time AND m.plan_end_time AND m.shift_id = b.shift_id AND m.staff_id = b.staff_id AND b.id IN (:ids)";
+        String sql = "SELECT b.id FROM base_staffshift b, mes_mo_schedule_staff m, mes_mo_schedule mms WHERE  b.shift_date BETWEEN mms.plan_start_time AND mms.plan_end_time AND m.shift_id = b.shift_id AND m.staff_id = b.staff_id AND mms.schedule_id = m.schedule_id AND b.id IN (:ids) GROUP BY id";
+        HashMap<String, Object> args = new HashMap<>();
+//        ArrayList<String> mids = new ArrayList<>();
+//        for (String one : ids) {
+//            mids.add(one);
+//        }
+//        args.put("ids", mids);
+
+        args.put("ids", Arrays.asList(ids));
+
+
+        NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
+        List<Map<String, Object>> list = givenParamJdbcTemp.queryForList(sql, args);
+        String[] ids1 = list.stream()
+                .map(item -> String.valueOf(item.get("id")))
+                .toArray(String[]::new);
+
+        return ids1;
     }
 
 

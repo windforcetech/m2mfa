@@ -323,8 +323,29 @@ public class BaseStaffshiftController {
     @ApiOperation(value = "删除员工排班表")
     @UserOperationLog("删除员工排班表")
     public ResponseMessage delete(@RequestBody String[] ids) {
-        baseStaffshiftService.deleteByIds(ids);
+
+        String[] canDelete = baseStaffshiftService.findCanDelete(ids);
+        baseStaffshiftService.deleteByIds(substract(ids, canDelete));
+        if (canDelete.length > 0) {
+            throw new MMException(StringUtils.join(canDelete, ",") + "存在排产记录，不可删除");
+        }
+
         return ResponseMessage.ok();
     }
 
+    public static String[] substract(String[] arr1, String[] arr2) {
+        LinkedList<String> list = new LinkedList<String>();
+        for (String str : arr1) {
+            if (!list.contains(str)) {
+                list.add(str);
+            }
+        }
+        for (String str : arr2) {
+            if (list.contains(str)) {
+                list.remove(str);
+            }
+        }
+        String[] result = {};
+        return list.toArray(result);
+    }
 }
