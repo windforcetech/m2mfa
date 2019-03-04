@@ -1,8 +1,10 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.query.BaseQualitySolutionDescQuery;
 import com.m2micro.m2mfa.base.service.BaseQualitySolutionDescService;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.vo.AqlDescSelect;
 import com.m2micro.m2mfa.base.vo.BaseQualitySolutionDescModel;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
@@ -20,6 +22,8 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseQualitySolutionDesc;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * 检验方案主档 前端控制器
@@ -40,7 +44,7 @@ public class BaseQualitySolutionDescController {
     @RequestMapping("/list")
     @ApiOperation(value="检验方案主档列表")
     @UserOperationLog("检验方案主档列表")
-    public ResponseMessage<PageUtil<BaseQualitySolutionDesc>> list(Query query){
+    public ResponseMessage<PageUtil<BaseQualitySolutionDesc>> list(BaseQualitySolutionDescQuery query){
         PageUtil<BaseQualitySolutionDesc> page = baseQualitySolutionDescService.list(query);
         return ResponseMessage.ok(page);
     }
@@ -94,4 +98,14 @@ public class BaseQualitySolutionDescController {
         return ResponseMessage.ok();
     }
 
+
+    /**
+     * 详情
+     */
+    @RequestMapping("/getAqlDesc")
+    @ApiOperation(value="获取抽样方案")
+    @UserOperationLog("获取抽样方案")
+    public ResponseMessage<List<AqlDescSelect>> getAqlDesc(){
+        return ResponseMessage.ok(baseQualitySolutionDescService.getAqlDesc());
+    }
 }
