@@ -103,7 +103,10 @@ public class PadHomeServiceImpl  implements PadHomeService {
     if(startTime !=null){
       BigDecimal standardHours = mesPartRouteStation.getStandardHours();
       BigDecimal bdhours = new BigDecimal((new Date().getTime()-startTime.getTime())/1000);
-       standardOutput = bdhours.divide(standardHours, 2, RoundingMode.HALF_UP);
+      if(standardHours.compareTo(BigDecimal.ZERO)!=0){
+        standardOutput = bdhours.divide(standardHours, 2, RoundingMode.HALF_UP);
+      }
+
       //获取当前员工开始模数
       BigDecimal startMolds=startMolds(rwId,PadStaffUtil.getStaff().getStaffId());
       //实际产出
