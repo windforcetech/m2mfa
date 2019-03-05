@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.base.repository.BaseAqlDescRepository;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDescRepository;
 import com.m2micro.m2mfa.base.service.BaseAqlDefService;
 import com.m2micro.m2mfa.base.service.BaseAqlDescService;
+import com.m2micro.m2mfa.base.vo.AqlDescSelect;
 import com.m2micro.m2mfa.base.vo.AqlDescvo;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -22,6 +23,8 @@ import com.m2micro.framework.commons.util.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * 抽样标准(aql)-主档 服务实现类
  * @author liaotao
@@ -115,6 +118,18 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
         BaseAqlDesc baseAqlDesc = this.findById(id).orElse(null);
         List<BaseAqlDef> baseAqlDefs = baseAqlDefRepository.findByAqlId(id);
         return  AqlDescvo.builder().baseAqlDefs(baseAqlDefs).baseAqlDesc(baseAqlDesc).build();
+    }
+
+    @Override
+    public List<AqlDescSelect> getAqlDesc() {
+        List<BaseAqlDesc> baseAqlDescs = baseAqlDescRepository.findAll();
+        List<AqlDescSelect> collect = baseAqlDescs.stream().map(baseAqlDesc -> {
+            AqlDescSelect al = new AqlDescSelect();
+            al.setAqlId(baseAqlDesc.getAqlId());
+            al.setAqlName(baseAqlDesc.getAqlName());
+            return al;
+        }).collect(Collectors.toList());
+        return collect;
     }
 
 }

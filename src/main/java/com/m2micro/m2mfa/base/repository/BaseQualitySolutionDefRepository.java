@@ -20,4 +20,12 @@ public interface BaseQualitySolutionDefRepository extends BaseRepository<BaseQua
      * @return  检验方案明细
      */
     List<BaseQualitySolutionDef> findByQitemId(String qitemId);
+
+    /**
+     * 根据检验方案主键查找检验方案明细
+     * @param solutionId
+     *              检验方案主档id
+     * @return      检验方案明细
+     */
+    List<BaseQualitySolutionDef> findBySolutionId(String solutionId);
 }

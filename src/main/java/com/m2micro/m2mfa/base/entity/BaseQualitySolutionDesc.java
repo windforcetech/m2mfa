@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
@@ -28,12 +29,23 @@ public class BaseQualitySolutionDesc extends BaseEntity implements Serializable 
     private String solutionName;
     @ApiModelProperty(value = "抽检方案")
     private String aqlId;
+    @Transient
+    @ApiModelProperty(value = "抽检方案名称")
+    private String aqlName;
     @ApiModelProperty(value = "作业指导书")
     private String instructionId;
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+
+    public String getAqlName() {
+        return aqlName;
+    }
+
+    public void setAqlName(String aqlName) {
+        this.aqlName = aqlName;
+    }
 
     public String getSolutionId() {
         return solutionId;
