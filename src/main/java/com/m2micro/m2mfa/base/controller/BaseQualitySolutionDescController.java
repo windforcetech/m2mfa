@@ -6,6 +6,7 @@ import com.m2micro.m2mfa.base.service.BaseQualitySolutionDescService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.vo.AqlDescSelect;
 import com.m2micro.m2mfa.base.vo.BaseQualitySolutionDescModel;
+import com.m2micro.m2mfa.base.vo.QualitySolutionDescInfo;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -55,9 +56,8 @@ public class BaseQualitySolutionDescController {
     @RequestMapping("/info/{id}")
     @ApiOperation(value="检验方案主档详情")
     @UserOperationLog("检验方案主档详情")
-    public ResponseMessage<BaseQualitySolutionDesc> info(@PathVariable("id") String id){
-        BaseQualitySolutionDesc baseQualitySolutionDesc = baseQualitySolutionDescService.findById(id).orElse(null);
-        return ResponseMessage.ok(baseQualitySolutionDesc);
+    public ResponseMessage<QualitySolutionDescInfo> info(@PathVariable("id") String id){
+        return ResponseMessage.ok(baseQualitySolutionDescService.info(id));
     }
 
     /**
@@ -77,14 +77,9 @@ public class BaseQualitySolutionDescController {
     @RequestMapping("/update")
     @ApiOperation(value="更新检验方案主档")
     @UserOperationLog("更新检验方案主档")
-    public ResponseMessage<BaseQualitySolutionDesc> update(@RequestBody BaseQualitySolutionDesc baseQualitySolutionDesc){
-        ValidatorUtil.validateEntity(baseQualitySolutionDesc, UpdateGroup.class);
-        BaseQualitySolutionDesc baseQualitySolutionDescOld = baseQualitySolutionDescService.findById(baseQualitySolutionDesc.getSolutionId()).orElse(null);
-        if(baseQualitySolutionDescOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        PropertyUtil.copy(baseQualitySolutionDesc,baseQualitySolutionDescOld);
-        return ResponseMessage.ok(baseQualitySolutionDescService.save(baseQualitySolutionDescOld));
+    public ResponseMessage update(@RequestBody BaseQualitySolutionDescModel baseQualitySolutionDescModel){
+        baseQualitySolutionDescService.updateEntity(baseQualitySolutionDescModel);
+        return ResponseMessage.ok();
     }
 
     /**

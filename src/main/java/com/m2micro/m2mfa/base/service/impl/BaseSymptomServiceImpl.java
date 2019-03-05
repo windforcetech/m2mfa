@@ -157,7 +157,7 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
     @Override
     @Transactional
     public void deleteEntitys(String[] ids) {
-        deleteEntitys(ids);
+        deleteByIds(ids);
     }
 
 

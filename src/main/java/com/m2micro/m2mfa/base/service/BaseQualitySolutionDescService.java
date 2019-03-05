@@ -7,6 +7,7 @@ import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.query.BaseQualitySolutionDescQuery;
 import com.m2micro.m2mfa.base.vo.AqlDescSelect;
 import com.m2micro.m2mfa.base.vo.BaseQualitySolutionDescModel;
+import com.m2micro.m2mfa.base.vo.QualitySolutionDescInfo;
 
 import java.util.List;
 
@@ -35,4 +36,17 @@ public interface BaseQualitySolutionDescService extends BaseService<BaseQualityS
      * @return
      */
     List<AqlDescSelect> getAqlDesc();
+
+    /**
+     * 获取详情
+     * @param id
+     * @return
+     */
+    QualitySolutionDescInfo info(String id);
+
+    /**
+     * 更新
+     * @return
+     */
+    void updateEntity(BaseQualitySolutionDescModel baseQualitySolutionDescModel);
 }

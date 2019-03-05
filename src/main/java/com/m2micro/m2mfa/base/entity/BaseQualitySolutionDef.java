@@ -3,10 +3,13 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -38,6 +41,7 @@ public class BaseQualitySolutionDef extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
+    @Size(max=5,message = "描述长度不能大于200位",groups = {AddGroup.class, UpdateGroup.class})
     private String description;
 
     public String getId() {
