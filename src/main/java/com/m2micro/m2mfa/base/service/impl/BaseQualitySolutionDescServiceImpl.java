@@ -1,7 +1,10 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseQualitySolutionDescQuery;
+import com.m2micro.m2mfa.base.repository.BasePartQualitySolutionRepository;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDefRepository;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDescRepository;
 import com.m2micro.m2mfa.base.service.BaseAqlDescService;
@@ -15,6 +18,7 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,6 +31,7 @@ import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +54,8 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
     JdbcTemplate jdbcTemplate;
     @Autowired
     BaseAqlDescService baseAqlDescService;
+    @Autowired
+    BasePartQualitySolutionRepository basePartQualitySolutionRepository;
 
     public BaseQualitySolutionDescRepository getRepository() {
         return baseQualitySolutionDescRepository;
@@ -153,7 +160,8 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
         BaseQualitySolutionDesc baseQualitySolutionDescOld = findById(baseQualitySolutionDescModel.getBaseQualitySolutionDesc().getSolutionId()).orElse(null);
         PropertyUtil.copy(baseQualitySolutionDescModel.getBaseQualitySolutionDesc(),baseQualitySolutionDescOld);
         save(baseQualitySolutionDescOld);
-
+        //去掉行删除的数据
+        deleteRow(baseQualitySolutionDescModel);
         //保存明细
         List<BaseQualitySolutionDef> list = baseQualitySolutionDescModel.getBaseQualitySolutionDefs().stream().map(baseQualitySolutionDef -> {
             BaseQualitySolutionDef baseQualitySolutionDefOld = new BaseQualitySolutionDef();
@@ -168,6 +176,64 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
             return baseQualitySolutionDefOld;
         }).collect(Collectors.toList());
         baseQualitySolutionDefService.saveAll(list);
+    }
+
+    /**
+     * 行删除
+     * @param baseQualitySolutionDescModel
+     */
+    private void deleteRow(BaseQualitySolutionDescModel baseQualitySolutionDescModel) {
+        //抽检方案明细(所有)
+        List<BaseQualitySolutionDef> baseQualitySolutionDefs = baseQualitySolutionDefRepository.findBySolutionId(baseQualitySolutionDescModel.getBaseQualitySolutionDesc().getSolutionId());
+        //前段传进来的数据库数据
+        List<String> ids = baseQualitySolutionDescModel.getBaseQualitySolutionDefs().stream().map(BaseQualitySolutionDef::getId).collect(Collectors.toList());
+        List<BaseQualitySolutionDef> allById = baseQualitySolutionDefRepository.findAllById(ids);
+        //剩下需要删除的（通过行删除）
+        baseQualitySolutionDefs.removeAll(allById);
+        baseQualitySolutionDefRepository.deleteAll(baseQualitySolutionDefs);
+    }
+
+    @Override
+    @Transactional
+    public ResponseMessage deleteEntity(String[] ids) {
+        //能删除的
+        List<BaseQualitySolutionDesc> enableDelete = new ArrayList<>();
+        //有引用，不能删除的
+        List<BaseQualitySolutionDesc> disableDelete = new ArrayList<>();
+        for (String id:ids){
+            BaseQualitySolutionDesc baseQualitySolutionDesc = findById(id).orElse(null);
+            if(baseQualitySolutionDesc==null){
+                throw new MMException("数据库不存在数据！");
+            }
+            //校验引用
+            List<BasePartQualitySolution> basePartQualitySolutions = basePartQualitySolutionRepository.findBySolutionId(baseQualitySolutionDesc.getSolutionId());
+            if(basePartQualitySolutions!=null&&basePartQualitySolutions.size()>0){
+                disableDelete.add(baseQualitySolutionDesc);
+                continue;
+            }
+            enableDelete.add(baseQualitySolutionDesc);
+        }
+        //删除所有
+        deleteAllEntity(enableDelete);
+        if(disableDelete.size()>0){
+            String[] strings = disableDelete.stream().map(BaseQualitySolutionDesc::getSolutionName).toArray(String[]::new);
+            return ResponseMessage.ok("校检方案【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+        }
+        return ResponseMessage.ok("操作成功");
+    }
+
+    /**
+     * 删除所有
+     * @param enableDelete
+     */
+    @Transactional
+    public void deleteAllEntity(List<BaseQualitySolutionDesc> enableDelete){
+        deleteAll(enableDelete);
+        //删除子表
+        if(enableDelete!=null&&enableDelete.size()>0){
+            List<BaseQualitySolutionDef> baseQualitySolutionDefs = baseQualitySolutionDefRepository.findBySolutionId(enableDelete.get(0).getSolutionId());
+            baseQualitySolutionDefRepository.deleteAll(baseQualitySolutionDefs);
+        }
     }
 
 }

@@ -89,8 +89,7 @@ public class BaseQualitySolutionDescController {
     @ApiOperation(value="删除检验方案主档")
     @UserOperationLog("删除检验方案主档")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseQualitySolutionDescService.deleteByIds(ids);
-        return ResponseMessage.ok();
+        return baseQualitySolutionDescService.deleteEntity(ids);
     }
 
 

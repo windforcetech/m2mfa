@@ -22,4 +22,5 @@ public class BaseQualitySolutionDescModel {
     private BaseQualitySolutionDesc baseQualitySolutionDesc;
     @ApiModelProperty(value = "检验方案明细")
     private List<BaseQualitySolutionDef> baseQualitySolutionDefs;
+
 }
