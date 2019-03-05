@@ -85,13 +85,19 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
     }
 
     @Override
+    @Transactional
     public void update(BaseInstruction baseInstruction, MultipartFile file, HttpServletRequest request) {
-//        BaseInstruction baseInstructionOld = baseInstructionService.findById(baseInstruction.getInstructionId()).orElse(null);
-//        if(baseInstructionOld==null){
-//            throw new MMException("数据库不存在该记录");
-//        }
-//        PropertyUtil.copy(baseInstruction,baseInstructionOld);
-//        return ResponseMessage.ok(baseInstructionService.save(baseInstructionOld));
+        BaseInstruction baseInstructionOld = findById(baseInstruction.getInstructionId()).orElse(null);
+        if(baseInstructionOld==null){
+            throw new MMException("数据库不存在该记录");
+        }
+        File deletefile = new File(baseInstruction.getFileUrl());
+        deletefile.delete();
+        baseInstruction.setExtension( file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")));
+        //上次文件
+        baseInstruction.setFileUrl(uploadFile(file,request,baseInstruction.getInstructionCode(),baseInstruction.getRevsion().toString()));
+        PropertyUtil.copy(baseInstruction,baseInstructionOld);
+        save(baseInstructionOld);
     }
 
     @Override
