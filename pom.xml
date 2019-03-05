@@ -66,7 +66,7 @@
 
 
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>cn.afterturn</groupId>
             <artifactId>easypoi-base</artifactId>
             <version>${easypoi.version}</version>
@@ -80,7 +80,7 @@
             <groupId>cn.afterturn</groupId>
             <artifactId>easypoi-annotation</artifactId>
             <version>${easypoi.version}</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>com.alibaba</groupId>
