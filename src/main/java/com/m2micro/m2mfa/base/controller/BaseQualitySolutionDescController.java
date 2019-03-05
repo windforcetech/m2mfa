@@ -111,6 +111,6 @@ public class BaseQualitySolutionDescController {
     @ApiOperation(value="获取检验项目")
     @UserOperationLog("获取检验项目")
     public ResponseMessage<List<BaseQualityItems>> getQualityItems(){
-        return ResponseMessage.ok();
+        return ResponseMessage.ok(baseQualitySolutionDescService.getQualityItems());
     }
 }
