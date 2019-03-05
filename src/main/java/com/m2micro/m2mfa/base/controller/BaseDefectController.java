@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.query.BaseDefectQuery;
+import com.m2micro.m2mfa.base.repository.BaseDefectRepository;
 import com.m2micro.m2mfa.base.service.BaseDefectService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -23,8 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 不良現象代碼 前端控制器
- * @author chenshuhong
- * @since 2019-01-24
+ * @author liaotao
+ * @since 2019-03-05
  */
 @RestController
 @RequestMapping("/base/baseDefect")
@@ -33,7 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class BaseDefectController {
     @Autowired
     BaseDefectService baseDefectService;
-
+    @Autowired
+    BaseDefectRepository baseDefectRepository;
     /**
      * 列表
      */
@@ -63,11 +65,13 @@ public class BaseDefectController {
     @ApiOperation(value="保存不良現象代碼")
     @UserOperationLog("保存不良現象代碼")
     public ResponseMessage<BaseDefect> save(@RequestBody BaseDefect baseDefect){
-        BaseDefect baseDefect1 =baseDefectService.findById(baseDefect.getEctCode()).orElse(null);
-        if(baseDefect1!=null){
-            throw  new MMException(baseDefect.getEctCode()+"该编码已被应用。");
+        if(!baseDefectRepository.findByEctCode(baseDefect.getEctCode()).isEmpty()){
+            throw  new MMException("不良编号【"+baseDefect.getEctCode()+"】已被使用。");
         }
-        return ResponseMessage.ok(baseDefectService.save(baseDefect));
+        ValidatorUtil.validateEntity(baseDefect, AddGroup.class);
+        baseDefect.setEctId(UUIDUtil.getUUID());
+        baseDefectService.save(baseDefect);
+        return ResponseMessage.ok();
     }
 
     /**
@@ -78,14 +82,14 @@ public class BaseDefectController {
     @UserOperationLog("更新不良現象代碼")
     public ResponseMessage<BaseDefect> update(@RequestBody BaseDefect baseDefect){
         ValidatorUtil.validateEntity(baseDefect, UpdateGroup.class);
-        BaseDefect baseDefectOld = baseDefectService.findById(baseDefect.getEctCode()).orElse(null);
+        BaseDefect baseDefectOld = baseDefectService.findById(baseDefect.getEctId()).orElse(null);
         if(baseDefectOld==null){
             throw new MMException("数据库不存在该记录");
         }
+        baseDefect.setEctCode(baseDefectOld.getEctCode());
         PropertyUtil.copy(baseDefect,baseDefectOld);
         return ResponseMessage.ok(baseDefectService.save(baseDefectOld));
     }
-
     /**
      * 删除
      */
@@ -93,12 +97,11 @@ public class BaseDefectController {
     @ApiOperation(value="删除不良現象代碼")
     @UserOperationLog("删除不良現象代碼")
     public ResponseMessage delete(@RequestBody String[] ids){
-      String msg =  baseDefectService.deleteIds(ids);
+        String msg =  baseDefectService.deleteIds(ids);
         ResponseMessage rm = ResponseMessage.ok();
         if(msg.trim()!=""){
             rm.setMessage(msg.trim()+"已被引用不可删除。");
         }
         return  rm;
     }
-
 }
