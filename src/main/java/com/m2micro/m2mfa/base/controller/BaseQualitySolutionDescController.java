@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.entity.BaseQualityItems;
 import com.m2micro.m2mfa.base.query.BaseQualitySolutionDescQuery;
 import com.m2micro.m2mfa.base.service.BaseQualitySolutionDescService;
 import com.m2micro.framework.commons.exception.MMException;
@@ -94,12 +95,22 @@ public class BaseQualitySolutionDescController {
 
 
     /**
-     * 详情
+     * 获取抽样方案
      */
     @RequestMapping("/getAqlDesc")
     @ApiOperation(value="获取抽样方案")
     @UserOperationLog("获取抽样方案")
     public ResponseMessage<List<AqlDescSelect>> getAqlDesc(){
         return ResponseMessage.ok(baseQualitySolutionDescService.getAqlDesc());
+    }
+
+    /**
+     * 获取检验项目
+     */
+    @RequestMapping("/getQualityItems")
+    @ApiOperation(value="获取检验项目")
+    @UserOperationLog("获取检验项目")
+    public ResponseMessage<List<BaseQualityItems>> getQualityItems(){
+        return ResponseMessage.ok();
     }
 }

@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.service;
 
 import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.m2mfa.base.entity.BaseQualityItems;
 import com.m2micro.m2mfa.base.entity.BaseQualitySolutionDesc;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -56,4 +57,10 @@ public interface BaseQualitySolutionDescService extends BaseService<BaseQualityS
      * @return
      */
     ResponseMessage deleteEntity(String[] ids);
+
+    /**
+     * 获取检验项目
+     * @return
+     */
+    List<BaseQualityItems> getQualityItems();
 }

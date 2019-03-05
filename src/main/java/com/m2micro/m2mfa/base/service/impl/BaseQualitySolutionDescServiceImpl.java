@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.base.repository.BasePartQualitySolutionRepository;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDefRepository;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDescRepository;
 import com.m2micro.m2mfa.base.service.BaseAqlDescService;
+import com.m2micro.m2mfa.base.service.BaseQualityItemsService;
 import com.m2micro.m2mfa.base.service.BaseQualitySolutionDefService;
 import com.m2micro.m2mfa.base.service.BaseQualitySolutionDescService;
 import com.m2micro.m2mfa.base.vo.AqlDescSelect;
@@ -56,6 +57,8 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
     BaseAqlDescService baseAqlDescService;
     @Autowired
     BasePartQualitySolutionRepository basePartQualitySolutionRepository;
+    @Autowired
+    BaseQualityItemsService baseQualityItemsService;
 
     public BaseQualitySolutionDescRepository getRepository() {
         return baseQualitySolutionDescRepository;
@@ -146,6 +149,10 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
         qualitySolutionDescInfo.setBaseQualitySolutionDesc(baseQualitySolutionDesc);
         //抽检方案明细
         List<BaseQualitySolutionDef> baseQualitySolutionDefs = baseQualitySolutionDefRepository.findBySolutionId(baseQualitySolutionDesc.getSolutionId());
+        baseQualitySolutionDefs.stream().forEach(baseQualitySolutionDef->{
+            BaseQualityItems baseQualityItems = baseQualityItemsService.findById(baseQualitySolutionDef.getQitemId()).orElse(null);
+            baseQualitySolutionDef.setItemName(baseQualityItems==null?null:baseQualityItems.getItemName());
+        });
         qualitySolutionDescInfo.setBaseQualitySolutionDefs(baseQualitySolutionDefs);
         return qualitySolutionDescInfo;
     }
@@ -220,6 +227,11 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
             return ResponseMessage.ok("校检方案【"+String.join(",", strings)+"】已产生业务,不允许删除！");
         }
         return ResponseMessage.ok("操作成功");
+    }
+
+    @Override
+    public List<BaseQualityItems> getQualityItems() {
+        return baseQualityItemsService.findAll();
     }
 
     /**
