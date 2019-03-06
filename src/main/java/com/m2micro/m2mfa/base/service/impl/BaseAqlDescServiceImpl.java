@@ -122,7 +122,7 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
 
     @Override
     public List<AqlDescSelect> getAqlDesc() {
-        List<BaseAqlDesc> baseAqlDescs = baseAqlDescRepository.findAll();
+        List<BaseAqlDesc> baseAqlDescs = baseAqlDescRepository.findByEnabled(true);
         List<AqlDescSelect> collect = baseAqlDescs.stream().map(baseAqlDesc -> {
             AqlDescSelect al = new AqlDescSelect();
             al.setAqlId(baseAqlDesc.getAqlId());

@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseQualityItems;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -52,5 +53,5 @@ public interface BaseQualityItemsService extends BaseService<BaseQualityItems,St
      * 删除
      * @param ids
      */
-    void deleteEntitys(String[] ids);
+    ResponseMessage deleteEntitys(String[] ids);
 }

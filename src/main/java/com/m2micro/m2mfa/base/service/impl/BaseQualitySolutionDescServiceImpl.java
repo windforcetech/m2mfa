@@ -5,10 +5,10 @@ import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseQualitySolutionDescQuery;
 import com.m2micro.m2mfa.base.repository.BasePartQualitySolutionRepository;
+import com.m2micro.m2mfa.base.repository.BaseQualityItemsRepository;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDefRepository;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDescRepository;
 import com.m2micro.m2mfa.base.service.BaseAqlDescService;
-import com.m2micro.m2mfa.base.service.BaseQualityItemsService;
 import com.m2micro.m2mfa.base.service.BaseQualitySolutionDefService;
 import com.m2micro.m2mfa.base.service.BaseQualitySolutionDescService;
 import com.m2micro.m2mfa.base.vo.AqlDescSelect;
@@ -58,7 +58,7 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
     @Autowired
     BasePartQualitySolutionRepository basePartQualitySolutionRepository;
     @Autowired
-    BaseQualityItemsService baseQualityItemsService;
+    BaseQualityItemsRepository baseQualityItemsRepository;
 
     public BaseQualitySolutionDescRepository getRepository() {
         return baseQualitySolutionDescRepository;
@@ -150,7 +150,7 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
         //抽检方案明细
         List<BaseQualitySolutionDef> baseQualitySolutionDefs = baseQualitySolutionDefRepository.findBySolutionId(baseQualitySolutionDesc.getSolutionId());
         baseQualitySolutionDefs.stream().forEach(baseQualitySolutionDef->{
-            BaseQualityItems baseQualityItems = baseQualityItemsService.findById(baseQualitySolutionDef.getQitemId()).orElse(null);
+            BaseQualityItems baseQualityItems = baseQualityItemsRepository.findById(baseQualitySolutionDef.getQitemId()).orElse(null);
             baseQualitySolutionDef.setItemName(baseQualityItems==null?null:baseQualityItems.getItemName());
         });
         qualitySolutionDescInfo.setBaseQualitySolutionDefs(baseQualitySolutionDefs);
@@ -231,7 +231,7 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
 
     @Override
     public List<BaseQualityItems> getQualityItems() {
-        return baseQualityItemsService.findAll();
+        return baseQualityItemsRepository.findByEnabled(true);
     }
 
     /**

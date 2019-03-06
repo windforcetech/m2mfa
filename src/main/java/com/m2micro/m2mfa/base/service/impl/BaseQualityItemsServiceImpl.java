@@ -1,8 +1,10 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseQualityItems;
 import com.m2micro.m2mfa.base.entity.BaseQualitySolutionDef;
+import com.m2micro.m2mfa.base.entity.BaseQualitySolutionDesc;
 import com.m2micro.m2mfa.base.entity.BaseUnit;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseQualityItemsQuery;
@@ -28,6 +30,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.m2micro.framework.commons.util.PageUtil;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 /**
  * 检验项目 服务实现类
@@ -174,16 +177,29 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
 
     @Override
     @Transactional
-    public void deleteEntitys(String[] ids) {
+    public ResponseMessage deleteEntitys(String[] ids) {
+
+        //能删除的
+        List<BaseQualityItems> enableDelete = new ArrayList<>();
+        //有引用，不能删除的
+        List<BaseQualityItems> disableDelete = new ArrayList<>();
         for(String id:ids){
+            BaseQualityItems baseQualityItems = findById(id).orElse(null);
             //是否被引用
             List<BaseQualitySolutionDef> list = baseQualitySolutionDefRepository.findByQitemId(id);
             if(list!=null&&list.size()>0){
-                BaseQualityItems baseQualityItems = findById(id).orElse(null);
-                throw new MMException("项目编号【"+baseQualityItems.getItemCode()+"】已产生业务，不允许删除！");
+                disableDelete.add(baseQualityItems);
+                continue;
             }
+            enableDelete.add(baseQualityItems);
         }
-        deleteByIds(ids);
+        deleteAll(enableDelete);
+        //deleteByIds(ids);
+        if(disableDelete.size()>0){
+            String[] strings = disableDelete.stream().map(BaseQualityItems::getItemCode).toArray(String[]::new);
+            return ResponseMessage.ok("项目编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+        }
+        return ResponseMessage.ok("操作成功");
     }
 
 }
