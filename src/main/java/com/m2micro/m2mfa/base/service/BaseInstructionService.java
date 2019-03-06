@@ -9,6 +9,8 @@ import com.m2micro.m2mfa.base.vo.BaseInstructionQueryObj;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * 作业指导书 服务类
@@ -28,17 +30,15 @@ public interface BaseInstructionService extends BaseService<BaseInstruction,Stri
      * 添加作业指导
      * @param baseInstruction
      * @param file
-     * @param request
      */
-    void save(BaseInstruction baseInstruction, MultipartFile file , HttpServletRequest request);
+    void save(BaseInstruction baseInstruction, MultipartFile file );
 
     /**
      * 跟新作业指导
      * @param baseInstruction
      * @param file
-     * @param request
      */
-    void update(BaseInstruction baseInstruction, MultipartFile file , HttpServletRequest request);
+    void update(BaseInstruction baseInstruction, MultipartFile file );
 
     /**
      * 删除作业指导
@@ -46,5 +46,6 @@ public interface BaseInstructionService extends BaseService<BaseInstruction,Stri
      * @return
      */
     ResponseMessage delete(String [] ids );
+
 }
 

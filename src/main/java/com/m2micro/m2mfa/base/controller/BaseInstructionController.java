@@ -6,6 +6,7 @@ import com.m2micro.m2mfa.base.service.BaseInstructionService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.base.vo.BaseInstructionQueryObj;
+import com.m2micro.m2mfa.common.util.FileUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
@@ -23,6 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +40,7 @@ import java.util.Map;
 @Api(value="作业指导书 前端控制器")
 @Authorize
 public class BaseInstructionController {
+
     @Autowired
     BaseInstructionService baseInstructionService;
     @Autowired
@@ -52,6 +57,7 @@ public class BaseInstructionController {
         return ResponseMessage.ok(page);
     }
 
+
     /**
      * 详情
      */
@@ -64,16 +70,18 @@ public class BaseInstructionController {
         return ResponseMessage.ok(baseInstruction);
     }
 
+
     /**
      * 保存
      */
     @RequestMapping("/save")
     @ApiOperation(value="保存作业指导书")
     @UserOperationLog("保存作业指导书")
-    public ResponseMessage save( BaseInstruction baseInstruction, MultipartFile file, HttpServletRequest request){
-        baseInstructionService.save(baseInstruction,file,request);
+    public ResponseMessage save( BaseInstruction baseInstruction, MultipartFile file){
+        baseInstructionService.save(baseInstruction,file);
         return ResponseMessage.ok();
     }
+
 
     /**
      * 更新
@@ -81,15 +89,11 @@ public class BaseInstructionController {
     @RequestMapping("/update")
     @ApiOperation(value="更新作业指导书")
     @UserOperationLog("更新作业指导书")
-    public ResponseMessage update(BaseInstruction baseInstruction, MultipartFile file, HttpServletRequest request){
-        ValidatorUtil.validateEntity(baseInstruction, UpdateGroup.class);
-        BaseInstruction baseInstructionOld = baseInstructionService.findById(baseInstruction.getInstructionId()).orElse(null);
-        if(baseInstructionOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        PropertyUtil.copy(baseInstruction,baseInstructionOld);
-        return ResponseMessage.ok(baseInstructionService.save(baseInstructionOld));
+    public ResponseMessage update(BaseInstruction baseInstruction, MultipartFile file){
+        baseInstructionService.update(baseInstruction,file);
+        return ResponseMessage.ok();
     }
+
 
     /**
      * 删除
@@ -100,6 +104,20 @@ public class BaseInstructionController {
     public ResponseMessage delete(@RequestBody String[] ids){
 
         return baseInstructionService.delete(ids);
+    }
+
+    /**
+     * 删除
+     */
+    @RequestMapping("/download")
+    @ApiOperation(value="下载这也指导书")
+    @UserOperationLog("下载这也指导书")
+    public void download( String id, HttpServletResponse response)throws IOException {
+        BaseInstruction baseInstruction = baseInstructionService.findById(id).orElse(null);
+        if(baseInstruction.equals(null)){
+            throw  new MMException("该文件路径不存在。");
+        }
+        FileUtil.downloadFile(baseInstruction.getInstructionCode()+"-"+baseInstruction.getRevsion()+baseInstruction.getExtension(),baseInstruction.getFileUrl(),response);
     }
 
     /**
