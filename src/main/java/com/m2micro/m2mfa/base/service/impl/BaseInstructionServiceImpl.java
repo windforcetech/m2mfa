@@ -16,6 +16,7 @@ import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -26,9 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 作业指导书 服务实现类
@@ -68,9 +74,7 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
 
     @Override
     @Transactional
-    public void  save(BaseInstruction baseInstruction, MultipartFile file, HttpServletRequest request) {
-
-
+    public void  save(BaseInstruction baseInstruction, MultipartFile file) {
 
         if(!baseInstructionRepository.findByInstructionCodeAndRevsion(baseInstruction.getInstructionCode(),baseInstruction.getRevsion()).isEmpty()){
             throw  new MMException("文件编号："+baseInstruction.getInstructionCode()+",版本："+baseInstruction.getRevsion()+" 已存在");
@@ -78,7 +82,7 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
         baseInstruction.setCheckFlag(false);
         baseInstruction.setExtension( file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")));
         //上次文件
-        baseInstruction.setFileUrl(uploadFile(file,request,baseInstruction.getInstructionCode(),baseInstruction.getRevsion().toString()));
+        baseInstruction.setFileUrl(uploadFile(file,baseInstruction.getInstructionCode(),baseInstruction.getRevsion().toString()));
         ValidatorUtil.validateEntity(baseInstruction, AddGroup.class);
         baseInstruction.setInstructionId(UUIDUtil.getUUID());
         save(baseInstruction);
@@ -86,7 +90,8 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
 
     @Override
     @Transactional
-    public void update(BaseInstruction baseInstruction, MultipartFile file, HttpServletRequest request) {
+    public void update(BaseInstruction baseInstruction, MultipartFile file) {
+        ValidatorUtil.validateEntity(baseInstruction, UpdateGroup.class);
         BaseInstruction baseInstructionOld = findById(baseInstruction.getInstructionId()).orElse(null);
         if(baseInstructionOld==null){
             throw new MMException("数据库不存在该记录");
@@ -95,12 +100,13 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
         deletefile.delete();
         baseInstruction.setExtension( file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")));
         //上次文件
-        baseInstruction.setFileUrl(uploadFile(file,request,baseInstruction.getInstructionCode(),baseInstruction.getRevsion().toString()));
+        baseInstruction.setFileUrl(uploadFile(file,baseInstruction.getInstructionCode(),baseInstruction.getRevsion().toString()));
         PropertyUtil.copy(baseInstruction,baseInstructionOld);
         save(baseInstructionOld);
     }
 
     @Override
+    @Transactional
     public ResponseMessage delete(String[] ids) {
         List<BaseInstruction> enableDelete = new ArrayList<>();
         List<BaseInstruction> disableDelete = new ArrayList<>();
@@ -134,24 +140,21 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
     /**
      * 文件上传
      * @param file
-     * @param request
      * @param instructionCode
      * @param version
      * @return
      */
-    public String   uploadFile(MultipartFile file, HttpServletRequest request,String instructionCode,String version){
+    public String   uploadFile(MultipartFile file,String instructionCode,String version){
         String fileurl="";
         try{
-            //创建文件在服务器端的存在路径
-            String dir = request.getServletContext().getRealPath("/upload");
-            File fileDir = new File(dir);
+            File fileDir = new File(System.getProperty("user.dir")+"src"+ File.separator+"main"+File.separator +"resources"+File.separator+"resources");
             if(!fileDir.exists())
                 fileDir.mkdirs();
             //生成文件在服务器存放的名字
             String fileSuffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-            String fileName= instructionCode+version+fileSuffix;
-            fileurl =fileDir+"/"+fileName;
-            File files = new File(fileDir+"/"+fileName);
+            String fileName= instructionCode+"-"+version+fileSuffix;
+            fileurl =fileDir+File.separator+fileName;
+            File files = new File(fileDir+File.separator+fileName);
             //上传
             file.transferTo(files);
         }catch (Exception e){
@@ -161,4 +164,5 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
         return  fileurl;
     }
 
+  
 }
