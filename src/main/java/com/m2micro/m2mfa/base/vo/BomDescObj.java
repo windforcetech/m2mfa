@@ -1,8 +1,6 @@
-package com.m2micro.m2mfa.base.entity;
-
+package com.m2micro.m2mfa.base.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
@@ -11,30 +9,13 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
-/**
- * 料件物料清单
- *
- * @author liaotao
- * @since 2018-11-26
- */
-@Entity
-@ApiModel(value = "BaseBomDesc对象", description = "料件物料清单")
-public class BaseBomDesc extends BaseEntity implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-    @ApiModelProperty(value = "主键")
-    @Id
-    @NotEmpty(message = "主键不能为空", groups = {UpdateGroup.class})
-    private String bomId;
+@ApiModel(value = "BomDescObj", description = "料件物料清单")
+public class BomDescObj {
     @ApiModelProperty(value = "料件编号")
     @Size(max = 50, message = "料件编号不能大于50位", groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message = "料件编号不能为空", groups = {AddGroup.class, UpdateGroup.class})
@@ -72,14 +53,8 @@ public class BaseBomDesc extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "审核用户主键")
     @LastModifiedBy
     private String checkBy;
-
-    public String getBomId() {
-        return bomId;
-    }
-
-    public void setBomId(String bomId) {
-        this.bomId = bomId;
-    }
+    @ApiModelProperty(value = "明细")
+    private List<BomDefObj> bomDefObjList;
 
     public String getPartId() {
         return partId;
@@ -167,5 +142,13 @@ public class BaseBomDesc extends BaseEntity implements Serializable {
 
     public void setCheckBy(String checkBy) {
         this.checkBy = checkBy;
+    }
+
+    public List<BomDefObj> getBomDefObjList() {
+        return bomDefObjList;
+    }
+
+    public void setBomDefObjList(List<BomDefObj> bomDefObjList) {
+        this.bomDefObjList = bomDefObjList;
     }
 }

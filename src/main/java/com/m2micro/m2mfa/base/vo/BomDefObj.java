@@ -1,39 +1,18 @@
-package com.m2micro.m2mfa.base.entity;
-
+package com.m2micro.m2mfa.base.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-/**
- * 料件物料清单明细
- *
- * @author liaotao
- * @since 2018-11-26
- */
-@Entity
-@ApiModel(value = "BaseBomDef对象", description = "料件物料清单明细")
-public class BaseBomDef extends BaseEntity implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-    @ApiModelProperty(value = "主键")
-    @Id
-    @NotEmpty(message = "主键不能为空", groups = {UpdateGroup.class})
-    private String id;
+@ApiModel(value = "BomDefObj", description = "料件物料清单明细")
+public class BomDefObj {
     @ApiModelProperty(value = "主档主键")
     @NotEmpty(message = "主档主键不能为空", groups = {UpdateGroup.class})
     private String bomId;
@@ -69,14 +48,6 @@ public class BaseBomDef extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     @Size(max = 200, message = "描述不能大于200位", groups = {AddGroup.class, UpdateGroup.class})
     private String description;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getBomId() {
         return bomId;
