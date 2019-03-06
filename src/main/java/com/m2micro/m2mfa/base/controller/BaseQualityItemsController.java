@@ -78,8 +78,8 @@ public class BaseQualityItemsController {
     @ApiOperation(value="删除检验项目")
     @UserOperationLog("删除检验项目")
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseQualityItemsService.deleteEntitys(ids);
-        return ResponseMessage.ok();
+
+        return baseQualityItemsService.deleteEntitys(ids);
     }
 
     /**
