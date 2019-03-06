@@ -24,4 +24,11 @@ public interface BaseQualityItemsRepository extends BaseRepository<BaseQualityIt
      * @return
      */
     List<BaseQualityItems> findByItemNameAndItemIdNot(String itemCode,String itemId);
+
+    /**
+     * 有效
+     * @param enabled
+     * @return
+     */
+    List<BaseQualityItems> findByEnabled(Boolean enabled);
 }
