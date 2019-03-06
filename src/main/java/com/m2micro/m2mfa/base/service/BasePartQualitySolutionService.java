@@ -7,7 +7,7 @@ import com.m2micro.framework.commons.util.Query;
 /**
  * 料件品质方案关联 服务类
  * @author liaotao
- * @since 2019-03-05
+ * @since 2019-03-06
  */
 public interface BasePartQualitySolutionService extends BaseService<BasePartQualitySolution,String> {
     /**

@@ -9,12 +9,12 @@ import java.util.List;
 /**
  * 料件品质方案关联 Repository 接口
  * @author liaotao
- * @since 2019-03-05
+ * @since 2019-03-06
  */
 @Repository
 public interface BasePartQualitySolutionRepository extends BaseRepository<BasePartQualitySolution,String> {
     /**
-     * 根据solutionId查找料件品质方案关联
+     * 查找
      * @param solutionId
      * @return
      */

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 料件品质方案关联 前端控制器
  * @author liaotao
- * @since 2019-03-05
+ * @since 2019-03-06
  */
 @RestController
 @RequestMapping("/base/basePartQualitySolution")
@@ -63,7 +63,7 @@ public class BasePartQualitySolutionController {
     @UserOperationLog("保存料件品质方案关联")
     public ResponseMessage<BasePartQualitySolution> save(@RequestBody BasePartQualitySolution basePartQualitySolution){
         ValidatorUtil.validateEntity(basePartQualitySolution, AddGroup.class);
-        basePartQualitySolution.setPartId(UUIDUtil.getUUID());
+        basePartQualitySolution.setPsId(UUIDUtil.getUUID());
         return ResponseMessage.ok(basePartQualitySolutionService.save(basePartQualitySolution));
     }
 
@@ -75,7 +75,7 @@ public class BasePartQualitySolutionController {
     @UserOperationLog("更新料件品质方案关联")
     public ResponseMessage<BasePartQualitySolution> update(@RequestBody BasePartQualitySolution basePartQualitySolution){
         ValidatorUtil.validateEntity(basePartQualitySolution, UpdateGroup.class);
-        BasePartQualitySolution basePartQualitySolutionOld = basePartQualitySolutionService.findById(basePartQualitySolution.getPartId()).orElse(null);
+        BasePartQualitySolution basePartQualitySolutionOld = basePartQualitySolutionService.findById(basePartQualitySolution.getPsId()).orElse(null);
         if(basePartQualitySolutionOld==null){
             throw new MMException("数据库不存在该记录");
         }
