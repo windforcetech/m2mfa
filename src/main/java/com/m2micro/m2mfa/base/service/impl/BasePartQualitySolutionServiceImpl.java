@@ -1,15 +1,19 @@
 package com.m2micro.m2mfa.base.service.impl;
 
-import com.m2micro.m2mfa.base.entity.BasePartQualitySolution;
+import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.repository.BasePartQualitySolutionRepository;
+import com.m2micro.m2mfa.base.repository.BasePartsRepository;
+import com.m2micro.m2mfa.base.service.BaseInstructionService;
 import com.m2micro.m2mfa.base.service.BasePartQualitySolutionService;
+import com.m2micro.m2mfa.base.service.BaseQualitySolutionDescService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBasePartQualitySolution;
+
 import java.util.List;
 /**
  * 料件品质方案关联 服务实现类
@@ -22,6 +26,12 @@ public class BasePartQualitySolutionServiceImpl implements BasePartQualitySoluti
     BasePartQualitySolutionRepository basePartQualitySolutionRepository;
     @Autowired
     JPAQueryFactory queryFactory;
+    @Autowired
+    BasePartsRepository basePartsRepository;
+    @Autowired
+    BaseQualitySolutionDescService baseQualitySolutionDescService;
+    @Autowired
+    BaseInstructionService baseInstructionService;
 
     public BasePartQualitySolutionRepository getRepository() {
         return basePartQualitySolutionRepository;
@@ -36,6 +46,31 @@ public class BasePartQualitySolutionServiceImpl implements BasePartQualitySoluti
         List<BasePartQualitySolution> list = jq.fetch();
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    @Override
+    public BasePartQualitySolution getBasePartQualitySolution(String partId) {
+        //获取料件信息
+        BaseParts baseParts = basePartsRepository.findById(partId).orElse(null);
+        //获取关联信息
+        BasePartQualitySolution basePartQualitySolution = basePartQualitySolutionRepository.findByPartId(partId);
+        //不存在
+        if(basePartQualitySolution==null){
+            basePartQualitySolution = new BasePartQualitySolution();
+            basePartQualitySolution.setPartId(baseParts.getPartId());
+            basePartQualitySolution.setPartName(baseParts.getName());
+            return basePartQualitySolution;
+        }
+        //如果存在
+        basePartQualitySolution.setPartId(baseParts.getPartId());
+        basePartQualitySolution.setPartName(baseParts.getName());
+        //校检方案名称
+        BaseQualitySolutionDesc baseQualitySolutionDesc = baseQualitySolutionDescService.findById(basePartQualitySolution.getSolutionId()).orElse(null);
+        basePartQualitySolution.setSolutionName(baseQualitySolutionDesc==null?null:baseQualitySolutionDesc.getSolutionName());
+        //作业指导名称
+        BaseInstruction baseInstruction = baseInstructionService.findById(basePartQualitySolution.getInstructionId()).orElse(null);
+        basePartQualitySolution.setInstructionName(baseInstruction==null?null:baseInstruction.getInstructionName());
+        return basePartQualitySolution;
     }
 
 }

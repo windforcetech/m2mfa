@@ -19,4 +19,11 @@ public interface BasePartQualitySolutionRepository extends BaseRepository<BasePa
      * @return
      */
     List<BasePartQualitySolution> findBySolutionId(String solutionId);
+
+    /**
+     * 获取料件品质方案关联
+     * @param partId
+     * @return
+     */
+    BasePartQualitySolution findByPartId(String partId);
 }

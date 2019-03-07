@@ -17,4 +17,10 @@ public interface BasePartQualitySolutionService extends BaseService<BasePartQual
      * @return  分页信息
      */
     PageUtil<BasePartQualitySolution> list(Query query);
+
+    /**
+     * 获取料件品质方案关联
+     * @return
+     */
+    BasePartQualitySolution getBasePartQualitySolution(String partId);
 }

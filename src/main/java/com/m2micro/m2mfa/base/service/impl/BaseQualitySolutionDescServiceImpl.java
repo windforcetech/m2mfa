@@ -91,6 +91,9 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
         if(StringUtils.isNotEmpty(query.getSolutionName())){
             sql = sql + " and bqsd.solution_name like '%"+query.getSolutionName()+"%'";
         }
+        if(query.getEnabled()!=null){
+            sql = sql+" and bqsd.enabled = "+query.getEnabled()+"";
+        }
 
         sql = sql + " order by bqsd.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
@@ -108,6 +111,9 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
         }
         if(StringUtils.isNotEmpty(query.getSolutionName())){
             countSql = countSql + " and bqsd.solution_name like '%"+query.getSolutionName()+"%'";
+        }
+        if(query.getEnabled()!=null){
+            countSql = countSql+" and bqsd.enabled = "+query.getEnabled()+"";
         }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());

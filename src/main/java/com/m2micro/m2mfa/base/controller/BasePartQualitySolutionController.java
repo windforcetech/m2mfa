@@ -94,4 +94,14 @@ public class BasePartQualitySolutionController {
         return ResponseMessage.ok();
     }
 
+
+    /**
+     * 详情
+     */
+    @RequestMapping("/getBasePartQualitySolution/{partId}")
+    @ApiOperation(value="料件品质方案关联详情")
+    @UserOperationLog("料件品质方案关联详情")
+    public ResponseMessage<BasePartQualitySolution> getBasePartQualitySolution(@PathVariable("partId") String partId){
+        return ResponseMessage.ok(basePartQualitySolutionService.getBasePartQualitySolution(partId));
+    }
 }

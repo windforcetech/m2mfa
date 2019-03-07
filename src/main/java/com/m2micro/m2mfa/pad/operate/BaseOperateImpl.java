@@ -586,7 +586,10 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         if(!isNotWork(obj.getRwid(),PadStaffUtil.getStaff().getStaffId())){
             throw new MMException("当前员工没有上工，不存在下工！");
         }
-        saveRecordFail(obj);
+        if(obj.getMesRecordFails()!=null&&obj.getMesRecordFails().size()>0){
+            saveRecordFail(obj);
+        }
+
         //更新职员作业记录表结束时间
         updateRecordStaffEndTime(obj.getRecordStaffId());
         if(isMesRecorWorkEnd(obj.getRwid())){
