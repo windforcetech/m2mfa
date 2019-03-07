@@ -12,15 +12,17 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * 料件品质方案关联
  * @author liaotao
- * @since 2019-03-05
+ * @since 2019-03-06
  */
 @Entity
 @ApiModel(value="BasePartQualitySolution对象", description="料件品质方案关联")
 public class BasePartQualitySolution extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @ApiModelProperty(value = "料件编号")
+    @ApiModelProperty(value = "主键")
     @Id
+    private String psId;
+    @ApiModelProperty(value = "料件编号")
     private String partId;
     @ApiModelProperty(value = "检验方案id")
     private String solutionId;
@@ -32,6 +34,13 @@ public class BasePartQualitySolution extends BaseEntity implements Serializable 
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+
+    public String getPsId() {
+        return psId;
+    }
+    public void setPsId(String psId) {
+        this.psId = psId;
+    }
 
     public String getPartId() {
         return partId;
