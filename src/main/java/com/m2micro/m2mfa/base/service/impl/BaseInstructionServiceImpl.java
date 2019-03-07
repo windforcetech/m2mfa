@@ -65,6 +65,9 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
         if(StringUtils.isNotEmpty(query.getInstructionName())){
             condition.and(qBaseInstruction.instructionName.like("%"+query.getInstructionName()+"%"));
         }
+       if(query.getEnabled()){
+         condition.and(qBaseInstruction.enabled.eq(true));
+       }
         jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
         List<BaseInstruction> list = jq.fetch();
 
@@ -164,5 +167,5 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
         return  fileurl;
     }
 
-  
+
 }
