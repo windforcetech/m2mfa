@@ -20,6 +20,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +43,9 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
     JPAQueryFactory queryFactory;
 
     @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    @Autowired
     BaseTemplateVarRepository baseTemplateVarRepository;
 
     public BaseTemplateRepository getRepository() {
@@ -53,11 +59,11 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
         BooleanBuilder condition = new BooleanBuilder();
         if (StringUtils.isNotEmpty(query.getName())) {
 
-            condition.and(qBaseTemplate.name.like("%"+query.getName()+"%"));
+            condition.and(qBaseTemplate.name.like("%" + query.getName() + "%"));
         }
         if (StringUtils.isNotEmpty(query.getNumber())) {
 
-            condition.and(qBaseTemplate.number.like("%"+query.getNumber()+"%"));
+            condition.and(qBaseTemplate.number.like("%" + query.getNumber() + "%"));
         }
         long totalCount = jq.where(condition).fetchCount();
         jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
@@ -126,7 +132,7 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
                 }
                 var1.setTemplateId(template.getId());
                 ValidatorUtil.validateEntity(var1, AddGroup.class);
-                if (baseTemplateVarRepository.countByIdNotAndTemplateIdAndName(var1.getId(),var1.getTemplateId(), var1.getName()) > 0) {
+                if (baseTemplateVarRepository.countByIdNotAndTemplateIdAndName(var1.getId(), var1.getTemplateId(), var1.getName()) > 0) {
                     throw new MMException("模板变量名称不唯一！");
                 }
                 BaseTemplateVar mval = baseTemplateVarRepository.save(var1);
@@ -162,5 +168,53 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
         baseTemplateRepository.deleteByIdIn(templateIds);
         baseTemplateVarRepository.deleteByTemplateIdIn(templateIds);
     }
+
+    @Override
+    public List<BaseTemplateObj> getByCategoryId(String tagId) {
+        List<BaseTemplateObj> rs = new ArrayList<>();
+        BaseTemplateObj baseTemplateObj = null;
+        List<BaseTemplate> templateList = baseTemplateRepository.findByCategory(tagId);
+        for (BaseTemplate one : templateList) {
+            baseTemplateObj = new BaseTemplateObj();
+            BeanUtils.copyProperties(one, baseTemplateObj);
+            List<BaseTemplateVar> valList = baseTemplateVarRepository.findByTemplateId(one.getId());
+            List<BaseTemplateVarObj> varObjs = new ArrayList<>();
+            for (BaseTemplateVar item : valList) {
+                BaseTemplateVarObj two = new BaseTemplateVarObj();
+                BeanUtils.copyProperties(item, two);
+                varObjs.add(two);
+            }
+            baseTemplateObj.setTemplateVarObjList(varObjs);
+            rs.add(baseTemplateObj);
+        }
+
+        return rs;
+    }
+
+    @Override
+    public List<BaseTemplateObj> getByCategoryIdAndNotUsedByPart(String partId, String tagId) {
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseTemplate.class);
+        String sql = "select b.* from base_template b where \n" +
+                "b.id not in(select a.template_id from base_part_template a where part_id='" + partId + "')\n" +
+                "and b.category='" + tagId + "' order by b.name ;";
+        List<BaseTemplate> templateList = jdbcTemplate.query(sql, rm);
+        List<BaseTemplateObj> rs = new ArrayList<>();
+        BaseTemplateObj baseTemplateObj = null;
+        for (BaseTemplate one : templateList) {
+            baseTemplateObj = new BaseTemplateObj();
+            BeanUtils.copyProperties(one, baseTemplateObj);
+            List<BaseTemplateVar> valList = baseTemplateVarRepository.findByTemplateId(one.getId());
+            List<BaseTemplateVarObj> varObjs = new ArrayList<>();
+            for (BaseTemplateVar item : valList) {
+                BaseTemplateVarObj two = new BaseTemplateVarObj();
+                BeanUtils.copyProperties(item, two);
+                varObjs.add(two);
+            }
+            baseTemplateObj.setTemplateVarObjList(varObjs);
+            rs.add(baseTemplateObj);
+        }
+        return rs;
+    }
+
 
 }

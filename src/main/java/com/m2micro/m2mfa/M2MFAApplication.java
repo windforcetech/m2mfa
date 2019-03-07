@@ -22,10 +22,10 @@ public class M2MFAApplication {
     public static void main(String[] args) {
         SpringApplication.run(M2MFAApplication.class, args);
     }
-    @Bean
-    MultipartConfigElement multipartConfigElement() {
-        MultipartConfigFactory factory = new MultipartConfigFactory();
-        factory.setLocation("/");
-        return factory.createMultipartConfig();
-    }
+//    @Bean
+//    MultipartConfigElement multipartConfigElement() {
+//        MultipartConfigFactory factory = new MultipartConfigFactory();
+//        factory.setLocation("/");
+//        return factory.createMultipartConfig();
+//    }
 }
