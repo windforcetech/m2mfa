@@ -1,13 +1,19 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.m2mfa.base.node.TreeNode;
+import com.m2micro.m2mfa.base.query.BasePartInstructionQuery;
 import com.m2micro.m2mfa.base.service.BasePartInstructionService;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.m2micro.m2mfa.pr.service.MesPartRouteService;
+import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -19,6 +25,9 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BasePartInstruction;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 作业指导书关联 前端控制器
@@ -32,6 +41,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class BasePartInstructionController {
     @Autowired
     BasePartInstructionService basePartInstructionService;
+    @Autowired
+    MesPartRouteService mesPartRouteService;
+    @Autowired
+    BasePartsService basePartsService;
 
     /**
      * 列表
@@ -39,7 +52,7 @@ public class BasePartInstructionController {
     @RequestMapping("/list")
     @ApiOperation(value="作业指导书关联列表")
     @UserOperationLog("作业指导书关联列表")
-    public ResponseMessage<PageUtil<BasePartInstruction>> list(Query query){
+    public ResponseMessage<PageUtil<BasePartInstruction>> list(BasePartInstructionQuery query){
         PageUtil<BasePartInstruction> page = basePartInstructionService.list(query);
         return ResponseMessage.ok(page);
     }
@@ -93,5 +106,21 @@ public class BasePartInstructionController {
         basePartInstructionService.deleteByIds(ids);
         return ResponseMessage.ok();
     }
+
+    /**
+     * 添加基本信息
+     */
+    @RequestMapping("/addDetails")
+    @ApiOperation(value="添加基本信息")
+    @UserOperationLog("添加基本信息")
+    public ResponseMessage<Map> delete(String partid){
+        Map map = new HashMap();
+        MesPartvo mesPartvos =mesPartRouteService.findparId(partid);
+        BaseParts baseParts = basePartsService.findById(partid).orElse(null);
+        map.put("baseParts",baseParts );
+        map.put("mesPartRouteStations",mesPartvos.getMesPartRouteStations() );
+        return ResponseMessage.ok(map);
+    }
+
 
 }

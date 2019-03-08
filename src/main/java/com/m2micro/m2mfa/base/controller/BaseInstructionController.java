@@ -117,7 +117,7 @@ public class BaseInstructionController {
         if(baseInstruction.equals(null)){
             throw  new MMException("该文件路径不存在。");
         }
-        FileUtil.downloadFile(baseInstruction.getInstructionCode()+"-"+baseInstruction.getRevsion()+baseInstruction.getExtension(),baseInstruction.getFileUrl(),response);
+        FileUtil.downloadFile(baseInstruction.getInstructionCode()+"-"+baseInstruction.getRevsion(),baseInstruction.getFileUrl(),response);
     }
 
     /**

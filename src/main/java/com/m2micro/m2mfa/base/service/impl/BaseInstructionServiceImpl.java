@@ -3,10 +3,8 @@ package com.m2micro.m2mfa.base.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.BaseInstruction;
 import com.m2micro.m2mfa.base.entity.BasePartInstruction;
-import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.QBaseInstruction;
 import com.m2micro.m2mfa.base.repository.BaseInstructionRepository;
 import com.m2micro.m2mfa.base.repository.BasePartInstructionRepository;
@@ -26,15 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 作业指导书 服务实现类
@@ -99,11 +91,14 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
         if(baseInstructionOld==null){
             throw new MMException("数据库不存在该记录");
         }
-        File deletefile = new File(baseInstruction.getFileUrl());
-        deletefile.delete();
-        baseInstruction.setExtension( file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")));
-        //上次文件
-        baseInstruction.setFileUrl(uploadFile(file,baseInstruction.getInstructionCode(),baseInstruction.getRevsion().toString()));
+        if(file !=null){
+            File deletefile = new File(baseInstruction.getFileUrl());
+            deletefile.delete();
+            baseInstruction.setExtension( file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")));
+            //上次文件
+            baseInstruction.setFileUrl(uploadFile(file,baseInstruction.getInstructionCode(),baseInstruction.getRevsion().toString()));
+        }
+
         PropertyUtil.copy(baseInstruction,baseInstructionOld);
         save(baseInstructionOld);
     }

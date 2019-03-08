@@ -1,20 +1,16 @@
 package com.m2micro.m2mfa.base.service.impl;
 
-import com.m2micro.m2mfa.base.entity.BasePartTemplate;
+import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.query.BasePartTemplateQuery;
 import com.m2micro.m2mfa.base.repository.BasePartTemplateRepository;
 import com.m2micro.m2mfa.base.service.BasePartTemplateService;
 import com.m2micro.m2mfa.base.vo.BasePartTemplateObj;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBasePartTemplate;
 
 import java.util.List;
 
