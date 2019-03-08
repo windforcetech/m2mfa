@@ -77,9 +77,12 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         //下工
         stopWorkForOutput(obj.getRwid(), PadStaffUtil.getStaff().getStaffId(),iotMachineOutput);
         //是否已完成目标量
-        if(isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork)){
+        //产出量>=目标量
+        Integer num =  isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork);
+
+        if(num>=0){
             //已完成目标量
-            return stopWorkForCompleted(obj,stopWorkModel,iotMachineOutput,mesRecordWork, mesMoSchedule);
+            return stopWorkForCompleted(obj,stopWorkModel,iotMachineOutput,mesRecordWork, mesMoSchedule, num);
         }
         //没有完成目标量
         return stopWorkForUnCompleted(obj,stopWorkModel,iotMachineOutput,mesRecordWork);
@@ -121,16 +124,26 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
      * @return
      */
     @Transactional
-    public StopWorkModel stopWorkForCompleted(StopWorkPara obj,StopWorkModel stopWorkModel,IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork,MesMoSchedule mesMoSchedule){
+    public StopWorkModel stopWorkForCompleted(StopWorkPara obj,StopWorkModel stopWorkModel,IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork,MesMoSchedule mesMoSchedule,Integer num){
         //退料
 
         //下模
 
         //结束工序
-        endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
-        endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
-        //排产单状态“已超量”
-        updateSchedulFlag(obj.getScheduleId());
+        if(num>0){
+            //结束工序
+            endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
+            endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
+            //排产单状态“已超量”
+            updateSchedulFlag(obj.getScheduleId());
+        }
+        if(num==0){
+            endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
+            endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
+            //排产单状态“已完成”
+            scheduleclose(obj.getScheduleId());
+        }
+
         //是否交接班
         if(!isChangeShifts(PadStaffUtil.getStaff().getStaffId())){
             //不交接班

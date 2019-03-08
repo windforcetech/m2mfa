@@ -19,4 +19,10 @@ public interface BasePartInstructionService extends BaseService<BasePartInstruct
      * @return  分页信息
      */
     PageUtil<BasePartInstructionModel> list(BasePartInstructionQuery query);
+
+    /**
+     * 获取详情
+     * @param id
+     */
+    void info(String id );
 }

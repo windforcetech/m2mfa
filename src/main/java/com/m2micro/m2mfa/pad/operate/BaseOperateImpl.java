@@ -669,14 +669,29 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
         IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         //产出量>=目标量
-        if(isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork)){
+      Integer num =  isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork);
+        if(num>0){
             //结束工序
             endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
             endStationTime(obj.getScheduleId(),obj.getProcessId());
             //排产单状态“已超量”
             updateSchedulFlag(obj.getScheduleId());
         }
+        if(num==0){
+            endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
+            endStationTime(obj.getScheduleId(),obj.getProcessId());
+            //排产单状态“已完成”
+            scheduleclose(obj.getScheduleId());
+        }
         return finishHomeworkModel;
+    }
+
+    /**
+     * 排产单已完成
+     * @param scheduleId
+     */
+    protected  void scheduleclose(String scheduleId){
+        mesMoScheduleRepository.setFlagFor(MoScheduleStatus.CLOSE.getKey(),scheduleId);
     }
 
 
@@ -1056,14 +1071,14 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
      * @param mesMoSchedule
      * @return  机台产量>=目标量 true
      */
-    protected Boolean isCompleted(IotMachineOutput iotMachineOutput,MesMoSchedule mesMoSchedule,MesRecordWork mesRecordWork){
+    protected Integer isCompleted(IotMachineOutput iotMachineOutput,MesMoSchedule mesMoSchedule,MesRecordWork mesRecordWork){
         Integer scheduleQty = mesMoSchedule.getScheduleQty();
         BigDecimal qty = new BigDecimal(scheduleQty);
         BigDecimal completedQty = getCompletedQty(iotMachineOutput,mesRecordWork.getScheduleId(),mesRecordWork.getStationId());
         MoDescInfoModel moDescForStationFail = getMoDescForStationFail(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
         BigDecimal fail = new BigDecimal(moDescForStationFail.getQty());
         BigDecimal output = completedQty.subtract(fail);
-        return output.compareTo(qty)==-1?false:true;
+        return output.compareTo(qty);
     }
 
     /**

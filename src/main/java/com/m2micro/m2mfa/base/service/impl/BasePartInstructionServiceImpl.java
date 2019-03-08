@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.m2mfa.base.entity.BasePartInstruction;
 import com.m2micro.m2mfa.base.query.BasePartInstructionQuery;
 import com.m2micro.m2mfa.base.repository.BasePartInstructionRepository;
 import com.m2micro.m2mfa.base.service.BasePartInstructionService;
@@ -14,6 +15,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.m2micro.framework.commons.util.PageUtil;
 
 import java.util.List;
+
 /**
  * 作业指导书关联 服务实现类
  * @author chengshuhong
@@ -21,6 +23,7 @@ import java.util.List;
  */
 @Service
 public class BasePartInstructionServiceImpl implements BasePartInstructionService {
+
     @Autowired
     BasePartInstructionRepository basePartInstructionRepository;
     @Autowired
@@ -28,9 +31,11 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @Override
     public BasePartInstructionRepository getRepository() {
         return basePartInstructionRepository;
     }
+
 
     @Override
     public PageUtil<BasePartInstructionModel> list(BasePartInstructionQuery query) {
@@ -53,19 +58,68 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             "LEFT JOIN base_station bs ON bs.station_id = bpins.station_id\n" +
             "LEFT JOIN base_instruction bi ON bi.instruction_id = bpins.instruction_id\n" +
             "LEFT JOIN mes_part_route mpr ON mpr.part_id = bp.part_id\n" +
-            "LEFT JOIN mes_part_route_station mprs ON mprs.part_route_id = mpr.part_route_id and mprs.station_id=bpins.station_id where 1=1 ";
+            "LEFT JOIN mes_part_route_station mprs ON mprs.part_route_id = mpr.part_route_id and mprs.station_id=bpins.station_id where 1=1 \n ";
             if(StringUtils.isNotEmpty(query.getPartNo())){
-                sql+="and  bp.part_no='"+query.getPartNo()+"'";
+                sql+=" and  bp.part_no='"+query.getPartNo()+"'\n";
             }
             if(StringUtils.isNotEmpty(query.getInstructionCode())){
-                sql+=" and bi.instruction_code='"+query.getInstructionCode()+"'";
+                sql+=" and bi.instruction_code='"+query.getInstructionCode()+"' \n";
             }
-        String  basePartInstructionModelsql = sql+" limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+
+        String Countsql ="SELECT\n" +
+            "  COUNT(*)\n" +
+            " FROM\n" +
+            "	base_part_instruction bpins\n" +
+            "LEFT JOIN base_parts bp ON bpins.part_id = bp.part_id\n" +
+            "LEFT JOIN base_station bs ON bs.station_id = bpins.station_id\n" +
+            "LEFT JOIN base_instruction bi ON bi.instruction_id = bpins.instruction_id\n" +
+            "LEFT JOIN mes_part_route mpr ON mpr.part_id = bp.part_id\n" +
+            "LEFT JOIN mes_part_route_station mprs ON mprs.part_route_id = mpr.part_route_id and mprs.station_id=bpins.station_id where 1=1 \n ";
+        if(StringUtils.isNotEmpty(query.getPartNo())){
+            Countsql+=" and  bp.part_no='"+query.getPartNo()+"' \n";
+        }
+        if(StringUtils.isNotEmpty(query.getInstructionCode())){
+            Countsql+=" and bi.instruction_code='"+query.getInstructionCode()+"' \n";
+        }
+        sql+=" limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BasePartInstructionModel> rowMapper = BeanPropertyRowMapper.newInstance(BasePartInstructionModel.class);
-        List<BasePartInstructionModel>basePartInstructionModels= jdbcTemplate.query(basePartInstructionModelsql,rowMapper);
-       // long totalCount = jq.fetchCount();
-       // return PageUtil.of(basePartInstructionModels,totalCount,query.getSize(),query.getPage());
-        return  null;
+        List<BasePartInstructionModel>basePartInstructionModels= jdbcTemplate.query(sql,rowMapper);
+        long totalCount=0;
+        try {
+            totalCount  = jdbcTemplate.queryForObject(Countsql,Long.class);
+        }catch (Exception e){
+
+        }
+        return PageUtil.of(basePartInstructionModels,totalCount,query.getSize(),query.getPage());
+    }
+
+    @Override
+    public void info(String id) {
+        BasePartInstruction basePartInstruction = findById(id).orElse(null);
+       // MesPartRouteStation
+        String sql ="SELECT\n" +
+            "  bpins.id id,\n" +
+            "	bp.part_no partNo ,\n" +
+            "	bp.`name` partName,\n" +
+            "	bp.spec spec,\n" +
+            "  mprs.process_id processId,\n" +
+            "	bs.station_id stationId,\n" +
+            "	bi.instruction_code instructionCode,\n" +
+            "	bi.description desription,\n" +
+            "	bi.revsion revsion,\n" +
+            "	bpins.effective_date effectiveDate,\n" +
+            "	bpins.invalid_date invalidDate,\n" +
+            "	bpins.enabled enabled\n" +
+            " FROM\n" +
+            "	base_part_instruction bpins\n" +
+            "LEFT JOIN base_parts bp ON bpins.part_id = bp.part_id\n" +
+            "LEFT JOIN base_station bs ON bs.station_id = bpins.station_id\n" +
+            "LEFT JOIN base_instruction bi ON bi.instruction_id = bpins.instruction_id\n" +
+            "LEFT JOIN mes_part_route mpr ON mpr.part_id = bp.part_id\n" +
+            "LEFT JOIN mes_part_route_station mprs ON mprs.part_route_id = mpr.part_route_id and mprs.station_id=bpins.station_id where   \n ";
+
     }
 
 }
+
+

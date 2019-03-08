@@ -27,7 +27,8 @@ public class MesMoScheduleAbsenceController {
     @ApiOperation(value="排产单缺勤获取")
     @UserOperationLog("排产单缺勤获取")
     public ResponseMessage<List<Absence>> findbStaffId(@ApiParam(value = "staffId",required=true) @RequestParam(required = true) String staffId){
-        return ResponseMessage.ok( mesMoScheduleAbsence.mesMoScheduleAbsence(staffId));
+        List<Absence> absences = mesMoScheduleAbsence.mesMoScheduleAbsence(staffId);
+        return ResponseMessage.ok( absences);
 
     }
 
