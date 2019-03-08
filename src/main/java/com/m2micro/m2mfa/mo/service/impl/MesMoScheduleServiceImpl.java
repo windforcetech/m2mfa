@@ -384,7 +384,14 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(!MoScheduleStatus.FROZEN.getKey().equals(mesMoSchedule.getFlag())){
             throw new MMException("用户排产单【"+mesMoSchedule.getScheduleNo()+"】当前状态【"+MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue()+"】,不允许解冻！");
         }
-        mesMoScheduleRepository.setFlagAndPrefreezingStateFor(mesMoSchedule.getPrefreezingState(),null,mesMoSchedule.getScheduleId());
+        //冻结前状态等于执行中
+        if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getPrefreezingState())){
+            //更改为排产单 已审待产，顺序从新排队
+            mesMoScheduleRepository.setFlagAndPrefreezingStateAndSequence(MoScheduleStatus.AUDITED.getKey(),null,maxSequence(mesMoSchedule.getMachineId())+1,mesMoSchedule.getScheduleId());
+        }else{
+            mesMoScheduleRepository.setFlagAndPrefreezingStateFor(mesMoSchedule.getPrefreezingState(),null,mesMoSchedule.getScheduleId());
+        }
+
     }
 
 

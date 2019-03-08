@@ -55,6 +55,18 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
     @Query("update MesMoSchedule m set m.flag = ?1 , m.prefreezingState = ?2 where m.scheduleId = ?3")
     Integer setFlagAndPrefreezingStateFor(Integer flag,Integer prefreezingState, String scheduleId);
 
+    /**
+     * 更新工单状态及冻结前状态及顺序
+     * @param flag
+     * @param prefreezingState
+     * @param sequence
+     * @param scheduleId
+     * @return
+     */
+    @Modifying
+    @Query("update MesMoSchedule m set m.flag = ?1 , m.prefreezingState = ?2 ,m.sequence=?3 where m.scheduleId = ?4")
+    Integer setFlagAndPrefreezingStateAndSequence(Integer flag,Integer prefreezingState,Integer sequence, String scheduleId);
+
 
     /**
      * 通过机台id查找排产单数量
