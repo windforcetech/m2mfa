@@ -47,5 +47,7 @@ public interface BaseInstructionService extends BaseService<BaseInstruction,Stri
      */
     ResponseMessage delete(String [] ids );
 
+
+
 }
 

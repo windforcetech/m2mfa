@@ -673,6 +673,8 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
             //结束工序
             endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
             endStationTime(obj.getScheduleId(),obj.getProcessId());
+            //排产单状态“已超量”
+            mesMoScheduleRepository.setFlagFor(MoScheduleStatus.EXCEEDED.getKey(),obj.getScheduleId());
         }
         return finishHomeworkModel;
     }

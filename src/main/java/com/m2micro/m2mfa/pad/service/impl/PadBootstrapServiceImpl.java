@@ -3,14 +3,17 @@ package com.m2micro.m2mfa.pad.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
+import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.operate.BaseOperateImpl;
 import com.m2micro.m2mfa.pad.service.PadBootstrapService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service("padBootstrapService")
 public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBootstrapService {
-
+    @Autowired
+    MesMoScheduleRepository mesMoScheduleRepository;
 
     @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
@@ -126,6 +130,8 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         //结束工序
         endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
         endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
+        //排产单状态“已超量”
+        mesMoScheduleRepository.setFlagFor(MoScheduleStatus.EXCEEDED.getKey(),obj.getScheduleId());
         //是否交接班
         if(!isChangeShifts(PadStaffUtil.getStaff().getStaffId())){
             //不交接班

@@ -110,7 +110,10 @@ public class PadHomeServiceImpl  implements PadHomeService {
       //获取当前员工开始模数
       BigDecimal startMolds=startMolds(rwId,PadStaffUtil.getStaff().getStaffId());
       //实际产出
-       actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
+      if(startMolds !=null && startMolds.compareTo(BigDecimal.ZERO)!=0){
+        actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
+      }
+
        //达成率
        rate = (float)actualOutput.longValue()/standardOutput.longValue();
     }

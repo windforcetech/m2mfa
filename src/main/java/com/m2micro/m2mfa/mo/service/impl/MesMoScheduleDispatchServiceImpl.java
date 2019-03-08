@@ -91,7 +91,7 @@ public class MesMoScheduleDispatchServiceImpl implements MesMoScheduleDispatchSe
                     ")\n" +
                     "WHERE\n" +
                     "	1 = 1\n" +
-                    "AND (mms.flag = "+ MoScheduleStatus.AUDITED.getKey() + " OR mms.flag = "+ MoScheduleStatus.FROZEN.getKey() + ")\n";
+                    "AND (mms.flag = "+ MoScheduleStatus.AUDITED.getKey() + ")\n";
         if(StringUtils.isNotEmpty(machineId)){
             sql = sql + " AND mms.machine_id = '" + machineId + "'\n";
         }
