@@ -68,8 +68,10 @@ public class BasePartQualitySolutionServiceImpl implements BasePartQualitySoluti
         BaseQualitySolutionDesc baseQualitySolutionDesc = baseQualitySolutionDescService.findById(basePartQualitySolution.getSolutionId()).orElse(null);
         basePartQualitySolution.setSolutionName(baseQualitySolutionDesc==null?null:baseQualitySolutionDesc.getSolutionName());
         //作业指导名称
-        BaseInstruction baseInstruction = baseInstructionService.findById(basePartQualitySolution.getInstructionId()).orElse(null);
-        basePartQualitySolution.setInstructionName(baseInstruction==null?null:baseInstruction.getInstructionName());
+        if(StringUtils.isNotEmpty(basePartQualitySolution.getInstructionId())){
+            BaseInstruction baseInstruction = baseInstructionService.findById(basePartQualitySolution.getInstructionId()).orElse(null);
+            basePartQualitySolution.setInstructionName(baseInstruction==null?null:baseInstruction.getInstructionName());
+        }
         return basePartQualitySolution;
     }
 

@@ -30,6 +30,8 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Auther: liaotao
@@ -149,6 +151,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     private List<PadScheduleModel> getFilterScheduleModels(BaseStaff baseStaff) {
         //获取该员工下已审待产中每个机器上的排产单（每个机器只取优先级最高的排产单）
         List<PadScheduleModel> auditeds = getAuditedScheduleModels(baseStaff);
+        //Map<String, List<PadScheduleModel>> collect = auditeds.stream().collect(Collectors.groupingBy(PadScheduleModel::getMachineId,(key, group)));
         //过滤后的排产单相关信息
         List<PadScheduleModel> filterPadScheduleModel = new ArrayList<>();
         if(auditeds!=null&&auditeds.size()>0){
@@ -176,7 +179,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
      */
     private List<PadScheduleModel> getAuditedScheduleModels(BaseStaff baseStaff) {
         //获取该员工下已审待产中每个机器上的排产单（每个机器只取优先级最高的排产单）
-        String sqlAudited = "SELECT\n" +
+        /*String sqlAudited = "SELECT\n" +
                 "	ms.schedule_id scheduleId,\n" +
                 "	ms.schedule_no scheduleNo,\n" +
                 "	min(ms.sequence) sequence,\n" +
@@ -202,7 +205,34 @@ public class PadScheduleServiceImpl implements PadScheduleService {
                 "	ms.machine_id\n" +
                 "ORDER BY\n" +
                 "	ms.sequence ASC,\n" +
-                "	bm.code ASC";
+                "	bm.code ASC";*/
+
+        String sqlAudited = "SELECT\n" +
+                "	ms.schedule_id scheduleId,\n" +
+                "	ms.schedule_no scheduleNo,\n" +
+                "	ms.sequence sequence,\n" +
+                "	ms.machine_id machineId,\n" +
+                "	IF(ms.flag="+ MoScheduleStatus.AUDITED.getKey() +",'"+MoScheduleStatus.AUDITED.getValue()+"','"+MoScheduleStatus.PRODUCTION.getValue()+"') flagStatus,\n" +
+                "	bm.name machineName,\n" +
+                "	bm.code machineCode,\n" +
+                "	bp.part_no partNo,\n" +
+                "	bp.name partName\n" +
+                "FROM\n" +
+                "	mes_mo_schedule ms,\n" +
+                "	mes_mo_schedule_staff mss,\n" +
+                "	base_machine bm,\n" +
+                "	base_parts bp\n" +
+                "WHERE\n" +
+                "	mss.schedule_id = ms.schedule_id \n" +
+                "AND ms.flag = 1\n" +
+                "AND bm.machine_id = ms.machine_id\n" +
+                "AND bp.part_id=ms.part_id\n" +
+                "AND mss.staff_id = '"+ baseStaff.getStaffId() + "'\n" +
+                "AND mss.enabled = 1 \n" +
+                "ORDER BY\n" +
+                "	ms.sequence ASC,\n" +
+                "	bm.code ASC\n" +
+                "limit 1\n";
         RowMapper<PadScheduleModel> rowMapperAudited = BeanPropertyRowMapper.newInstance(PadScheduleModel.class);
         return jdbcTemplate.query(sqlAudited, rowMapperAudited);
     }
