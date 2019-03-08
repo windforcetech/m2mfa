@@ -108,7 +108,13 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BaseQualityItems> rm = BeanPropertyRowMapper.newInstance(BaseQualityItems.class);
         List<BaseQualityItems> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_quality_items";
+        String countSql = "select count(*) from base_quality_items bqi where 1=1 \n";
+        if(StringUtils.isNotEmpty(query.getItemCode())){
+            countSql = countSql + " and bqi.item_code like '%"+query.getItemCode()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getItemName())){
+            countSql = countSql + " and bqi.item_name like '%"+query.getItemName()+"%'";
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }

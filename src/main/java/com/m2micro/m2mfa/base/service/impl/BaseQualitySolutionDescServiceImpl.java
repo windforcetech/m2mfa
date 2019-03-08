@@ -184,6 +184,7 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
                 PropertyUtil.copy(baseQualitySolutionDef,baseQualitySolutionDefOld);
             } else {//新增
                 PropertyUtil.copy(baseQualitySolutionDef,baseQualitySolutionDefOld);
+                baseQualitySolutionDefOld.setSolutionId(baseQualitySolutionDescOld.getSolutionId());
                 baseQualitySolutionDefOld.setId(UUIDUtil.getUUID());
             }
             return baseQualitySolutionDefOld;

@@ -91,7 +91,13 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BaseSymptom> rm = BeanPropertyRowMapper.newInstance(BaseSymptom.class);
         List<BaseSymptom> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_symptom";
+        String countSql = "select count(*) from base_symptom bs where 1=1\n";
+        if(StringUtils.isNotEmpty(query.getSymptomCode())){
+            countSql = countSql + " and bs.symptom_code like '%"+query.getSymptomCode()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSymptomName())){
+            countSql = countSql + " and bs.symptom_name like '%"+query.getSymptomName()+"%'";
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
