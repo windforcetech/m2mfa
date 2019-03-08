@@ -57,6 +57,9 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
         if(StringUtils.isNotEmpty(query.getInstructionName())){
             condition.and(qBaseInstruction.instructionName.like("%"+query.getInstructionName()+"%"));
         }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            condition.and(qBaseInstruction.category.like("%"+query.getCategory()+"%"));
+        }
        if(query.getEnabled()){
          condition.and(qBaseInstruction.enabled.eq(true));
        }

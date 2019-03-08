@@ -1,29 +1,29 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.commons.annotation.UserOperationLog;
+import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.m2mfa.base.entity.BasePartInstruction;
 import com.m2micro.m2mfa.base.entity.BaseParts;
-import com.m2micro.m2mfa.base.node.TreeNode;
 import com.m2micro.m2mfa.base.query.BasePartInstructionQuery;
 import com.m2micro.m2mfa.base.service.BasePartInstructionService;
-import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.service.BasePartsService;
+import com.m2micro.m2mfa.base.vo.BasePartInstructionModel;
+import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
-import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
-import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
-import com.m2micro.m2mfa.base.entity.BasePartInstruction;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -52,8 +52,8 @@ public class BasePartInstructionController {
     @RequestMapping("/list")
     @ApiOperation(value="作业指导书关联列表")
     @UserOperationLog("作业指导书关联列表")
-    public ResponseMessage<PageUtil<BasePartInstruction>> list(BasePartInstructionQuery query){
-        PageUtil<BasePartInstruction> page = basePartInstructionService.list(query);
+    public ResponseMessage<PageUtil<BasePartInstructionModel>> list(BasePartInstructionQuery query){
+        PageUtil<BasePartInstructionModel> page = basePartInstructionService.list(query);
         return ResponseMessage.ok(page);
     }
 

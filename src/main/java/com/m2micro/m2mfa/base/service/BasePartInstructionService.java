@@ -3,7 +3,9 @@ package com.m2micro.m2mfa.base.service;
 import com.m2micro.m2mfa.base.entity.BasePartInstruction;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.base.query.BasePartInstructionQuery;
+import com.m2micro.m2mfa.base.vo.BasePartInstructionModel;
+
 /**
  * 作业指导书关联 服务类
  * @author chengshuhong
@@ -16,5 +18,5 @@ public interface BasePartInstructionService extends BaseService<BasePartInstruct
      *         查询参数
      * @return  分页信息
      */
-    PageUtil<BasePartInstruction> list(Query query);
+    PageUtil<BasePartInstructionModel> list(BasePartInstructionQuery query);
 }

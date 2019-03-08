@@ -89,7 +89,7 @@ public class BaseInstructionController {
     @RequestMapping("/update")
     @ApiOperation(value="更新作业指导书")
     @UserOperationLog("更新作业指导书")
-    public ResponseMessage update(BaseInstruction baseInstruction, MultipartFile file){
+    public ResponseMessage update(BaseInstruction baseInstruction,  @RequestParam(required = false) MultipartFile file){
         baseInstructionService.update(baseInstruction,file);
         return ResponseMessage.ok();
     }
@@ -107,7 +107,7 @@ public class BaseInstructionController {
     }
 
     /**
-     * 删除
+     * 下载
      */
     @RequestMapping("/download")
     @ApiOperation(value="下载这也指导书")

@@ -14,6 +14,8 @@ public class BaseInstructionQueryObj extends Query {
   private String instructionName;
   @ApiModelProperty(value = "有效否")
   private Boolean enabled;
+  @ApiModelProperty(value = "类型")
+  private String category;
 
 
 }
