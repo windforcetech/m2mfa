@@ -674,7 +674,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
             endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
             endStationTime(obj.getScheduleId(),obj.getProcessId());
             //排产单状态“已超量”
-            mesMoScheduleRepository.setFlagFor(MoScheduleStatus.EXCEEDED.getKey(),obj.getScheduleId());
+            updateSchedulFlag(obj.getScheduleId());
         }
         return finishHomeworkModel;
     }
@@ -1335,6 +1335,13 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return  false;
     }
 
+    /**
+     * 更新排产单状态为已超量
+     * @param scheduleId
+     */
+    protected  void  updateSchedulFlag(String scheduleId){
+        mesMoScheduleRepository.setFlagFor(MoScheduleStatus.EXCEEDED.getKey(),scheduleId);
+    }
 
 }
 

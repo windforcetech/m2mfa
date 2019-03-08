@@ -24,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service("padBootstrapService")
 public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBootstrapService {
-    @Autowired
-    MesMoScheduleRepository mesMoScheduleRepository;
+
 
     @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
@@ -131,7 +130,7 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
         endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
         //排产单状态“已超量”
-        mesMoScheduleRepository.setFlagFor(MoScheduleStatus.EXCEEDED.getKey(),obj.getScheduleId());
+        updateSchedulFlag(obj.getScheduleId());
         //是否交接班
         if(!isChangeShifts(PadStaffUtil.getStaff().getStaffId())){
             //不交接班
