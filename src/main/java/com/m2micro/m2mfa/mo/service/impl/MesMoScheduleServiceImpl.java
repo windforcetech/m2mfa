@@ -228,15 +228,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoScheduleModel.class);
         List<MesMoScheduleModel> list = jdbcTemplate.query(sql,rm);
 
-        if(list!=null&&list.size()>0){
-            for (int i=0;i<list.size();i++){
-                MesMoScheduleModel mesMoScheduleModel = list.get(i);
-                List scheduleIds = new ArrayList();
-                scheduleIds.add(mesMoScheduleModel.getScheduleId());
-                Integer outPutQtys = padBottomDisplayService.getOutPutQtys(mesMoScheduleModel.getScheduleId(), scheduleIds);
-                mesMoScheduleModel.setOutputQty(outPutQtys);
-            }
-        }
+        getScheduleModelForOutput(list);
 
         String countSql =   "SELECT\n" +
             "	count(*)\n" +
@@ -263,6 +255,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+    }
+
+    public List<MesMoScheduleModel> getScheduleModelForOutput(List<MesMoScheduleModel> list) {
+        if(list!=null&&list.size()>0){
+            for (int i=0;i<list.size();i++){
+                MesMoScheduleModel mesMoScheduleModel = list.get(i);
+                List scheduleIds = new ArrayList();
+                scheduleIds.add(mesMoScheduleModel.getScheduleId());
+                Integer outPutQtys = padBottomDisplayService.getOutPutQtys(mesMoScheduleModel.getScheduleId(), scheduleIds);
+                mesMoScheduleModel.setOutputQty(outPutQtys);
+            }
+        }
+        return list;
     }
 
 

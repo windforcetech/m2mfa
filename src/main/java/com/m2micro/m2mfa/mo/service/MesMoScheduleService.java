@@ -186,4 +186,12 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     boolean  isScheduleFlag(String  scheduleId);
 
+
+    /**
+     * 设置产量（完成量）
+     * @param list
+     * @return
+     */
+    List<MesMoScheduleModel> getScheduleModelForOutput(List<MesMoScheduleModel> list);
+
 }

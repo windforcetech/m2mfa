@@ -10,6 +10,7 @@ import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.model.ScheduleSequenceModel;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleDispatchService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -41,6 +42,9 @@ public class MesMoScheduleDispatchServiceImpl implements MesMoScheduleDispatchSe
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Autowired
     MesMoScheduleService mesMoScheduleService;
+
+    @Autowired
+    PadBottomDisplayService padBottomDisplayService;
 
 
     @Override
@@ -97,7 +101,15 @@ public class MesMoScheduleDispatchServiceImpl implements MesMoScheduleDispatchSe
         }
         sql = sql + " ORDER BY mms.sequence ASC";
         RowMapper<MesMoScheduleModel> rowMapper = BeanPropertyRowMapper.newInstance(MesMoScheduleModel.class);
-        return jdbcTemplate.query(sql, rowMapper);
+        List<MesMoScheduleModel> list = jdbcTemplate.query(sql, rowMapper);
+
+        return mesMoScheduleService.getScheduleModelForOutput(list);
+    }
+
+    private Integer getOutput(String scheduleId) {
+        List scheduleIds = new ArrayList();
+        scheduleIds.add(scheduleId);
+        return padBottomDisplayService.getOutPutQtys(scheduleId, scheduleIds);
     }
 
     @Override
