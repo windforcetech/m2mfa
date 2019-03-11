@@ -7,24 +7,22 @@ import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.query.BaseBomDescQuery;
 import com.m2micro.m2mfa.base.query.BaseStaffshiftQuery;
-import com.m2micro.m2mfa.base.service.BaseShiftService;
-import com.m2micro.m2mfa.base.service.BaseStaffService;
-import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
-import com.m2micro.m2mfa.base.vo.OneStaffShift;
-import com.m2micro.m2mfa.base.vo.StaffShiftByOne;
-import com.m2micro.m2mfa.base.vo.StaffShiftObj;
-import com.m2micro.m2mfa.base.vo.StaffShiftResult;
+import com.m2micro.m2mfa.base.service.*;
+import com.m2micro.m2mfa.base.vo.*;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.DateFormat;
@@ -46,303 +44,197 @@ import java.util.stream.Stream;
 @Authorize
 public class BaseBomDescController {
     @Autowired
-    BaseStaffshiftService baseStaffshiftService;
-
+    BaseBomDescService baseBomDescService;
     @Autowired
-    BaseStaffService baseStaffService;
+    BaseBomDefService baseBomDefService;
     @Autowired
-    BaseShiftService baseShiftService;
+    BaseBomSubstituteService baseBomSubstituteService;
 
     /**
      * 列表
      */
     @PostMapping("/list")
-    @ApiOperation(value = "员工排班表列表")
-    @UserOperationLog("员工排班表列表")
-    public ResponseMessage<PageUtil<Map<String, Object>>> list(BaseStaffshiftQuery query) {
-        PageUtil<Map<String, Object>> page = baseStaffshiftService.list(query);
-        return ResponseMessage.ok(page);
+    @ApiOperation(value = "bom列表")
+    @UserOperationLog("bom列表")
+    public ResponseMessage<PageUtil<BaseBomDesc>> list(BaseBomDescQuery query) {
+
+        QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
+        BooleanBuilder expression = new BooleanBuilder();
+        if (StringUtils.isNotEmpty(query.getPartId())) {
+            expression.and(baseBomDesc.partId.like("%" + query.getPartId() + "%"));
+        }
+        ArrayList<BaseBomDesc> baseBomDescs = Lists.newArrayList(baseBomDescService.findAll(expression));
+
+        PageUtil<BaseBomDesc> of = PageUtil.of(baseBomDescs, baseBomDescs.size(), query.getSize(), query.getPage());
+        return ResponseMessage.ok(of);
     }
 
-    /**
-     * 列表
-     */
-    @PostMapping("/listbystaff")
-    @ApiOperation(value = "单个员工排班表列表")
-    @UserOperationLog("单个员工排班表列表")
-    public ResponseMessage<StaffShiftByOne> listbystaff(BaseStaffshiftQuery query) {
-        QBaseStaffshift qBaseStaff = QBaseStaffshift.baseStaffshift;
-        BooleanExpression expression = qBaseStaff.shiftDate.between(query.getStartTime(), query.getEndTime())
-                .and(qBaseStaff.staffId.eq(query.getStaffId()));
-        ArrayList<BaseStaffshift> baseStaffs = Lists.newArrayList(baseStaffshiftService.findAll(expression));
-
-//        List<String> baseShiftIdList = baseStaffs.stream()
-//                .map(BaseStaffshift::getShiftId).distinct()
-//                .collect(Collectors.toList());
-//        Map<String, String> baseShiftNameMap = baseShiftService.findAllById(baseShiftIdList)
-//                .stream()
-//                .collect(Collectors.toMap(BaseShift::getShiftId, BaseShift::getName));
-//
-//        Map<String, List<BaseStaffshift>> baseStaffshitMap = baseStaffs.stream()
-//                .map(item -> {
-//
-//                })
-//                .collect(Collectors.groupingBy(BaseStaffshift::getStaffId));
-//
-//        Set<String> keys = baseStaffshitMap.keySet();
-//
-//        List<HashMap<String, Object>> collect = baseStaffService.findAllById(Lists.newArrayList(keys))
-//                .stream()
-//                .map(item -> {
-//                    HashMap<String, Object> map = new HashMap<>();
-//                    map.put("staff_id", item.getStaffId());
-//                    map.put("keyvalue", baseStaffshitMap.get(item.getStaffId()));
-//                    map.put("code", item.getCode());
-//                    return map;
-//                }).collect(Collectors.toList());
-
-
-        Stream<BaseStaffshift> sorted = baseStaffs.stream().sorted(Comparator.comparing(BaseStaffshift::getShiftDate));
-        StaffShiftByOne staffShiftByOne = new StaffShiftByOne();
-        staffShiftByOne.setStaffId(query.getStaffId());
-
-        Optional<BaseStaff> byId = baseStaffService.findById(query.getStaffId());
-        BaseStaff baseStaff = byId.get();
-        staffShiftByOne.setStaffName(baseStaff.getStaffName());
-        staffShiftByOne.setStaffCode(baseStaff.getCode());
-
-        List<OneStaffShift> list =
-                sorted.map(item -> {
-                    OneStaffShift oneStaffShift = new OneStaffShift();
-                    oneStaffShift.setId(item.getId());
-                    oneStaffShift.setShiftDate(item.getShiftDate());
-                    oneStaffShift.setShiftId(item.getShiftId());
-
-                    Optional<BaseShift> byId1 = baseShiftService.findById(item.getShiftId());
-                    BaseShift baseShift = byId1.get();
-                    oneStaffShift.setShiftName(baseShift.getName());
-                    oneStaffShift.setShiftCode(baseShift.getCode());
-
-                    return oneStaffShift;
-                }).collect(Collectors.toList());
-
-        staffShiftByOne.setList(list);
-        return ResponseMessage.ok(staffShiftByOne);
-    }
-
-    /**
-     * 详情
-     */
-    @GetMapping("/info/{id}")
-    @ApiOperation(value = "员工排班表详情")
-    @UserOperationLog("员工排班表详情")
-    public ResponseMessage<BaseStaffshift> info(@PathVariable("id") String id) {
-        BaseStaffshift baseStaffshift = baseStaffshiftService.findById(id).orElse(null);
-        return ResponseMessage.ok(baseStaffshift);
-    }
 
     /**
      * 保存
      */
     @PostMapping("/save")
-    @ApiOperation(value = "保存员工排班表")
-    @UserOperationLog("保存员工排班表")
-    public ResponseMessage<List<StaffShiftResult>> save(@RequestBody StaffShiftObj staffShiftObj) throws ParseException {
+    @ApiOperation(value = "保存Bom")
+    @UserOperationLog("保存Bom")
+    public ResponseMessage<List<BaseBomDef>> save(@RequestBody BaseBomDesc staffShiftObj) throws ParseException {
         ValidatorUtil.validateEntity(staffShiftObj, AddGroup.class);
-        List<BaseStaffshift> baseStaffshiftList = new ArrayList<>();
-        List<String> stringst;
-        //员工id为空，取部门所有人员
-        if (StringUtils.isEmpty(staffShiftObj.getStaffId())) {
-            QBaseStaff qBaseStaff = QBaseStaff.baseStaff;
-            BooleanExpression expression = qBaseStaff.departmentId.eq(staffShiftObj.getDepartmentId());
-            ArrayList<BaseStaff> baseStaffs = Lists.newArrayList(baseStaffService.findAll(expression));
-            stringst = baseStaffs.stream().map(x -> x.getStaffId()).collect(Collectors.toList());
-        } else {
-            stringst = Arrays.asList(staffShiftObj.getStaffId().split(","));
-        }
-        //排除人员不为空,将他们删除
-        if (StringUtils.isNotEmpty(staffShiftObj.getExcludeStaffId())) {
-            String[] split = staffShiftObj.getExcludeStaffId().split(",");
-            List<String> strings = Arrays.asList(split);
-            stringst.removeAll(strings);
-        }
-        if (stringst.size() == 0) {
-            throw new MMException("员工个数为零");
-        }
-        //遍历所有人员
-        for (String baseStaff :
-                stringst) {
-            Calendar c = Calendar.getInstance();
-            DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd");
-            Date beginDate = dateFormat1.parse(dateFormat1.format(staffShiftObj.getStartDate()));
-            Date endDate = dateFormat1.parse(dateFormat1.format(staffShiftObj.getEndDate()));
-            c.setTime(endDate);
-            c.add(Calendar.DATE, 1); // 结束日期加1天
-            endDate = c.getTime();
-            Date date = beginDate;
-            List<String> strings1 = new ArrayList<>();//要排除日期
-            if (StringUtils.isNotEmpty(staffShiftObj.getExcludeDate())) {
-                String[] split1 = staffShiftObj.getExcludeDate().split(",");
-                strings1 = Arrays.asList(split1);
-            }
-            //遍历所有时间
-            while (!date.equals(endDate)) {
-                //不是要排除的日期，添加
-                if (!strings1.contains(dateFormat1.format(date))) {
-                    BaseStaffshift baseStaffshift = new BaseStaffshift();
-                    baseStaffshift.setId(UUIDUtil.getUUID());
-                    baseStaffshift.setEnabled(true);
-                    baseStaffshift.setShiftId(staffShiftObj.getShiftId());
-                    baseStaffshift.setStaffId(baseStaff);
-                    baseStaffshift.setShiftDate(date);
-                    baseStaffshiftList.add(baseStaffshift);
+        QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
+        BooleanExpression expression = baseBomDesc.category.eq(staffShiftObj.getCategory())
+                .and(baseBomDesc.partId.eq(staffShiftObj.getPartId()))
+                .and(baseBomDesc.version.eq(staffShiftObj.getVersion()))
+                .and(baseBomDesc.enabled.eq(true));
+        Iterable<BaseBomDesc> all = baseBomDescService.findAll(expression);
+        ArrayList<BaseBomDesc> baseBomDescs = Lists.newArrayList(all);
+        if (baseBomDescs.size() > 0)
+            throw new MMException("料号、类型、版本唯一");
+        staffShiftObj.setBomId(UUIDUtil.getUUID());
+        BaseBomDesc save = baseBomDescService.save(staffShiftObj);
+        List<BaseBomDef> bomDefObjList = staffShiftObj.getBomDefObjList();
+        bomDefObjList.forEach(x -> {
+            x.setBomId(save.getBomId());
+            x.setId(UUIDUtil.getUUID());
+        });
 
-                }
-                System.out.println(date);
-                c.setTime(date);
-                c.add(Calendar.DATE, 1); // 日期加1天
-                date = c.getTime();
-            }
-        }
-
-        ArrayList<StaffShiftResult> staffShiftResults = new ArrayList<>();
-
-        for (BaseStaffshift baseStaffshift :
-                baseStaffshiftList) {
-            StaffShiftResult staffShiftResult = new StaffShiftResult();
-            staffShiftResult.setShiftDate(baseStaffshift.getShiftDate());
-
-            Optional<BaseStaff> byId = baseStaffService.findById(baseStaffshift.getStaffId());
-            BaseStaff baseStaff = byId.get();
-            staffShiftResult.setStaffName(baseStaff.getStaffName());
-            staffShiftResult.setStaffCode(baseStaff.getCode());
-
-            Optional<BaseShift> byId1 = baseShiftService.findById(baseStaffshift.getShiftId());
-            BaseShift baseShift = byId1.get();
-            staffShiftResult.setShiftName(baseShift.getName());
-            staffShiftResult.setShiftCode(baseShift.getCode());
-
-            if (staffShiftObj.getForceUpdate()) {
-                //强制更新，先删除原来所有，再新增一条
-                QBaseStaffshift qBaseStaff = QBaseStaffshift.baseStaffshift;
-                BooleanExpression expression = qBaseStaff.shiftDate.eq(baseStaffshift.getShiftDate())
-                        //.and(qBaseStaff.shiftId.eq(baseStaffshift.getShiftId()))
-                        .and(qBaseStaff.staffId.eq(baseStaffshift.getStaffId()));
-                ArrayList<BaseStaffshift> baseStaffs = Lists.newArrayList(baseStaffshiftService.findAll(expression));
-                if (baseStaffs.size() > 0) {
-
-                    //先删除所有
-                    baseStaffshiftService.deleteAll(baseStaffs);
-
-                    /*BaseStaffshift baseStaffshift1 = baseStaffs.get(0);
-                    baseStaffshift1.setShiftId(baseStaffshift.getShiftId());
-                    baseStaffshiftService.updateById(baseStaffshift1.getId(), baseStaffshift1);*/
-
-                    //再新增一条
-                    baseStaffshiftService.save(baseStaffshift);
-                    staffShiftResult.setResult("更新成功");
-
-                } else {
-                    baseStaffshiftService.save(baseStaffshift);
-                    staffShiftResult.setResult("新增成功");
-
-                }
-            } else {
-                QBaseStaffshift qBaseStaff = QBaseStaffshift.baseStaffshift;
-                BooleanExpression expression = qBaseStaff.shiftDate.eq(baseStaffshift.getShiftDate())
-                        .and(qBaseStaff.shiftId.eq(baseStaffshift.getShiftId()))
-                        .and(qBaseStaff.staffId.eq(baseStaffshift.getStaffId()));
-                ArrayList<BaseStaffshift> baseStaffs = Lists.newArrayList(baseStaffshiftService.findAll(expression));
-                if (baseStaffs.size() == 0) {
-                    baseStaffshiftService.save(baseStaffshift);
-                    staffShiftResult.setResult("新增成功");
-                } else {
-                    staffShiftResult.setResult("已存在排班，没有选择强制替换");
-                }
-
-            }
-            staffShiftResults.add(staffShiftResult);
-        }
-
-        return ResponseMessage.ok(staffShiftResults);
+        return ResponseMessage.ok(baseBomDefService.saveAll(bomDefObjList));
     }
-
-    /**
-     * 更新
-     */
-    @PostMapping("/updateall")
-    @ApiOperation(value = "更新所有员工排班表")
-    @UserOperationLog("更新所有员工排班表")
-    public ResponseMessage<List<BaseStaffshift>> updateall(@RequestBody List<BaseStaffshift> baseStaffshift) {
-
-        List<BaseStaffshift> list = new ArrayList<>();
-        List<String> listDelete = new ArrayList<>();
-        for (BaseStaffshift baseStaffshift1 : baseStaffshift
-        ) {
-            ValidatorUtil.validateEntity(baseStaffshift1, UpdateGroup.class);
-            BaseStaffshift baseStaffshiftOld = baseStaffshiftService.findById(baseStaffshift1.getId()).orElse(null);
-            if (baseStaffshiftOld == null) {
-                throw new MMException("数据库不存在该记录");
-            }
-            if (StringUtils.isEmpty(baseStaffshift1.getShiftId())) {//为null,删除
-                listDelete.add(baseStaffshift1.getId());
-
-            } else {
-                PropertyUtil.copy(baseStaffshift1, baseStaffshiftOld);
-                list.add(baseStaffshiftOld);
-            }
-        }
-        baseStaffshiftService.deleteByIds(listDelete.toArray(new String[0]));
-        return ResponseMessage.ok(baseStaffshiftService.saveAll(list));
-    }
-
 
     /**
      * 更新
      */
     @PostMapping("/update")
-    @ApiOperation(value = "更新员工排班表")
-    @UserOperationLog("更新员工排班表")
-    public ResponseMessage<BaseStaffshift> update(@RequestBody BaseStaffshift baseStaffshift) {
-        ValidatorUtil.validateEntity(baseStaffshift, UpdateGroup.class);
-        BaseStaffshift baseStaffshiftOld = baseStaffshiftService.findById(baseStaffshift.getId()).orElse(null);
+    @ApiOperation(value = "更新bom表")
+    @UserOperationLog("更新bom表")
+    @Transactional
+    public ResponseMessage<BaseStaffshift> update(@RequestBody BaseBomDesc baseBomDescObj) {
+        ValidatorUtil.validateEntity(baseBomDescObj, UpdateGroup.class);
+        BaseBomDesc baseStaffshiftOld = baseBomDescService.findById(baseBomDescObj.getBomId()).orElse(null);
         if (baseStaffshiftOld == null) {
-            throw new MMException("数据库不存在该记录");
+            throw new MMException("数据库不存在BomDesc记录");
         }
-        PropertyUtil.copy(baseStaffshift, baseStaffshiftOld);
-        return ResponseMessage.ok(baseStaffshiftService.save(baseStaffshiftOld));
+
+        QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
+        BooleanExpression expression = baseBomDesc.category.eq(baseBomDescObj.getCategory())
+                .and(baseBomDesc.partId.eq(baseBomDescObj.getPartId()))
+                .and(baseBomDesc.version.eq(baseBomDescObj.getVersion()))
+                .and(baseBomDesc.bomId.notEqualsIgnoreCase(baseBomDescObj.getBomId()))
+                .and(baseBomDesc.enabled.eq(true));
+        Iterable<BaseBomDesc> all = baseBomDescService.findAll(expression);
+        ArrayList<BaseBomDesc> baseBomDescs = Lists.newArrayList(all);
+        if (baseBomDescs.size() > 0)
+            throw new MMException("料号、类型、版本唯一");
+
+        PropertyUtil.copy(baseBomDescObj, baseStaffshiftOld);
+        baseBomDescService.save(baseStaffshiftOld);
+
+        baseBomDescObj.getBomDefObjList().forEach(x -> {
+
+            if (StringUtils.isEmpty(x.getId())) {//为null,新增
+                x.setBomId(baseBomDescObj.getBomId());
+                x.setId(UUIDUtil.getUUID());
+                baseBomDefService.save(x);
+            } else {//修改
+                BaseBomDef baseBomDefOld = baseBomDefService.findById(x.getId()).orElse(null);
+                if (baseBomDefOld == null) {
+                    throw new MMException("数据库不存在BomDef记录");
+                }
+                PropertyUtil.copy(x, baseBomDefOld);
+                baseBomDefService.save(baseBomDefOld);
+            }
+
+        });
+        return ResponseMessage.ok();
     }
 
     /**
      * 删除
      */
-    @PostMapping("/delete")
-    @ApiOperation(value = "删除员工排班表")
-    @UserOperationLog("删除员工排班表")
-    public ResponseMessage delete(@RequestBody String[] ids) {
+    @PostMapping("/deletedesc")
+    @ApiOperation(value = "删除bom desc表")
+    @UserOperationLog("删除bom desc表")
+    @Transactional
+    public ResponseMessage deletedesc(@RequestBody String[] ids) {
 
-        String[] canDelete = baseStaffshiftService.findCanDelete(ids);
-        baseStaffshiftService.deleteByIds(substract(ids, canDelete));
-        if (canDelete.length > 0) {
-            throw new MMException(StringUtils.join(canDelete, ",") + "存在排产记录，不可删除");
-        }
 
+//        QBaseBomDef baseBomDesc = QBaseBomDef.baseBomDef;
+//        BooleanExpression expression = baseBomDesc.bomId.in(ids);
+//        Iterable<BaseBomDef> all = baseBomDefService.findAll(expression);
+//        baseBomDefService.deleteAll(all);
+//        baseBomDescService.deleteByIds(ids);
+        baseBomDefService.deleteByBomIds(Arrays.asList(ids));
+        baseBomDescService.deleteByIds(ids);
         return ResponseMessage.ok();
     }
 
-    public static String[] substract(String[] arr1, String[] arr2) {
-        LinkedList<String> list = new LinkedList<String>();
-        for (String str : arr1) {
-            if (!list.contains(str)) {
-                list.add(str);
-            }
+    /**
+     * 删除
+     */
+    @PostMapping("/deletedef")
+    @ApiOperation(value = "删除bom def表")
+    @UserOperationLog("删除bom def表")
+    @Transactional
+    public ResponseMessage deletedef(@RequestBody String[] ids) {
+        baseBomDefService.deleteByIds(ids);
+        return ResponseMessage.ok();
+    }
+
+    /**
+     * 保存
+     */
+    @PostMapping("/ecn")
+    @ApiOperation(value = "工程变更号码")
+    @UserOperationLog("工程变更号码")
+    public ResponseMessage<List<BaseBomDef>> ecn(@RequestBody BaseBomDesc staffShiftObj) throws ParseException {
+        ValidatorUtil.validateEntity(staffShiftObj, AddGroup.class);
+
+        BaseBomDesc baseStaffshiftOld = baseBomDescService.findById(staffShiftObj.getBomId()).orElse(null);
+        if (baseStaffshiftOld == null) {
+            throw new MMException("数据库不存在BomDesc记录");
         }
-        for (String str : arr2) {
-            if (list.contains(str)) {
-                list.remove(str);
-            }
+
+        baseStaffshiftOld.setEnabled(false);
+        baseBomDescService.save(baseStaffshiftOld);//设置无效
+
+        staffShiftObj.setVersion(baseStaffshiftOld.getVersion() + 1);
+        staffShiftObj.setBomId(UUIDUtil.getUUID());
+        BaseBomDesc save = baseBomDescService.save(staffShiftObj);
+        List<BaseBomDef> bomDefObjList = staffShiftObj.getBomDefObjList();
+        bomDefObjList.forEach(x -> {
+            x.setBomId(save.getBomId());
+            x.setId(UUIDUtil.getUUID());
+        });
+
+        return ResponseMessage.ok(baseBomDefService.saveAll(bomDefObjList));
+    }
+
+    /**
+     * 更新
+     */
+    @PostMapping("/maintain")
+    @ApiOperation(value = "替代维护")
+    @UserOperationLog("替代维护")
+    @Transactional
+    public ResponseMessage<BaseStaffshift> maintain(@RequestBody BaseBomDesc baseBomDescObj) {
+        ValidatorUtil.validateEntity(baseBomDescObj, UpdateGroup.class);
+        BaseBomDesc baseStaffshiftOld = baseBomDescService.findById(baseBomDescObj.getBomId()).orElse(null);
+        if (baseStaffshiftOld == null) {
+            throw new MMException("数据库不存在BomDesc记录");
         }
-        String[] result = {};
-        return list.toArray(result);
+        baseBomDescObj.getBomSubstituteList().forEach(x -> {
+
+            if (StringUtils.isEmpty(x.getId())) {//为null,新增
+                x.setBomId(baseBomDescObj.getBomId());
+                x.setId(UUIDUtil.getUUID());
+                baseBomSubstituteService.save(x);
+            } else {//修改
+                BaseBomSubstitute baseBomSubstitute = baseBomSubstituteService.findById(x.getId()).orElse(null);
+                if (baseBomSubstitute == null) {
+                    throw new MMException("数据库不存在BomSubtitute记录");
+                }
+                PropertyUtil.copy(x, baseBomSubstitute);
+                baseBomSubstituteService.save(baseBomSubstitute);
+            }
+
+        });
+        return ResponseMessage.ok();
     }
 }
