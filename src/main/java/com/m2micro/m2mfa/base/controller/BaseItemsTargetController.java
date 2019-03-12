@@ -78,7 +78,7 @@ public class BaseItemsTargetController {
     @ApiOperation(value="更新参考资料对应表")
     @UserOperationLog("更新参考资料对应表")
     public ResponseMessage<BaseItemsTarget> update(@RequestBody BaseItemsTarget baseItemsTarget){
-        return ResponseMessage.ok(baseItemsTargetService.saveEntity(baseItemsTarget));
+        return ResponseMessage.ok(baseItemsTargetService.updateEntity(baseItemsTarget));
     }
 
     /**
