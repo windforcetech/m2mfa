@@ -194,4 +194,11 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     List<MesMoScheduleModel> getScheduleModelForOutput(List<MesMoScheduleModel> list);
 
+    /**
+     * 获取排产单最大顺序
+     * @param machineId
+     * @return
+     */
+    Integer maxSequence(String machineId);
+
 }

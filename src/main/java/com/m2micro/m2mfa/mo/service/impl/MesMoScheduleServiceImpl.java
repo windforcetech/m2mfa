@@ -1154,6 +1154,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @param machineId
      * @return
      */
+    @Override
     public Integer maxSequence(String machineId){
         Integer max=1;
         String sql ="select MAX(sequence)  from mes_mo_schedule where  machine_id='"+machineId+"'  and flag !="+MoScheduleStatus.CLOSE.getKey()+"  and flag !="+MoScheduleStatus.FORCECLOSE.getKey()+"";
