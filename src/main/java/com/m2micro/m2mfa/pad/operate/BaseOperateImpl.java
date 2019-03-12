@@ -979,8 +979,8 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
      * @return
      */
     protected boolean isMesRecorWorkEnd(String rwId) {
-        MesRecordStaff mesRecordStaff = mesRecordStaffRepository.findByRwIdAndStartTimeNotNullAndEndTimeIsNull(rwId);
-        if(mesRecordStaff==null){
+       List< MesRecordStaff> mesRecordStaff = mesRecordStaffRepository.findByRwIdAndStartTimeNotNullAndEndTimeIsNull(rwId);
+        if(mesRecordStaff.isEmpty()){
             return true;
         }
         return false;

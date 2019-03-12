@@ -5,6 +5,7 @@ import com.m2micro.m2mfa.base.query.BasePartInstructionQuery;
 import com.m2micro.m2mfa.base.repository.BasePartInstructionRepository;
 import com.m2micro.m2mfa.base.service.BasePartInstructionService;
 import com.m2micro.m2mfa.base.vo.BasePartInstructionModel;
+import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -116,8 +117,13 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             "LEFT JOIN base_station bs ON bs.station_id = bpins.station_id\n" +
             "LEFT JOIN base_instruction bi ON bi.instruction_id = bpins.instruction_id\n" +
             "LEFT JOIN mes_part_route mpr ON mpr.part_id = bp.part_id\n" +
-            "LEFT JOIN mes_part_route_station mprs ON mprs.part_route_id = mpr.part_route_id and mprs.station_id=bpins.station_id where   \n ";
+            "LEFT JOIN mes_part_route_station mprs ON mprs.part_route_id = mpr.part_route_id and mprs.station_id=bpins.station_id where  bp.part_id='"+basePartInstruction.getPartId()+"' \n ";
+      RowMapper<BasePartInstructionModel> rowMapper = BeanPropertyRowMapper.newInstance(BasePartInstructionModel.class);
+      List<BasePartInstructionModel>basePartInstructionModels= jdbcTemplate.query(sql,rowMapper);
 
+      for(BasePartInstructionModel basePartInstructionModel : basePartInstructionModels){
+        MesPartRouteStation mesPartRouteStation = new MesPartRouteStation();
+      }
     }
 
 }

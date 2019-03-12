@@ -44,9 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 生产排程表表头 服务实现类
@@ -158,16 +156,54 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
     }
 
+    public void getRws(List<MesMoScheduleStaff> mesMoScheduleStaffs){
+        for( MesMoScheduleStaff mesMoScheduleStaff : mesMoScheduleStaffs){
+            List<MesRecordStaff>mesRecordStaffs =  mesRecordStaffRepository.findStaffId(mesMoScheduleStaff.getStaffId());
+            if(!mesRecordStaffs.isEmpty()){
+
+            }
+        }
+    }
 
     @Transactional
     @Override
     public void peopleDistributionsave(List<MesMoScheduleStaff> mesMoScheduleStaffs,List<MesMoScheduleStation> mesMoScheduleStations) {
-        for( MesMoScheduleStaff mesMoScheduleStaff : mesMoScheduleStaffs){
-            List<MesRecordStaff>mesRecordStaffs =  mesRecordStaffRepository.findStaffId(mesMoScheduleStaff.getStaffId());
-            if(!mesRecordStaffs.isEmpty()){
-                throw  new MMException(baseStaffService.findById(mesMoScheduleStaff.getStaffId()).orElse(null).getStaffName()+"已上工不可添加。");
+        Set<MesRecordStaff> mesRecordStaffSet = new HashSet<>();
+        for( MesMoScheduleStaff mesMoScheduleStaff : mesMoScheduleStaffs) {
+            List<MesRecordStaff> mesRecordStaffs = mesRecordStaffRepository.findStaffId(mesMoScheduleStaff.getStaffId());
+            String recrdstaffId = "";
+            if (!mesRecordStaffs.isEmpty()) {
+                for (MesRecordStaff mesRecordStaff : mesRecordStaffs) {
+                    //判断当前员工的工位是不是原有工位不进行任何处理
+                    MesRecordWork mesRecordWork = mesRecordWorkRepository.findById(mesRecordStaff.getRwId()).orElse(null);
+                    if (mesRecordStaff.getStaffId().equals(mesMoScheduleStaff.getStaffId()) && mesRecordStaff.getScheduleId().equals(mesMoScheduleStaff.getScheduleId()) && mesRecordWork.getStationId().equals(mesMoScheduleStaff.getStationId())) {
+                        recrdstaffId = mesRecordStaff.getId();
+                        continue;
+                    }
+                    throw new MMException(baseStaffService.findById(mesMoScheduleStaff.getStaffId()).orElse(null).getStaffName() + "已上工不可添加。");
+                }
+
             }
+            MesRecordWork mesRecordWork = mesRecordWorkRepository.selectMesRecordWork(mesMoScheduleStaff.getScheduleId(), mesMoScheduleStaff.getStationId());
+            if (mesRecordWork!=null) {
+                List<MesRecordStaff> byRwIdAndStaff = mesRecordStaffRepository.findByRwIdAndStartTimeNotNullAndEndTimeIsNull(mesRecordWork.getRwid());
+                //对已有工位进行下工
+                for (MesRecordStaff mesRecordStaff : byRwIdAndStaff) {
+                    if (recrdstaffId.equals("")) {
+                        if(!mesRecordStaffSet.contains(mesRecordStaff)){
+                            mesRecordStaff.setEndTime(new Date());
+                            mesRecordStaffRepository.save(mesRecordStaff);
+                        }
+
+                        continue;
+                    }
+                    mesRecordStaffSet.add(mesRecordStaff);
+                }
+            }
+
         }
+
+
         String ScheduleId= mesMoScheduleStaffs.get(0).getScheduleId();
         if(ScheduleId==null || mesMoScheduleRepository.findById(ScheduleId).orElse(null)==null){
             throw  new MMException("排产单ID有误。");
