@@ -46,5 +46,19 @@ public interface BaseItemsTargetService extends BaseService<BaseItemsTarget,Stri
      */
     TreeNode getTreeNode(String itemCode);
 
+    /**
+     * 保存
+     * @param baseItemsTarget
+     * @return
+     */
+    BaseItemsTarget saveEntity(BaseItemsTarget baseItemsTarget);
+
+    /**
+     * 修改
+     * @param baseItemsTarget
+     * @return
+     */
+    BaseItemsTarget updateEntity(BaseItemsTarget baseItemsTarget);
+
 
 }

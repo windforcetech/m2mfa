@@ -101,8 +101,8 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      * @return  影响行数
      */
     @Modifying
-    @Query("update MesMoSchedule m set m.machineId = ?1 where m.scheduleId = ?2")
-    Integer updateMachineIdByScheduleId(String machineId,String scheduleId);
+    @Query("update MesMoSchedule m set m.machineId = ?1 ,m.sequence=?2 where m.scheduleId = ?3")
+    Integer updateMachineIdByScheduleId(String machineId,Integer sequence, String scheduleId);
 
     /**
      * 获取当前机器正在生产的排产单

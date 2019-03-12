@@ -178,8 +178,10 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
             //如果排产单状态是初始或是已审核
             else if(MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())||
                     MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())){
+                //新机台上的最大顺序
+                Integer integer = mesMoScheduleService.maxSequence(scheduleMachineParaModel.getNewMachineId());
                 //直接更新机台id
-                mesMoScheduleRepository.updateMachineIdByScheduleId(scheduleMachineParaModel.getNewMachineId(),mesMoSchedule.getScheduleId());
+                mesMoScheduleRepository.updateMachineIdByScheduleId(scheduleMachineParaModel.getNewMachineId(),integer+1,mesMoSchedule.getScheduleId());
             }
             else {
                 //选中之后，排产单状态已发生改变，抛出异常
