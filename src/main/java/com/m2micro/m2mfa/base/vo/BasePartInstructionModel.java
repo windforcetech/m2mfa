@@ -19,6 +19,8 @@ public class BasePartInstructionModel extends BaseEntity implements Serializable
   private String id;
   @ApiModelProperty(value = "料件编号")
   private String partNo;
+  @ApiModelProperty(value = "料件Id")
+  private String partId;
   @ApiModelProperty(value = "品名")
   private String partName;
   @ApiModelProperty(value = "规格")
@@ -29,7 +31,11 @@ public class BasePartInstructionModel extends BaseEntity implements Serializable
   private String stationId;
   @ApiModelProperty(value = "指导书编号")
   private String instructionCode;
+  @ApiModelProperty(value = "指导书Id")
+  private String instructionId;
   @ApiModelProperty(value = "指导书名称")
+  private String instructionName;
+  @ApiModelProperty(value = "备注")
   private String desription;
   @ApiModelProperty(value = "版本")
   private String revsion;

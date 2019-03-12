@@ -6,6 +6,8 @@ import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.query.BasePartInstructionQuery;
 import com.m2micro.m2mfa.base.vo.BasePartInstructionModel;
 
+import java.util.List;
+
 /**
  * 作业指导书关联 服务类
  * @author chengshuhong
@@ -24,5 +26,5 @@ public interface BasePartInstructionService extends BaseService<BasePartInstruct
      * 获取详情
      * @param id
      */
-    void info(String id );
+    List<BasePartInstructionModel> info(String id );
 }

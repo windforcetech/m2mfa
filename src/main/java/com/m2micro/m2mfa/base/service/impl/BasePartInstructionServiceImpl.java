@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.m2micro.framework.commons.util.PageUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -95,35 +96,35 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
     }
 
     @Override
-    public void info(String id) {
+    public  List<BasePartInstructionModel> info(String id) {
         BasePartInstruction basePartInstruction = findById(id).orElse(null);
-       // MesPartRouteStation
+
         String sql ="SELECT\n" +
-            "  bpins.id id,\n" +
-            "	bp.part_no partNo ,\n" +
+            "	mps.id id ,\n" +
+            "	bp.part_no partNo  ,\n" +
             "	bp.`name` partName,\n" +
             "	bp.spec spec,\n" +
-            "  mprs.process_id processId,\n" +
-            "	bs.station_id stationId,\n" +
-            "	bi.instruction_code instructionCode,\n" +
-            "	bi.description desription,\n" +
+            "	bpi.part_id partId,\n" +
+            "	mps.process_id processId,\n" +
+            "	mps.station_id stationId,\n" +
+            "	bi.instruction_id instructionId ,\n" +
+            "	bi.instruction_name instructionName,\n" +
             "	bi.revsion revsion,\n" +
-            "	bpins.effective_date effectiveDate,\n" +
-            "	bpins.invalid_date invalidDate,\n" +
-            "	bpins.enabled enabled\n" +
-            " FROM\n" +
-            "	base_part_instruction bpins\n" +
-            "LEFT JOIN base_parts bp ON bpins.part_id = bp.part_id\n" +
-            "LEFT JOIN base_station bs ON bs.station_id = bpins.station_id\n" +
-            "LEFT JOIN base_instruction bi ON bi.instruction_id = bpins.instruction_id\n" +
-            "LEFT JOIN mes_part_route mpr ON mpr.part_id = bp.part_id\n" +
-            "LEFT JOIN mes_part_route_station mprs ON mprs.part_route_id = mpr.part_route_id and mprs.station_id=bpins.station_id where  bp.part_id='"+basePartInstruction.getPartId()+"' \n ";
+            "	bpi.effective_date effectiveDate,\n" +
+            "	bpi.invalid_date invalidDate,\n" +
+            "	bpi.description desription,\n" +
+            "	bpi.enabled enabled\n" +
+            "FROM\n" +
+            "	mes_part_route_station mps\n" +
+            "LEFT JOIN mes_part_route mpr ON mps.part_route_id = mpr.part_route_id\n" +
+            "LEFT JOIN base_part_instruction bpi ON bpi.part_id = mpr.part_id\n" +
+            "LEFT JOIN base_instruction bi ON bi.instruction_id = bpi.instruction_id\n" +
+            "LEFT JOIN base_parts bp ON bp.part_id = bpi.part_id\n" +
+            "WHERE\n" +
+            "	bpi.part_id = '"+basePartInstruction.getPartId()+"'";
       RowMapper<BasePartInstructionModel> rowMapper = BeanPropertyRowMapper.newInstance(BasePartInstructionModel.class);
       List<BasePartInstructionModel>basePartInstructionModels= jdbcTemplate.query(sql,rowMapper);
-
-      for(BasePartInstructionModel basePartInstructionModel : basePartInstructionModels){
-        MesPartRouteStation mesPartRouteStation = new MesPartRouteStation();
-      }
+      return basePartInstructionModels;
     }
 
 }

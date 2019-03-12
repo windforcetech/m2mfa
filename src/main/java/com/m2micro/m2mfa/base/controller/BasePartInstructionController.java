@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,9 +64,9 @@ public class BasePartInstructionController {
     @RequestMapping("/info/{id}")
     @ApiOperation(value="作业指导书关联详情")
     @UserOperationLog("作业指导书关联详情")
-    public ResponseMessage<BasePartInstruction> info(@PathVariable("id") String id){
-        BasePartInstruction basePartInstruction = basePartInstructionService.findById(id).orElse(null);
-        return ResponseMessage.ok(basePartInstruction);
+    public ResponseMessage<List<BasePartInstructionModel>> info(@PathVariable("id") String id){
+
+        return ResponseMessage.ok(basePartInstructionService.info(id));
     }
 
     /**
