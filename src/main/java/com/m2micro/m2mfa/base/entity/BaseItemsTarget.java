@@ -3,9 +3,12 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -25,7 +28,9 @@ public class BaseItemsTarget extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "父节点主键")
     private String itemId;
     @ApiModelProperty(value = "树形父节点")
+    @NotEmpty(message="父节点不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String treeParentId;
+    @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "显示名称")
     private String itemName;
     @ApiModelProperty(value = "写入值")

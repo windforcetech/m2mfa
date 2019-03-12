@@ -68,9 +68,7 @@ public class BaseItemsTargetController {
     @ApiOperation(value="保存参考资料对应表")
     @UserOperationLog("保存参考资料对应表")
     public ResponseMessage<BaseItemsTarget> save(@RequestBody BaseItemsTarget baseItemsTarget){
-        //ValidatorUtil.validateEntity(baseItemsTarget, AddGroup.class);
-        baseItemsTarget.setId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(baseItemsTargetService.save(baseItemsTarget));
+        return ResponseMessage.ok(baseItemsTargetService.saveEntity(baseItemsTarget));
     }
 
     /**
@@ -80,13 +78,7 @@ public class BaseItemsTargetController {
     @ApiOperation(value="更新参考资料对应表")
     @UserOperationLog("更新参考资料对应表")
     public ResponseMessage<BaseItemsTarget> update(@RequestBody BaseItemsTarget baseItemsTarget){
-        ValidatorUtil.validateEntity(baseItemsTarget, UpdateGroup.class);
-        BaseItemsTarget baseItemsTargetOld = baseItemsTargetService.findById(baseItemsTarget.getId()).orElse(null);
-        if(baseItemsTargetOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        PropertyUtil.copy(baseItemsTarget,baseItemsTargetOld);
-        return ResponseMessage.ok(baseItemsTargetService.save(baseItemsTargetOld));
+        return ResponseMessage.ok(baseItemsTargetService.saveEntity(baseItemsTarget));
     }
 
     /**
