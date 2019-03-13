@@ -1057,10 +1057,12 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @Override
     @Transactional
     public void save(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations) {
+
         String ScheduleId  = UUIDUtil.getUUID();
         checkschedule(mesMoSchedule, ScheduleId);
         //设置排产单编号
         setScheduleNo(mesMoSchedule);
+        mesMoSchedule.setScheduleId(ScheduleId);
         //保存排产单
         this.save(mesMoSchedule);
         //跟新工单信息
@@ -1128,19 +1130,25 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      */
     private void setScheduleNo(MesMoSchedule mesMoSchedule) {
         String scheduleNo = getScheduleNoByMoId(mesMoSchedule.getMoId());
-        mesMoSchedule.setScheduleNo(scheduleNo);
+        MesMoSchedule mesMoSchedule1 = findById(mesMoSchedule.getScheduleId()).orElse(null);
+        if(mesMoSchedule1 !=null){
+            //删除
+            String msg= deleteMesMoschedule(mesMoSchedule.getScheduleId(),"");
+            if(msg.trim().equals("")){
+            }else {
+                throw  new MMException("排产单已执行不可修改。");
+            }
+            mesMoSchedule.setScheduleNo(mesMoSchedule1.getScheduleNo());
+        }else {
+            mesMoSchedule.setScheduleNo(scheduleNo);
+        }
+
+
     }
 
     @Override
     public void updateMesMoSchedule(MesMoSchedule mesMoSchedule, List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleProcess> mesMoScheduleProcesses, List<MesMoScheduleStation> mesMoScheduleStations) {
-        //删除
-        String msg= deleteMesMoschedule(mesMoSchedule.getScheduleId(),"");
-        if(msg.trim().equals("")){
             save(mesMoSchedule,mesMoScheduleStaffs,mesMoScheduleProcesses,mesMoScheduleStations);
-        }else {
-            throw  new MMException("排产单已执行不可修改。");
-        }
-
     }
 
     /**
@@ -1149,7 +1157,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @param scheduleId
      */
     private void checkschedule(MesMoSchedule mesMoSchedule, String scheduleId) {
-        mesMoSchedule.setScheduleId(scheduleId);
+
         ValidatorUtil.validateEntity(mesMoSchedule, AddGroup.class);
         MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
         if(moDesc==null){
