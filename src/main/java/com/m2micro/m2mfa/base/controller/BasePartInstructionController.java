@@ -119,7 +119,12 @@ public class BasePartInstructionController {
         MesPartvo mesPartvos =mesPartRouteService.findparId(partid);
         BaseParts baseParts = basePartsService.findById(partid).orElse(null);
         map.put("baseParts",baseParts );
-        map.put("mesPartRouteStations",mesPartvos.getMesPartRouteStations() );
+        if(mesPartvos !=null && mesPartvos.getMesPartRouteStations() !=null){
+            map.put("mesPartRouteStations",mesPartvos.getMesPartRouteStations() );
+        }else {
+            map.put("mesPartRouteStations",null );
+        }
+
         return ResponseMessage.ok(map);
     }
 
