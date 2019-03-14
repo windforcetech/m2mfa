@@ -42,25 +42,30 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
     @Override
     public PageUtil<BasePartInstructionModel> list(BasePartInstructionQuery query) {
         String sql ="SELECT\n" +
-            "  bpins.id id,\n" +
-            "	bp.part_no partNo ,\n" +
+            "	bpi.id,\n" +
+            "	bp.part_no partNo,\n" +
             "	bp.`name` partName,\n" +
             "	bp.spec spec,\n" +
-            "  mprs.process_id processId,\n" +
-            "	bs.station_id stationId,\n" +
-            "	bi.instruction_code instructionCode,\n" +
-            "	bi.description desription,\n" +
+            "	bps.process_name processName,\n" +
+            "	bpi.part_id partId,\n" +
+            "	mps.process_id processId,\n" +
+            "	mps.station_id stationId,\n" +
+            "	bs.`name` stationName,\n" +
+            "	bi.instruction_id instructionId,\n" +
+            "	bi.instruction_name instructionName,\n" +
             "	bi.revsion revsion,\n" +
-            "	bpins.effective_date effectiveDate,\n" +
-            "	bpins.invalid_date invalidDate,\n" +
-            "	bpins.enabled enabled\n" +
-            " FROM\n" +
-            "	base_part_instruction bpins\n" +
-            "LEFT JOIN base_parts bp ON bpins.part_id = bp.part_id\n" +
-            "LEFT JOIN base_station bs ON bs.station_id = bpins.station_id\n" +
-            "LEFT JOIN base_instruction bi ON bi.instruction_id = bpins.instruction_id\n" +
-            "LEFT JOIN mes_part_route mpr ON mpr.part_id = bp.part_id\n" +
-            "LEFT JOIN mes_part_route_station mprs ON mprs.part_route_id = mpr.part_route_id and mprs.station_id=bpins.station_id where 1=1 \n ";
+            "	bpi.effective_date effectiveDate,\n" +
+            "	bpi.invalid_date invalidDate,\n" +
+            "	bpi.description desription,\n" +
+            "	bpi.enabled enabled\n" +
+            "FROM\n" +
+            "	base_part_instruction bpi\n" +
+            "LEFT JOIN base_station bs ON bs.station_id = bpi.station_id\n" +
+            "LEFT JOIN base_instruction bi ON bi.instruction_id = bpi.instruction_id\n" +
+            "LEFT JOIN base_parts bp ON bp.part_id = bpi.part_id\n" +
+            "LEFT JOIN mes_part_route mpr ON mpr.part_id = bpi.part_id\n" +
+            "LEFT JOIN mes_part_route_station mps ON mps.part_route_id = mpr.part_route_id\n" +
+            "LEFT JOIN base_process bps ON bps.process_id = mps.process_id WHERE  1=1 ";
             if(StringUtils.isNotEmpty(query.getPartNo())){
                 sql+=" and  bp.part_no='"+query.getPartNo()+"'\n";
             }
@@ -68,24 +73,27 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
                 sql+=" and bi.instruction_code='"+query.getInstructionCode()+"' \n";
             }
 
-        String Countsql ="SELECT\n" +
-            "  COUNT(*)\n" +
-            " FROM\n" +
-            "	base_part_instruction bpins\n" +
-            "LEFT JOIN base_parts bp ON bpins.part_id = bp.part_id\n" +
-            "LEFT JOIN base_station bs ON bs.station_id = bpins.station_id\n" +
-            "LEFT JOIN base_instruction bi ON bi.instruction_id = bpins.instruction_id\n" +
-            "LEFT JOIN mes_part_route mpr ON mpr.part_id = bp.part_id\n" +
-            "LEFT JOIN mes_part_route_station mprs ON mprs.part_route_id = mpr.part_route_id and mprs.station_id=bpins.station_id where 1=1 \n ";
+        String Countsql ="select COUNT(*) from base_part_instruction bpis where bpis.id in( SELECT\n" +
+            "bpi.id\n" +
+            "FROM\n" +
+            "	base_part_instruction bpi\n" +
+            "LEFT JOIN base_station bs ON bs.station_id = bpi.station_id\n" +
+            "LEFT JOIN base_instruction bi ON bi.instruction_id = bpi.instruction_id\n" +
+            "LEFT JOIN base_parts bp ON bp.part_id = bpi.part_id\n" +
+            "LEFT JOIN mes_part_route mpr ON mpr.part_id = bpi.part_id\n" +
+            "LEFT JOIN mes_part_route_station mps ON mps.part_route_id = mpr.part_route_id\n" +
+            "LEFT JOIN base_process bps ON bps.process_id = mps.process_id\n" +
+            "WHERE  1=1 ";
         if(StringUtils.isNotEmpty(query.getPartNo())){
             Countsql+=" and  bp.part_no='"+query.getPartNo()+"' \n";
         }
         if(StringUtils.isNotEmpty(query.getInstructionCode())){
             Countsql+=" and bi.instruction_code='"+query.getInstructionCode()+"' \n";
         }
-        sql+=" limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        sql+="  GROUP BY bpi.id   limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BasePartInstructionModel> rowMapper = BeanPropertyRowMapper.newInstance(BasePartInstructionModel.class);
         List<BasePartInstructionModel>basePartInstructionModels= jdbcTemplate.query(sql,rowMapper);
+        Countsql +="GROUP BY bpi.id )";
         long totalCount=0;
         try {
             totalCount  = jdbcTemplate.queryForObject(Countsql,Long.class);
@@ -100,14 +108,16 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
         BasePartInstruction basePartInstruction = findById(id).orElse(null);
 
         String sql ="SELECT\n" +
-            "	mps.id id ,\n" +
-            "	bp.part_no partNo  ,\n" +
+            "	bpi.id,\n" +
+            "	bp.part_no partNo,\n" +
             "	bp.`name` partName,\n" +
             "	bp.spec spec,\n" +
+            "	bps.process_name processName,\n" +
             "	bpi.part_id partId,\n" +
             "	mps.process_id processId,\n" +
             "	mps.station_id stationId,\n" +
-            "	bi.instruction_id instructionId ,\n" +
+            "	bs.`name` stationName,\n" +
+            "	bi.instruction_id instructionId,\n" +
             "	bi.instruction_name instructionName,\n" +
             "	bi.revsion revsion,\n" +
             "	bpi.effective_date effectiveDate,\n" +
@@ -115,13 +125,15 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             "	bpi.description desription,\n" +
             "	bpi.enabled enabled\n" +
             "FROM\n" +
-            "	mes_part_route_station mps\n" +
-            "LEFT JOIN mes_part_route mpr ON mps.part_route_id = mpr.part_route_id\n" +
-            "LEFT JOIN base_part_instruction bpi ON bpi.part_id = mpr.part_id\n" +
+            "	base_part_instruction bpi\n" +
+            "LEFT JOIN base_station bs ON bs.station_id = bpi.station_id\n" +
             "LEFT JOIN base_instruction bi ON bi.instruction_id = bpi.instruction_id\n" +
             "LEFT JOIN base_parts bp ON bp.part_id = bpi.part_id\n" +
+            "LEFT JOIN mes_part_route mpr ON mpr.part_id = bpi.part_id\n" +
+            "LEFT JOIN mes_part_route_station mps ON mps.part_route_id = mpr.part_route_id\n" +
+            "LEFT JOIN base_process bps ON bps.process_id = mps.process_id\n" +
             "WHERE\n" +
-            "	bpi.part_id = '"+basePartInstruction.getPartId()+"'";
+            "	bpi.part_id = '"+basePartInstruction.getPartId()+"'   GROUP BY bpi.id";
       RowMapper<BasePartInstructionModel> rowMapper = BeanPropertyRowMapper.newInstance(BasePartInstructionModel.class);
       List<BasePartInstructionModel>basePartInstructionModels= jdbcTemplate.query(sql,rowMapper);
       return basePartInstructionModels;

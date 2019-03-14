@@ -1,10 +1,13 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.m2mfa.base.entity.BaseInstruction;
 import com.m2micro.m2mfa.base.entity.BaseItems;
 import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.node.TreeNode;
+import com.m2micro.m2mfa.base.repository.BaseInstructionRepository;
 import com.m2micro.m2mfa.base.repository.BaseItemsRepository;
 import com.m2micro.m2mfa.base.repository.BaseItemsTargetRepository;
 import com.m2micro.m2mfa.base.service.BaseItemsService;
@@ -41,7 +44,8 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
     JPAQueryFactory queryFactory;
     @Autowired
     BaseItemsRepository baseItemsRepository;
-
+    @Autowired
+    BaseInstructionRepository baseInstructionRepository;
 
     public BaseItemsTargetRepository getRepository() {
         return baseItemsTargetRepository;
@@ -168,6 +172,28 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
         }
         PropertyUtil.copy(baseItemsTarget,baseItemsTargetOld);
         return save(baseItemsTargetOld);
+    }
+
+    @Override
+    public ResponseMessage delete(String[] ids) {
+        ResponseMessage responseMessage = ResponseMessage.ok();
+        List <BaseItemsTarget> ls = new ArrayList<>();
+        for(String id :ids){
+            List<BaseInstruction> byCategory = baseInstructionRepository.findByCategory(id);
+            BaseItemsTarget baseItemsTarget = findById(id).orElse(null);
+            if(byCategory.isEmpty()){
+                deleteById(id);
+            }else {
+                ls.add(baseItemsTarget);
+            }
+
+        }
+
+        if(!ls.isEmpty()){
+            String [] strings = ls.stream().map(BaseItemsTarget::getItemName).toArray(String[]::new);
+            responseMessage.setMessage("类型【"+String.join(",", strings)+"】被作业指导书引用");
+        }
+       return responseMessage;
     }
 
     /**

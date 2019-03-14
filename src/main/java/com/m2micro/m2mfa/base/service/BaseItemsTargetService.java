@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -59,6 +60,8 @@ public interface BaseItemsTargetService extends BaseService<BaseItemsTarget,Stri
      * @return
      */
     BaseItemsTarget updateEntity(BaseItemsTarget baseItemsTarget);
+
+    ResponseMessage  delete(String [] ids);
 
 
 }

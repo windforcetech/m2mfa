@@ -16,4 +16,6 @@ import java.util.List;
 public interface BaseInstructionRepository extends BaseRepository<BaseInstruction,String> {
 
   List<BaseInstruction>findByInstructionCodeAndRevsion(String instructionCode , Integer revsion );
+
+  List<BaseInstruction>findByCategory(String category);
 }

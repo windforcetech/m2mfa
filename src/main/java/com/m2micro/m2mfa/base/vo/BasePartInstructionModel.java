@@ -27,8 +27,12 @@ public class BasePartInstructionModel extends BaseEntity implements Serializable
   private String spec;
   @ApiModelProperty(value = "工序")
   private String processId;
+  @ApiModelProperty(value = "工序名称")
+  private String processName;
   @ApiModelProperty(value = "工位")
   private String stationId;
+  @ApiModelProperty(value = "工位名称")
+  private String stationName;
   @ApiModelProperty(value = "指导书编号")
   private String instructionCode;
   @ApiModelProperty(value = "指导书Id")

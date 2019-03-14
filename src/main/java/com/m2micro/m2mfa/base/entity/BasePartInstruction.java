@@ -5,9 +5,12 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * 作业指导书关联
@@ -28,8 +31,10 @@ public class BasePartInstruction extends BaseEntity implements Serializable {
     private String stationId;
     @ApiModelProperty(value = "指导书主键")
     private String instructionId;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
     @ApiModelProperty(value = "生效日期")
     private Date effectiveDate;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
     @ApiModelProperty(value = "失效日期")
     private Date invalidDate;
     @ApiModelProperty(value = "有效否")

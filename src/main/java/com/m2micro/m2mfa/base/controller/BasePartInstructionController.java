@@ -21,6 +21,7 @@ import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -75,10 +76,15 @@ public class BasePartInstructionController {
     @RequestMapping("/save")
     @ApiOperation(value="保存作业指导书关联")
     @UserOperationLog("保存作业指导书关联")
-    public ResponseMessage<BasePartInstruction> save(@RequestBody BasePartInstruction basePartInstruction){
-        ValidatorUtil.validateEntity(basePartInstruction, AddGroup.class);
-        basePartInstruction.setId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(basePartInstructionService.save(basePartInstruction));
+    @Transactional
+    public ResponseMessage save(@RequestBody List< BasePartInstruction>  basePartInstructions){
+        for(BasePartInstruction basePartInstruction :basePartInstructions){
+            ValidatorUtil.validateEntity(basePartInstruction, AddGroup.class);
+            basePartInstruction.setId(UUIDUtil.getUUID());
+            basePartInstructionService.save(basePartInstruction);
+        }
+
+        return ResponseMessage.ok();
     }
 
     /**
@@ -87,14 +93,13 @@ public class BasePartInstructionController {
     @RequestMapping("/update")
     @ApiOperation(value="更新作业指导书关联")
     @UserOperationLog("更新作业指导书关联")
-    public ResponseMessage<BasePartInstruction> update(@RequestBody BasePartInstruction basePartInstruction){
-        ValidatorUtil.validateEntity(basePartInstruction, UpdateGroup.class);
-        BasePartInstruction basePartInstructionOld = basePartInstructionService.findById(basePartInstruction.getId()).orElse(null);
-        if(basePartInstructionOld==null){
-            throw new MMException("数据库不存在该记录");
+    @Transactional
+    public ResponseMessage<BasePartInstruction> update(@RequestBody List< BasePartInstruction>  basePartInstructions){
+        for(BasePartInstruction basePartInstruction :basePartInstructions){
+
+            basePartInstructionService.save(basePartInstruction);
         }
-        PropertyUtil.copy(basePartInstruction,basePartInstructionOld);
-        return ResponseMessage.ok(basePartInstructionService.save(basePartInstructionOld));
+        return ResponseMessage.ok();
     }
 
     /**

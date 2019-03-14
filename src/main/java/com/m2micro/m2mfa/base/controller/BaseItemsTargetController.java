@@ -1,30 +1,26 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
-import com.m2micro.m2mfa.base.node.SelectNode;
-import com.m2micro.m2mfa.base.node.TreeNode;
-import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
-import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.common.util.ValidatorUtil;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
-import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
-import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.Api;
-import com.m2micro.m2mfa.common.util.UUIDUtil;
-import io.swagger.annotations.ApiOperation;
+import com.m2micro.m2mfa.base.entity.BaseInstruction;
 import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
-import org.springframework.web.bind.annotation.RestController;
+import com.m2micro.m2mfa.base.node.SelectNode;
+import com.m2micro.m2mfa.base.node.TreeNode;
+import com.m2micro.m2mfa.base.repository.BaseInstructionRepository;
+import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 /**
  * 参考资料对应表 前端控制器
@@ -87,9 +83,10 @@ public class BaseItemsTargetController {
     @RequestMapping("/delete")
     @ApiOperation(value="删除参考资料对应表")
     @UserOperationLog("删除参考资料对应表")
+    @Transactional
     public ResponseMessage delete(@RequestBody String[] ids){
-        baseItemsTargetService.deleteByIds(ids);
-        return ResponseMessage.ok();
+
+        return baseItemsTargetService.delete(ids);
     }
 
     /**
