@@ -961,13 +961,15 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
      */
     @Transactional
     protected  void endStationTime(String scheduleId,String processId ){
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(scheduleId).orElse(null);
+        IotMachineOutput iotMachineOutputByMachineId = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         String sql ="SELECT mrw.rwid FROM mes_record_work mrw WHERE mrw.schedule_id = '"+scheduleId+"' AND mrw.process_id = '"+processId+"' AND mrw.station_id != ( SELECT bs.station_id FROM base_station bs WHERE bs. CODE = '"+StationConstant.BOOT.getKey()+"' ) AND start_time IS NOT NULL AND end_time IS NULL";
             List<String> rwids = jdbcTemplate.queryForList(sql, String.class);
             if( !rwids.isEmpty()){
                 for(String rwid :rwids){
-                    sql ="update mes_record_staff  set end_time='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  where start_time is NOT NULL  and end_time is NULL and rw_id='"+rwid+"'";
+                    sql ="update mes_record_staff  set end_time='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  ,end_molds ='"+iotMachineOutputByMachineId.getOutput()+"'  where start_time is NOT NULL  and end_time is NULL and rw_id='"+rwid+"'";
                     jdbcTemplate.update(sql);
-                    sql ="update mes_record_work   set end_time='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  where start_time is NOT NULL  and end_time is NULL and rwid='"+rwid+"'";
+                    sql ="update mes_record_work   set end_time='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  ,end_molds ='"+iotMachineOutputByMachineId.getOutput()+"'  where start_time is NOT NULL  and end_time is NULL and rwid='"+rwid+"'";
                     jdbcTemplate.update(sql);
                 }
             }
