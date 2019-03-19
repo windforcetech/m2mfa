@@ -53,6 +53,7 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             "	bs.`name` stationName,\n" +
             "	bi.instruction_id instructionId,\n" +
             "	bi.instruction_name instructionName,\n" +
+            "	bi.instruction_code instructionCode,\n" +
             "	bi.revsion revsion,\n" +
             "	bpi.effective_date effectiveDate,\n" +
             "	bpi.invalid_date invalidDate,\n" +
@@ -119,6 +120,7 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             "	bs.`name` stationName,\n" +
             "	bi.instruction_id instructionId,\n" +
             "	bi.instruction_name instructionName,\n" +
+            "	bi.instruction_code instructionCode,\n" +
             "	bi.revsion revsion,\n" +
             "	bpi.effective_date effectiveDate,\n" +
             "	bpi.invalid_date invalidDate,\n" +
