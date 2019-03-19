@@ -7,7 +7,7 @@ server:
 
 spring:
   profiles:
-    active: dev
+    active: test
   jpa:
     hibernate:
       ddl-auto: update
@@ -38,17 +38,6 @@ m2mfa:
     processId: 9529213DBAEE4BFF838762D8B2665D35 #(注塑成型工艺id)排产单ID找模具ID是只找注塑成型工序的模具
   pad:
     changeTime: 360  #交班间隙时间
-  demo:
-    qtyPerDay: 1800 #每台机器日生产量基数
-    machineNum: 10  #机器数量
-    moUnit: 10000 #工单随机单位(万)
-    moTargetStart: 1  #工单目标量随机范围开始值
-    moTargetEnd: 5  #工单目标量随机范围结束值
-    time: 14  #相隔时间(两周)
-    mimAmount: 10000  #排产单最小量
-    moDelayStart: 40 #//随机生成标准工时最小值
-    moTdelayEnd: 42 #随机生成标准工时最大值
-    moWorkTime: 01:00~08:00,08:00~11:30,13:00~18:00,19:30~23:59
 file:
   baseDir:
 labServer:
@@ -57,5 +46,3 @@ labServer:
 
 
 
-logging:
-  file: demo.log

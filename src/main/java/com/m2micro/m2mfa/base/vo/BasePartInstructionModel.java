@@ -40,7 +40,7 @@ public class BasePartInstructionModel extends BaseEntity implements Serializable
   @ApiModelProperty(value = "指导书名称")
   private String instructionName;
   @ApiModelProperty(value = "备注")
-  private String desription;
+  private String description;
   @ApiModelProperty(value = "版本")
   private String revsion;
   @ApiModelProperty(value = "生效日期")

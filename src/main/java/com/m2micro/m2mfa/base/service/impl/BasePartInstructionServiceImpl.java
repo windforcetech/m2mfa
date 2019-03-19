@@ -56,7 +56,7 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             "	bi.revsion revsion,\n" +
             "	bpi.effective_date effectiveDate,\n" +
             "	bpi.invalid_date invalidDate,\n" +
-            "	bpi.description desription,\n" +
+            "	bpi.description description,\n" +
             "	bpi.enabled enabled\n" +
             "FROM\n" +
             "	base_part_instruction bpi\n" +
@@ -122,7 +122,7 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             "	bi.revsion revsion,\n" +
             "	bpi.effective_date effectiveDate,\n" +
             "	bpi.invalid_date invalidDate,\n" +
-            "	bpi.description desription,\n" +
+            "	bpi.description description,\n" +
             "	bpi.enabled enabled\n" +
             "FROM\n" +
             "	base_part_instruction bpi\n" +
