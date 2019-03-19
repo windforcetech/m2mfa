@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/factory_application?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
+    url: jdbc:mysql://192.168.1.132:3306/factory_application?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
     username: root
-    password: root
+    password:
     druid:
       max-active: 10
       min-idle: 2
@@ -18,8 +18,6 @@ spring:
 m2miot:
   client:
     url: http://192.168.1.111:8082
-    queue-name: real.time.data.dev
-
 file:
   baseDir: /home/test001/m2m_mes/files
 labServer:
