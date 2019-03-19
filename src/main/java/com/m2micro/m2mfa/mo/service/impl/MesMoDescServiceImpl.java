@@ -137,7 +137,24 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                             "LEFT JOIN base_route_desc brd ON brd.route_id = md.route_id\n" +
                             "LEFT JOIN base_process bpro ON bpro.process_id = md.input_process_id\n" +
                             "LEFT JOIN base_process bpr ON bpr.process_id = md.output_process_id\n" +
-                            "LEFT JOIN base_customer bc ON bc.customer_id = md.customer_id";
+                            "LEFT JOIN base_customer bc ON bc.customer_id = md.customer_id\n" +
+                            "WHERE\n" +
+                                "	1 = 1 ";
+
+
+        if(StringUtils.isNotEmpty(query.getMoNumber())){
+            countSql = countSql+" and md.mo_number like '%"+query.getMoNumber()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getCloseFlag())){
+            countSql = countSql+" and md.close_flag = "+query.getCloseFlag();
+        }
+        if (query.getStartTime() != null) {
+            countSql = countSql+" and md.plan_input_date >= "+ "'"+DateUtil.format(query.getStartTime())+"'" ;
+        }
+        if (query.getEndTime() != null) {
+            countSql = countSql+" and md.plan_input_date <= "+"'"+DateUtil.format(query.getEndTime())+"'" ;
+        }
+
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
