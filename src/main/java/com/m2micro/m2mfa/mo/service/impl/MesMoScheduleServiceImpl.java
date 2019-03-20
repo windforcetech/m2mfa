@@ -748,35 +748,26 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         String sql = "SELECT\n" +
             "	*\n" +
             "FROM\n" +
-            "	base_process bp\n" +
-            "LEFT JOIN mes_part_route_process brd ON bp.process_id = brd.processid\n" +
-            "WHERE\n" +
-            "	bp.process_id IN (\n" +
-            "		SELECT\n" +
-            "			mprp.processid\n" +
+            "	base_process bp,\n" +
+            "	(\n" +
+            "		SELECT DISTINCT\n" +
+            "			mprp.processid,\n" +
+            "			mprp.setp\n" +
             "		FROM\n" +
-            "			mes_part_route_process mprp\n" +
+            "			mes_part_route_process mprp,\n" +
+            "			mes_part_route mpr,\n" +
+            "			mes_mo_desc mmd\n" +
             "		WHERE\n" +
-            "			mprp.partrouteid IN (\n" +
-            "				SELECT\n" +
-            "					mpr.part_route_id\n" +
-            "				FROM\n" +
-            "					mes_part_route mpr\n" +
-            "				WHERE\n" +
-            "					mpr.part_id IN (\n" +
-            "						SELECT\n" +
-            "							mmd.part_id\n" +
-            "						FROM\n" +
-            "							mes_mo_desc mmd\n" +
-            "						WHERE\n" +
-            "							mo_id = '"+moId+"'\n" +
-            "					)\n" +
-            "			)\n" +
-            "	)\n" +
-            "GROUP BY\n" +
-            "	bp.process_id\n" +
+            "			mprp.partrouteid = mpr.part_route_id\n" +
+            "		AND mpr.part_id = mmd.part_id\n" +
+            "		AND mmd.mo_id = '"+moId+"'\n" +
+            "		ORDER BY\n" +
+            "			mprp.setp DESC\n" +
+            "	) r\n" +
+            "WHERE\n" +
+            "	bp.process_id = r.processid\n" +
             "ORDER BY\n" +
-            "	brd.setp";
+            "	r.setp";
         return jdbcTemplate.query(sql,baseprocessrm);
     }
 
