@@ -99,7 +99,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
     Date  startTime = startTime(rwId,PadStaffUtil.getStaff().getStaffId());
     BigDecimal standardOutput = new BigDecimal(0);
     BigDecimal actualOutput  = new BigDecimal(0);
-    float rate=0;
+    long rate=0;
     if(startTime !=null){
       BigDecimal standardHours = mesPartRouteStation.getStandardHours();
       BigDecimal bdhours = new BigDecimal((new Date().getTime()-startTime.getTime())/1000);
@@ -115,14 +115,22 @@ public class PadHomeServiceImpl  implements PadHomeService {
       }
 
        //达成率
-       rate = (float)actualOutput.longValue()/standardOutput.longValue();
+       rate =actualOutput.longValue()/standardOutput.longValue();
     }
 
     Integer partInput = partInput(rwId);
     Integer partOutput = 0;
     return PadHomeModel.builder().staffCode(baseStaff.getCode()).staffName(baseStaff.getStaffName()).staffDepartmentName(organizationService.findByUUID(baseStaff.getDepartmentId()).getDepartmentName())
         .staffShiftName(baseShift.getName()).staffOnTime(startTime).standardOutput(standardOutput.longValue()).actualOutput(actualOutput.longValue()).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
-        .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate( getReach(rate)).build();
+        .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate( rate*100).build();
+  }
+
+
+  public static void main(String args[]) {
+    BigDecimal standardOutput = new BigDecimal(5);
+    BigDecimal actualOutput  = new BigDecimal(50);
+   long  rate = actualOutput.longValue()/standardOutput.longValue();
+   System.out.println(rate*100);
   }
 
   @Override
@@ -141,22 +149,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
     return padHomePara.getTotalamount()>actualOutput.longValue() ? true : false;
   }
 
-  /**
-   * 获取达成效
-   * @param rate
-   * @return
-   */
-  private long getReach(float rate) {
-    NumberFormat nt = NumberFormat.getPercentInstance();
-    nt.setMinimumFractionDigits(0);
-    long reach =0;
-    try {
-      reach= Long.parseLong(nt.format(rate).replace("%","").split(",")[0]);
-        }catch (Exception  e){
 
-    }
-    return reach;
-  }
 
 
   /**
