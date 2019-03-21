@@ -99,7 +99,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
     Date  startTime = startTime(rwId,PadStaffUtil.getStaff().getStaffId());
     BigDecimal standardOutput = new BigDecimal(0);
     BigDecimal actualOutput  = new BigDecimal(0);
-    double rate=0;
+    double rate=0.00;
     if(startTime !=null){
       BigDecimal standardHours = mesPartRouteStation.getStandardHours();
       BigDecimal bdhours = new BigDecimal((new Date().getTime()-startTime.getTime())/1000);
@@ -115,7 +115,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
       }
 
        //达成率
-       rate =actualOutput.doubleValue()/standardOutput.doubleValue();
+      rate = actualOutput.doubleValue()/standardOutput.longValue();
     }
 
     Integer partInput = partInput(rwId);
@@ -127,8 +127,8 @@ public class PadHomeServiceImpl  implements PadHomeService {
 
 
   public static void main(String args[]) {
-    BigDecimal standardOutput = new BigDecimal(23);
-    BigDecimal actualOutput  = new BigDecimal(200);
+    BigDecimal standardOutput = new BigDecimal(5);
+    BigDecimal actualOutput  = new BigDecimal(50);
    double  rate = actualOutput.doubleValue()/standardOutput.doubleValue();
    System.out.println((long)( rate*100));
   }
