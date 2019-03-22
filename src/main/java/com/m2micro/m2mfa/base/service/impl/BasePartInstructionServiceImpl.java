@@ -42,7 +42,7 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
     @Override
     public PageUtil<BasePartInstructionModel> list(BasePartInstructionQuery query) {
         String sql ="SELECT\n" +
-            "	bpi.id,\n" +
+            "	distinct bpi.id,\n" +
             "	bp.part_no partNo,\n" +
             "	bp.`name` partName,\n" +
             "	bp.spec spec,\n" +
@@ -65,7 +65,7 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             "LEFT JOIN base_instruction bi ON bi.instruction_id = bpi.instruction_id\n" +
             "LEFT JOIN base_parts bp ON bp.part_id = bpi.part_id\n" +
             "LEFT JOIN mes_part_route mpr ON mpr.part_id = bpi.part_id\n" +
-            "LEFT JOIN mes_part_route_station mps ON mps.part_route_id = mpr.part_route_id\n" +
+            "LEFT JOIN mes_part_route_station mps ON mps.part_route_id = mpr.part_route_id  and mps.station_id=bpi.station_id \n" +
             "LEFT JOIN base_process bps ON bps.process_id = mps.process_id WHERE  1=1 ";
             if(StringUtils.isNotEmpty(query.getPartNo())){
                 sql+=" and  bp.part_no='"+query.getPartNo()+"'\n";
@@ -75,14 +75,14 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             }
 
         String Countsql ="select COUNT(*) from base_part_instruction bpis where bpis.id in( SELECT\n" +
-            "bpi.id\n" +
+            "distinct bpi.id\n" +
             "FROM\n" +
             "	base_part_instruction bpi\n" +
             "LEFT JOIN base_station bs ON bs.station_id = bpi.station_id\n" +
             "LEFT JOIN base_instruction bi ON bi.instruction_id = bpi.instruction_id\n" +
             "LEFT JOIN base_parts bp ON bp.part_id = bpi.part_id\n" +
             "LEFT JOIN mes_part_route mpr ON mpr.part_id = bpi.part_id\n" +
-            "LEFT JOIN mes_part_route_station mps ON mps.part_route_id = mpr.part_route_id\n" +
+            "LEFT JOIN mes_part_route_station mps ON mps.part_route_id = mpr.part_route_id and mps.station_id=bpi.station_id\n" +
             "LEFT JOIN base_process bps ON bps.process_id = mps.process_id\n" +
             "WHERE  1=1 ";
         if(StringUtils.isNotEmpty(query.getPartNo())){
@@ -91,10 +91,10 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
         if(StringUtils.isNotEmpty(query.getInstructionCode())){
             Countsql+=" and bi.instruction_code='"+query.getInstructionCode()+"' \n";
         }
-        sql+="  GROUP BY bpi.id   limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        sql+="  limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BasePartInstructionModel> rowMapper = BeanPropertyRowMapper.newInstance(BasePartInstructionModel.class);
         List<BasePartInstructionModel>basePartInstructionModels= jdbcTemplate.query(sql,rowMapper);
-        Countsql +="GROUP BY bpi.id )";
+        Countsql +=")";
         long totalCount=0;
         try {
             totalCount  = jdbcTemplate.queryForObject(Countsql,Long.class);
@@ -132,10 +132,10 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             "LEFT JOIN base_instruction bi ON bi.instruction_id = bpi.instruction_id\n" +
             "LEFT JOIN base_parts bp ON bp.part_id = bpi.part_id\n" +
             "LEFT JOIN mes_part_route mpr ON mpr.part_id = bpi.part_id\n" +
-            "LEFT JOIN mes_part_route_station mps ON mps.part_route_id = mpr.part_route_id\n" +
+            "LEFT JOIN mes_part_route_station mps ON mps.part_route_id = mpr.part_route_id  and mps.station_id=bpi.station_id\n" +
             "LEFT JOIN base_process bps ON bps.process_id = mps.process_id\n" +
             "WHERE\n" +
-            "	bpi.part_id = '"+basePartInstruction.getPartId()+"'   GROUP BY bpi.id";
+            "	bpi.part_id = '"+basePartInstruction.getPartId()+"' ";
       RowMapper<BasePartInstructionModel> rowMapper = BeanPropertyRowMapper.newInstance(BasePartInstructionModel.class);
       List<BasePartInstructionModel>basePartInstructionModels= jdbcTemplate.query(sql,rowMapper);
       return basePartInstructionModels;

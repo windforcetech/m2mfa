@@ -43,7 +43,32 @@ public class MesMoScheduleAbsenceServiceImpl implements MesMoScheduleAbsenceServ
     private IotMachineOutputService iotMachineOutputService;
     @Override
     public List<Absence> mesMoScheduleAbsence(String staffId) {
-        String sql ="SELECT bm. CODE machineCode, mms.schedule_no scheduleNo,mms.schedule_id scheduleId, bp.part_no partNo, bps.process_name processName, bsson. NAME stationName, mmss.create_on createTime, bsft. NAME shiftName FROM mes_mo_schedule_staff mmss LEFT JOIN mes_mo_schedule mms ON mmss.schedule_id = mms.schedule_id LEFT JOIN base_staff bs ON bs.staff_id = mmss.staff_id LEFT JOIN base_machine bm ON bm.machine_id = mms.machine_id LEFT JOIN organization o ON bm.department_id = o.uuid LEFT JOIN mes_mo_desc mmd ON mmd.mo_id = mms.mo_id LEFT JOIN base_parts bp ON bp.part_id = mmd.part_id LEFT JOIN base_process bps ON bps.process_id = mmss.process_id LEFT JOIN base_station bsson ON bsson.station_id = mmss.station_id LEFT JOIN base_shift bsft ON bsft.shift_id = mmss.shift_id WHERE   mmss.enabled=1   AND ( mms.flag = "+ MoStatus.AUDITED.getKey()+" OR mms.flag = "+MoStatus.SCHEDULED.getKey()+" )  AND mmss.actual_start_time IS NULL OR ( mmss.actual_start_time IS NOT NULL AND mmss.actual_end_time IS NULL ) AND  mmss.staff_id = '"+staffId+"'  GROUP BY mms.schedule_id ";
+        //String sql ="SELECT bm. CODE machineCode, mms.schedule_no scheduleNo,mms.schedule_id scheduleId, bp.part_no partNo, bps.process_name processName, bsson. NAME stationName, mmss.create_on createTime, bsft. NAME shiftName FROM mes_mo_schedule_staff mmss LEFT JOIN mes_mo_schedule mms ON mmss.schedule_id = mms.schedule_id LEFT JOIN base_staff bs ON bs.staff_id = mmss.staff_id LEFT JOIN base_machine bm ON bm.machine_id = mms.machine_id LEFT JOIN organization o ON bm.department_id = o.uuid LEFT JOIN mes_mo_desc mmd ON mmd.mo_id = mms.mo_id LEFT JOIN base_parts bp ON bp.part_id = mmd.part_id LEFT JOIN base_process bps ON bps.process_id = mmss.process_id LEFT JOIN base_station bsson ON bsson.station_id = mmss.station_id LEFT JOIN base_shift bsft ON bsft.shift_id = mmss.shift_id WHERE   mmss.enabled=1   AND ( mms.flag = "+ MoStatus.AUDITED.getKey()+" OR mms.flag = "+MoStatus.SCHEDULED.getKey()+" )  AND mmss.actual_start_time IS NULL OR ( mmss.actual_start_time IS NOT NULL AND mmss.actual_end_time IS NULL ) AND  mmss.staff_id = '"+staffId+"'  ";
+      String sql ="SELECT\n" +
+          "	bm. CODE machineCode,\n" +
+          "	mms.schedule_no scheduleNo,\n" +
+          "	mms.schedule_id scheduleId,\n" +
+          "	bp.part_no partNo,\n" +
+          "	bps.process_name processName,\n" +
+          "	bsson. NAME stationName,\n" +
+          "	mmss.create_on createTime,\n" +
+          "	bsft. NAME shiftName\n" +
+          "FROM\n" +
+          "	mes_mo_schedule_staff mmss\n" +
+          "LEFT JOIN mes_mo_schedule mms ON mmss.schedule_id = mms.schedule_id\n" +
+          "LEFT JOIN base_staff bs ON bs.staff_id = mmss.staff_id\n" +
+          "LEFT JOIN base_machine bm ON bm.machine_id = mms.machine_id\n" +
+          "LEFT JOIN organization o ON bm.department_id = o.uuid\n" +
+          "LEFT JOIN mes_mo_desc mmd ON mmd.mo_id = mms.mo_id\n" +
+          "LEFT JOIN base_parts bp ON bp.part_id = mmd.part_id\n" +
+          "LEFT JOIN base_process bps ON bps.process_id = mmss.process_id\n" +
+          "LEFT JOIN base_station bsson ON bsson.station_id = mmss.station_id\n" +
+          "LEFT JOIN base_shift bsft ON bsft.shift_id = mmss.shift_id\n" +
+          "WHERE\n" +
+          "	mmss.enabled = 1\n" +
+          "AND (mms.flag = 1 OR mms.flag = 2)\n" +
+          "AND mmss.actual_start_time IS NULL\n" +
+          "AND mmss.staff_id = '"+staffId+"'";
         RowMapper rm = BeanPropertyRowMapper.newInstance(Absence.class);
         return jdbcTemplate.query(sql,rm);
     }
