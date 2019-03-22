@@ -781,30 +781,23 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         //获取全部工位
         List<BaseStation> baseStationsAll = getBaseStations(baseProcess.getProcessId());
         RowMapper baseStationrm = BeanPropertyRowMapper.newInstance(BaseStation.class);
-        String sql;
-        sql ="SELECT\n" +
+        String sql="SELECT DISTINCT\n" +
             "	bs.*,\n" +
             "	bps.step step,\n" +
             "  mmss.is_station\n" +
             "FROM\n" +
-            "	base_station bs\n" +
-            "LEFT JOIN base_process_station bps ON bs.station_id = bps.station_id\n" +
-            "LEFT JOIN  mes_mo_schedule_staff  mmss ON bs.station_id =  mmss.station_id\n" +
+            "	mes_part_route_station nmprs,\n" +
+            "	base_process_station bps,\n" +
+            "	base_station bs,\n" +
+            "mes_mo_schedule_staff mmss\n" +
             "WHERE\n" +
-            "	bs.station_id IN (\n" +
-            "		SELECT DISTINCT\n" +
-            "			nmprs.station_id\n" +
-            "		FROM\n" +
-            "			mes_part_route_station nmprs\n" +
-            "		WHERE\n" +
-            "			nmprs.process_id ='"+baseProcess.getProcessId()+"'\n" +
-            "	)\n" +
-            "and mmss.schedule_id='"+scheduleId+"'\n" +
-            "GROUP BY\n" +
-            "	bs.station_id\n" +
+            "	nmprs.station_id = bs.station_id\n" +
+            "AND bs.station_id = bps.station_id\n" +
+            "AND bps.process_id=nmprs.process_id\n" +
+            "AND nmprs.process_id = '"+baseProcess.getProcessId()+"'\n" +
+            "AND mmss.schedule_id='"+scheduleId+"'\n" +
             "ORDER BY\n" +
             "	step";
-
         //排产单对应的工位
         List<BaseStation> baseStations = jdbcTemplate.query(sql,baseStationrm);
         for(int i =0;i<baseStationsAll.size();i++){
@@ -827,24 +820,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private List<BaseStation> getBaseStations(String processId) {
         RowMapper baseStationrm = BeanPropertyRowMapper.newInstance(BaseStation.class);
         String sql;
-        sql ="SELECT\n" +
-            "	bs.*,\n" +
-            "	bps.step step,\n" +
-            "  false isStation\n" +
+        sql ="SELECT DISTINCT\n" +
+            "	bs.station_id,\n" +
+            "	bs.*, FALSE isStation,\n" +
+            "	bps.step step\n" +
             "FROM\n" +
+            "	mes_part_route_station nmprs,\n" +
+            "	base_process_station bps,\n" +
             "	base_station bs\n" +
-            "LEFT JOIN base_process_station bps ON bs.station_id = bps.station_id\n" +
             "WHERE\n" +
-            "	bs.station_id IN (\n" +
-            "		SELECT DISTINCT\n" +
-            "			nmprs.station_id\n" +
-            "		FROM\n" +
-            "			mes_part_route_station nmprs\n" +
-            "		WHERE\n" +
-            "			nmprs.process_id ='"+processId+"'\n" +
-            "	)\n" +
-            "GROUP BY\n" +
-            "	bs.station_id\n" +
+            "	nmprs.station_id = bs.station_id\n" +
+            "AND bs.station_id = bps.station_id\n" +
+            "AND bps.process_id=nmprs.process_id\n" +
+            "AND nmprs.process_id = '"+processId+"'\n" +
             "ORDER BY\n" +
             "	step";
         return jdbcTemplate.query(sql,baseStationrm);
