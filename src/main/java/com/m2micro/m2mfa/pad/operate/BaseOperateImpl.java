@@ -189,13 +189,13 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         //不良品数(0:置灰,1:不置灰)
         operationInfo.setDefectiveProducts("1");
         //提报异常(0:置灰,1:不置灰)
-        operationInfo.setReportingAnomalies("1");
+        operationInfo.setReportingAnomalies("0");
         //作业输入(0:置灰,1:不置灰)
         operationInfo.setJobInput("1");
         //作业指导(0:置灰,1:不置灰)
-        operationInfo.setHomeworkGuidance("1");
+        operationInfo.setHomeworkGuidance("0");
         //操作历史(0:置灰,1:不置灰)
-        operationInfo.setOperationHistory("1");
+        operationInfo.setOperationHistory("0");
         //结束作业(0:置灰,1:不置灰)
         operationInfo.setFinishHomework("1");
     }
