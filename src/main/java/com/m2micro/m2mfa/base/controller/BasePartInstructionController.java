@@ -145,8 +145,9 @@ public class BasePartInstructionController {
         if(!byPartId.isEmpty()){
             msg.setResult(false);
             msg.setMessage("该料件编号不可重复添加！！！");
+        }else {
+          msg.setResult(true);
         }
-        msg.setResult(true);
         return  msg;
     }
 
