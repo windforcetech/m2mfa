@@ -35,16 +35,7 @@ public class BaseDefectServiceImpl implements BaseDefectService {
         return baseDefectRepository;
     }
 
-    @Override
-    public PageUtil<BaseDefect> list(Query query) {
-        QBaseDefect qBaseDefect = QBaseDefect.baseDefect;
-        JPAQuery<BaseDefect> jq = queryFactory.selectFrom(qBaseDefect);
 
-        jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-        List<BaseDefect> list = jq.fetch();
-        long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
-    }
 
     @Override
     public PageUtil<BaseDefect> listQuery(BaseDefectQuery query) {

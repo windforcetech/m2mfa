@@ -12,13 +12,7 @@ import com.m2micro.m2mfa.base.query.BaseDefectQuery;
  * @since 2019-03-05
  */
 public interface BaseDefectService extends BaseService<BaseDefect,String> {
-    /**
-     * 分页查询
-     * @param query
-     *         查询参数
-     * @return  分页信息
-     */
-    PageUtil<BaseDefect> list(Query query);
+
 
     PageUtil<BaseDefect>listQuery(BaseDefectQuery query);
 
