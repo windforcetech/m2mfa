@@ -18,4 +18,6 @@ public interface BaseInstructionRepository extends BaseRepository<BaseInstructio
   List<BaseInstruction>findByInstructionCodeAndRevsion(String instructionCode , Integer revsion );
 
   List<BaseInstruction>findByCategory(String category);
+
+  List<BaseInstruction>findByInstructionCode(String instructionCode);
 }

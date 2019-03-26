@@ -19,6 +19,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.mapping.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 作业指导书 服务实现类
@@ -73,6 +77,14 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
     @Override
     @Transactional
     public void  save(BaseInstruction baseInstruction, MultipartFile file) {
+        //获取原有的版本，有的话全部为“无效”，
+
+        List<BaseInstruction> byInstructionCode = baseInstructionRepository.findByInstructionCode(baseInstruction.getInstructionCode());
+        List<BaseInstruction> collect = byInstructionCode.stream().filter(i -> {
+            i.setEnabled(false);
+            return true;
+        }).collect(Collectors.toList());
+        baseInstructionRepository.saveAll(collect);
 
         if(!baseInstructionRepository.findByInstructionCodeAndRevsion(baseInstruction.getInstructionCode(),baseInstruction.getRevsion()).isEmpty()){
             throw  new MMException("文件编号："+baseInstruction.getInstructionCode()+",版本："+baseInstruction.getRevsion()+" 已存在");
