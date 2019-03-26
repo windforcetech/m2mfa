@@ -26,7 +26,7 @@ public class BasePartsQuery extends Query {
     private String category;
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
-
-
+    @ApiModelProperty(value = "类型")
+    private String  typesof;
 
 }

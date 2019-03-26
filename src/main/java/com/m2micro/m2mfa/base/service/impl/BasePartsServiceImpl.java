@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BasePartsQuery;
 import com.m2micro.m2mfa.base.repository.BasePackRepository;
+import com.m2micro.m2mfa.base.repository.BasePartInstructionRepository;
 import com.m2micro.m2mfa.base.repository.BasePartsRepository;
 import com.m2micro.m2mfa.base.service.BasePackService;
 import com.m2micro.m2mfa.base.service.BasePartsService;
@@ -13,6 +14,7 @@ import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -27,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * 料件基本资料 服务实现类
  * @author liaotao
@@ -46,7 +50,8 @@ public class BasePartsServiceImpl implements BasePartsService {
     BaseItemsTargetServiceImpl baseItemsTargetService;
     @Autowired
     BasePackRepository basePackRepository;
-
+    @Autowired
+    private BasePartInstructionRepository basePartInstructionRepository;
     public BasePartsRepository getRepository() {
         return basePartsRepository;
     }
@@ -146,6 +151,17 @@ public class BasePartsServiceImpl implements BasePartsService {
             }
 
         }
+        List<String> ids = new ArrayList<>();
+        String collect="";
+        if(StringUtils.isNotEmpty(query.getTypesof())){
+            List<BasePartInstruction> all = basePartInstructionRepository.findAll();
+             collect = all.stream().filter(v->{
+                boolean flag = !ids.contains(v.getPartId());
+                ids.add(v.getPartId());
+                return flag;
+            }).map(e -> e.getPartId()).collect(Collectors.joining(",","'","'"));
+            sql+=" and bp.part_id NOT in("+collect+")";
+       }
         sql = sql + " order by bp.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
@@ -167,6 +183,10 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(query.getEnabled()!=null){
             countSql = countSql+" and bp.enabled = "+query.getEnabled()+"";
         }
+        if(StringUtils.isNotEmpty(query.getTypesof())){
+            countSql +=" and bp.part_id NOT in("+collect+")";
+        }
+
         if(StringUtils.isNotEmpty(query.getCategory())){
             BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
             //不等于全部
