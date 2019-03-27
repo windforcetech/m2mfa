@@ -8,6 +8,7 @@ import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BasePartInstruction;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.query.BasePartInstructionQuery;
+import com.m2micro.m2mfa.base.repository.BasePartInstructionRepository;
 import com.m2micro.m2mfa.base.service.BasePartInstructionService;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.base.vo.BasePartInstructionModel;
@@ -47,6 +48,8 @@ public class BasePartInstructionController {
     MesPartRouteService mesPartRouteService;
     @Autowired
     BasePartsService basePartsService;
+    @Autowired
+    private BasePartInstructionRepository basePartInstructionRepository;
 
     /**
      * 列表
@@ -78,6 +81,7 @@ public class BasePartInstructionController {
     @UserOperationLog("保存作业指导书关联")
     @Transactional
     public ResponseMessage save(@RequestBody List< BasePartInstruction>  basePartInstructions){
+
         for(BasePartInstruction basePartInstruction :basePartInstructions){
             ValidatorUtil.validateEntity(basePartInstruction, AddGroup.class);
             basePartInstruction.setId(UUIDUtil.getUUID());
@@ -132,6 +136,19 @@ public class BasePartInstructionController {
 
         return ResponseMessage.ok(map);
     }
-
+    @RequestMapping("/isPartid")
+    @ApiOperation(value="判断料件编号是否已经添加")
+    @UserOperationLog("判断料件编号是否已经添加")
+    public ResponseMessage<Boolean> isPartid(String partid){
+        ResponseMessage msg= ResponseMessage.ok();
+        List<BasePartInstruction> byPartId = basePartInstructionRepository.findByPartId(partid);
+        if(!byPartId.isEmpty()){
+            msg.setResult(false);
+            msg.setMessage("该料件编号不可重复添加！！！");
+        }else {
+          msg.setResult(true);
+        }
+        return  msg;
+    }
 
 }
