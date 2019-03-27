@@ -45,6 +45,8 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
     BasePartInstructionRepository basePartInstructionRepository;
     @Autowired
     JPAQueryFactory queryFactory;
+    @Autowired
+    BaseItemsTargetServiceImpl baseItemsTargetService;
 
     public BaseInstructionRepository getRepository() {
         return baseInstructionRepository;
@@ -69,9 +71,12 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
        }
         jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
         List<BaseInstruction> list = jq.fetch();
-
+        List<BaseInstruction> collect = list.stream().filter(e -> {
+            e.setCategoryName(baseItemsTargetService.findById(e.getCategory()).orElse(null).getItemName());
+            return true;
+        }).collect(Collectors.toList());
         long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        return PageUtil.of(collect,totalCount,query.getSize(),query.getPage());
     }
 
     @Override
