@@ -10,13 +10,13 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * 在制记录表
+ * 在制记录表历史
  * @author liaotao
- * @since 2019-01-02
+ * @since 2019-03-27
  */
 @Entity
-@ApiModel(value="MesRecordWipRec对象", description="在制记录表")
-public class MesRecordWipRec implements Serializable {
+@ApiModel(value="MesRecordWipLog对象", description="在制记录表历史")
+public class MesRecordWipLog implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @ApiModelProperty(value = "主键")
@@ -80,14 +80,6 @@ public class MesRecordWipRec implements Serializable {
     private String wipNextProcess;
     @ApiModelProperty(value = "排产单id")
     private String scheduleId;
-
-    public String getScheduleId() {
-        return scheduleId;
-    }
-
-    public void setScheduleId(String scheduleId) {
-        this.scheduleId = scheduleId;
-    }
 
     public String getId() {
         return id;
@@ -290,6 +282,13 @@ public class MesRecordWipRec implements Serializable {
     }
     public void setWipNextProcess(String wipNextProcess) {
         this.wipNextProcess = wipNextProcess;
+    }
+
+    public String getScheduleId() {
+        return scheduleId;
+    }
+    public void setScheduleId(String scheduleId) {
+        this.scheduleId = scheduleId;
     }
 
 

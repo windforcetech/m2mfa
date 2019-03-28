@@ -1,6 +1,8 @@
 package com.m2micro.m2mfa.pad.operate;
 
+import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
@@ -13,10 +15,12 @@ import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
+import com.m2micro.m2mfa.mo.entity.MesMoScheduleStation;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleStationRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleStaffService;
@@ -102,13 +106,15 @@ public class BaseOperateImpl implements BaseOperate {
     BaseProcessService baseProcessService;
     @Autowired
     BaseItemsTargetService baseItemsTargetService;
+    @Autowired
+    MesMoScheduleStationRepository mesMoScheduleStationRepository;
 
-protected MesMoSchedule findMesMoScheduleById(String scheduleId){
+    protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return mesMoScheduleRepository.findById(scheduleId).orElse(null);
     }
 
 
-@Override
+    @Override
     public OperationInfo getOperationInfo(String scheduleId, String stationId) {
 
         if(StringUtils.isEmpty(scheduleId)){
@@ -137,11 +143,15 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         setOtherByWork(operationInfo);
         //5.根据提报异常标志设置其他按钮是否置灰
         setOtherByAbnormal(operationInfo);
+        //6.根据工序设置作业输入是否置灰
+        MesMoScheduleStation mesMoScheduleStation = mesMoScheduleStationRepository.findByScheduleIdAndStationId(scheduleId, stationId);
+        BaseProcess baseProcess = baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null);
+        setOtherByProcess(operationInfo,baseProcess);
         return operationInfo;
     }
 
 
-/**
+    /**
      * 根据上下工标志设置其他按钮是否置灰
      * @param operationInfo
      */
@@ -164,7 +174,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
      * 根据提报异常标志设置其他按钮是否置灰
      * @param operationInfo
      */
@@ -178,8 +188,21 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         }
     }
 
+    /**
+     * 根据提报异常标志设置其他按钮是否置灰
+     * @param operationInfo
+     */
+    private void setOtherByProcess(OperationInfo operationInfo,BaseProcess baseProcess) {
+        BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseProcess.getCategory()).orElse(null);
+        //一般作业站不置灰
+        if(BaseItemsTargetConstant.SYSCOMMON.equalsIgnoreCase(baseItemsTarget.getItemValue())){
+            //作业输入(0:置灰,1:不置灰)
+            operationInfo.setJobInput("1");
+        }
+    }
 
-/**
+
+    /**
      * 初始化，默认全部都有
      * @param operationInfo
      */
@@ -193,7 +216,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         //提报异常(0:置灰,1:不置灰)
         operationInfo.setReportingAnomalies("0");
         //作业输入(0:置灰,1:不置灰)
-        operationInfo.setJobInput("1");
+        operationInfo.setJobInput("0");
         //作业指导(0:置灰,1:不置灰)
         operationInfo.setHomeworkGuidance("0");
         //操作历史(0:置灰,1:不置灰)
@@ -203,7 +226,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
      * 获取当前员工在当前排产单的当前岗位上的上工最新时间信息
      * @param staffId
      * @param scheduleId
@@ -233,7 +256,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
      *获取在当前排产单的当前岗位上的提报异常最新信息
      * @param scheduleId
      * @param stationId
@@ -256,7 +279,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
      * 设置上下工标志
      * @param recordWorks
      * @param operationInfo
@@ -293,7 +316,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
      * 设置提报异常标志
      * @param recordAbnormals
      *
@@ -328,7 +351,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-@Override
+    @Override
     @Transactional
     public StartWorkPara startWork(PadPara obj) {
         MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(obj.getScheduleId()).orElse(null);
@@ -357,7 +380,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
     * 上工模具添加
     * @param moId
     * @param rwId
