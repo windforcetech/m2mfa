@@ -22,6 +22,7 @@ import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteStationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +52,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
   @Autowired
   private BaseItemsTargetService baseItemsTargetService;
   @Autowired
+  @Qualifier("secondaryJdbcTemplate")
   private JdbcTemplate jdbcTemplate;
   @Autowired
   private IotMachineOutputService iotMachineOutputService;

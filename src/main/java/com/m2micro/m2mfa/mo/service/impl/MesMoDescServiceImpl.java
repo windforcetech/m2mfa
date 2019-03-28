@@ -22,6 +22,7 @@ import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -43,6 +44,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     @Autowired
     JPAQueryFactory queryFactory;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesPartRouteRepository mesPartRouteRepository;

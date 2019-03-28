@@ -4,6 +4,7 @@ import com.m2micro.m2mfa.base.entity.BaseRouteDef;
 import com.m2micro.m2mfa.base.entity.BaseRouteDesc;
 import com.m2micro.m2mfa.base.repository.BaseRouteDefRepository;
 import com.m2micro.m2mfa.base.service.BaseRouteDefService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -29,6 +30,7 @@ public class BaseRouteDefServiceImpl implements BaseRouteDefService {
     JPAQueryFactory queryFactory;
 
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
 
     public BaseRouteDefRepository getRepository() {

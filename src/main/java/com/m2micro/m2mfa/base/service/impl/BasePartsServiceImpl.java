@@ -45,6 +45,7 @@ public class BasePartsServiceImpl implements BasePartsService {
     @Autowired
     MesMoDescRepository mesMoDescRepository;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
     @Autowired
     BaseItemsTargetServiceImpl baseItemsTargetService;

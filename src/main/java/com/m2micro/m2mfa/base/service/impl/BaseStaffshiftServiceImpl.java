@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.base.repository.BaseStaffshiftRepository;
 import com.m2micro.m2mfa.base.service.BaseStaffshiftService;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -36,6 +37,7 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
     @Autowired
     JPAQueryFactory queryFactory;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
 
     public BaseStaffshiftRepository getRepository() {

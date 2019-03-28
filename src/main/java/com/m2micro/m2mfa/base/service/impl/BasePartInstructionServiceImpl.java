@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.base.service.BasePartInstructionService;
 import com.m2micro.m2mfa.base.vo.BasePartInstructionModel;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -31,6 +32,7 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
     @Autowired
     JPAQueryFactory queryFactory;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
 
     @Override

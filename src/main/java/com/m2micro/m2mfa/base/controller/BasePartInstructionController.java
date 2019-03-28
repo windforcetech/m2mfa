@@ -48,8 +48,7 @@ public class BasePartInstructionController {
     MesPartRouteService mesPartRouteService;
     @Autowired
     BasePartsService basePartsService;
-    @Autowired
-    private BasePartInstructionRepository basePartInstructionRepository;
+
 
     /**
      * 列表
@@ -136,19 +135,6 @@ public class BasePartInstructionController {
 
         return ResponseMessage.ok(map);
     }
-    @RequestMapping("/isPartid")
-    @ApiOperation(value="判断料件编号是否已经添加")
-    @UserOperationLog("判断料件编号是否已经添加")
-    public ResponseMessage<Boolean> isPartid(String partid){
-        ResponseMessage msg= ResponseMessage.ok();
-        List<BasePartInstruction> byPartId = basePartInstructionRepository.findByPartId(partid);
-        if(!byPartId.isEmpty()){
-            msg.setResult(false);
-            msg.setMessage("该料件编号不可重复添加！！！");
-        }else {
-          msg.setResult(true);
-        }
-        return  msg;
-    }
+
 
 }

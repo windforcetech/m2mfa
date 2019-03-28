@@ -40,6 +40,7 @@ import com.m2micro.m2mfa.record.service.MesRecordWorkService;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -63,6 +64,7 @@ public class BaseOperateImpl implements BaseOperate {
     @Autowired
     PadConstant padConstant;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesRecordWorkService mesRecordWorkService;

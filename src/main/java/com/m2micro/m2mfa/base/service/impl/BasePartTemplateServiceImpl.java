@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.base.service.BasePartTemplateService;
 import com.m2micro.m2mfa.base.vo.BasePartTemplateObj;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -28,6 +29,7 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
     JPAQueryFactory queryFactory;
 
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
 
     public BasePartTemplateRepository getRepository() {

@@ -4,6 +4,7 @@ import com.m2micro.m2mfa.base.repository.BaseBomDefRepository;
 import com.m2micro.m2mfa.base.service.BaseBomDefService;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class BaseBomDefServiceImpl implements BaseBomDefService {
     @Autowired
     JPAQueryFactory queryFactory;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
 
     public BaseBomDefRepository getRepository() {

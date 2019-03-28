@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.base.service.BaseBomDescService;
 import com.m2micro.m2mfa.base.service.BaseBomSubstituteService;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class BaseBomSubstituteServiceImpl implements BaseBomSubstituteService {
     @Autowired
     JPAQueryFactory queryFactory;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
 
     public BaseBomSubstituteRepository getRepository() {

@@ -16,6 +16,6 @@ public interface BasePartInstructionRepository extends BaseRepository<BasePartIn
 
   List<BasePartInstruction>findByInstructionId(String instructionId );
 
-  List<BasePartInstruction>findByPartId(String partId);
+
 
 }

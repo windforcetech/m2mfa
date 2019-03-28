@@ -19,6 +19,7 @@ import com.m2micro.m2mfa.mo.query.MesMachineQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -47,6 +48,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     @Autowired
     JPAQueryFactory queryFactory;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
     @Autowired
     IotMachineOutputService iotMachineOutputService;
