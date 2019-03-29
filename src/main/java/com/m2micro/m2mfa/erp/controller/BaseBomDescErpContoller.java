@@ -31,8 +31,8 @@ public class BaseBomDescErpContoller {
   @RequestMapping("/erpBasebomdesc")
   @ApiOperation(value="料件物料清单erp")
   @UserOperationLog("料件物料清单erp")
-  public ResponseMessage erpBasebomdesc( ){
-    baseBomDescErpService.erpBasebomdesc();
+  public ResponseMessage erpBasebomdesc(String partNo,String  distinguish ){
+    baseBomDescErpService.erpBasebomdesc(partNo,distinguish);
     return ResponseMessage.ok();
   }
 

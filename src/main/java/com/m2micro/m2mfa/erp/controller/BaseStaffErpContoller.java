@@ -29,8 +29,8 @@ public class BaseStaffErpContoller {
   @RequestMapping("/erpBasestaff")
   @ApiOperation(value="人员erp")
   @UserOperationLog("人员erp")
-  public ResponseMessage erpBasestaff( ){
-    baseStaffErpService.erpBasestaff();
+  public ResponseMessage erpBasestaff(String code ){
+    baseStaffErpService.erpBasestaff(code);
     return ResponseMessage.ok();
   }
 

@@ -29,8 +29,8 @@ public class BasePartsErpContoller {
   @RequestMapping("/erpParts")
   @ApiOperation(value="料件erp")
   @UserOperationLog("料件erp")
-  public ResponseMessage erpParts( ){
-    basePartsErpService.erpParts();
+  public ResponseMessage erpParts(String partNos){
+    basePartsErpService.erpParts(partNos);
     return ResponseMessage.ok();
   }
 

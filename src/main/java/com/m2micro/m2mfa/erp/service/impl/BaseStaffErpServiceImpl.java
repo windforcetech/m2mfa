@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.erp.entity.GenFile;
 import com.m2micro.m2mfa.erp.entity.ImaFile;
 import com.m2micro.m2mfa.erp.service.BaseStaffErpService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -16,7 +17,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BaseStaffErpServiceImpl implements BaseStaffErpService {
@@ -33,9 +36,14 @@ public class BaseStaffErpServiceImpl implements BaseStaffErpService {
 
 
   @Override
-  public boolean erpBasestaff() {
+  public boolean erpBasestaff(String code) {
 
-    String sql ="select * from GEN_FILE ";
+    String sql ="select * from GEN_FILE WHERE  1=1 ";
+    if(StringUtils.isNotEmpty(code)){
+      String[] split = code.split(",");
+      String join = Arrays.stream(split).collect(Collectors.joining("','","'","'"));
+      sql+=" and gen01 in("+join+")";
+    }
     RowMapper rm = BeanPropertyRowMapper.newInstance(GenFile.class);
     List<GenFile> list = primaryJdbcTemplate.query(sql, rm);
     List<BaseStaff> baseStaffs = new ArrayList<>();

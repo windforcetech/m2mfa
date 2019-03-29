@@ -29,8 +29,8 @@ public class MesMoDescErpContoller {
   @RequestMapping("/erpMesMoDesc")
   @ApiOperation(value="工单erp")
   @UserOperationLog("工单erp")
-  public ResponseMessage erpMesMoDesc( ){
-    mesMoDescErpService.erpMesMoDesc();
+  public ResponseMessage erpMesMoDesc(String moNumber ){
+    mesMoDescErpService.erpMesMoDesc(moNumber);
     return ResponseMessage.ok();
   }
 

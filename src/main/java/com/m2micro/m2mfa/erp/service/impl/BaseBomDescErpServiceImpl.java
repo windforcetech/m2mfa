@@ -17,6 +17,7 @@ import com.m2micro.m2mfa.erp.entity.BmbFile;
 import com.m2micro.m2mfa.erp.entity.ImaFile;
 import com.m2micro.m2mfa.erp.service.BaseBomDescErpService;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -50,15 +51,28 @@ public class BaseBomDescErpServiceImpl implements BaseBomDescErpService {
   BaseBomDefService baseBomDefService;
   @Override
   @Transactional
-  public boolean erpBasebomdesc() {
-    String sql ="select * from BMA_FILE ";
+  public boolean erpBasebomdesc(String partNo,String  distinguish ) {
+    String sql ="select * from BMA_FILE  where 1=1 ";
+    if(StringUtils.isNotEmpty(partNo)){
+    sql+=" and  bma01='"+partNo+"' ";
+    }
+
+    if(StringUtils.isNotEmpty(distinguish)){
+      sql+=" and bma06='"+distinguish+"'";
+    }
     RowMapper rm = BeanPropertyRowMapper.newInstance(BmaFile.class);
     List<BmaFile> list = primaryJdbcTemplate.query(sql, rm);
 
-     sql ="select * from BMB_FILE ";
+     sql ="select * from BMB_FILE WHERE  1=1 ";
+    if(StringUtils.isNotEmpty(partNo)){
+      sql+=" and  bmb03='"+partNo+"' ";
+    }
+
+    if(StringUtils.isNotEmpty(distinguish)){
+      sql+=" and bmb29='"+distinguish+"'";
+    }
     RowMapper bmbrm = BeanPropertyRowMapper.newInstance(BmbFile.class);
     List<BmbFile> bmbFiles = primaryJdbcTemplate.query(sql, bmbrm);
-
 
     List<BaseBomDef> baseBomDefs = new ArrayList<>();
     List<BaseBomDesc> baseBomDescs = new ArrayList<>();
@@ -93,7 +107,7 @@ public class BaseBomDescErpServiceImpl implements BaseBomDescErpService {
       baseBomDef.setId(UUIDUtil.getUUID());
       baseBomDef.setBomId(bomid);
       baseBomDef.setSequence(bmbFile.getBmb02());
-      baseBomDef.setPartId(bmbFile.getBmb03());
+      baseBomDef.setPartId(basePartsRepository.findByPartNo(bmbFile.getBmb03()).get(0).getPartId());
       baseBomDef.setDistinguish(bmbFile.getBmb29());
       baseBomDef.setEffectiveDate(bmbFile.getBmb04());
       baseBomDef.setInvalidDate(bmbFile.getBmb05());

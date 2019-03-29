@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.base.service.BaseUnitService;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.erp.entity.ImaFile;
 import com.m2micro.m2mfa.erp.service.BasePartsErpService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -17,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BasePartsErpServiceImpl implements BasePartsErpService {
@@ -34,8 +37,13 @@ public class BasePartsErpServiceImpl implements BasePartsErpService {
   BaseUnitRepository baseUnitRepository;
   @Override
   @Transactional
-  public boolean erpParts() {
-    String sql ="select * from IMA_FILE ";
+  public boolean erpParts(String partNos) {
+    String sql ="select * from IMA_FILE  where 1=1 ";
+    if(StringUtils.isNotEmpty(partNos)){
+      String[] split = partNos.split(",");
+      String join = Arrays.stream(split).collect(Collectors.joining("','","'","'"));
+      sql+=" and ima01 in("+join+")";
+    }
     RowMapper rm = BeanPropertyRowMapper.newInstance(ImaFile.class);
     List<ImaFile> list = primaryJdbcTemplate.query(sql, rm);
     List<BaseParts> listparts = new ArrayList<>();

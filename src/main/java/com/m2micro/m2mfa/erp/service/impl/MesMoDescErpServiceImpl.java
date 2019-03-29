@@ -15,6 +15,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.service.MesMoBomService;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -25,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MesMoDescErpServiceImpl implements MesMoDescErpService {
@@ -46,12 +49,21 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
 
   @Override
   @Transactional
-  public boolean erpMesMoDesc() {
-    String sql ="select * from SFB_FILE";
+  public boolean erpMesMoDesc(String moNumber) {
+    String sql ="select * from SFB_FILE  where 1=1 ";
+    if(StringUtils.isNotEmpty(moNumber)){
+      String[] split = moNumber.split(",");
+      String join = Arrays.stream(split).collect(Collectors.joining("','","'","'"));
+          sql +="  and sfb01 in("+moNumber+") ";
+    }
     RowMapper rm = BeanPropertyRowMapper.newInstance(SfbFile.class);
     List<SfbFile> list = primaryJdbcTemplate.query(sql, rm);
 
-    sql ="select * from SFA_FILE";
+    sql ="select * from SFA_FILE WHERE  1=1";
+
+    if(StringUtils.isNotEmpty(moNumber)){
+      sql +="  and sfa01='"+moNumber+"' ";
+    }
     RowMapper sfa_filerowmapper = BeanPropertyRowMapper.newInstance(SfaFile.class);
     List<SfaFile> sfaFiles = primaryJdbcTemplate.query(sql, sfa_filerowmapper);
 
