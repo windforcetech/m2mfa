@@ -161,7 +161,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //拷贝数据到历史记录
         MesRecordWipLog mesRecordWipRecLog = new MesRecordWipLog();
         try {
-            BeanUtils.copyProperties(mesRecordWipRec,mesRecordWipRecLog);
+            BeanUtils.copyProperties(mesRecordWipRecLog,mesRecordWipRec);
         } catch (Exception e) {
             e.printStackTrace();
             throw new MMException("在制记录异常");
