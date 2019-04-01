@@ -20,5 +20,5 @@ import java.util.Map;
 public interface BaseBomDefService extends BaseService<BaseBomDef, String> {
 
      void deleteByBomIds(List<String> bomIds);
-
+     List<BaseBomDef> findAllByBomId(String bomid);
 }

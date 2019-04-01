@@ -41,4 +41,8 @@ public class BaseBomDescServiceImpl implements BaseBomDescService {
     }
 
 
+    @Override
+    public List<BaseBomDesc> findAllByPartId(String partid) {
+        return baseBomDescRepository.findAllByPartId(partid);
+    }
 }

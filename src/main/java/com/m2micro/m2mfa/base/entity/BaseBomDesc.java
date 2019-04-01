@@ -66,12 +66,10 @@ public class BaseBomDesc extends BaseEntity implements Serializable {
 
     @ApiModelProperty(value = "审核日期", example = "2018-11-21 12:00:00")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @LastModifiedDate
-    @Column(nullable = false)
+//    @LastModifiedDate
     private Date checkOn;
 
     @ApiModelProperty(value = "审核用户主键")
-    @LastModifiedBy
     private String checkBy;
 
     @ApiModelProperty(value = "明细")

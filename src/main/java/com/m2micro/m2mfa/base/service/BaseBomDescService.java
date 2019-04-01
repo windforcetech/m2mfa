@@ -19,6 +19,6 @@ import java.util.Map;
  */
 public interface BaseBomDescService extends BaseService<BaseBomDesc, String> {
 
-
+    List<BaseBomDesc> findAllByPartId(String partid);
 
 }

@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.controller;
 
 import com.google.common.collect.Lists;
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -49,6 +50,8 @@ public class BaseBomDescController {
     BaseBomDefService baseBomDefService;
     @Autowired
     BaseBomSubstituteService baseBomSubstituteService;
+    @Autowired
+    BasePartsService basePartsService;
 
     /**
      * 列表
@@ -76,6 +79,7 @@ public class BaseBomDescController {
     @PostMapping("/save")
     @ApiOperation(value = "保存Bom")
     @UserOperationLog("保存Bom")
+    @Transactional
     public ResponseMessage<List<BaseBomDef>> save(@RequestBody BaseBomDesc staffShiftObj) throws ParseException {
         ValidatorUtil.validateEntity(staffShiftObj, AddGroup.class);
         QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
@@ -237,4 +241,141 @@ public class BaseBomDescController {
         });
         return ResponseMessage.ok();
     }
+
+    /**
+     * 删除替代维护
+     */
+    @PostMapping("/deletesubstitute")
+    @ApiOperation(value = "删除bom 替代维护表")
+    @UserOperationLog("删除bom 替代维护表")
+    @Transactional
+    public ResponseMessage deletesubstitute(@RequestBody String[] ids) {
+        baseBomSubstituteService.deleteByIds(ids);
+        return ResponseMessage.ok();
+    }
+
+    /**
+     * 删除替代维护
+     */
+    @PostMapping("/check")
+    @ApiOperation(value = "审核bom")
+    @UserOperationLog("审核bom")
+    public ResponseMessage check(String id) {
+        BaseBomDesc baseBomDesc = baseBomDescService.findById(id).orElse(null);
+        if (baseBomDesc == null)
+            return ResponseMessage.error("不存在记录");
+        baseBomDesc.setCheckFlag(true);
+        baseBomDesc.setCheckOn(new Date());
+        baseBomDesc.setCheckBy(TokenInfo.getTokenInfo(null).getUserID());
+        baseBomDescService.updateById(id, baseBomDesc);
+        return ResponseMessage.ok();
+    }
+
+    /**
+     * 展示BOM
+     */
+    @GetMapping("/showbom")
+    @ApiOperation(value = "展示bom")
+    @UserOperationLog("展示bom")
+    public ResponseMessage showbom(String id) {
+        BaseBomDesc baseBomDesc = baseBomDescService.findById(id).get();
+        // QBaseBomDef qbaseBomDef = QBaseBomDef.baseBomDef;
+
+        List<BaseBomDef> allByBomId = baseBomDefService.findAllByBomId(baseBomDesc.getBomId());
+        baseBomDesc.setBomDefObjList(allByBomId);
+        recursive(allByBomId);
+        return ResponseMessage.ok(baseBomDesc);
+    }
+
+    public List<BaseBomDesc> recursive(List<BaseBomDef> baseBomDefList) {
+        List<BaseBomDesc> baseBomDescslist = new ArrayList<>();
+        baseBomDefList.forEach(baseBomDef -> {
+            List<BaseBomDesc> allByPartId = baseBomDescService.findAllByPartId(baseBomDef.getPartId());
+            baseBomDef.setBomDescObjList(allByPartId);
+            allByPartId.forEach(baseBomDesc -> {
+                List<BaseBomDef> allByBomId = baseBomDefService.findAllByBomId(baseBomDesc.getBomId());
+                baseBomDesc.setBomDefObjList(allByBomId);
+                recursive(allByBomId);
+            });
+
+        });
+        return baseBomDescslist;
+    }
+
+    /**
+     * 展示BOM
+     */
+    @GetMapping("/showbomonly")
+    @ApiOperation(value = "展示bomonly")
+    @UserOperationLog("展示bomonly")
+    public ResponseMessage showbomonly(String id) {
+        BaseBomDesc baseBomDesc = baseBomDescService.findById(id).get();
+        ShowBom showBom = descToShowBomObj(baseBomDesc);
+
+
+        List<BaseBomDef> allByBomId = baseBomDefService.findAllByBomId(baseBomDesc.getBomId());
+
+        showBom.setShowBomList(recursiveonly(allByBomId));
+        return ResponseMessage.ok(showBom);
+    }
+
+    public List<ShowBom> recursiveonly(List<BaseBomDef> baseBomDefList) {
+        List<ShowBom> showBomDefList = new ArrayList<>();
+        baseBomDefList.forEach(baseBomDef -> {
+            ShowBom showBomDef = defToShowBomObj(baseBomDef);
+
+
+            List<BaseBomDesc> allByPartId = baseBomDescService.findAllByPartId(baseBomDef.getPartId());
+
+            List<ShowBom> showBomDescList = new ArrayList<>();
+
+            allByPartId.forEach(baseBomDesc -> {
+
+                ShowBom showBomDesc = descToShowBomObj(baseBomDesc);
+                showBomDescList.add(showBomDesc);
+
+                List<BaseBomDef> allByBomId = baseBomDefService.findAllByBomId(baseBomDesc.getBomId());
+                showBomDesc.setShowBomList(recursiveonly(allByBomId));
+            });
+
+            showBomDef.setShowBomList(showBomDescList);
+            showBomDefList.add(showBomDef);
+        });
+        return showBomDefList;
+    }
+
+    public ShowBom descToShowBomObj(BaseBomDesc baseBomDesc) {
+        ShowBom showBom = new ShowBom();
+        showBom.setPartId(baseBomDesc.getPartId());
+        showBom.setDistinguish(baseBomDesc.getDistinguish());
+        BaseParts baseParts = basePartsService.selectpartNo(baseBomDesc.getPartId());
+        showBom.setName(baseParts.getName());
+        showBom.setSpec(baseParts.getSpec());
+        showBom.setEffectiveDate(baseBomDesc.getEffectiveDate());
+        showBom.setInvalidDate(baseBomDesc.getInvalidDate());
+        showBom.setUnit(baseParts.getSentUnit());
+        showBom.setLossRate(baseParts.getProductionLossRate());
+        showBom.setSource(baseParts.getSource());
+
+        return showBom;
+
+    }
+
+    public ShowBom defToShowBomObj(BaseBomDef baseBomDef) {
+        ShowBom showBom = new ShowBom();
+        showBom.setPartId(baseBomDef.getPartId());
+        showBom.setDistinguish(baseBomDef.getDistinguish());
+        BaseParts baseParts = basePartsService.selectpartNo(baseBomDef.getPartId());
+        showBom.setName(baseParts.getName());
+        showBom.setSpec(baseParts.getSpec());
+        showBom.setEffectiveDate(baseBomDef.getEffectiveDate());
+        showBom.setInvalidDate(baseBomDef.getInvalidDate());
+        showBom.setUnit(baseBomDef.getUnit());
+        showBom.setLossRate(baseBomDef.getLossRate());
+        showBom.setSource(baseParts.getSource());
+
+        return showBom;
+
+    }
+
 }

@@ -13,11 +13,13 @@ import org.springframework.data.annotation.LastModifiedDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 料件物料清单明细
@@ -69,6 +71,18 @@ public class BaseBomDef extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     @Size(max = 200, message = "描述不能大于200位", groups = {AddGroup.class, UpdateGroup.class})
     private String description;
+
+    @ApiModelProperty(value = "(通过料件编号关联)desc明细")
+    @Transient
+    private List<BaseBomDesc> bomDescObjList;
+
+    public List<BaseBomDesc> getBomDescObjList() {
+        return bomDescObjList;
+    }
+
+    public void setBomDescObjList(List<BaseBomDesc> bomDescObjList) {
+        this.bomDescObjList = bomDescObjList;
+    }
 
     public String getId() {
         return id;

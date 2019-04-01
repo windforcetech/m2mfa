@@ -16,5 +16,7 @@ import java.util.List;
 @Repository
 public interface BaseBomDefRepository extends BaseRepository<BaseBomDef, String> {
 
-     void deleteAllByBomIdIsIn(List<String> ids);
+    void deleteAllByBomIdIsIn(List<String> ids);
+
+    List<BaseBomDef> findAllByBomId(String bomid);
 }

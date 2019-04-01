@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.m2mfa.base.entity.BaseBomDef;
 import com.m2micro.m2mfa.base.repository.BaseBomDefRepository;
 import com.m2micro.m2mfa.base.service.BaseBomDefService;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -34,5 +35,10 @@ public class BaseBomDefServiceImpl implements BaseBomDefService {
     @Override
     public void deleteByBomIds(List<String> bomIds) {
         baseBomDefRepository.deleteAllByBomIdIsIn(bomIds);
+    }
+
+    @Override
+    public List<BaseBomDef> findAllByBomId(String bomid) {
+        return baseBomDefRepository.findAllByBomId(bomid);
     }
 }
