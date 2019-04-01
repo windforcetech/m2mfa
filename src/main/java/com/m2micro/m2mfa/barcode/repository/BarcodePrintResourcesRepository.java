@@ -10,5 +10,10 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface BarcodePrintResourcesRepository extends BaseRepository<BarcodePrintResources,String> {
-
+    /**
+     * 获取标签打印记录
+     * @param barcode
+     * @return
+     */
+    BarcodePrintResources findByBarcode(String barcode);
 }

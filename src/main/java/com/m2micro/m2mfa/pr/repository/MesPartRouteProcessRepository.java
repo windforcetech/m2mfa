@@ -20,5 +20,40 @@ public interface MesPartRouteProcessRepository extends BaseRepository<MesPartRou
     @Query(value="delete from mes_part_route_process where  partrouteid=?1",nativeQuery = true)
     void deleteParRouteID(String parrouteid);
 
+    /**
+     * 获取途程的第一个扫描工序id
+     * @param itemValue
+     * @param partRouteId
+     * @return
+     */
+    @Query(value = "SELECT\n" +
+                    "	mprp.processid\n" +
+                    "FROM\n" +
+                    "	mes_part_route mpr,\n" +
+                    "	mes_part_route_process mprp,\n" +
+                    "	base_process bp,\n" +
+                    "	base_items_target bit\n" +
+                    "WHERE mpr.part_route_id = mprp.partrouteid\n" +
+                    "AND mprp.processid = bp.process_id\n" +
+                    "AND bp.collection = bit.id\n" +
+                    "AND bit.item_value=?1\n" +
+                    "AND mpr.part_route_id=?2\n" +
+                    "ORDER BY mprp.setp ASC limit 1",nativeQuery = true)
+    String getFirstScanProcessId(String itemValue,String partRouteId);
 
+    /**
+     * 获取上一工序信息
+     * @param partrouteid
+     * @param nextprocessid
+     * @return
+     */
+    MesPartRouteProcess findByPartrouteidAndNextprocessid(String partrouteid,String nextprocessid);
+
+    /**
+     * 获取下一工序
+     * @param partrouteid
+     * @param nextprocessid
+     * @return
+     */
+    MesPartRouteProcess findByPartrouteidAndProcessid(String partrouteid,String nextprocessid);
 }
