@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class MesMoDescErpServiceImpl implements MesMoDescErpService {
+
   @Autowired
   @Qualifier("primaryJdbcTemplate")
   JdbcTemplate primaryJdbcTemplate;
@@ -92,6 +93,7 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     return true;
   }
 
+
   private List<MesMoDesc> getMesMoDescs(SfbFile sfbFile, MesMoDesc moDesc, String moid) {
     moDesc.setMoId(moid);
     moDesc.setMoNumber(sfbFile.getSfb01());
@@ -107,7 +109,12 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     moDesc.setBomRevsion(0);
     moDesc.setPlanInputDate(sfbFile.getSfb13());
     moDesc.setPlanCloseDate(sfbFile.getSfb15());
-    moDesc.setRouteId(mesPartRouteRepository.findByPartId(baseParts.getPartId()).get(0).getRouteId());
+    try {
+      moDesc.setRouteId(mesPartRouteRepository.findByPartId(baseParts.getPartId()).get(0).getRouteId());
+    }catch (Exception e){
+      System.out.println("该料件为绑定途程");
+    }
+
     moDesc.setReachDate(sfbFile.getSfb20());
     moDesc.setMachineQty(1);
     moDesc.setOrderId(sfbFile.getSfb22());
@@ -123,6 +130,7 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     moDesc.setCloseFlag(MoStatus.INITIAL.getKey());
     return mesMoDescService.findByMoNumberAndMoIdNot(moDesc.getMoNumber(),"");
   }
+
 
   private MesMoBom getMesMoBom(List<SfaFile> sfaFiles, int i, String moid) {
     SfaFile sfaFile = sfaFiles.get(i);
@@ -144,5 +152,6 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     mesMoBom.setEnabled(true);
     return mesMoBom;
   }
+
 
 }
