@@ -193,11 +193,13 @@ public class BaseOperateImpl implements BaseOperate {
      * @param operationInfo
      */
     private void setOtherByProcess(OperationInfo operationInfo,BaseProcess baseProcess) {
-        BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseProcess.getCategory()).orElse(null);
-        //一般作业站不置灰
-        if(BaseItemsTargetConstant.SYSCOMMON.equalsIgnoreCase(baseItemsTarget.getItemValue())){
-            //作业输入(0:置灰,1:不置灰)
-            operationInfo.setJobInput("1");
+        if(operationInfo.getWorkFlag().equalsIgnoreCase("1")){
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseProcess.getCategory()).orElse(null);
+            //一般作业站不置灰
+            if(BaseItemsTargetConstant.SYSCOMMON.equalsIgnoreCase(baseItemsTarget.getItemValue())){
+                //作业输入(0:置灰,1:不置灰)
+                operationInfo.setJobInput("1");
+            }
         }
     }
 

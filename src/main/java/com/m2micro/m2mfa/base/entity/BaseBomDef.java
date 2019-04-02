@@ -76,6 +76,19 @@ public class BaseBomDef extends BaseEntity implements Serializable {
     @Transient
     private List<BaseBomDesc> bomDescObjList;
 
+
+    @ApiModelProperty(value = "品名(parts表)")
+    @Transient
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public List<BaseBomDesc> getBomDescObjList() {
         return bomDescObjList;
     }

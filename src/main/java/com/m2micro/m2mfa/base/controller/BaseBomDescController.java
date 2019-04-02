@@ -66,8 +66,20 @@ public class BaseBomDescController {
         if (StringUtils.isNotEmpty(query.getPartId())) {
             expression.and(baseBomDesc.partId.like("%" + query.getPartId() + "%"));
         }
-        ArrayList<BaseBomDesc> baseBomDescs = Lists.newArrayList(baseBomDescService.findAll(expression));
+        List<BaseBomDesc> baseBomDescs = Lists.newArrayList(baseBomDescService.findAll(expression));
 
+        baseBomDescs.forEach(baseBomDesc1 -> {
+            BaseParts baseParts = basePartsService.selectpartNo(baseBomDesc1.getPartId());
+            baseBomDesc1.setName(baseParts.getName());
+            baseBomDesc1.setSpec(baseParts.getSpec());
+            baseBomDesc1.setProductionUnit(baseParts.getProductionUnit());
+            List<BaseBomDef> allByBomId = baseBomDefService.findAllByBomId(baseBomDesc1.getBomId());
+            allByBomId.forEach(baseBomDef -> {
+                BaseParts baseParts1 = basePartsService.selectpartNo(baseBomDef.getPartId());
+                baseBomDef.setName(baseParts1.getName());
+            });
+            baseBomDesc1.setBomDefObjList(allByBomId);
+        });
         PageUtil<BaseBomDesc> of = PageUtil.of(baseBomDescs, baseBomDescs.size(), query.getSize(), query.getPage());
         return ResponseMessage.ok(of);
     }
