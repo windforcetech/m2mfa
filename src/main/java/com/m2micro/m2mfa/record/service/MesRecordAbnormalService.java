@@ -17,4 +17,11 @@ public interface MesRecordAbnormalService extends BaseService<MesRecordAbnormal,
      * @return  分页信息
      */
     PageUtil<MesRecordAbnormal> list(Query query);
+
+    /**
+     * 异常提报
+     * @param mesRecordAbnormal
+     * @return
+     */
+    boolean addsave(MesRecordAbnormal mesRecordAbnormal);
 }

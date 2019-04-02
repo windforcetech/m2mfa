@@ -61,10 +61,11 @@ public class MesRecordAbnormalController {
     @RequestMapping("/save")
     @ApiOperation(value="保存异常记录表")
     @UserOperationLog("保存异常记录表")
-    public ResponseMessage<MesRecordAbnormal> save(@RequestBody MesRecordAbnormal mesRecordAbnormal){
+    public ResponseMessage save(@RequestBody MesRecordAbnormal mesRecordAbnormal){
         ValidatorUtil.validateEntity(mesRecordAbnormal, AddGroup.class);
         mesRecordAbnormal.setId(UUIDUtil.getUUID());
-        return ResponseMessage.ok(mesRecordAbnormalService.save(mesRecordAbnormal));
+        mesRecordAbnormalService.addsave(mesRecordAbnormal);
+        return ResponseMessage.ok();
     }
 
     /**
