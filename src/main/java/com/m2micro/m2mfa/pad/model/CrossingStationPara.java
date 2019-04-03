@@ -22,6 +22,6 @@ public class CrossingStationPara {
     @NotEmpty(message="工序主键不能为空",groups = {QueryGroup.class})
     private String processId;
     @ApiModelProperty(value = "记录主键")
-    @NotEmpty(message="记录主键",groups = {QueryGroup.class})
+    @NotEmpty(message="记录主键不能为空",groups = {QueryGroup.class})
     private String rwId;
 }
