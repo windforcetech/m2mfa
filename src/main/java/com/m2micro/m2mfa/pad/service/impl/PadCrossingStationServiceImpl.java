@@ -122,6 +122,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
 
     @Override
     public List<WipRecModel> pullIn(String processId) {
+        if(StringUtils.isEmpty(processId)){
+            throw new MMException("工序id不能为空！");
+        }
         List<MesRecordWipRec> mesRecordWipRecs = mesRecordWipRecRepository.findByNextProcessId(processId);
         if(mesRecordWipRecs==null){
             return null;
