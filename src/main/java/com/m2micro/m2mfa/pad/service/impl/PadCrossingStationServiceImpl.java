@@ -10,7 +10,10 @@ import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
 import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.m2mfa.base.entity.BasePack;
 import com.m2micro.m2mfa.base.entity.BaseProcess;
+import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.repository.BasePackRepository;
+import com.m2micro.m2mfa.base.repository.BaseRouteDefRepository;
+import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
 import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
@@ -18,12 +21,15 @@ import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.QueryGroup;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.model.ScheduleAndPartsModel;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.constant.StationConstant;
 import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
 import com.m2micro.m2mfa.pad.service.PadCrossingStationService;
+import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteProcess;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteProcessRepository;
@@ -37,7 +43,12 @@ import com.m2micro.m2mfa.record.repository.MesRecordWipRecRepository;
 import com.m2micro.m2mfa.record.service.MesRecordWipRecService;
 import javafx.scene.media.MediaMarkerEvent;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,6 +89,15 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
     PadBottomDisplayService padBottomDisplayService;
     @Autowired
     MesRecordWipLogRepository mesRecordWipLogRepository;
+    @Autowired
+    BaseRouteDefRepository baseRouteDefRepository;
+    @Autowired
+    MesMoScheduleRepository mesMoScheduleRepository;
+    @Autowired
+    BaseStaffRepository baseStaffRepository;
+    @Autowired
+    @Qualifier("secondaryJdbcTemplate")
+    JdbcTemplate jdbcTemplate;
 
 
 
@@ -129,7 +149,8 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //获取上一工序
         //MesPartRouteProcess mesPartRouteProcess = mesPartRouteProcessRepository.findByPartrouteidAndNextprocessid(partRouteId, para.getProcessId());
         //获取下一工序
-        MesPartRouteProcess nextProcessid = mesPartRouteProcessRepository.findByPartrouteidAndProcessid(partRouteId, para.getProcessId());
+        //MesPartRouteProcess nextProcessid = mesPartRouteProcessRepository.findByPartrouteidAndProcessid(partRouteId, para.getProcessId());
+        String nextProcessId = baseRouteDefRepository.getNextProcessId(partRouteId, para.getProcessId());
 
         //String collection = getCollection(mesPartRouteProcess.getProcessid());
         //上一工序是否是机台自动扫描工序，是 算结余量
@@ -161,7 +182,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //拷贝数据到历史记录
         MesRecordWipLog mesRecordWipRecLog = new MesRecordWipLog();
         try {
-            BeanUtils.copyProperties(mesRecordWipRec,mesRecordWipRecLog);
+            BeanUtils.copyProperties(mesRecordWipRecLog,mesRecordWipRec);
         } catch (Exception e) {
             e.printStackTrace();
             throw new MMException("在制记录异常");
@@ -179,7 +200,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         mesRecordWipRec.setOutputQty(para.getOutputQty());
         mesRecordWipRec.setOutTime(new Date());
         mesRecordWipRec.setWipNowProcess(para.getProcessId());
-        mesRecordWipRec.setWipNextProcess(nextProcessid.getNextprocessid());
+        mesRecordWipRec.setWipNextProcess(nextProcessId);
+        mesRecordWipRec.setNextProcessId(nextProcessId);
+        mesRecordWipRec.setStaffId(PadStaffUtil.getStaff().getStaffId());
         mesRecordWipRecRepository.save(mesRecordWipRec);
         //获取产出工序
         //if(工序是否是产出工序)
@@ -199,7 +222,8 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
      * @param para
      * @return
      */
-    private ResponseMessage<CrossingStationModel> handForNotMesRecordWipRec(CrossingStationPara para) {
+    @Transactional
+    public ResponseMessage<CrossingStationModel> handForNotMesRecordWipRec(CrossingStationPara para) {
         //获取排产单id
         String source = barcodePrintApplyRepository.getSource(para.getBarcode());
         //获取料件途程id
@@ -238,34 +262,123 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             mesRecordWipRec.setOutputQty(surplusQty);
         }
         //上一个工序
-        MesPartRouteProcess mesPartRouteProcess = mesPartRouteProcessRepository.findByPartrouteidAndNextprocessid(partRouteId, para.getProcessId());
-        mesRecordWipRec.setProcessId(mesPartRouteProcess.getProcessid());
-        mesRecordWipRec.setWipNowProcess(mesPartRouteProcess.getProcessid());
+        //MesPartRouteProcess mesPartRouteProcess = mesPartRouteProcessRepository.findByPartrouteidAndNextprocessid(partRouteId, para.getProcessId());
+        String beforeProcessId = baseRouteDefRepository.getBeforeProcessId(partRouteId, para.getProcessId());
+        mesRecordWipRec.setProcessId(beforeProcessId);
+        mesRecordWipRec.setWipNowProcess(beforeProcessId);
 
         Date date = new Date();
         mesRecordWipRec.setInTime(date);
         mesRecordWipRec.setInlineTime(date);
+        //mesRecordWipRec.setOutTime(date);
         //职员（预留）
 
         //途程
         mesRecordWipRec.setRouteId(partRouteId);
         //下一工序
         mesRecordWipRec.setWipNextProcess(para.getProcessId());
+        mesRecordWipRec.setNextProcessId(para.getProcessId());
         mesRecordWipRecRepository.save(mesRecordWipRec);
 
         CrossingStationModel crossingStationModel = new CrossingStationModel();
         //上一工序是否是机台自动扫描工序，是 算结余量
-        if(BaseItemsTargetConstant.SCAN.equalsIgnoreCase(getCollection(mesPartRouteProcess.getProcessid()))){
+        if(BaseItemsTargetConstant.AUTO.equalsIgnoreCase(getCollection(beforeProcessId))){
             crossingStationModel.setSurplusQty(surplusQty);
         }
         //返回不良数0、及排产单信息
         crossingStationModel.setBarcode(para.getBarcode());
         crossingStationModel.setQty(0l);
         crossingStationModel.setOutputQty(mesRecordWipRec.getOutputQty());
+
         //上一工序的相关信息
-        StationRelationModel stationRelationModel = mesRecordWipRecRepository.getStationRelationModel(para.getBarcode());
+        //StationRelationModel stationRelationModel = mesRecordWipRecRepository.getStationRelationModel(para.getBarcode());
+        StationRelationModel stationRelationModel = getStationRelationModel(para.getBarcode(), source);
         crossingStationModel.setStationRelationModel(stationRelationModel);
         return ResponseMessage.ok(crossingStationModel);
+    }
+
+    /**
+     * 获取关联信息
+     * @param barcode
+     * @param scheduleId
+     * @return
+     */
+    private StationRelationModel getStationRelationModel(String barcode,String scheduleId){
+        //获取排产单信息
+        ScheduleAndPartsModel scheduleAndPartsModel = getScheduleAndPartsModel(scheduleId);
+        //获取在制表信息
+        MesRecordWipRec mesRecordWipRec = mesRecordWipRecRepository.findBySerialNumber(barcode);
+        return getStationRelationModel(mesRecordWipRec,scheduleAndPartsModel);
+    }
+
+    /**
+     * 获取关联信息
+     * @param mesRecordWipRec
+     * @param scheduleAndPartsModel
+     * @return
+     */
+    private StationRelationModel getStationRelationModel(MesRecordWipRec mesRecordWipRec,ScheduleAndPartsModel scheduleAndPartsModel){
+        StationRelationModel stationRelationModel = new StationRelationModel();
+        //获取排产单信息
+        try {
+            BeanUtils.copyProperties(stationRelationModel,scheduleAndPartsModel);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //设置在制表信息
+        //当前工序
+        String wipNowProcess = mesRecordWipRec.getWipNowProcess();
+        if(StringUtils.isNotEmpty(wipNowProcess)){
+            BaseProcess baseProcess = baseProcessService.findById(wipNowProcess).orElse(null);
+            stationRelationModel.setWipNowProcessName(baseProcess.getProcessName());
+        }
+        //职员
+        String staffId = mesRecordWipRec.getStaffId();
+        if(StringUtils.isNotEmpty(staffId)){
+            BaseStaff baseStaff = baseStaffRepository.findById(staffId).orElse(null);
+            stationRelationModel.setStaffId(staffId);
+            stationRelationModel.setStaffName(baseStaff.getStaffName());
+        }
+        //产出时间
+        stationRelationModel.setOutTime(mesRecordWipRec.getOutTime());
+        //产出数量
+        stationRelationModel.setOutputQty(mesRecordWipRec.getOutputQty());
+        //下一工序
+        String wipNextProcess = mesRecordWipRec.getWipNextProcess();
+        if(StringUtils.isNotEmpty(wipNextProcess)){
+            BaseProcess baseProcess = baseProcessService.findById(wipNextProcess).orElse(null);
+            stationRelationModel.setWipNextProcessName(baseProcess.getProcessName());
+            //采集方式
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null);
+            stationRelationModel.setCollectionName(baseItemsTarget.getItemName());
+        }
+        return stationRelationModel;
+    }
+
+    /**
+     * 获取排产单料件信息
+     * @param scheduleId
+     * @return
+     */
+    private ScheduleAndPartsModel getScheduleAndPartsModel(String scheduleId){
+        String sql = "SELECT\n" +
+                "	mms.schedule_id,\n" +
+                "	mms.schedule_no scheduleNo,\n" +
+                "	bpt.part_no partNo,\n" +
+                "	bpt.name partName,\n" +
+                "	bpt.spec partSpec \n" +
+                "FROM\n" +
+                "	mes_mo_schedule mms,\n" +
+                "	base_parts bpt \n" +
+                "WHERE\n" +
+                "	mms.part_id = bpt.part_id \n" +
+                "	AND mms.schedule_id ='"+scheduleId+"'\n";
+        RowMapper<ScheduleAndPartsModel> rowMapper = BeanPropertyRowMapper.newInstance(ScheduleAndPartsModel.class);
+        List<ScheduleAndPartsModel> list = jdbcTemplate.query(sql, rowMapper);
+        if(list==null||list.size()==0){
+            return null;
+        }
+        return list.get(0);
     }
 
     /**
@@ -281,6 +394,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         Integer outPutQtys = padBottomDisplayService.getOutPutQtys(source, scheduleIds);
         //2.当前工序当前排产单的投入数之和
         Integer allInputQty = mesRecordWipLogRepository.getAllInputQty(source, processId);
+        allInputQty = allInputQty==null?0:allInputQty;
         //3.结余量：排产单的完成量-投入数之和
         if(outPutQtys<allInputQty){
             throw new MMException("排产单的完成量小于投入数总和。");
@@ -322,14 +436,18 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             crossingStationModel.setQty(0l);
         }
         //上一工序的相关信息
-        StationRelationModel stationRelationModel = mesRecordWipRecRepository.getStationRelationModel(para.getBarcode());
+        //StationRelationModel stationRelationModel = mesRecordWipRecRepository.getStationRelationModel(para.getBarcode());
+        StationRelationModel stationRelationModel = getStationRelationModel(para.getBarcode(), source);
         crossingStationModel.setStationRelationModel(stationRelationModel);
         //默认为上一次的产出量
         crossingStationModel.setOutputQty(stationRelationModel.getOutputQty());
 
-        /*//判定当前工序是否是机台自动采集
-        String collection = getCollection(para);
-        //获取结余量*/
+        //上一工序是否是机台自动扫描工序，是 算结余量
+        if(BaseItemsTargetConstant.AUTO.equalsIgnoreCase(getCollection(mesRecordWipRec.getWipNowProcess()))){
+            //获取结余量
+            Integer surplusQty = getSurplusQty(para.getProcessId(), source);
+            crossingStationModel.setSurplusQty(surplusQty);
+        }
         return ResponseMessage.ok(crossingStationModel);
     }
 

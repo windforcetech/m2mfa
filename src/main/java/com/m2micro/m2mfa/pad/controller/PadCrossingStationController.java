@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/pad/padCrossingStationController")
-@Api(value="pad过站  前端控制器")
+@Api(value="pad过站  前端控制器",description = "过站")
 //@Authorize(Authorize.authorizeType.AllowAll)
 public class PadCrossingStationController {
     @Autowired
