@@ -12,6 +12,7 @@ import com.m2micro.m2mfa.pad.service.PadCrossingStationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,7 +45,7 @@ public class PadCrossingStationController {
     @RequestMapping("/pullOut")
     @ApiOperation(value="pad 出站（确认出站）")
     @UserOperationLog("pad 出站（确认出站）")
-    public ResponseMessage pullOut(OutStationModel obj){
+    public ResponseMessage pullOut(@RequestBody OutStationModel obj){
         padCrossingStationService.pullOut(obj);
         return ResponseMessage.ok();
     }
