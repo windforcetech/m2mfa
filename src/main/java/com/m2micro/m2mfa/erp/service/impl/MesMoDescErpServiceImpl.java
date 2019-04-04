@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.erp.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.repository.BasePartsRepository;
 import com.m2micro.m2mfa.base.service.BasePartsService;
@@ -50,7 +51,7 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
 
   @Override
   @Transactional
-  public boolean erpMesMoDesc(String moNumber) {
+  public ResponseMessage erpMesMoDesc(String moNumber) {
     String sql ="select * from SFB_FILE  where 1=1 ";
     if(StringUtils.isNotEmpty(moNumber)){
       String[] split = moNumber.split(",");
@@ -67,34 +68,32 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     }
     RowMapper sfa_filerowmapper = BeanPropertyRowMapper.newInstance(SfaFile.class);
     List<SfaFile> sfaFiles = primaryJdbcTemplate.query(sql, sfa_filerowmapper);
-
-
-
     List<MesMoDesc> mesMoDescs = new ArrayList<>();
     List<MesMoBom> mesMoBoms =new ArrayList<>();
+    List<String>oerrArrys = new ArrayList<>();
     for(int i=0;i<list.size();i++){
       SfbFile sfbFile=list.get(i);
-      MesMoDesc moDesc= new MesMoDesc();
       String moid =UUIDUtil.getUUID();
-
-      List<MesMoDesc> islist = getMesMoDescs(sfbFile, moDesc, moid);
-      if(islist!=null&&islist.size()>0){
-        //throw new MMException("工单号码不唯一！");
+      MesMoDesc MesMoDesc= getMesMoDesc(sfbFile, moid, oerrArrys);
+      if(MesMoDesc==null){
         continue;
       }
-      mesMoDescs.add(moDesc);
-
-
+      mesMoDescs.add(MesMoDesc);
       MesMoBom mesMoBom = getMesMoBom(sfaFiles, i, moid);
       mesMoBoms.add(mesMoBom);
     }
     mesMoBomService.saveAll(mesMoBoms);
     mesMoDescService.saveAll(mesMoDescs);
-    return true;
+    ResponseMessage responseMessage = ResponseMessage.ok();
+    if(!oerrArrys.isEmpty()){
+      responseMessage.setMessage("物料编号【"+String.join(",", oerrArrys.stream().toArray(String [] ::new))+"】没有对应的途程信息！");
+    }
+    return responseMessage;
   }
 
 
-  private List<MesMoDesc> getMesMoDescs(SfbFile sfbFile, MesMoDesc moDesc, String moid) {
+  private MesMoDesc getMesMoDesc(SfbFile sfbFile, String moid,List<String> oerrArrys) {
+    MesMoDesc moDesc= new MesMoDesc();
     moDesc.setMoId(moid);
     moDesc.setMoNumber(sfbFile.getSfb01());
     moDesc.setCategory(sfbFile.getSfb02());
@@ -112,7 +111,10 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     try {
       moDesc.setRouteId(mesPartRouteRepository.findByPartId(baseParts.getPartId()).get(0).getRouteId());
     }catch (Exception e){
+      oerrArrys.add(baseParts.getName());
       System.out.println("该料件为绑定途程");
+      return  null;
+
     }
 
     moDesc.setReachDate(sfbFile.getSfb20());
@@ -128,7 +130,12 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     moDesc.setCloseFlag(0);
     moDesc.setEnabled(true);
     moDesc.setCloseFlag(MoStatus.INITIAL.getKey());
-    return mesMoDescService.findByMoNumberAndMoIdNot(moDesc.getMoNumber(),"");
+    List<MesMoDesc> islist = mesMoDescService.findByMoNumberAndMoIdNot(moDesc.getMoNumber(),"");
+    if(islist!=null&&islist.size()>0){
+      //throw new MMException("工单号码不唯一！");
+      return null;
+    }
+    return moDesc;
   }
 
 

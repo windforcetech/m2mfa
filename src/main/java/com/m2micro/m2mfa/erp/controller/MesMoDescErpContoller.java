@@ -30,8 +30,7 @@ public class MesMoDescErpContoller {
   @ApiOperation(value="工单erp")
   @UserOperationLog("工单erp")
   public ResponseMessage erpMesMoDesc(String moNumber ){
-    mesMoDescErpService.erpMesMoDesc(moNumber);
-    return ResponseMessage.ok();
+    return   mesMoDescErpService.erpMesMoDesc(moNumber);
   }
 
 
