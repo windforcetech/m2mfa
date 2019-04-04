@@ -22,7 +22,7 @@ public interface MesRecordFailRepository extends BaseRepository<MesRecordFail,St
    * @param processId
    * @return
    */
-  @Query(value = "SELECT mrf.* FROM mes_record_fail mrf, mes_record_work mrw WHERE mrf.rw_id=mrw.rwid AND mrf.repair_flag <>1 AND mrw.schedule_id=?1 AND mrw.process_id=?2",nativeQuery = true)
+  @Query(value = "SELECT mrf.* FROM mes_record_fail mrf, mes_record_work mrw WHERE mrf.rw_id=mrw.rwid AND (mrf.repair_flag <>1 OR mrf.repair_flag IS NULL) AND mrw.schedule_id=?1 AND mrw.process_id=?2",nativeQuery = true)
   List<MesRecordFail> getByProcessIdAndScheduleId(String scheduleId,String processId);
 
 }
