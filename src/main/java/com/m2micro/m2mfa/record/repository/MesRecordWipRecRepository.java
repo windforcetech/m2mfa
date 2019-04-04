@@ -29,14 +29,14 @@ public interface MesRecordWipRecRepository extends BaseRepository<MesRecordWipRe
      * @param serialNumber
      * @return
      */
-    @Query(value = "SELECT\n" +
+    /*@Query(value = "SELECT\n" +
             "	mms.schedule_no scheduleNo,\n" +
             "	bpt.part_no partNo,\n" +
             "	bpt.name partName,\n" +
             "	bpt.spec partSpec,\n" +
             "	bp1.process_name wipNowProcessName,\n" +
-            "	bs.staff_name staffName,\n" +
             "	mrwr.out_time outTime,\n" +
+            "	mrwr.staff_id staffId,\n" +
             "	mrwr.output_qty outputQty,\n" +
             "	bit.item_name itemName,\n" +
             "	bp2.process_name wipNextProcessName\n" +
@@ -46,17 +46,15 @@ public interface MesRecordWipRecRepository extends BaseRepository<MesRecordWipRe
             "	base_process bp2,\n" +
             "	mes_mo_schedule mms,\n" +
             "	base_parts bpt,\n" +
-            "	base_staff bs,\n" +
             "	base_items_target bit\n" +
             "WHERE\n" +
             "	mrwr.wip_now_process = bp1.process_id \n" +
             "	AND mrwr.wip_next_process = bp2.process_id \n" +
             "	AND mrwr.schedule_id = mms.schedule_id \n" +
             "	AND mms.part_id = bpt.part_id\n" +
-            "	AND mrwr.staff_id=bs.staff_id\n" +
             "	AND bp2.collection=bit.id\n" +
-            "	AND mrwr.serial_number=?1",nativeQuery = true)
-    StationRelationModel getStationRelationModel(String serialNumber);
+            "	AND mrwr.serial_number=?1",nativeQuery = true)*/
+    //StationRelationModel getStationRelationModel(String serialNumber);
 
     /**
      * 获取在制信息

@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.pad.service;
 
+import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.pad.model.CrossingStationModel;
 import com.m2micro.m2mfa.pad.model.CrossingStationPara;

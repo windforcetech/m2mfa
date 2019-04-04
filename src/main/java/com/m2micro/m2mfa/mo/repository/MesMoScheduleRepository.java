@@ -5,6 +5,8 @@ import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.framework.commons.BaseRepository;
+import com.m2micro.m2mfa.mo.model.ScheduleAndPartsModel;
+import com.m2micro.m2mfa.pad.model.StationRelationModel;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -131,4 +133,18 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      * @return
      */
     List<MesMoSchedule> findByMoId(String moId);
+
+    @Query(value = "SELECT\n" +
+                    "	mms.schedule_id,\n" +
+                    "	mms.schedule_no scheduleNo,\n" +
+                    "	bpt.part_no partNo,\n" +
+                    "	bpt.`name` partName,\n" +
+                    "	bpt.spec partSpec \n" +
+                    "FROM\n" +
+                    "	mes_mo_schedule mms,\n" +
+                    "	base_parts bpt \n" +
+                    "WHERE\n" +
+                    "	mms.part_id = bpt.part_id \n" +
+                    "	AND mms.schedule_id = ?1",nativeQuery = true)
+    ScheduleAndPartsModel getStationRelationModel(String scheduleId);
 }

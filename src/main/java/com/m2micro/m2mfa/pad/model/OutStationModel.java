@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -18,10 +19,10 @@ public class OutStationModel {
     @NotEmpty(message="工序主键不能为空",groups = {QueryGroup.class})
     private String processId;
     @ApiModelProperty(value = "产出数")
-    @NotEmpty(message="产出数不能为空",groups = {QueryGroup.class})
+    @NotNull(message="产出数不能为空",groups = {QueryGroup.class})
     private Integer outputQty;
     @ApiModelProperty(value = "不良数量")
-    @NotEmpty(message="不良数量不能为空",groups = {QueryGroup.class})
+    @NotNull(message="不良数量不能为空",groups = {QueryGroup.class})
     private Long qty;
     @ApiModelProperty(value = "不良数ids")
     private List ids;

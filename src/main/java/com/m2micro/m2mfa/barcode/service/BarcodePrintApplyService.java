@@ -4,6 +4,12 @@ import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
+import com.m2micro.m2mfa.barcode.query.PrintApplyQuery;
+import com.m2micro.m2mfa.barcode.query.ScheduleQuery;
+import com.m2micro.m2mfa.barcode.vo.PrintApplyObj;
+import com.m2micro.m2mfa.barcode.vo.ScheduleObj;
+import org.springframework.data.domain.Page;
+
 /**
  * 标签打印表单 服务类
  * @author liaotao
@@ -16,5 +22,20 @@ public interface BarcodePrintApplyService extends BaseService<BarcodePrintApply,
      *         查询参数
      * @return  分页信息
      */
-    PageUtil<BarcodePrintApply> list(Query query);
+//    PageUtil<BarcodePrintApply> list(PrintApplyQuery query);
+    boolean exist(String sourceCategory,String sourceNo,String partId);
+
+    PageUtil<ScheduleObj> list(ScheduleQuery query);
+
+    ScheduleObj scheduleInfo(String scheduleId);
+
+    BarcodePrintApply add(BarcodePrintApply barcodePrintApply);
+
+    void checkList(String[] ids);
+
+    void check(String barcodePrintApplyId);
+
+    void deleteList(String[] ids);
+
+    PageUtil<PrintApplyObj> printApplyList(PrintApplyQuery query);
 }
