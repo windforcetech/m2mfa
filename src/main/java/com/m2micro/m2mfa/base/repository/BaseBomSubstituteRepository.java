@@ -17,4 +17,5 @@ import java.util.List;
 public interface BaseBomSubstituteRepository extends BaseRepository<BaseBomSubstitute, String> {
 
      void deleteAllByBomIdIsIn(List<String> ids);
+     List<BaseBomSubstitute> findAllByBomId(String bomid);
 }

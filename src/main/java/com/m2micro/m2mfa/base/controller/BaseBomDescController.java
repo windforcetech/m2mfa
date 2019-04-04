@@ -73,11 +73,16 @@ public class BaseBomDescController {
             baseBomDesc1.setName(baseParts.getName());
             baseBomDesc1.setSpec(baseParts.getSpec());
             baseBomDesc1.setProductionUnit(baseParts.getProductionUnit());
+
             List<BaseBomDef> allByBomId = baseBomDefService.findAllByBomId(baseBomDesc1.getBomId());
             allByBomId.forEach(baseBomDef -> {
                 BaseParts baseParts1 = basePartsService.selectpartNo(baseBomDef.getPartId());
                 baseBomDef.setName(baseParts1.getName());
             });
+
+            List<BaseBomSubstitute> baseBomSubstituteList = baseBomSubstituteService.findAllByBomId(baseBomDesc1.getBomId());
+            baseBomDesc1.setBomSubstituteList(baseBomSubstituteList);
+
             baseBomDesc1.setBomDefObjList(allByBomId);
         });
         PageUtil<BaseBomDesc> of = PageUtil.of(baseBomDescs, baseBomDescs.size(), query.getSize(), query.getPage());

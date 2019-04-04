@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 员工排班表 服务实现类
  *
@@ -32,4 +34,8 @@ public class BaseBomSubstituteServiceImpl implements BaseBomSubstituteService {
     }
 
 
+    @Override
+    public List<BaseBomSubstitute> findAllByBomId(String bomid) {
+        return baseBomSubstituteRepository.findAllByBomId(bomid);
+    }
 }
