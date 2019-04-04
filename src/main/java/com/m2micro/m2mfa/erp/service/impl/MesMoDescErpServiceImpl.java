@@ -15,6 +15,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoBom;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.service.MesMoBomService;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
+import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +110,10 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     moDesc.setPlanInputDate(sfbFile.getSfb13());
     moDesc.setPlanCloseDate(sfbFile.getSfb15());
     try {
-      moDesc.setRouteId(mesPartRouteRepository.findByPartId(baseParts.getPartId()).get(0).getRouteId());
+      MesPartRoute mesPartRoute = mesPartRouteRepository.findByPartId(baseParts.getPartId()).get(0);
+      moDesc.setRouteId(mesPartRoute.getRouteId());
+      moDesc.setOutputProcessId(mesPartRoute.getOutputProcessId());
+      moDesc.setInputProcessId(mesPartRoute.getInputProcessId());
     }catch (Exception e){
       oerrArrys.add(baseParts.getName());
       System.out.println("该料件为绑定途程");
