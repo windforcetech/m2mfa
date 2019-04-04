@@ -66,6 +66,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 " cus.code customer_code,\n" +
                 " cus.name customer_name,\n" +
                 " t.id apply_id,\n" +
+                " t.sequence sequence,\n"+
                 " t.category,\n" +
                 " t.source,\n" +
                 " t.print_category,\n" +
@@ -163,7 +164,8 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "                t.schedule_qty," +
                 "                t1.name machine_name," +
                 "        cus.name customer_name," +
-                "        cus.code customer_code" +
+                "        cus.code customer_code," +
+                "        mo.order_seq order_seq" +
                 "        FROM factory_application.mes_mo_schedule t" +
                 "        left join base_machine t1" +
                 "        on t1.id=t.machine_id" +

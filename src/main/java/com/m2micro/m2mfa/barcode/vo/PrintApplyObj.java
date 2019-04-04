@@ -39,4 +39,7 @@ public class PrintApplyObj {
 
     @ApiModelProperty("有效")
     private Boolean enabled;
+
+    @ApiModelProperty("项次")
+    private Integer sequence;
 }

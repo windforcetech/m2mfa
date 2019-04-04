@@ -38,6 +38,17 @@ public class ScheduleObj {
         return templateObjList;
     }
 
+    @ApiModelProperty("项次")
+    private Integer orderSeq;
+
+    public Integer getOrderSeq() {
+        return orderSeq;
+    }
+
+    public void setOrderSeq(Integer orderSeq) {
+        this.orderSeq = orderSeq;
+    }
+
     public String getPartSpec() {
         return partSpec;
     }
