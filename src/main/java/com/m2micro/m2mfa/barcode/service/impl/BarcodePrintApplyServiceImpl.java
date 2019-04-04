@@ -123,7 +123,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "        left join base_parts t2" +
                 "        on t2.part_id=t.part_id" +
                 "        where" +
-                "        t.flag=0 and" +
+                "        t.flag in(0,1) and" +
                 "        t.enabled=1 ";
 
         String sql2 = "SELECT count(*) FROM factory_application.mes_mo_schedule t" +
@@ -132,7 +132,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "        left join base_parts t2" +
                 "        on t2.part_id=t.part_id" +
                 "        where" +
-                "        t.flag=0 and" +
+                "        t.flag in(0,1) and" +
                 "        t.enabled=1 ";
         if (!StringUtils.isEmpty(query.getScheduleNo())) {
             sql += " and t.shedule_no like '" + query.getScheduleNo() + "'";
@@ -162,7 +162,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "                t2.spec part_spec," +
                 "                t.schedule_qty," +
                 "                t1.name machine_name," +
-                "        cus.name customer_name" +
+                "        cus.name customer_name," +
                 "        cus.code customer_code" +
                 "        FROM factory_application.mes_mo_schedule t" +
                 "        left join base_machine t1" +
@@ -174,12 +174,12 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "        left join base_customer cus" +
                 "        on cus.customer_id=mo.customer_id" +
                 "        where" +
-                "        t.flag=0 and" +
-                "        t.enabled=1 " +
+                "        t.flag in(0,1) and" +
+                "        t.enabled=1 and " +
                 " t.schedule_id='" + scheduleId + "' ;";
         List<ScheduleObj> scheduleObjList = jdbcTemplate.query(sql, rm);
         ScheduleObj scheduleObj = scheduleObjList.get(0);
-        String sql2 = "SELECT t1.id,t1.name,t1.version ,t1.description,t2.id item_id,t2.item_name FROM base_part_template  t left join  base_template t1 " +
+        String sql2 = "SELECT t1.id,t1.name,t1.version ,t1.description,t2.id tag_id,t2.item_name tag_name FROM base_part_template  t left join  base_template t1 " +
                 "        on t1.id=t.template_id " +
                 "        left join base_items_target t2 " +
                 "        on t2.id=t1.category " +
