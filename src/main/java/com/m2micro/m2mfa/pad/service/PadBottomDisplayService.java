@@ -37,4 +37,12 @@ public interface PadBottomDisplayService {
      * @return
      */
     Integer getOutPutQtys(String scheduleId, List<String> scheduleIds);
+
+    /**
+     * 获取工单完工数量
+     * @param scheduleIds
+     * @param outputProcessId
+     * @return
+     */
+    Integer getOutPutQtys(List<String> scheduleIds, String outputProcessId);
 }

@@ -252,8 +252,10 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         mesRecordWipRec.setMoId(mesMoSchedule.getMoId());
         MesMoDesc mesMoDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
         mesRecordWipRec.setPartId(mesMoDesc.getPartId());
+        //上一个工序
+        String beforeProcessId = baseRouteDefRepository.getBeforeProcessId(partRouteId, para.getProcessId());
         //获取结余量
-        Integer surplusQty = getSurplusQty(para.getProcessId(), source);
+        Integer surplusQty = getSurplusQty(para.getProcessId(), source,beforeProcessId);
         //投入数量，产出数量：包装量小于结余量，以包装量为准，否则以结余量为主
         Integer packQty = basePack.getQty().intValue();
         //包装量小于结余量
@@ -264,9 +266,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             mesRecordWipRec.setInputQty(surplusQty);
             mesRecordWipRec.setOutputQty(surplusQty);
         }
-        //上一个工序
+
         //MesPartRouteProcess mesPartRouteProcess = mesPartRouteProcessRepository.findByPartrouteidAndNextprocessid(partRouteId, para.getProcessId());
-        String beforeProcessId = baseRouteDefRepository.getBeforeProcessId(partRouteId, para.getProcessId());
+        //上一个工序
         mesRecordWipRec.setProcessId(beforeProcessId);
         mesRecordWipRec.setWipNowProcess(beforeProcessId);
 
@@ -390,11 +392,11 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
      * @param source
      * @return
      */
-    private Integer getSurplusQty(String processId, String source) {
+    private Integer getSurplusQty(String processId, String source,String beforeProcessId) {
         //1.获取排产单的完成量
         List scheduleIds = new ArrayList();
         scheduleIds.add(source);
-        Integer outPutQtys = padBottomDisplayService.getOutPutQtys(source, scheduleIds);
+        Integer outPutQtys = padBottomDisplayService.getOutPutQtys(scheduleIds,beforeProcessId);
         //2.当前工序当前排产单的投入数之和
         Integer allInputQty = mesRecordWipLogRepository.getAllInputQty(source, processId);
         allInputQty = allInputQty==null?0:allInputQty;
@@ -448,7 +450,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //上一工序是否是机台自动扫描工序，是 算结余量
         if(BaseItemsTargetConstant.AUTO.equalsIgnoreCase(getCollection(mesRecordWipRec.getWipNowProcess()))){
             //获取结余量
-            Integer surplusQty = getSurplusQty(para.getProcessId(), source);
+            Integer surplusQty = getSurplusQty(para.getProcessId(), source,mesRecordWipRec.getWipNowProcess());
             crossingStationModel.setSurplusQty(surplusQty);
         }
         return ResponseMessage.ok(crossingStationModel);

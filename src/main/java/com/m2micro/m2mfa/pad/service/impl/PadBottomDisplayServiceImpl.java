@@ -137,6 +137,11 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     public Integer getOutPutQtys(String scheduleId,List<String> scheduleIds) {
         //获取工单的产出工序
         String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
+        return getOutPutQtys(scheduleIds, outputProcessId);
+    }
+
+    @Override
+    public Integer getOutPutQtys(List<String> scheduleIds, String outputProcessId) {
         //获取产出工序的最后一个工位
         BaseStation baseStation = atlastStation(outputProcessId);
         String stationId=baseStation.getStationId();
