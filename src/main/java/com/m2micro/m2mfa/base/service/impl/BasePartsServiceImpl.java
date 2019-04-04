@@ -122,8 +122,11 @@ public class BasePartsServiceImpl implements BasePartsService {
                     "	bp.modified_by modifiedBy,\n" +
                     "	bi.item_name categoryName,\n" +
                     "	bi2.item_name sourceName\n" +
-                    "FROM\n" +
-                    "	base_parts bp\n" +
+                    "FROM\n" ;
+                  if(query.isIsom()){
+                    sql = sql+"mes_part_route mpr ,  ";
+                  }
+                  sql+=   "	base_parts bp\n" +
                     "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
                     "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
                     "WHERE 1 = 1";
@@ -163,11 +166,18 @@ public class BasePartsServiceImpl implements BasePartsService {
             }).map(e -> e.getPartId()).collect(Collectors.joining(",","'","'"));
             sql+=" and bp.part_id NOT in("+collect+")";
        }
+        if(query.isIsom()){
+          sql+="   and  mpr.part_id=bp.part_id";
+        }
         sql = sql + " order by bp.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_parts bp where 1=1 ";
+        String countSql = "select count(*) from ";
+      if(query.isIsom()){
+        countSql = countSql+"mes_part_route mpr ,  ";
+      }
+      countSql +="base_parts bp where 1=1 ";
 
         if(StringUtils.isNotEmpty(query.getPartNo())){
             countSql = countSql+" and bp.part_no like '%"+query.getPartNo()+"%'";
@@ -195,6 +205,9 @@ public class BasePartsServiceImpl implements BasePartsService {
                 countSql = countSql+" and bp.category = '"+query.getCategory()+"'";
             }
 
+        }
+        if(query.isIsom()){
+          countSql +="   and  mpr.part_id=bp.part_id";
         }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
 
