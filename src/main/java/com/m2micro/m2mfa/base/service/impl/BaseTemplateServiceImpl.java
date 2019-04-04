@@ -218,5 +218,30 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
         return rs;
     }
 
+    @Override
+    public BaseTemplateObj getBaseTemplateObjByPartId(String partId) {
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseTemplate.class);
+        String sql = " SELECT t.* FROM factory_application.base_template t " +
+                "where t.id in (select a.template_id FROM factory_application.base_part_template a " +
+                "where a.part_id='" + partId + "');";
+        List<BaseTemplate> templateList = jdbcTemplate.query(sql, rm);
+        List<BaseTemplateObj> rs = new ArrayList<>();
+        BaseTemplateObj baseTemplateObj = null;
+        for (BaseTemplate one : templateList) {
+            baseTemplateObj = new BaseTemplateObj();
+            BeanUtils.copyProperties(one, baseTemplateObj);
+            List<BaseTemplateVar> valList = baseTemplateVarRepository.findByTemplateId(one.getId());
+            List<BaseTemplateVarObj> varObjs = new ArrayList<>();
+            for (BaseTemplateVar item : valList) {
+                BaseTemplateVarObj two = new BaseTemplateVarObj();
+                BeanUtils.copyProperties(item, two);
+                varObjs.add(two);
+            }
+            baseTemplateObj.setTemplateVarObjList(varObjs);
+            rs.add(baseTemplateObj);
+        }
+        return rs.get(0);
+    }
+
 
 }
