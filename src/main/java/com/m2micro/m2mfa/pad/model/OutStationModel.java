@@ -7,6 +7,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -25,5 +26,5 @@ public class OutStationModel {
     @NotNull(message="不良数量不能为空",groups = {QueryGroup.class})
     private Long qty;
     @ApiModelProperty(value = "不良数ids")
-    private List ids;
+    private ArrayList<String> ids;
 }
