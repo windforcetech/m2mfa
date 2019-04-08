@@ -396,7 +396,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //1.获取排产单的完成量
         List scheduleIds = new ArrayList();
         scheduleIds.add(source);
-        Integer outPutQtys = padBottomDisplayService.getOutPutQtys(scheduleIds,beforeProcessId);
+        Integer outPutQtys = padBottomDisplayService.getMachineOutputQty(scheduleIds,beforeProcessId);
         //2.当前工序当前排产单的投入数之和
         Integer allInputQty = mesRecordWipLogRepository.getAllInputQty(source, processId);
         allInputQty = allInputQty==null?0:allInputQty;

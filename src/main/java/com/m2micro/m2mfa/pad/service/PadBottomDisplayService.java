@@ -45,4 +45,26 @@ public interface PadBottomDisplayService {
      * @return
      */
     Integer getOutPutQtys(List<String> scheduleIds, String outputProcessId);
+
+    /**
+     * 获取机台产量（注塑成型工序的产量）
+     * @param scheduleIds
+     * @param outputProcessId
+     * @return
+     */
+    Integer getMachineOutputQty(List<String> scheduleIds, String outputProcessId);
+
+    /**
+     * 获取单个排产单完工数（已排除不良********常用方法）
+     * @param scheduleId
+     * @return
+     */
+    Integer getOutPutQtys(String scheduleId);
+
+    /**
+     * 获取机台产量（注塑成型工序的产量***************常用方法）
+     * @param scheduleId
+     * @return
+     */
+    Integer getMachineOutputQty(String scheduleId);
 }

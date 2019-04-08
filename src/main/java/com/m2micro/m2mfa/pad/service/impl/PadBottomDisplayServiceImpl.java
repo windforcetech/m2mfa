@@ -26,6 +26,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -129,7 +130,62 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     }
 
     /**
-     * 获取工单完工数量
+     * 获取单个排产单完工数（已排除不良********常用方法）
+     * @param scheduleId
+     * @return
+     */
+
+    public Integer getOutPutQtys(String scheduleId) {
+        List<String> scheduleIds = new ArrayList<>();
+        scheduleIds.add(scheduleId);
+        //获取工单的产出工序
+        String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
+        //如果产出工序是注塑成型
+        if(true){
+            return getMachineOutputQty(scheduleId, outputProcessId);
+        }
+        //如果不是从在制表拿
+        return null;
+    }
+
+    /**
+     * 获取机台产量（注塑成型工序的产量***************常用方法）
+     * @param scheduleId
+     * @return
+     */
+    @Override
+    public Integer getMachineOutputQty(String scheduleId) {
+        //获取工单的产出工序
+        String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
+        return getMachineOutputQty(scheduleId, outputProcessId);
+    }
+
+    private Integer getMachineOutputQty(String scheduleId, String outputProcessId) {
+        //获取产出工序的最后一个工位
+        BaseStation baseStation = atlastStation(outputProcessId);
+        String stationId=baseStation.getStationId();
+
+        //获取工单完工数量(包含不良数量)
+        BigDecimal completedQty = new BigDecimal(0);
+
+        //注意：每个排产单绑定的机器id不一样，这里只能循环计算
+        MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleId).orElse(null);
+        IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        completedQty = completedQty.add(getCompletedQty(iotMachineOutput, scheduleId, stationId));
+
+        List scheduleIds = new ArrayList();
+        scheduleIds.add(scheduleId);
+        //获取不良数量(产出工位的不良)
+        Integer failQty = getFailQty(scheduleIds, stationId);
+        failQty = failQty==null?0:failQty;
+        if(failQty>completedQty.intValue()){
+            throw new MMException("不良数量大于完工数量");
+        }
+        return  completedQty.intValue()-failQty;
+    }
+
+    /**
+     * 获取工单完工数量（排产单来自同一工单才能调用，不是同一工单scheduleIds只能传一个）
      * @param scheduleId
      * @return
      */
@@ -140,8 +196,30 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         return getOutPutQtys(scheduleIds, outputProcessId);
     }
 
+    /**
+     * 同一工单的排产单（料件途程相同，产出工序相同）
+     * @param scheduleIds
+     * @param outputProcessId
+     * @return
+     */
     @Override
     public Integer getOutPutQtys(List<String> scheduleIds, String outputProcessId) {
+        //如果产出工序是注塑成型(预留)
+
+        //如果不是从在制表拿
+        return getMachineOutputQty(scheduleIds, outputProcessId);
+    }
+
+
+
+    /**
+     * 获取机台产量（注塑成型工序的产量）
+     * @param scheduleIds
+     * @param outputProcessId
+     * @return
+     */
+    @Override
+    public Integer getMachineOutputQty(List<String> scheduleIds, String outputProcessId) {
         //获取产出工序的最后一个工位
         BaseStation baseStation = atlastStation(outputProcessId);
         String stationId=baseStation.getStationId();
