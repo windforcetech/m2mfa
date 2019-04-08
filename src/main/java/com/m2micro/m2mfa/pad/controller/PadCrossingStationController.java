@@ -47,7 +47,7 @@ public class PadCrossingStationController {
     @UserOperationLog("pad 出站（确认出站）")
     public ResponseMessage pullOut(@RequestBody OutStationModel obj){
         padCrossingStationService.pullOut(obj);
-        return ResponseMessage.ok();
+        return ResponseMessage.ok("出站成功！");
     }
 
 }
