@@ -26,7 +26,7 @@ public interface PadCrossingStationService {
      * @param processId
      * @return
      */
-    List<WipRecModel> pullIn(String processId);
+    List<WipRecModel> pullIn(String processId,String barcode);
 
     /**
      * 出站

@@ -60,5 +60,5 @@ public interface MesRecordWipRecRepository extends BaseRepository<MesRecordWipRe
      * 获取在制信息
      * @return
      */
-    List<MesRecordWipRec> findByNextProcessId(String processId);
+    List<MesRecordWipRec> findByNextProcessIdAndScheduleId(String processId,String scheduleId);
 }

@@ -121,11 +121,16 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
     }
 
     @Override
-    public List<WipRecModel> pullIn(String processId) {
+    public List<WipRecModel> pullIn(String processId,String barcode) {
         if(StringUtils.isEmpty(processId)){
             throw new MMException("工序id不能为空！");
         }
-        List<MesRecordWipRec> mesRecordWipRecs = mesRecordWipRecRepository.findByNextProcessId(processId);
+        if(StringUtils.isEmpty(barcode)){
+            throw new MMException("条码标签不能为空！");
+        }
+        //获取排产单id
+        String source = barcodePrintApplyRepository.getSource(barcode);
+        List<MesRecordWipRec> mesRecordWipRecs = mesRecordWipRecRepository.findByNextProcessIdAndScheduleId(processId,source);
         if(mesRecordWipRecs==null){
             return null;
         }

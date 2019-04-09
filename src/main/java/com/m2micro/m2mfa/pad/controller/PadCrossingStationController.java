@@ -37,8 +37,8 @@ public class PadCrossingStationController {
     @RequestMapping("/pullIn")
     @ApiOperation(value="pad 进站（代进站处理）")
     @UserOperationLog("pad 进站（代进站处理）")
-    public ResponseMessage<List<WipRecModel>> pullIn(String processId){
-        return ResponseMessage.ok(padCrossingStationService.pullIn(processId));
+    public ResponseMessage<List<WipRecModel>> pullIn(String processId,String barcode){
+        return ResponseMessage.ok(padCrossingStationService.pullIn(processId,barcode));
     }
 
 
