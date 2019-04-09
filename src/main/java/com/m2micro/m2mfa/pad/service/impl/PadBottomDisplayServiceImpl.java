@@ -1,8 +1,11 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.constant.ProcessConstant;
+import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDescRepository;
+import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.base.service.BaseStationService;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
@@ -15,8 +18,13 @@ import com.m2micro.m2mfa.pad.model.MoDescInfoModel;
 import com.m2micro.m2mfa.pad.model.StationInfoModel;
 import com.m2micro.m2mfa.pad.operate.BaseOperateImpl;
 import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
+import com.m2micro.m2mfa.record.entity.MesRecordWipLog;
+import com.m2micro.m2mfa.record.entity.MesRecordWipRec;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
+import com.m2micro.m2mfa.record.repository.MesRecordWipLogRepository;
+import com.m2micro.m2mfa.record.repository.MesRecordWipRecRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
+import com.m2micro.m2mfa.record.service.MesRecordWipRecService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -55,6 +63,14 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     MesMoScheduleStaffRepository mesMoScheduleStaffRepository;
     @Autowired
     MesRecordWorkRepository mesRecordWorkRepository;
+    @Autowired
+    BaseProcessService baseProcessService;
+    @Autowired
+    ProcessConstant processConstant;
+    @Autowired
+    MesRecordWipRecRepository mesRecordWipRecRepository;
+    @Autowired
+    MesRecordWipLogRepository mesRecordWipLogRepository;
 
     @Override
     public MoDescInfoModel getMoDescInfo(String scheduleId) {
@@ -105,9 +121,18 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         stationInfoModel.setQty(moDescForStationFail.getQty());
         stationInfoModel.setScrapQty(moDescForStationFail.getScrapQty());
 
-        //完工数量
-        Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
-        stationInfoModel.setCompletedQty(completedQty-moDescForStationFail.getQty().intValue());
+        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
+        //产出工序是注塑成型
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            //完工数量
+            Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
+            stationInfoModel.setCompletedQty(completedQty-moDescForStationFail.getQty().intValue());
+        }else {
+            //从在制信息获取完工数
+
+            stationInfoModel.setCompletedQty(0);
+        }
+
         /*完成比 :完工数量/排产数量 *100%
           不良率:不良数量/完工数量*100%
           报废率:报废数量/完工数量*100%*/
@@ -115,15 +140,15 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         Integer completionRate = stationInfoModel.getCompletedQty()*100/stationInfoModel.getScheduleQty();
         stationInfoModel.setCompletionRate(completionRate);
         //不良率,报废率
-        if(completedQty.equals(0)){
+        if(stationInfoModel.getCompletedQty().equals(0)){
             stationInfoModel.setFailRate(null);
             stationInfoModel.setScrapRate(null);
         }else{
             //不良率
-            Long failRate = stationInfoModel.getQty()*100/ completedQty;
+            Long failRate = stationInfoModel.getQty()*100/ stationInfoModel.getCompletedQty();
             stationInfoModel.setFailRate(failRate.intValue());
             //报废率
-            Integer scrapRate = stationInfoModel.getScrapQty()*100/completedQty;
+            Integer scrapRate = stationInfoModel.getScrapQty()*100/stationInfoModel.getCompletedQty();
             stationInfoModel.setScrapRate(scrapRate);
         }
         return stationInfoModel;
@@ -140,8 +165,9 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         scheduleIds.add(scheduleId);
         //获取工单的产出工序
         String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
+        BaseProcess baseProcess = baseProcessService.findById(outputProcessId).orElse(null);
         //如果产出工序是注塑成型
-        if(true){
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
             return getMachineOutputQty(scheduleId, outputProcessId);
         }
         //如果不是从在制表拿
@@ -149,7 +175,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     }
 
     /**
-     * 获取机台产量（注塑成型工序的产量***************常用方法）
+     * 获取机台产量
      * @param scheduleId
      * @return
      */
@@ -160,7 +186,13 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         return getMachineOutputQty(scheduleId, outputProcessId);
     }
 
-    private Integer getMachineOutputQty(String scheduleId, String outputProcessId) {
+    /**
+     * 获取机台产量（注塑成型工序的产量***************常用方法）
+     * @param scheduleId
+     * @return
+     */
+    @Override
+    public Integer getMachineOutputQty(String scheduleId, String outputProcessId) {
         //获取产出工序的最后一个工位
         BaseStation baseStation = atlastStation(outputProcessId);
         String stationId=baseStation.getStationId();
@@ -205,9 +237,13 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     @Override
     public Integer getOutPutQtys(List<String> scheduleIds, String outputProcessId) {
         //如果产出工序是注塑成型(预留)
-
+        BaseProcess baseProcess = baseProcessService.findById(outputProcessId).orElse(null);
+        //如果产出工序是注塑成型
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            return getMachineOutputQty(scheduleIds, outputProcessId);
+        }
         //如果不是从在制表拿
-        return getMachineOutputQty(scheduleIds, outputProcessId);
+        return null;
     }
 
 

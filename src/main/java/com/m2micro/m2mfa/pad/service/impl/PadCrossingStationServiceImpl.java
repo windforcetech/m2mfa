@@ -187,14 +187,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         3)更新  mes_record_wip_rec 。更新已处理的不良记录状态为1.
         if(工序是否是产出工序)
             更新工单（mes_mo_desc）的产出数（OutputQty）。*/
-        //拷贝数据到历史记录
+        //拷贝上一次数据到历史记录
         MesRecordWipLog mesRecordWipRecLog = new MesRecordWipLog();
-        try {
-            BeanUtils.copyProperties(mesRecordWipRecLog,mesRecordWipRec);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new MMException("在制记录异常");
-        }
+        copyData(mesRecordWipRec, mesRecordWipRecLog);
         mesRecordWipRecLog.setId(UUIDUtil.getUUID());
         mesRecordWipLogRepository.save(mesRecordWipRecLog);
         //更新已处理的不良记录状态为1.
@@ -203,26 +198,60 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             mesRecordFails.stream().forEach(mesRecordFail -> mesRecordFail.setRepairFlag(1));
             mesRecordFailRepository.saveAll(mesRecordFails);
         }
+        //获取产出工序
+        MesPartRoute mesPartRoute = mesPartRouteRepository.findById(partRouteId).orElse(null);
+        //工序是否是产出工序
+        Boolean isOutputProcess = isOutputProcess(para.getProcessId(), mesPartRoute.getOutputProcessId());
         //更新  mes_record_wip_rec
         mesRecordWipRec.setInputQty(mesRecordWipRec.getOutputQty());
         mesRecordWipRec.setOutputQty(para.getOutputQty());
         mesRecordWipRec.setOutTime(new Date());
         mesRecordWipRec.setWipNowProcess(para.getProcessId());
-        mesRecordWipRec.setWipNextProcess(nextProcessId);
-        mesRecordWipRec.setNextProcessId(nextProcessId);
+        if(isOutputProcess){
+            mesRecordWipRec.setWipNextProcess("");
+            mesRecordWipRec.setNextProcessId("");
+        }else {
+            mesRecordWipRec.setWipNextProcess(nextProcessId);
+            mesRecordWipRec.setNextProcessId(nextProcessId);
+        }
         mesRecordWipRec.setStaffId(PadStaffUtil.getStaff().getStaffId());
         mesRecordWipRecRepository.save(mesRecordWipRec);
-        //获取产出工序
         //if(工序是否是产出工序)
+        if(isOutputProcess){
             //更新工单（mes_mo_desc）的产出数（OutputQty
-        MesPartRoute mesPartRoute = mesPartRouteRepository.findById(partRouteId).orElse(null);
-        if(para.getProcessId().equalsIgnoreCase(mesPartRoute.getOutputProcessId())){
             MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(source).orElse(null);
             MesMoDesc mesMoDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
             Integer moQty = mesMoDesc.getOutputQty()==null?0:mesMoDesc.getOutputQty();
             mesMoDesc.setOutputQty(moQty+mesRecordWipRec.getOutputQty());
+            //将当前工序放入日志，因为是最后一道工序
+            MesRecordWipLog log = new MesRecordWipLog();
+            copyData(mesRecordWipRec, log);
+            log.setId(UUIDUtil.getUUID());
+            mesRecordWipLogRepository.save(log);
         }
 
+    }
+
+    private void copyData(MesRecordWipRec mesRecordWipRec, MesRecordWipLog log) {
+        try {
+            BeanUtils.copyProperties(log, mesRecordWipRec);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new MMException("在制记录异常");
+        }
+    }
+
+    /**
+     * 是否是产出工序
+     * @param processId
+     * @param outputProcessId
+     * @return
+     */
+    private Boolean isOutputProcess(String processId,String outputProcessId){
+        if(processId.equalsIgnoreCase(outputProcessId)){
+            return true;
+        }
+        return false;
     }
 
     /**

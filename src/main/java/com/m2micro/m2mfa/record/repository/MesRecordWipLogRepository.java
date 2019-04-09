@@ -17,4 +17,7 @@ public interface MesRecordWipLogRepository extends BaseRepository<MesRecordWipLo
 
     @Query("select sum(inputQty) from MesRecordWipLog where scheduleId=?1 and wipNextProcess=?2")
     Integer getAllInputQty(String scheduleId,String wipNextProcess);
+
+    @Query("select sum(outputQty) from MesRecordWipLog where scheduleId=?1 and wipNowProcess=?2")
+    Integer getAllOutputQty(String scheduleId,String processId);
 }

@@ -34,10 +34,12 @@ scheduletask:
 
 m2mfa:
   version: @project.version@
-  iot:
-    processId: 9529213DBAEE4BFF838762D8B2665D35 #(注塑成型工艺id)排产单ID找模具ID是只找注塑成型工序的模具
+  #iot:
+    #processId: 9529213DBAEE4BFF838762D8B2665D35 #(注塑成型工艺id)排产单ID找模具ID是只找注塑成型工序的模具
   pad:
     changeTime: 360  #交班间隙时间
+  processConstant:
+    processCode: gxdm #注塑成型code
 file:
   baseDir:
 labServer:

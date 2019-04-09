@@ -61,4 +61,13 @@ public interface MesRecordWipRecRepository extends BaseRepository<MesRecordWipRe
      * @return
      */
     List<MesRecordWipRec> findByNextProcessIdAndScheduleId(String processId,String scheduleId);
+
+    /**
+     * 获取产出
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+    @Query("select sum(outputQty) from MesRecordWipRec where scheduleId=?1 and wipNowProcess=?2")
+    Integer getAllOutputQty(String scheduleId,String processId);
 }
