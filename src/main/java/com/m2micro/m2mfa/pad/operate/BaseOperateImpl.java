@@ -188,7 +188,8 @@ public class BaseOperateImpl implements BaseOperate {
         }
     }
 
-    /**
+
+/**
      * 根据提报异常标志设置其他按钮是否置灰
      * @param operationInfo
      */
@@ -713,7 +714,8 @@ public class BaseOperateImpl implements BaseOperate {
         return finishHomeworkModel;
     }
 
-    /**
+
+/**
      * 排产单已完成
      * @param scheduleId
      */
@@ -728,30 +730,54 @@ public class BaseOperateImpl implements BaseOperate {
         return null;
     }
 
-    @Transactional
+
+@Transactional
     protected void saveMesRocerdRail(Padbad padbad) {
         for(MesRecordFail mesRecordFail1 :  padbad.getMesRecordFails()){
             saveMesRecordFail(mesRecordFail1);
         }
    }
-    @Transactional
+
+
+@Transactional
     public  void saveMesRecordFail(MesRecordFail mesRecordFail1) {
         MesRecordFail mesRecordFail = new MesRecordFail();
         mesRecordFail.setRwId(mesRecordFail1.getRwId());
         mesRecordFail.setId(UUIDUtil.getUUID());
         mesRecordFail.setDefectCode(mesRecordFail1.getDefectCode());
-        if(mesRecordFail1.getQty()<0){
-            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +mesRecordFail1.getRwId() + "'";
-            long badsum = jdbcTemplate.queryForObject(sql, Long.class);
-            long qtynum= Math.abs(mesRecordFail1.getQty());
+        MesRecordWork mesRecordWork = mesRecordWorkService.findById(mesRecordFail1.getRwId()).orElse(null);
+        //完工数量
+       Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesRecordWork.getMachineId()), mesRecordWork.getScheduleId(), mesRecordWork.getStationId()).intValue();
+        if(mesRecordFail1.getQty()>completedQty){
+            throw new MMException("不良负数量不可大于完工数量");
+        }
+
+        long badsum = getBadsum(mesRecordFail1);
+        long qtynum= Math.abs(mesRecordFail1.getQty());
             if (qtynum > badsum) {
                 throw new MMException("不良负数量不可大于原有数量");
             }
-        }
+            if(badsum>completedQty){
+                throw new MMException("不良负数量不可大于完工数量");
+            }
+
+
         mesRecordFail.setQty(mesRecordFail1.getQty());
         mesRecordFail.setCreateOn(new Date());
         mesRecordFailRepository.save(mesRecordFail);
     }
+
+
+    private long getBadsum(MesRecordFail mesRecordFail1) {
+            long num=0;
+            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +mesRecordFail1.getRwId() + "'";
+            try {
+                num =   jdbcTemplate.queryForObject(sql, Long.class);
+            }catch (Exception e){
+
+            }
+            return num;
+        }
 
 
     @Override
