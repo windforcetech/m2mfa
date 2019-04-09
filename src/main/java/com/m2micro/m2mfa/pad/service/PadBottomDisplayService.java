@@ -28,7 +28,7 @@ public interface PadBottomDisplayService {
      *          工位id
      * @return
      */
-    StationInfoModel getStationInfo(String scheduleId, String stationId);
+    StationInfoModel getStationInfo(String scheduleId, String stationId,String processId);
 
     /**
      * 获取工单完工数量

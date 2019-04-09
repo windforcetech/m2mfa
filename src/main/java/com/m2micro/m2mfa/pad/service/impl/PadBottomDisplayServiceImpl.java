@@ -75,7 +75,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     }
 
     @Override
-    public StationInfoModel getStationInfo(String scheduleId, String stationId) {
+    public StationInfoModel getStationInfo(String scheduleId, String stationId,String processId) {
         if(StringUtils.isEmpty(scheduleId)||StringUtils.isEmpty(stationId)){
             throw new MMException("排产单和工位id不能为空！");
         }
