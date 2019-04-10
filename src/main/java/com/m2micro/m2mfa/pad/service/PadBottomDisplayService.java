@@ -37,6 +37,7 @@ public interface PadBottomDisplayService {
      * @param scheduleIds
      * @return
      */
+    @Deprecated
     Integer getOutPutQtys(String scheduleId, List<String> scheduleIds);
 
     /**
@@ -45,6 +46,7 @@ public interface PadBottomDisplayService {
      * @param outputProcessId
      * @return
      */
+    @Deprecated
     Integer getOutPutQtys(List<String> scheduleIds, String outputProcessId);
 
     /**
@@ -96,5 +98,6 @@ public interface PadBottomDisplayService {
      * @param moDescForStationFail
      * @return
      */
+    @Deprecated
     Integer getOutputQtyForStation(String scheduleId, String stationId, String processId,String machineId, MoDescInfoModel moDescForStationFail);
 }

@@ -295,6 +295,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
 
+    @Deprecated
     public List<MesMoScheduleModel> getScheduleModelForOutput(List<MesMoScheduleModel> list) {
         if(list!=null&&list.size()>0){
             for (int i=0;i<list.size();i++){
