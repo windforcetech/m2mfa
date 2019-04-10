@@ -119,18 +119,9 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         MoDescInfoModel moDescForStationFail = getMoDescForStationFail(scheduleId, stationId);
         stationInfoModel.setQty(moDescForStationFail.getQty());
         stationInfoModel.setScrapQty(moDescForStationFail.getScrapQty());
-
-        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
-        //产出工序是注塑成型
-        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
-            //完工数量
-            Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
-            stationInfoModel.setCompletedQty(completedQty-moDescForStationFail.getQty().intValue());
-        }else {
-            //从在制信息获取完工数,此时拿的是工序的产出,因为在制没有工位产出
-            Integer completedQty = mesRecordWipLogService.getAllOutputQty(scheduleId, processId);
-            stationInfoModel.setCompletedQty(completedQty);
-        }
+        //获取工位完成量（已排除不良）
+        Integer completedQty = getOutputQtyForStation(scheduleId, stationId, processId, mesMoSchedule.getMachineId(), moDescForStationFail);
+        stationInfoModel.setCompletedQty(completedQty);
         /*Integer completedQty = getOutputQtyForProcess(scheduleId, baseProcess);
         stationInfoModel.setCompletedQty(completedQty);*/
 
@@ -141,18 +132,33 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         Integer completionRate = stationInfoModel.getCompletedQty()*100/stationInfoModel.getScheduleQty();
         stationInfoModel.setCompletionRate(completionRate);
         //不良率,报废率
-        if(stationInfoModel.getCompletedQty().equals(0)){
+        Integer com = stationInfoModel.getCompletedQty()+stationInfoModel.getQty().intValue();
+        if(com.equals(0)){
             stationInfoModel.setFailRate(null);
             stationInfoModel.setScrapRate(null);
         }else{
             //不良率
-            Long failRate = stationInfoModel.getQty()*100/ stationInfoModel.getCompletedQty();
+            Long failRate = stationInfoModel.getQty()*100/ com;
             stationInfoModel.setFailRate(failRate.intValue());
             //报废率
-            Integer scrapRate = stationInfoModel.getScrapQty()*100/stationInfoModel.getCompletedQty();
+            Integer scrapRate = stationInfoModel.getScrapQty()*100/com;
             stationInfoModel.setScrapRate(scrapRate);
         }
         return stationInfoModel;
+    }
+
+    private Integer getOutputQtyForStation(String scheduleId, String stationId, String processId,String machineId, MoDescInfoModel moDescForStationFail) {
+        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
+        //产出工序是注塑成型
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            //完工数量
+            Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(machineId), scheduleId, stationId).intValue();
+            return completedQty-moDescForStationFail.getQty().intValue();
+        }else {
+            //从在制信息获取完工数,此时拿的是工序的产出,因为在制没有工位产出
+            Integer completedQty = mesRecordWipLogService.getAllOutputQty(scheduleId, processId);
+            return completedQty;
+        }
     }
 
     /**
