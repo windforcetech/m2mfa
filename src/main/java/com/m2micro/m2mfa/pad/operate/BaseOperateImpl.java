@@ -750,7 +750,7 @@ public class BaseOperateImpl implements BaseOperate {
         MesRecordWork mesRecordWork = mesRecordWorkService.findById(mesRecordFail1.getRwId()).orElse(null);
         //完工数量
        Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesRecordWork.getMachineId()), mesRecordWork.getScheduleId(), mesRecordWork.getStationId()).intValue();
-        if(mesRecordFail1.getQty()>completedQty){
+       if(mesRecordFail1.getQty()>completedQty){
             throw new MMException("不良负数量不可大于完工数量");
         }
 

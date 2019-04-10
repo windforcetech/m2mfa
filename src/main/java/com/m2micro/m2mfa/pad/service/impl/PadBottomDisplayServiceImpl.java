@@ -131,7 +131,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         //完成率
         Integer completionRate = stationInfoModel.getCompletedQty()*100/stationInfoModel.getScheduleQty();
         stationInfoModel.setCompletionRate(completionRate);
-        //不良率,报废率
+        //不良率,报废率（完工数 包含不良）
         Integer com = stationInfoModel.getCompletedQty()+stationInfoModel.getQty().intValue();
         if(com.equals(0)){
             stationInfoModel.setFailRate(null);
@@ -147,7 +147,8 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         return stationInfoModel;
     }
 
-    private Integer getOutputQtyForStation(String scheduleId, String stationId, String processId,String machineId, MoDescInfoModel moDescForStationFail) {
+    @Override
+    public Integer getOutputQtyForStation(String scheduleId, String stationId, String processId,String machineId, MoDescInfoModel moDescForStationFail) {
         BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
         //产出工序是注塑成型
         if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){

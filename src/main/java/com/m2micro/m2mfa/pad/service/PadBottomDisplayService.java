@@ -86,4 +86,15 @@ public interface PadBottomDisplayService {
      * @return
      */
     Integer getMachineOutputQty(String scheduleId,String processId);
+
+    /**
+     * 获取工位完成量
+     * @param scheduleId
+     * @param stationId
+     * @param processId
+     * @param machineId
+     * @param moDescForStationFail
+     * @return
+     */
+    Integer getOutputQtyForStation(String scheduleId, String stationId, String processId,String machineId, MoDescInfoModel moDescForStationFail);
 }
