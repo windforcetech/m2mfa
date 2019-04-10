@@ -24,6 +24,7 @@ import com.m2micro.m2mfa.record.entity.MesRecordWork;
 import com.m2micro.m2mfa.record.repository.MesRecordWipLogRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordWipRecRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
+import com.m2micro.m2mfa.record.service.MesRecordWipLogService;
 import com.m2micro.m2mfa.record.service.MesRecordWipRecService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,9 +69,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     @Autowired
     ProcessConstant processConstant;
     @Autowired
-    MesRecordWipRecRepository mesRecordWipRecRepository;
-    @Autowired
-    MesRecordWipLogRepository mesRecordWipLogRepository;
+    MesRecordWipLogService mesRecordWipLogService;
 
     @Override
     public MoDescInfoModel getMoDescInfo(String scheduleId) {
@@ -128,9 +127,9 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
             Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
             stationInfoModel.setCompletedQty(completedQty-moDescForStationFail.getQty().intValue());
         }else {
-            //从在制信息获取完工数,此时拿的是工序的产出
-
-            stationInfoModel.setCompletedQty(0);
+            //从在制信息获取完工数,此时拿的是工序的产出,因为在制没有工位产出
+            Integer completedQty = mesRecordWipLogService.getAllOutputQty(scheduleId, processId);
+            stationInfoModel.setCompletedQty(completedQty);
         }
         /*Integer completedQty = getOutputQtyForProcess(scheduleId, baseProcess);
         stationInfoModel.setCompletedQty(completedQty);*/
@@ -183,7 +182,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
             return getMachineOutputQty(scheduleId, baseProcess.getProcessId());
         }
         //如果不是从在制表拿
-        return null;
+        return mesRecordWipLogService.getAllOutputQty(scheduleId,baseProcess.getProcessId());
     }
 
     /**
@@ -262,7 +261,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
             return getMachineOutputQty(scheduleIds, outputProcessId);
         }
         //如果不是从在制表拿
-        return null;
+        return mesRecordWipLogService.getAllOutputQty(scheduleIds, outputProcessId);
     }
 
 

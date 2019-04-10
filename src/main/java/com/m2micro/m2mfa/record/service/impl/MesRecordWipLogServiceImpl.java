@@ -38,4 +38,36 @@ public class MesRecordWipLogServiceImpl implements MesRecordWipLogService {
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
 
+    /**
+     * 获取条码关联的排产单当前工序的产出
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+    @Override
+    public Integer getAllOutputQty(String scheduleId, String processId) {
+        Integer allOutputQty = mesRecordWipLogRepository.getAllOutputQty(scheduleId, processId);
+        return allOutputQty==null?0:allOutputQty;
+    }
+
+    /**
+     * 获取条码关联的排产单当前工序的产出
+     * @param scheduleIds
+     * @param processId
+     * @see <code>getAllOutputQty(String scheduleId, String processId)</code>
+     * @return
+     */
+    @Override
+    @Deprecated
+    public Integer getAllOutputQty(List<String> scheduleIds, String processId) {
+        Integer outputQty = 0;
+        if(scheduleIds!=null&&scheduleIds.size()>0){
+            for(String scheduleId:scheduleIds){
+                Integer allOutputQty = getAllOutputQty(scheduleId, processId);
+                outputQty = outputQty+allOutputQty;
+            }
+        }
+        return outputQty;
+    }
+
 }
