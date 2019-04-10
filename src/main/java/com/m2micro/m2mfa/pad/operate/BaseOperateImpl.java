@@ -27,6 +27,7 @@ import com.m2micro.m2mfa.mo.service.MesMoScheduleStaffService;
 import com.m2micro.m2mfa.pad.constant.PadConstant;
 import com.m2micro.m2mfa.pad.constant.StationConstant;
 import com.m2micro.m2mfa.pad.model.*;
+import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
@@ -108,6 +109,8 @@ public class BaseOperateImpl implements BaseOperate {
     BaseItemsTargetService baseItemsTargetService;
     @Autowired
     MesMoScheduleStationRepository mesMoScheduleStationRepository;
+    @Autowired
+    PadBottomDisplayService padBottomDisplayService;
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return mesMoScheduleRepository.findById(scheduleId).orElse(null);
@@ -676,7 +679,7 @@ public class BaseOperateImpl implements BaseOperate {
 
 
 /**
-     * 处理作业结束
+     * 处理
      * @param obj
      * @param finishHomeworkModel
      * @return
@@ -697,7 +700,9 @@ public class BaseOperateImpl implements BaseOperate {
         MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
         IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         //产出量>=目标量
-      Integer num =  isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork);
+
+      //Integer num =  isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork);
+        Integer num =  isCompeledForProcess(mesMoSchedule,obj);
         if(num>0){
             //结束工序
             endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
@@ -712,6 +717,16 @@ public class BaseOperateImpl implements BaseOperate {
             scheduleclose(obj.getScheduleId());
         }
         return finishHomeworkModel;
+    }
+
+
+
+
+    public Integer isCompeledForProcess( MesMoSchedule  mesMoSchedule,  FinishHomeworkPara obj){
+      BaseProcess baseProcess = baseProcessService.findById(obj.getProcessId()).orElse(null);
+      Integer outputQtyForProcess = padBottomDisplayService.getOutputQtyForProcess(obj.getScheduleId(), baseProcess);
+      Integer scheduleQty = mesMoSchedule.getScheduleQty();
+      return  outputQtyForProcess.compareTo(scheduleQty);
     }
 
 
@@ -749,8 +764,10 @@ public class BaseOperateImpl implements BaseOperate {
         mesRecordFail.setDefectCode(mesRecordFail1.getDefectCode());
         MesRecordWork mesRecordWork = mesRecordWorkService.findById(mesRecordFail1.getRwId()).orElse(null);
         //完工数量
-       Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesRecordWork.getMachineId()), mesRecordWork.getScheduleId(), mesRecordWork.getStationId()).intValue();
-       if(mesRecordFail1.getQty()>completedQty){
+       //Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesRecordWork.getMachineId()), mesRecordWork.getScheduleId(), mesRecordWork.getScheduleId()).intValue();
+        MoDescInfoModel moDescForStationFail = getMoDescForStationFail(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
+        Integer completedQty = padBottomDisplayService.getOutputQtyForStation(mesRecordWork.getScheduleId(), mesRecordWork.getStationId(), mesRecordWork.getProcessId(), mesRecordWork.getMachineId(), moDescForStationFail);
+        if(mesRecordFail1.getQty()>completedQty){
             throw new MMException("不良负数量不可大于完工数量");
         }
 
