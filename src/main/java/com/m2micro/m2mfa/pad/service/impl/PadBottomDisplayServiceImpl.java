@@ -128,10 +128,12 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
             Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
             stationInfoModel.setCompletedQty(completedQty-moDescForStationFail.getQty().intValue());
         }else {
-            //从在制信息获取完工数
+            //从在制信息获取完工数,此时拿的是工序的产出
 
             stationInfoModel.setCompletedQty(0);
         }
+        /*Integer completedQty = getOutputQtyForProcess(scheduleId, baseProcess);
+        stationInfoModel.setCompletedQty(completedQty);*/
 
         /*完成比 :完工数量/排产数量 *100%
           不良率:不良数量/完工数量*100%
@@ -166,9 +168,19 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         //获取工单的产出工序
         String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
         BaseProcess baseProcess = baseProcessService.findById(outputProcessId).orElse(null);
+        return getOutputQtyForProcess(scheduleId, baseProcess);
+    }
+
+    /**
+     * 获取工序的完成量（工序的产量**************常用方法）
+     * @param scheduleId
+     * @param baseProcess
+     * @return
+     */
+    public Integer getOutputQtyForProcess(String scheduleId,BaseProcess baseProcess) {
         //如果产出工序是注塑成型
         if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
-            return getMachineOutputQty(scheduleId, outputProcessId);
+            return getMachineOutputQty(scheduleId, baseProcess.getProcessId());
         }
         //如果不是从在制表拿
         return null;
@@ -179,16 +191,19 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
      * @param scheduleId
      * @return
      */
-    @Override
+    /*@Override
     public Integer getMachineOutputQty(String scheduleId) {
         //获取工单的产出工序
         String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
         return getMachineOutputQty(scheduleId, outputProcessId);
-    }
+    }*/
 
     /**
      * 获取机台产量（注塑成型工序的产量***************常用方法）
      * @param scheduleId
+     *          机台关联的排产单
+     * @param outputProcessId
+     *          产出工序并且是注塑成型工序
      * @return
      */
     @Override
@@ -219,9 +234,11 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     /**
      * 获取工单完工数量（排产单来自同一工单才能调用，不是同一工单scheduleIds只能传一个）
      * @param scheduleId
+     * @see <code>getOutPutQtys(String scheduleId)</code>
      * @return
      */
     @Override
+    @Deprecated
     public Integer getOutPutQtys(String scheduleId,List<String> scheduleIds) {
         //获取工单的产出工序
         String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
@@ -232,9 +249,11 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
      * 同一工单的排产单（料件途程相同，产出工序相同）
      * @param scheduleIds
      * @param outputProcessId
+     * @see <code>getOutPutQtys(String scheduleId)/code>
      * @return
      */
     @Override
+    @Deprecated
     public Integer getOutPutQtys(List<String> scheduleIds, String outputProcessId) {
         //如果产出工序是注塑成型(预留)
         BaseProcess baseProcess = baseProcessService.findById(outputProcessId).orElse(null);
@@ -252,9 +271,11 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
      * 获取机台产量（注塑成型工序的产量）
      * @param scheduleIds
      * @param outputProcessId
+     * @see <code>getMachineOutputQty(String scheduleId,String processId)</code>
      * @return
      */
     @Override
+    @Deprecated
     public Integer getMachineOutputQty(List<String> scheduleIds, String outputProcessId) {
         //获取产出工序的最后一个工位
         BaseStation baseStation = atlastStation(outputProcessId);
