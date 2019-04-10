@@ -779,7 +779,7 @@ public class BaseOperateImpl implements BaseOperate {
                 throw new MMException("不良负数量不可大于原有数量");
             }
         }
-         Long qty = mesRecordFail1.getQty()+badsum;
+         Long qty = mesRecordFail1.getQty();
          if(badsum>completedQty  ||  qty > completedQty ){
                 throw new MMException("不良负数量不可大于完工数量");
             }
