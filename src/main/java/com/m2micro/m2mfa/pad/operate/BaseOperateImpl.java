@@ -772,11 +772,16 @@ public class BaseOperateImpl implements BaseOperate {
         }
 
         long badsum = getBadsum(mesRecordFail1);
-        long qtynum= Math.abs(mesRecordFail1.getQty());
+        //不良数量为负
+        if(mesRecordFail1.getQty() <0){
+            long qtynum= Math.abs(mesRecordFail1.getQty());
             if (qtynum > badsum) {
                 throw new MMException("不良负数量不可大于原有数量");
             }
-            if(badsum>completedQty){
+        }
+
+
+            if(badsum>completedQty || mesRecordFail1.getQty()<=completedQty){
                 throw new MMException("不良负数量不可大于完工数量");
             }
 
