@@ -45,7 +45,7 @@ public class DataSourceConfig {
   }
   @Bean(name = "namedParameterJdbcTemplate")
   public NamedParameterJdbcTemplate setNamedParameterJdbcTemplate(){
-   return  new NamedParameterJdbcTemplate(primaryDataSource());
+   return  new NamedParameterJdbcTemplate(secondaryDataSource());
   }
 
 }
