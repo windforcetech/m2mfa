@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.barcode.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.m2mfa.barcode.entity.BarcodePrintResources;
 import com.m2micro.m2mfa.barcode.query.PrintApplyQuery;
 import com.m2micro.m2mfa.barcode.query.ScheduleQuery;
 import com.m2micro.m2mfa.barcode.service.BarcodePrintApplyService;
@@ -172,11 +173,32 @@ public class BarcodePrintApplyController {
         return ResponseMessage.ok(printApplyObj);
     }
 
+//    @PostMapping("/printApplyGenerate")
+//    @ApiOperation(value = "打印条码生成")
+//    @UserOperationLog("打印条码生成")
+//    public ResponseMessage<List<HashMap<String, String>>> printApplyGenerate(String applyId, Integer num) {
+//        List<HashMap<String, String>> labels = barcodePrintApplyService.generateLabel(applyId, num);
+//        return ResponseMessage.ok(labels);
+//    }
+
     @PostMapping("/printApplyGenerate")
     @ApiOperation(value = "打印条码生成")
     @UserOperationLog("打印条码生成")
-    public ResponseMessage<List<HashMap<String, String>>> printApplyGenerate(String applyId, Integer num) {
-        List<HashMap<String, String>> labels = barcodePrintApplyService.generateLabel(applyId, num);
+    public ResponseMessage<List<BarcodePrintResources>> printApplyGenerate(String applyId, Integer num) {
+        List<BarcodePrintResources> labels = barcodePrintApplyService.generateLabel(applyId, num);
         return ResponseMessage.ok(labels);
     }
+
+
+    /**
+     * 批量审核打印审核 打印作废，打印
+     */
+    @PostMapping("/printCheckList")
+    @ApiOperation(value = "审核打印 1 打印，-1 打印作废,2 已打印，0 新添加的")
+    @UserOperationLog("审核打印")
+    public ResponseMessage printCheckList(@RequestBody String[] ids,Integer flag) {
+        barcodePrintApplyService.printCheckList(ids,flag);
+        return ResponseMessage.ok();
+    }
+
 }

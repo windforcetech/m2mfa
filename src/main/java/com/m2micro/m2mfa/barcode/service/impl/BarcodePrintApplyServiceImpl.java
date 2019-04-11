@@ -379,6 +379,15 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         printApplyObj.setTemplatePrintObj(templatePrintObj);
 
         //
+
+        RowMapper rm111 = BeanPropertyRowMapper.newInstance(PrintResourceObj.class);
+        String sql111 = " SELECT t.id,t.apply_id,t.content,t.flag FROM barcode_print_resources t \n" +
+                "where t.apply_id='"+printApplyObj.getApplyId()+"' ; ";
+
+        List<PrintResourceObj> printResourceObjList = jdbcTemplate.query(sql111, rm111);
+
+        printApplyObj.setPrintResourceObjList(printResourceObjList);
+        //
         RowMapper rm11 = BeanPropertyRowMapper.newInstance(PackObj.class);
         String sql11 = " select p.id,p.qty,p.nw,p.gw,p.cuft from base_pack p " +
                 "where p.part_id='" + printApplyObj.getPartNo() + "' and p.category=2; ";
@@ -407,7 +416,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     // 生成打印标签
     @Override
     @Transactional
-    public List<HashMap<String,String>> generateLabel(String applyId, Integer num/*份数*/) {
+    public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*份数*/) {
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
         String dateNow = df.format(new Date());
         PrintApplyObj printApplyObj = printDetail(applyId);
@@ -518,20 +527,32 @@ name: "日期函数"
                 k++;
             }
         }
+        List<BarcodePrintResources> rs = new ArrayList<>();
+        for (HashMap<String, String> item : labelList) {
+            BarcodePrintResources one = new BarcodePrintResources();
+            one.setId(UUIDUtil.getUUID());
+            one.setApplyId(printApplyObj.getApplyId());
+            LabelObj lableObj = new LabelObj();
+            lableObj.setLabelFile(printApplyObj.getTemplatePrintObj().getFileName());
+            lableObj.setData(item);
+            String content = JSONObject.toJSONString(lableObj);
+            one.setContent(content);
+            one.setFlag(0);
+            barcodePrintResourcesRepository.save(one);
+            rs.add(one);
+        }
+        return rs;
+    }
 
-      for(HashMap<String,String> item:labelList)  {
-          BarcodePrintResources one=new BarcodePrintResources();
-          one.setId(UUIDUtil.getUUID());
-          one.setApplyId(printApplyObj.getApplyId());
-          LabelObj lableObj=new LabelObj();
-          lableObj.setLabelFile(printApplyObj.getTemplatePrintObj().getFileName());
-          lableObj.setData(item);
-          String content = JSONObject.toJSONString(lableObj);
-          one.setContent(content);
-          one.setFlag(1);
-          barcodePrintResourcesRepository.save(one);
-      }
-      return  labelList;
+    @Override
+    @Transactional
+    public void printCheckList(String[] ids, Integer flag) {
+        for (String id : ids) {
+            Optional<BarcodePrintResources> byId = barcodePrintResourcesRepository.findById(id);
+            byId.get().setFlag(flag);
+            barcodePrintResourcesRepository.save(byId.get());
+        }
+
     }
 
 

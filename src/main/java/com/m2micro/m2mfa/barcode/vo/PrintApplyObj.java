@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Date;
+import java.util.List;
 
 @ApiModel("打印申请")
 public class PrintApplyObj {
@@ -74,6 +75,17 @@ public class PrintApplyObj {
 
     @ApiModelProperty("工单项次")
     private String orderSeq;
+
+    @ApiModelProperty("打印条码列表")
+    private List<PrintResourceObj> printResourceObjList;
+
+    public List<PrintResourceObj> getPrintResourceObjList() {
+        return printResourceObjList;
+    }
+
+    public void setPrintResourceObjList(List<PrintResourceObj> printResourceObjList) {
+        this.printResourceObjList = printResourceObjList;
+    }
 
     public String getMoNumber() {
         return moNumber;
