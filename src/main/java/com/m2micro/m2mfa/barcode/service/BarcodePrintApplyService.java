@@ -38,4 +38,6 @@ public interface BarcodePrintApplyService extends BaseService<BarcodePrintApply,
     void deleteList(String[] ids);
 
     PageUtil<PrintApplyObj> printApplyList(PrintApplyQuery query);
+
+    PrintApplyObj printDetail(String applyId);
 }
