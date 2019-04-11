@@ -41,19 +41,19 @@ public class BarcodePrintApply extends BaseEntity implements Serializable {
     private String source;
     @ApiModelProperty(value = "来源项次")
     private Integer sequence;
-    @NotEmpty(message="标签类型不能为空",groups = {AddGroup.class, UpdateGroup.class})
+//    @NotEmpty(message="标签类型不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "标签类型")
     private String lableCategory;
     @NotEmpty(message="标签模板不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "标签模板")
     private String templateId;
-    @NotEmpty(message="客户编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
+//    @NotEmpty(message="客户编号不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "客户编号")
     private String customerNo;
     @NotEmpty(message="料件Id不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "料件Id")
     private String partId;
-    @NotEmpty(message="数量不能为空",groups = {AddGroup.class, UpdateGroup.class})
+//    @NotEmpty(message="数量不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "数量")
     private Integer qty;
     @ApiModelProperty(value = "审核状态")

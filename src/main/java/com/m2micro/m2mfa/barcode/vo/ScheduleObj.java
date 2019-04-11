@@ -20,7 +20,7 @@ public class ScheduleObj {
     @ApiModelProperty("品名")
     private String partName;
     @ApiModelProperty("排产数量")
-    private String scheduleQty;
+    private Integer scheduleQty;
     @ApiModelProperty("机台编号")
     private String machineName;
 
@@ -121,11 +121,11 @@ public class ScheduleObj {
         this.partName = partName;
     }
 
-    public String getScheduleQty() {
+    public Integer getScheduleQty() {
         return scheduleQty;
     }
 
-    public void setScheduleQty(String scheduleQty) {
+    public void setScheduleQty(Integer scheduleQty) {
         this.scheduleQty = scheduleQty;
     }
 

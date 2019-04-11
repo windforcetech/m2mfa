@@ -56,8 +56,8 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 //        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
 //    }
 
-    @Override
-    public PageUtil<PrintApplyObj> printApplyList(PrintApplyQuery query) {
+
+    public PageUtil<PrintApplyObj> printApplyList1(PrintApplyQuery query) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
         String sql = " select\n" +
                 " t2.item_name flag_type,\n" +
@@ -84,6 +84,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 " base_items_target t2,\n" +
                 " base_customer cus\n" +
                 " where t1.category=t2.id\n" +
+                " and t1.id= t.template_id "+
                 " and t.customer_no=cus.code\n" +
                 " and t.part_id=p.part_id\n" +
                 " and t.flag=0  ";
@@ -96,6 +97,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 " base_items_target t2,\n" +
                 " base_customer cus\n" +
                 " where t1.category=t2.id\n" +
+                " and t1.id= t.template_id "+
                 " and t.customer_no=cus.code\n" +
                 " and t.part_id=p.part_id\n" +
                 " and t.flag=0 ;";
@@ -108,6 +110,71 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 
     }
 
+
+    @Override
+    public PageUtil<PrintApplyObj> printApplyList(PrintApplyQuery query) {
+        RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
+        String sql = " select t3.item_name source_type,\n" +
+                "t3.id source_id,\n" +
+                "t2.item_name flag_type,\n" +
+                "t1.name template_name,\n" +
+                "t1.id template_id,\n" +
+                "t1.version template_version,\n" +
+                "cus.code customer_code,\n" +
+                "cus.name customer_name,\n" +
+                "t.id apply_id,\n" +
+                "t.category,\n" +
+                "t.source,\n" +
+                "schedule.schedule_no,\n" +
+                "t.print_category,\n" +
+                "t.qty,\n" +
+                "t.check_On,\n" +
+                "t.flag,\n" +
+                "t.description,\n" +
+                "t.check_flag,\n" +
+                "t.enabled,\n" +
+                "p.part_id,\n" +
+                "p.part_no,\n" +
+                "p.name part_name\n" +
+                "from barcode_print_apply t ,\n" +
+                "base_parts p,\n" +
+                "base_template t1,\n" +
+                "base_items_target t2,\n" +
+                "base_customer cus,\n" +
+                "mes_mo_schedule schedule,\n" +
+                "base_items_target t3\n" +
+                "where t1.category=t2.id\n" +
+                "and t1.id= t.template_id\n" +
+                "and t.customer_no=cus.code\n" +
+                "and t.part_id=p.part_id\n" +
+                "and schedule.schedule_id=t.source\n" +
+                "and t.category=t3.id\n" +
+                "and t.flag=0  ";
+
+        String sql2 = " select\n" +
+                " count(t.id) \n" +
+                "from barcode_print_apply t ,\n" +
+                "base_parts p,\n" +
+                "base_template t1,\n" +
+                "base_items_target t2,\n" +
+                "base_customer cus,\n" +
+                "mes_mo_schedule schedule,\n" +
+                "base_items_target t3\n" +
+                "where t1.category=t2.id\n" +
+                "and t1.id= t.template_id\n" +
+                "and t.customer_no=cus.code\n" +
+                "and t.part_id=p.part_id\n" +
+                "and schedule.schedule_id=t.source\n" +
+                "and t.category=t3.id\n" +
+                "and t.flag=0  ;";
+
+        Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
+        sql += " order by t.id limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
+
+        List<PrintApplyObj> templateList = jdbcTemplate.query(sql, rm);
+        return PageUtil.of(templateList, count, query.getSize(), query.getPage());
+
+    }
 
     @Override
     public boolean exist(String sourceCategory, String sourceNo, String partId) {
