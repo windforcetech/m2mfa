@@ -16,7 +16,7 @@ public interface BaseOperate {
      * @param scheduleId
      * @param stationId
      */
-    OperationInfo getOperationInfo(String scheduleId, String stationId);
+    OperationInfo getOperationInfo(String scheduleId, String stationId,String processId);
 
     /**
      * 上工

@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 @Service("padChargingService")
 public class PadChargingServiceImpl extends BaseOperateImpl implements PadChargingService {
     @Override
-    public OperationInfo getOperationInfo(String scheduleId, String stationId) {
-        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId);
+    public OperationInfo getOperationInfo(String scheduleId, String stationId,String processId) {
+        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId,processId);
         //加料没有不良输入，置灰
         operationInfo.setDefectiveProducts("0");
         return operationInfo;

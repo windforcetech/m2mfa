@@ -27,8 +27,8 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
 
 
     @Override
-    public OperationInfo getOperationInfo(String scheduleId, String stationId) {
-        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId);
+    public OperationInfo getOperationInfo(String scheduleId, String stationId,String processId) {
+        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId,processId);
         //开机没有作业输入，置灰
         operationInfo.setJobInput("0");
         return operationInfo;
