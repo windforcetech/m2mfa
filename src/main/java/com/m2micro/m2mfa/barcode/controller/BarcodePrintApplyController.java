@@ -24,6 +24,9 @@ import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * 标签打印表单 前端控制器
  *
@@ -32,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/barcode/barcodePrintApply")
-@Api(value = "标签打印表单 前端控制器",description = "打印申请接口")
+@Api(value = "标签打印表单 前端控制器", description = "打印申请接口")
 @Authorize
 public class BarcodePrintApplyController {
     @Autowired
@@ -160,4 +163,20 @@ public class BarcodePrintApplyController {
         return ResponseMessage.ok(page);
     }
 
+
+    @GetMapping("/printApplyDetail/{id}")
+    @ApiOperation(value = "获取打印申请详情")
+    @UserOperationLog("获取打印申请详情")
+    public ResponseMessage<PrintApplyObj> printApplyDetail(@PathVariable("id") String applyId) {
+        PrintApplyObj printApplyObj = barcodePrintApplyService.printDetail(applyId);
+        return ResponseMessage.ok(printApplyObj);
+    }
+
+    @PostMapping("/printApplyGenerate")
+    @ApiOperation(value = "打印条码生成")
+    @UserOperationLog("打印条码生成")
+    public ResponseMessage<List<HashMap<String, String>>> printApplyGenerate(String applyId, Integer num) {
+        List<HashMap<String, String>> labels = barcodePrintApplyService.generateLabel(applyId, num);
+        return ResponseMessage.ok(labels);
+    }
 }

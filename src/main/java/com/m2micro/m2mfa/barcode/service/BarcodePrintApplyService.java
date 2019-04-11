@@ -10,6 +10,9 @@ import com.m2micro.m2mfa.barcode.vo.PrintApplyObj;
 import com.m2micro.m2mfa.barcode.vo.ScheduleObj;
 import org.springframework.data.domain.Page;
 
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * 标签打印表单 服务类
  * @author liaotao
@@ -40,4 +43,5 @@ public interface BarcodePrintApplyService extends BaseService<BarcodePrintApply,
     PageUtil<PrintApplyObj> printApplyList(PrintApplyQuery query);
 
     PrintApplyObj printDetail(String applyId);
+    List<HashMap<String,String>> generateLabel(String applyId, Integer num/*份数*/);
 }

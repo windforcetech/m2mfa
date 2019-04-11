@@ -138,20 +138,24 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "p.part_id,\n" +
                 "p.part_no,\n" +
                 "p.name part_name ,\n" +
-                " p.spec  \n" +
+                " p.spec  ,\n" +
+                " mo.mo_number,  \n" +
+                " mo.order_seq  \n" +
                 "from barcode_print_apply t ,\n" +
                 "base_parts p,\n" +
                 "base_template t1,\n" +
                 "base_items_target t2,\n" +
                 "base_customer cus,\n" +
                 "mes_mo_schedule schedule,\n" +
-                "base_items_target t3\n" +
+                "base_items_target t3,\n" +
+                " mes_mo_desc mo \n " +
                 "where t1.category=t2.id\n" +
                 "and t1.id= t.template_id\n" +
                 "and t.customer_no=cus.code\n" +
                 "and t.part_id=p.part_id\n" +
                 "and schedule.schedule_id=t.source\n" +
                 "and t.category=t3.id\n" +
+                "and mo.mo_id=schedule.mo_id " +
                 "and t.flag=0  ";
 
         String sql2 = " select\n" +
@@ -401,7 +405,9 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     }
 
     // 生成打印标签
-    public void generateLabel(String applyId, Integer num/*份数*/) {
+    @Override
+    @Transactional
+    public List<HashMap<String,String>> generateLabel(String applyId, Integer num/*份数*/) {
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
         String dateNow = df.format(new Date());
         PrintApplyObj printApplyObj = printDetail(applyId);
@@ -525,6 +531,7 @@ name: "日期函数"
           one.setFlag(1);
           barcodePrintResourcesRepository.save(one);
       }
+      return  labelList;
     }
 
 
