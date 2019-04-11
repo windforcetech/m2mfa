@@ -698,10 +698,10 @@ public class BaseOperateImpl implements BaseOperate {
     public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) {
         FinishHomeworkModel finishHomeworkModel = new FinishHomeworkModel();
         //是否是扫描或继承站
-        if(isProcessCollection(obj.getProcessId())){
+        /*if(isProcessCollection(obj.getProcessId())){
             //预留
             return finishHomeworkModel;
-        }
+        }*/
         return handleFinishHomework(obj, finishHomeworkModel);
     }
 
