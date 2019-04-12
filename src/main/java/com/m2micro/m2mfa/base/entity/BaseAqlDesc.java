@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.entity;
 
 
+import javax.jdo.annotations.Transactional;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
@@ -38,10 +39,18 @@ public class BaseAqlDesc extends BaseEntity implements Serializable {
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+    @Transactional
+    @ApiModelProperty(value = "抽样方式名称")
+    private String categoryName;
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
 
     public String getAqlId() {
         return aqlId;
     }
+
     public void setAqlId(String aqlId) {
         this.aqlId = aqlId;
     }
@@ -49,6 +58,7 @@ public class BaseAqlDesc extends BaseEntity implements Serializable {
     public String getAqlCode() {
         return aqlCode;
     }
+
     public void setAqlCode(String aqlCode) {
         this.aqlCode = aqlCode;
     }
@@ -56,6 +66,7 @@ public class BaseAqlDesc extends BaseEntity implements Serializable {
     public String getAqlName() {
         return aqlName;
     }
+
     public void setAqlName(String aqlName) {
         this.aqlName = aqlName;
     }
@@ -63,6 +74,7 @@ public class BaseAqlDesc extends BaseEntity implements Serializable {
     public String getCategory() {
         return category;
     }
+
     public void setCategory(String category) {
         this.category = category;
     }
@@ -70,6 +82,7 @@ public class BaseAqlDesc extends BaseEntity implements Serializable {
     public Boolean getEnabled() {
         return enabled;
     }
+
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
@@ -77,10 +90,16 @@ public class BaseAqlDesc extends BaseEntity implements Serializable {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
 
-
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 }
