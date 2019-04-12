@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class BaseAqlDescServiceImpl implements BaseAqlDescService {
+
     @Autowired
     BaseAqlDescRepository baseAqlDescRepository;
     @Autowired
@@ -47,9 +48,12 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
     @Autowired
     @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
+
+    @Override
     public BaseAqlDescRepository getRepository() {
         return baseAqlDescRepository;
     }
+
 
     @Override
     public PageUtil<BaseAqlDesc> list(BaseAqlDescQuery query) {
@@ -91,6 +95,7 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
         return PageUtil.of(baseAqlDescs,totalCount,query.getSize(),query.getPage());
     }
 
+
     @Override
     @Transactional
     public void save(AqlDescvo aqlDescvo) {
@@ -109,6 +114,7 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
         this.save(baseAqlDesc);
     }
 
+
     @Override
     @Transactional
     public void update(AqlDescvo aqlDescvo) {
@@ -124,11 +130,12 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
         }
     }
 
+
     @Override
     @Transactional
     public String  deleteIds(String[] ids) {
 
-         String msg ="";
+        List<String> msgs = new ArrayList<>();
          for(int i = 0 ; i< ids.length; i++){
              List<BaseQualitySolutionDesc> baseQualitySolutionDescs  = baseQualitySolutionDescRepository.findByAqlId(ids[i]);
              if(baseQualitySolutionDescs.isEmpty()){
@@ -137,12 +144,14 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
                  continue;
              }
              BaseAqlDesc baseAqlDesc = this.findById(ids[i]).orElse(null);
-
-             msg +=baseAqlDesc.getAqlCode()+",";
-
+             msgs.add(baseAqlDesc.getAqlCode());
          }
-         return  msg ;
+        if(msgs.isEmpty()){
+            return null;
+        }
+         return String.join(",",msgs);
     }
+
 
     @Override
     public AqlDescvo selectAqlDes(String id) {
@@ -150,6 +159,7 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
         List<BaseAqlDef> baseAqlDefs = baseAqlDefRepository.findByAqlId(id);
         return  AqlDescvo.builder().baseAqlDefs(baseAqlDefs).baseAqlDesc(baseAqlDesc).build();
     }
+
 
     @Override
     public List<AqlDescSelect> getAqlDesc() {
@@ -162,5 +172,6 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
         }).collect(Collectors.toList());
         return collect;
     }
+
 
 }
