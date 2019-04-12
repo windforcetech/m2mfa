@@ -15,4 +15,8 @@ import java.util.List;
 public interface BaseDefectRepository extends BaseRepository<BaseDefect,String> {
 
   List<BaseDefect>findByEctCode(String ectCode);
+
+  List<BaseDefect> findByEctCodeAndEctIdNot(String ectCode,String ectId);
+
+  List<BaseDefect> findByEctNameAndEctIdNot(String ectCode,String ectId);
 }

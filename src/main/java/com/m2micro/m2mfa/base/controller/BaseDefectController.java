@@ -65,12 +65,7 @@ public class BaseDefectController {
     @ApiOperation(value="保存不良現象代碼")
     @UserOperationLog("保存不良現象代碼")
     public ResponseMessage<BaseDefect> save(@RequestBody BaseDefect baseDefect){
-        if(!baseDefectRepository.findByEctCode(baseDefect.getEctCode()).isEmpty()){
-            throw  new MMException("不良编号【"+baseDefect.getEctCode()+"】已被使用。");
-        }
-        ValidatorUtil.validateEntity(baseDefect, AddGroup.class);
-        baseDefect.setEctId(UUIDUtil.getUUID());
-        baseDefectService.save(baseDefect);
+        baseDefectService.saveEntity(baseDefect);
         return ResponseMessage.ok();
     }
 
@@ -81,14 +76,7 @@ public class BaseDefectController {
     @ApiOperation(value="更新不良現象代碼")
     @UserOperationLog("更新不良現象代碼")
     public ResponseMessage<BaseDefect> update(@RequestBody BaseDefect baseDefect){
-        ValidatorUtil.validateEntity(baseDefect, UpdateGroup.class);
-        BaseDefect baseDefectOld = baseDefectService.findById(baseDefect.getEctId()).orElse(null);
-        if(baseDefectOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        baseDefect.setEctCode(baseDefectOld.getEctCode());
-        PropertyUtil.copy(baseDefect,baseDefectOld);
-        return ResponseMessage.ok(baseDefectService.save(baseDefectOld));
+        return ResponseMessage.ok(baseDefectService.updateEntity(baseDefect));
     }
     /**
      * 删除
