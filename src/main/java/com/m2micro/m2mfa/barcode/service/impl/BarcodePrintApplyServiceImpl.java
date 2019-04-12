@@ -552,6 +552,8 @@ name: "日期函数"
             String content = JSONObject.toJSONString(lableObj);
             one.setContent(content);
             one.setFlag(0);
+//            one.setDescription("..");
+//            one.setBarcode("test");
             barcodePrintResourcesRepository.save(one);
             rs.add(one);
         }
