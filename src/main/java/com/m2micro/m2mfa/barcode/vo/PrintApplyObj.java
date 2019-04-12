@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Date;
+import java.util.List;
 
 @ApiModel("打印申请")
 public class PrintApplyObj {
@@ -53,12 +54,78 @@ public class PrintApplyObj {
     @ApiModelProperty("有效")
     private Boolean enabled;
 
+    @ApiModelProperty("规格")
+    private String spec;
 //    @ApiModelProperty("项次")
 //    private Integer sequence;
     @ApiModelProperty("料件id")
     private String partId;
     @ApiModelProperty("品名")
     private String partName;
+    @ApiModelProperty("模板数据")
+
+    private TemplatePrintObj templatePrintObj;
+
+
+    @ApiModelProperty("包装数据")
+    private PackObj packObj;
+
+    @ApiModelProperty("工单号码")
+    private String moNumber;
+
+    @ApiModelProperty("工单项次")
+    private String orderSeq;
+
+    @ApiModelProperty("打印条码列表")
+    private List<PrintResourceObj> printResourceObjList;
+
+    public List<PrintResourceObj> getPrintResourceObjList() {
+        return printResourceObjList;
+    }
+
+    public void setPrintResourceObjList(List<PrintResourceObj> printResourceObjList) {
+        this.printResourceObjList = printResourceObjList;
+    }
+
+    public String getMoNumber() {
+        return moNumber;
+    }
+
+    public void setMoNumber(String moNumber) {
+        this.moNumber = moNumber;
+    }
+
+    public String getOrderSeq() {
+        return orderSeq;
+    }
+
+    public void setOrderSeq(String orderSeq) {
+        this.orderSeq = orderSeq;
+    }
+
+    public PackObj getPackObj() {
+        return packObj;
+    }
+
+    public void setPackObj(PackObj packObj) {
+        this.packObj = packObj;
+    }
+
+    public TemplatePrintObj getTemplatePrintObj() {
+        return templatePrintObj;
+    }
+
+    public void setTemplatePrintObj(TemplatePrintObj templatePrintObj) {
+        this.templatePrintObj = templatePrintObj;
+    }
+
+    public String getSpec() {
+        return spec;
+    }
+
+    public void setSpec(String spec) {
+        this.spec = spec;
+    }
 
     public String getApplyId() {
         return applyId;
@@ -237,4 +304,6 @@ public class PrintApplyObj {
     public void setPartName(String partName) {
         this.partName = partName;
     }
+
+
 }

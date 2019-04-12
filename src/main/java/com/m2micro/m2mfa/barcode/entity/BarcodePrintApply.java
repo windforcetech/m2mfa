@@ -238,4 +238,5 @@ public class BarcodePrintApply extends BaseEntity implements Serializable {
         return format + num;
     }
 
+
 }
