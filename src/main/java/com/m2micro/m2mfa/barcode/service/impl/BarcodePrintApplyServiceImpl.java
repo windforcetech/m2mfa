@@ -366,7 +366,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "and t.part_id=p.part_id\n" +
                 "and schedule.schedule_id=t.source\n" +
                 "and t.category=t3.id\n" +
-                "and t.flag=0  " +
+                "and t.flag=1  " +
                 "and mo.mo_id=schedule.mo_id " +
                 "and t.id='" + applyId + "' ;";
 
@@ -552,8 +552,9 @@ name: "日期函数"
             String content = JSONObject.toJSONString(lableObj);
             one.setContent(content);
             one.setFlag(0);
+            String data=JSONObject.toJSONString(item);
 //            one.setDescription("..");
-//            one.setBarcode("test");
+            one.setBarcode(data);
             barcodePrintResourcesRepository.save(one);
             rs.add(one);
         }
