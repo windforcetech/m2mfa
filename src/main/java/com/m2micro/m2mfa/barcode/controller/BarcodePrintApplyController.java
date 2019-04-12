@@ -194,7 +194,7 @@ public class BarcodePrintApplyController {
      * 批量审核打印审核 打印作废，打印
      */
     @PostMapping("/printCheckList")
-    @ApiOperation(value = "审核打印 1 打印，-1 打印作废,2 已打印，0 新添加的")
+    @ApiOperation(value = "审核打印 :1, 已打印：2， 打印作废:-1,未审核：0")
     @UserOperationLog("审核打印")
     public ResponseMessage printCheckList(@RequestBody String[] ids,Integer flag) {
         barcodePrintApplyService.printCheckList(ids,flag);
