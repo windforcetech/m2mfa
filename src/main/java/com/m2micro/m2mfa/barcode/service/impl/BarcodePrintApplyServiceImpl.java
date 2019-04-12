@@ -542,8 +542,7 @@ name: "日期函数"
         }
 
         List<BarcodePrintResources> rs = new ArrayList<>();
-        for (
-                HashMap<String, String> item : labelList) {
+        for (HashMap<String, String> item : labelList) {
             BarcodePrintResources one = new BarcodePrintResources();
             one.setId(UUIDUtil.getUUID());
             one.setApplyId(printApplyObj.getApplyId());
