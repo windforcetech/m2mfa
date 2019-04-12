@@ -34,8 +34,8 @@ public class PadDispatchController {
     @RequestMapping("/getOperationInfo")
     @ApiOperation(value="获取操作栏相关信息")
     @UserOperationLog("获取操作栏相关信息")
-    public ResponseMessage<OperationInfo> getOperationInfo(String scheduleId, String stationId) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        return ResponseMessage.ok(padDispatchService.getOperationInfo(scheduleId,stationId));
+    public ResponseMessage<OperationInfo> getOperationInfo(String scheduleId, String stationId,String processId) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return ResponseMessage.ok(padDispatchService.getOperationInfo(scheduleId,stationId,processId));
     }
 
     /**

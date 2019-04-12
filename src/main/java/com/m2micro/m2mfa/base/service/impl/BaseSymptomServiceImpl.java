@@ -116,12 +116,12 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
         //校验不良原因代码
         List<BaseSymptom> listByCode = baseSymptomRepository.findBySymptomCodeAndSymptomIdNot(baseSymptom.getSymptomCode(), "");
         if(listByCode!=null&&listByCode.size()>0){
-            throw new MMException("不良原因代码不唯一！");
+            throw new MMException("不良代码不唯一！");
         }
         //校验不良原因名称
         List<BaseSymptom> listByName = baseSymptomRepository.findBySymptomNameAndSymptomIdNot(baseSymptom.getSymptomName(), "");
         if(listByName!=null&&listByName.size()>0){
-            throw new MMException("不良原因名称不唯一！");
+            throw new MMException("不良名称不唯一！");
         }
         baseSymptom.setSymptomId(UUIDUtil.getUUID());
         return save(baseSymptom);
@@ -138,12 +138,12 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
         //校验不良原因代码
         List<BaseSymptom> listByCode = baseSymptomRepository.findBySymptomCodeAndSymptomIdNot(baseSymptom.getSymptomCode(), baseSymptom.getSymptomId());
         if(listByCode!=null&&listByCode.size()>0){
-            throw new MMException("不良原因代码不唯一！");
+            throw new MMException("不良代码不唯一！");
         }
         //校验不良原因名称
         List<BaseSymptom> listByName = baseSymptomRepository.findBySymptomNameAndSymptomIdNot(baseSymptom.getSymptomName(), baseSymptom.getSymptomId());
         if(listByName!=null&&listByName.size()>0){
-            throw new MMException("不良原因名称不唯一！");
+            throw new MMException("不良名称不唯一！");
         }
         PropertyUtil.copy(baseSymptom,baseSymptomOld);
         return save(baseSymptomOld);

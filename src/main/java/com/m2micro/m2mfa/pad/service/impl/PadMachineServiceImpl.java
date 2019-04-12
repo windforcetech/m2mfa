@@ -28,8 +28,8 @@ public class PadMachineServiceImpl extends BaseOperateImpl implements PadMachine
     private MesRecordWorkService mesRecordWorkService;
 
     @Override
-    public OperationInfo getOperationInfo(String scheduleId, String stationId) {
-        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId);
+    public OperationInfo getOperationInfo(String scheduleId, String stationId,String processId ) {
+        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId,processId);
         //调机没有不良输入，置灰
         operationInfo.setDefectiveProducts("0");
         return operationInfo;

@@ -1,22 +1,24 @@
 package com.m2micro.m2mfa.base.service.impl;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseDefect;
+import com.m2micro.m2mfa.base.entity.BaseSymptom;
 import com.m2micro.m2mfa.base.query.BaseDefectQuery;
 import com.m2micro.m2mfa.base.repository.BaseDefectRepository;
 import com.m2micro.m2mfa.base.service.BaseDefectService;
+import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.record.repository.MesRecordFailRepository;
 import com.querydsl.core.BooleanBuilder;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.QBaseDefect;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,5 +107,45 @@ public class BaseDefectServiceImpl implements BaseDefectService {
 
 
         return msg;
+    }
+
+    @Override
+    public BaseDefect saveEntity(BaseDefect baseDefect) {
+        ValidatorUtil.validateEntity(baseDefect, AddGroup.class);
+        //校验不良原因代码
+        validCodeAndName(baseDefect, "");
+        baseDefect.setEctId(UUIDUtil.getUUID());
+        return save(baseDefect);
+    }
+
+    @Override
+    public BaseDefect updateEntity(BaseDefect baseDefect) {
+        ValidatorUtil.validateEntity(baseDefect, UpdateGroup.class);
+        BaseDefect baseDefectOld = findById(baseDefect.getEctId()).orElse(null);
+        if(baseDefectOld==null){
+            throw new MMException("数据库不存在该记录");
+        }
+        //校验code和name
+        validCodeAndName(baseDefect, baseDefect.getEctId());
+        PropertyUtil.copy(baseDefect,baseDefectOld);
+        return save(baseDefectOld);
+    }
+
+    /**
+     * 校验code和name
+     * @param baseDefect
+     * @param ectId
+     */
+    private void validCodeAndName(BaseDefect baseDefect, String ectId) {
+        //校验不良原因代码
+        List<BaseDefect> listByCode = baseDefectRepository.findByEctCodeAndEctIdNot(baseDefect.getEctCode(), ectId);
+        if (listByCode != null && listByCode.size() > 0) {
+            throw new MMException("不良代码不唯一！");
+        }
+        //校验不良原因名称
+        List<BaseDefect> listByName = baseDefectRepository.findByEctNameAndEctIdNot(baseDefect.getEctName(), ectId);
+        if (listByName != null && listByName.size() > 0) {
+            throw new MMException("不良名称不唯一！");
+        }
     }
 }

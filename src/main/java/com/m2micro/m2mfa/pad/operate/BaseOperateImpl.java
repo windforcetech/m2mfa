@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.pad.operate;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
+import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
@@ -111,6 +112,8 @@ public class BaseOperateImpl implements BaseOperate {
     MesMoScheduleStationRepository mesMoScheduleStationRepository;
     @Autowired
     PadBottomDisplayService padBottomDisplayService;
+    @Autowired
+    ProcessConstant processConstant;
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return mesMoScheduleRepository.findById(scheduleId).orElse(null);
@@ -118,7 +121,7 @@ public class BaseOperateImpl implements BaseOperate {
 
 
     @Override
-    public OperationInfo getOperationInfo(String scheduleId, String stationId) {
+    public OperationInfo getOperationInfo(String scheduleId, String stationId,String processId) {
 
         if(StringUtils.isEmpty(scheduleId)){
             throw new MMException("当前没有可处理的排产单！");
@@ -126,6 +129,9 @@ public class BaseOperateImpl implements BaseOperate {
         if(StringUtils.isEmpty(stationId)){
             throw new MMException("当前岗位为空，请刷新！");
         }
+        /*if(StringUtils.isEmpty(processId)){
+            throw new MMException("当前工序为空，请刷新！");
+        }*/
         MesMoSchedule mesMoSchedule = findMesMoScheduleById(scheduleId);
         //校验排产单状态
         isScheduleFlag(mesMoSchedule);
@@ -147,11 +153,33 @@ public class BaseOperateImpl implements BaseOperate {
         //5.根据提报异常标志设置其他按钮是否置灰
         setOtherByAbnormal(operationInfo);
         //6.根据工序设置作业输入是否置灰
-        MesMoScheduleStation mesMoScheduleStation = mesMoScheduleStationRepository.findByScheduleIdAndStationId(scheduleId, stationId);
-        BaseProcess baseProcess = baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null);
+        //MesMoScheduleStation mesMoScheduleStation = mesMoScheduleStationRepository.findByScheduleIdAndStationId(scheduleId, stationId);
+        //BaseProcess baseProcess = baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null);
+        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
         setOtherByProcess(operationInfo,baseProcess);
+        //7.禁用扫描过站的不良输入
+        setDefectiveProducts(operationInfo,baseProcess);
         return operationInfo;
     }
+
+    /**
+     * 禁用扫描过站的不良输入
+     * @param operationInfo
+     * @param baseProcess
+     */
+    private void setDefectiveProducts(OperationInfo operationInfo, BaseProcess baseProcess) {
+        //禁用扫描过站的不良输入
+        if(BaseItemsTargetConstant.SCAN.equalsIgnoreCase(getCollection(baseProcess))){
+            //不良品数(0:置灰,1:不置灰)
+            operationInfo.setDefectiveProducts("0");
+        }
+    }
+
+    private String getCollection(BaseProcess baseProcess) {
+        BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null);
+        return baseItemsTarget.getItemValue();
+    }
+
 
 
     /**
@@ -670,10 +698,10 @@ public class BaseOperateImpl implements BaseOperate {
     public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) {
         FinishHomeworkModel finishHomeworkModel = new FinishHomeworkModel();
         //是否是扫描或继承站
-        if(isProcessCollection(obj.getProcessId())){
+        /*if(isProcessCollection(obj.getProcessId())){
             //预留
             return finishHomeworkModel;
-        }
+        }*/
         return handleFinishHomework(obj, finishHomeworkModel);
     }
 

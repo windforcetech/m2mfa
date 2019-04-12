@@ -12,7 +12,7 @@ public interface PadDispatchService {
      * @param scheduleId
      * @param stationId
      */
-    OperationInfo getOperationInfo(String scheduleId, String stationId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException;
+    OperationInfo getOperationInfo(String scheduleId, String stationId,String processId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException;
 
     /**
      * 上工

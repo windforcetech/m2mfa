@@ -393,7 +393,7 @@ public class PadScheduleServiceImpl implements PadScheduleService {
             stationAndOperate.setOperationInfo(operationInfo);
             return stationAndOperate;
         }
-        OperationInfo operationInfo = padDispatchService.getOperationInfo(scheduleId, pendingStations.get(0).getStationId());
+        OperationInfo operationInfo = padDispatchService.getOperationInfo(scheduleId, pendingStations.get(0).getStationId(),pendingStations.get(0).getProcessId());
         stationAndOperate.setOperationInfo(operationInfo);
         return stationAndOperate;
     }
