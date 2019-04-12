@@ -288,7 +288,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         barcodePrintApply.setFlag(0);
         barcodePrintApply.setEnabled(true);
         barcodePrintApply.setCheckFlag(0);
-        if(barcodePrintApplyRepository.countBySource(barcodePrintApply.getSource())>0){
+        if (barcodePrintApplyRepository.countBySource(barcodePrintApply.getSource()) > 0) {
             throw new MMException("来源单号已存在，不可重复申请打印。");
         }
         BarcodePrintApply save = barcodePrintApplyRepository.save(barcodePrintApply);
@@ -521,12 +521,14 @@ name: "日期函数"
                         default:
                             break;
                     }
-                    if (str.length() < rule.getLength()) {
-                        str = addZeroForNum(str, rule.getLength());
-                    }
-                    if (str.length() > rule.getLength()) {
-                        // Integer start = str.length() - rule.getLength();
-                        str = str.substring(0, rule.getLength());
+                    if (rule.getLength() != null && rule.getLength() != 0) {
+                        if (str.length() < rule.getLength()) {
+                            str = addZeroForNum(str, rule.getLength());
+                        }
+                        if (str.length() > rule.getLength()) {
+                            // Integer start = str.length() - rule.getLength();
+                            str = str.substring(0, rule.getLength());
+                        }
                     }
                     value += str;
                 }
@@ -538,8 +540,10 @@ name: "日期函数"
                 k++;
             }
         }
+
         List<BarcodePrintResources> rs = new ArrayList<>();
-        for (HashMap<String, String> item : labelList) {
+        for (
+                HashMap<String, String> item : labelList) {
             BarcodePrintResources one = new BarcodePrintResources();
             one.setId(UUIDUtil.getUUID());
             one.setApplyId(printApplyObj.getApplyId());
