@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.controller;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.query.BaseDefectQuery;
 import com.m2micro.m2mfa.base.repository.BaseDefectRepository;
+import com.m2micro.m2mfa.base.repository.BaseItemsTargetRepository;
 import com.m2micro.m2mfa.base.service.BaseDefectService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -36,6 +37,8 @@ public class BaseDefectController {
     BaseDefectService baseDefectService;
     @Autowired
     BaseDefectRepository baseDefectRepository;
+    @Autowired
+    BaseItemsTargetRepository baseItemsTargetRepository;
     /**
      * 列表
      */
@@ -55,6 +58,7 @@ public class BaseDefectController {
     @UserOperationLog("不良現象代碼详情")
     public ResponseMessage<BaseDefect> info(@PathVariable("id") String id){
         BaseDefect baseDefect = baseDefectService.findById(id).orElse(null);
+        baseDefect.setCategoryName(baseItemsTargetRepository.findById(baseDefect.getCategory()).orElse(null).getItemName());
         return ResponseMessage.ok(baseDefect);
     }
 
@@ -65,12 +69,7 @@ public class BaseDefectController {
     @ApiOperation(value="保存不良現象代碼")
     @UserOperationLog("保存不良現象代碼")
     public ResponseMessage<BaseDefect> save(@RequestBody BaseDefect baseDefect){
-        if(!baseDefectRepository.findByEctCode(baseDefect.getEctCode()).isEmpty()){
-            throw  new MMException("不良编号【"+baseDefect.getEctCode()+"】已被使用。");
-        }
-        ValidatorUtil.validateEntity(baseDefect, AddGroup.class);
-        baseDefect.setEctId(UUIDUtil.getUUID());
-        baseDefectService.save(baseDefect);
+        baseDefectService.saveEntity(baseDefect);
         return ResponseMessage.ok();
     }
 
@@ -81,14 +80,7 @@ public class BaseDefectController {
     @ApiOperation(value="更新不良現象代碼")
     @UserOperationLog("更新不良現象代碼")
     public ResponseMessage<BaseDefect> update(@RequestBody BaseDefect baseDefect){
-        ValidatorUtil.validateEntity(baseDefect, UpdateGroup.class);
-        BaseDefect baseDefectOld = baseDefectService.findById(baseDefect.getEctId()).orElse(null);
-        if(baseDefectOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        baseDefect.setEctCode(baseDefectOld.getEctCode());
-        PropertyUtil.copy(baseDefect,baseDefectOld);
-        return ResponseMessage.ok(baseDefectService.save(baseDefectOld));
+        return ResponseMessage.ok(baseDefectService.updateEntity(baseDefect));
     }
     /**
      * 删除

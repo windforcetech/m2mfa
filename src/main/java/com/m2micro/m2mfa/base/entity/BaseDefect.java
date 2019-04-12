@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.entity;
 
 
+import javax.jdo.annotations.Transactional;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.io.Serializable;
@@ -19,6 +20,11 @@ import io.swagger.annotations.ApiModelProperty;
 public class BaseDefect extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
     @Id
     private String ectId;
     private String ectCode;
@@ -27,10 +33,13 @@ public class BaseDefect extends BaseEntity implements Serializable {
     private Integer sortCode;
     private Boolean enabled;
     private String description;
+    @Transactional
+    private String categoryName;
 
     public String getEctId() {
         return ectId;
     }
+
     public void setEctId(String ectId) {
         this.ectId = ectId;
     }
@@ -38,6 +47,7 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public String getEctCode() {
         return ectCode;
     }
+
     public void setEctCode(String ectCode) {
         this.ectCode = ectCode;
     }
@@ -45,6 +55,7 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public String getEctName() {
         return ectName;
     }
+
     public void setEctName(String ectName) {
         this.ectName = ectName;
     }
@@ -52,6 +63,7 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public String getCategory() {
         return category;
     }
+
     public void setCategory(String category) {
         this.category = category;
     }
@@ -59,6 +71,7 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public Integer getSortCode() {
         return sortCode;
     }
+
     public void setSortCode(Integer sortCode) {
         this.sortCode = sortCode;
     }
@@ -66,6 +79,7 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public Boolean getEnabled() {
         return enabled;
     }
+
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
@@ -73,10 +87,18 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 
 
 }

@@ -202,12 +202,16 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
             enableDelete.add(baseQualityItems);
         }
         deleteAll(enableDelete);
+
         //deleteByIds(ids);
+        ResponseMessage<Object>  ok = ResponseMessage.ok();
         if(disableDelete.size()>0){
             String[] strings = disableDelete.stream().map(BaseQualityItems::getItemCode).toArray(String[]::new);
-            return ResponseMessage.ok("项目编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            ok.setMessage("项目编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return ok;
         }
-        return ResponseMessage.ok("操作成功");
+        ok.setMessage("操作成功");
+        return ok;
     }
 
 }

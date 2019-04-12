@@ -22,4 +22,9 @@ public interface BaseDefectService extends BaseService<BaseDefect,String> {
      * @return
      */
     String  deleteIds(String [] ids);
+
+
+    BaseDefect saveEntity(BaseDefect baseDefect);
+
+    BaseDefect updateEntity(BaseDefect baseDefect);
 }
