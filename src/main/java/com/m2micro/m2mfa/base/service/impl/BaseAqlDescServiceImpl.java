@@ -23,7 +23,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import springfox.documentation.service.ApiListing;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -125,6 +127,7 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
     @Override
     @Transactional
     public String  deleteIds(String[] ids) {
+
          String msg ="";
          for(int i = 0 ; i< ids.length; i++){
              List<BaseQualitySolutionDesc> baseQualitySolutionDescs  = baseQualitySolutionDescRepository.findByAqlId(ids[i]);
@@ -133,7 +136,9 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
                  baseAqlDefRepository.deleteByAqlId(ids[i]);
                  continue;
              }
-             msg +=ids[i]+",";
+             BaseAqlDesc baseAqlDesc = this.findById(ids[i]).orElse(null);
+
+             msg +=baseAqlDesc.getAqlCode()+",";
 
          }
          return  msg ;
