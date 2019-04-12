@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.controller;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.base.query.BaseDefectQuery;
 import com.m2micro.m2mfa.base.repository.BaseDefectRepository;
+import com.m2micro.m2mfa.base.repository.BaseItemsTargetRepository;
 import com.m2micro.m2mfa.base.service.BaseDefectService;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -36,6 +37,8 @@ public class BaseDefectController {
     BaseDefectService baseDefectService;
     @Autowired
     BaseDefectRepository baseDefectRepository;
+    @Autowired
+    BaseItemsTargetRepository baseItemsTargetRepository;
     /**
      * 列表
      */
@@ -55,6 +58,7 @@ public class BaseDefectController {
     @UserOperationLog("不良現象代碼详情")
     public ResponseMessage<BaseDefect> info(@PathVariable("id") String id){
         BaseDefect baseDefect = baseDefectService.findById(id).orElse(null);
+        baseDefect.setCategoryName(baseItemsTargetRepository.findById(baseDefect.getCategory()).orElse(null).getItemName());
         return ResponseMessage.ok(baseDefect);
     }
 
