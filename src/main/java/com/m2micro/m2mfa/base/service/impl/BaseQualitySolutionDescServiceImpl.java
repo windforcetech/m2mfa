@@ -229,15 +229,16 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
             }
             enableDelete.add(baseQualitySolutionDesc);
         }
-        ResponseMessage rm = ResponseMessage.ok();
         //删除所有
         deleteAllEntity(enableDelete);
+        ResponseMessage<Object> ok = ResponseMessage.ok();
         if(disableDelete.size()>0){
             String[] strings = disableDelete.stream().map(BaseQualitySolutionDesc::getSolutionName).toArray(String[]::new);
-            rm.setMessage("校检方案【"+String.join(",", strings)+"】已产生业务,不允许删除！");
-            return rm ;
+            ok.setMessage("校检方案【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return ok;
         }
-        return rm;
+        ok.setMessage("操作成功");
+        return ok;
     }
 
     @Override
