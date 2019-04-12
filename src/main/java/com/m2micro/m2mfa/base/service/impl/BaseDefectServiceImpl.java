@@ -1,18 +1,17 @@
 package com.m2micro.m2mfa.base.service.impl;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.m2micro.m2mfa.base.entity.BaseDefect;
 import com.m2micro.m2mfa.base.query.BaseDefectQuery;
 import com.m2micro.m2mfa.base.repository.BaseDefectRepository;
 import com.m2micro.m2mfa.base.service.BaseDefectService;
 import com.m2micro.m2mfa.record.repository.MesRecordFailRepository;
 import com.querydsl.core.BooleanBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.QBaseDefect;
 import org.springframework.transaction.annotation.Transactional;
 
