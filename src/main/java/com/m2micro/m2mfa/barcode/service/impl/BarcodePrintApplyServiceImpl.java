@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.barcode.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintResources;
@@ -287,6 +288,9 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         barcodePrintApply.setFlag(0);
         barcodePrintApply.setEnabled(true);
         barcodePrintApply.setCheckFlag(0);
+        if(barcodePrintApplyRepository.countBySource(barcodePrintApply.getSource())>0){
+            throw new MMException("来源单号已存在，不可重复申请打印。");
+        }
         BarcodePrintApply save = barcodePrintApplyRepository.save(barcodePrintApply);
         return save;
     }
@@ -382,7 +386,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 
         RowMapper rm111 = BeanPropertyRowMapper.newInstance(PrintResourceObj.class);
         String sql111 = " SELECT t.id,t.apply_id,t.content,t.flag FROM barcode_print_resources t \n" +
-                "where t.apply_id='"+printApplyObj.getApplyId()+"' ; ";
+                "where t.apply_id='" + printApplyObj.getApplyId() + "' ; ";
 
         List<PrintResourceObj> printResourceObjList = jdbcTemplate.query(sql111, rm111);
 
@@ -405,7 +409,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 
         for (TemplateVarObj one : templateVarObjList) {
             RowMapper rm3 = BeanPropertyRowMapper.newInstance(RuleObj.class);
-            String sql3 = " select t.id,t.position,t.category,t.defaults  from base_barcode_rule_def t \n" +
+            String sql3 = " select t.id,t.position,t.category,t.defaults,t.length,t.ary  from base_barcode_rule_def t \n" +
                     "where t.barcode_id='" + one.getRuleId() + "'; ";
             List<RuleObj> ruleObjList = jdbcTemplate.query(sql3, rm3);
             one.setRuleObjList(ruleObjList);
@@ -517,6 +521,13 @@ name: "日期函数"
                         default:
                             break;
                     }
+                    if (str.length() < rule.getLength()) {
+                        str = addZeroForNum(str, rule.getLength());
+                    }
+                    if (str.length() > rule.getLength()) {
+                        // Integer start = str.length() - rule.getLength();
+                        str = str.substring(0, rule.getLength());
+                    }
                     value += str;
                 }
                 lable.put(varObj.getName(), value);
@@ -542,6 +553,22 @@ name: "日期函数"
             rs.add(one);
         }
         return rs;
+    }
+
+
+    private String addZeroForNum(String str, int strLength) {
+        int strLen = str.length();
+        if (strLen < strLength) {
+            while (strLen < strLength) {
+                StringBuffer sb = new StringBuffer();
+                sb.append("0").append(str);// 左补0
+                // sb.append(str).append("0");//右补0
+                str = sb.toString();
+                strLen = str.length();
+            }
+        }
+
+        return str;
     }
 
     @Override

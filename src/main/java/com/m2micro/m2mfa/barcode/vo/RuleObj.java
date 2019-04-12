@@ -17,6 +17,28 @@ public class RuleObj {
     @ApiModelProperty("默认值")
     private String defaults;
 
+    @ApiModelProperty("长度")
+    private  Integer length;
+
+    @ApiModelProperty("进制")
+    private Integer ary;
+
+    public Integer getLength() {
+        return length;
+    }
+
+    public void setLength(Integer length) {
+        this.length = length;
+    }
+
+    public Integer getAry() {
+        return ary;
+    }
+
+    public void setAry(Integer ary) {
+        this.ary = ary;
+    }
+
     public String getId() {
         return id;
     }
