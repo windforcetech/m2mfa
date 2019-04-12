@@ -164,6 +164,17 @@ public class BarcodePrintApplyController {
         return ResponseMessage.ok(page);
     }
 
+    /**
+     * 列表
+     */
+    @GetMapping("/printApplyListAfterCheckedOk")
+    @ApiOperation(value = "标签打印表单审核过的列表")
+    @UserOperationLog("标签打印表单审核过的列表")
+    public ResponseMessage<PageUtil<PrintApplyObj>> printApplyListAfterCheckedOk(PrintApplyQuery query) {
+        PageUtil<PrintApplyObj> page = barcodePrintApplyService.printApplyListAfterCheckedOk(query);
+        return ResponseMessage.ok(page);
+    }
+
 
     @GetMapping("/printApplyDetail/{id}")
     @ApiOperation(value = "获取打印申请详情")
