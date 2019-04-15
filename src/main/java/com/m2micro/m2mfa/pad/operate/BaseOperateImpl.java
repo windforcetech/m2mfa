@@ -32,6 +32,7 @@ import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
+import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import com.m2micro.m2mfa.record.entity.MesRecordFail;
 import com.m2micro.m2mfa.record.entity.MesRecordMold;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
@@ -114,6 +115,8 @@ public class BaseOperateImpl implements BaseOperate {
     PadBottomDisplayService padBottomDisplayService;
     @Autowired
     ProcessConstant processConstant;
+    @Autowired
+    MesPartRouteRepository mesPartRouteRepository;
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return mesMoScheduleRepository.findById(scheduleId).orElse(null);
@@ -1462,6 +1465,47 @@ public class BaseOperateImpl implements BaseOperate {
      */
     protected  void  updateSchedulFlag(String scheduleId){
         mesMoScheduleRepository.setFlagFor(MoScheduleStatus.EXCEEDED.getKey(),scheduleId);
+    }
+
+    /**
+     * 当前工序是产出工序时更新排产单状态为已超量
+     * @param scheduleId
+     * @param processId
+     */
+    protected void handUpdateSchedulFlag(String scheduleId,String processId){
+        if(isOutputProcessId(scheduleId,processId)){
+            updateSchedulFlag(scheduleId);
+        }
+
+    }
+
+    /**
+     * 当前工序是产出工序时更新排产单状态为已完结
+     * @param scheduleId
+     * @param processId
+     */
+    protected  void handScheduleclose(String scheduleId,String processId){
+        if(isOutputProcessId(scheduleId,processId)){
+            scheduleclose(scheduleId);
+        }
+    }
+
+    /**
+     * 当前工序是否是产出工序
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+    protected Boolean isOutputProcessId(String scheduleId,String processId){
+        //获取料件途程id
+        String partRouteId = mesPartRouteRepository.getPartRouteId(scheduleId);
+        //获取产出工序
+        MesPartRoute mesPartRoute = mesPartRouteRepository.findById(partRouteId).orElse(null);
+        //当前工序是产出工序
+        if(processId.equals(mesPartRoute.getOutputProcessId())){
+            return true;
+        }
+        return false;
     }
 
 }
