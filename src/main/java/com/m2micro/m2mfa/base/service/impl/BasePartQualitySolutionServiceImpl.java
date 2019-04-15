@@ -54,15 +54,19 @@ public class BasePartQualitySolutionServiceImpl implements BasePartQualitySoluti
         BaseParts baseParts = basePartsRepository.findById(partId).orElse(null);
         //获取关联信息
         BasePartQualitySolution basePartQualitySolution = basePartQualitySolutionRepository.findByPartId(partId);
+
+
         //不存在
         if(basePartQualitySolution==null){
             basePartQualitySolution = new BasePartQualitySolution();
             basePartQualitySolution.setPartId(baseParts.getPartId());
+            basePartQualitySolution.setPartNo(baseParts.getPartNo());
             basePartQualitySolution.setPartName(baseParts.getName());
             return basePartQualitySolution;
         }
         //如果存在
         basePartQualitySolution.setPartId(baseParts.getPartId());
+        basePartQualitySolution.setPartNo(baseParts.getPartNo());
         basePartQualitySolution.setPartName(baseParts.getName());
         //校检方案名称
         BaseQualitySolutionDesc baseQualitySolutionDesc = baseQualitySolutionDescService.findById(basePartQualitySolution.getSolutionId()).orElse(null);

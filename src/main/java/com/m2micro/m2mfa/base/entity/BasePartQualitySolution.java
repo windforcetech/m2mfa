@@ -27,8 +27,10 @@ public class BasePartQualitySolution extends BaseEntity implements Serializable 
     @ApiModelProperty(value = "主键")
     @Id
     private String psId;
-    @ApiModelProperty(value = "料件编号")
+    @ApiModelProperty(value = "料件id")
     private String partId;
+    @ApiModelProperty(value = "料件编号")
+    private String partNo;
     @Transient
     @ApiModelProperty(value = "品名")
     private String partName;
@@ -48,6 +50,14 @@ public class BasePartQualitySolution extends BaseEntity implements Serializable 
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+
+    public String getPartNo() {
+        return partNo;
+    }
+
+    public void setPartNo(String partNo) {
+        this.partNo = partNo;
+    }
 
     public String getInstructionName() {
         return instructionName;
