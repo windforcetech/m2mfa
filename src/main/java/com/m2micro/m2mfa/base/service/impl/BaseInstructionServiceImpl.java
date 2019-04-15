@@ -83,7 +83,9 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
     @Transactional
     public void  save(BaseInstruction baseInstruction, MultipartFile file) {
         //获取原有的版本，有的话全部为“无效”，
-
+        if(file==null){
+            throw  new MMException("请选择作业指导书文件");
+        }
         List<BaseInstruction> byInstructionCode = baseInstructionRepository.findByInstructionCode(baseInstruction.getInstructionCode());
         List<BaseInstruction> collect = byInstructionCode.stream().filter(i -> {
             i.setEnabled(false);
