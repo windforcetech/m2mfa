@@ -6,6 +6,7 @@ import com.m2micro.m2mfa.barcode.query.PrintApplyQuery;
 import com.m2micro.m2mfa.barcode.query.ScheduleQuery;
 import com.m2micro.m2mfa.barcode.service.BarcodePrintApplyService;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.barcode.vo.CheckObj;
 import com.m2micro.m2mfa.barcode.vo.PrintApplyObj;
 import com.m2micro.m2mfa.barcode.vo.ScheduleObj;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -207,8 +208,8 @@ public class BarcodePrintApplyController {
     @PostMapping("/printCheckList")
     @ApiOperation(value = "审核打印 :1, 已打印：2， 打印作废:-1,未审核：0")
     @UserOperationLog("审核打印")
-    public ResponseMessage printCheckList(@RequestBody String[] ids,Integer flag) {
-        barcodePrintApplyService.printCheckList(ids,flag);
+    public ResponseMessage printCheckList(@RequestBody CheckObj checkObj) {
+        barcodePrintApplyService.printCheckList(checkObj.getIds(),checkObj.getFlag());
         return ResponseMessage.ok();
     }
 

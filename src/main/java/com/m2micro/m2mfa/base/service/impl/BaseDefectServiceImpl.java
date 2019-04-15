@@ -58,6 +58,9 @@ public class BaseDefectServiceImpl implements BaseDefectService {
         if(StringUtils.isNotEmpty(query.getEctName())){
             totalCountsql +=  " AND bd.ect_name = '"+query.getEctName()+"'\n" ;
         }
+        if(!query.isEnabled()){
+            totalCountsql +=  " AND bd.enabled = '"+1+"'\n" ;
+        }
          Long totalCount = jdbcTemplate.queryForObject(totalCountsql, Long.class);
 
         String sql = "SELECT\n" +
@@ -79,7 +82,9 @@ public class BaseDefectServiceImpl implements BaseDefectService {
             if(StringUtils.isNotEmpty(query.getEctName())){
                 sql +=  " AND bd.ect_name = '"+query.getEctName()+"'\n" ;
             }
-
+            if(!query.isEnabled()){
+                sql +=  " AND bd.enabled = '"+1+"'\n" ;
+            }
            sql += " ORDER BY\n" +
             "	bd.ect_id ASC\n" +
             "LIMIT "+(query.getPage() - 1) * query.getSize()+",\n" +
