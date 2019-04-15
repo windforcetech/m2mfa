@@ -39,6 +39,7 @@ import java.util.stream.Stream;
  */
 @Service
 public class BaseInstructionServiceImpl implements BaseInstructionService {
+
     @Autowired
     BaseInstructionRepository baseInstructionRepository;
     @Autowired
@@ -48,9 +49,11 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
     @Autowired
     BaseItemsTargetServiceImpl baseItemsTargetService;
 
+    @Override
     public BaseInstructionRepository getRepository() {
         return baseInstructionRepository;
     }
+
 
     @Override
     public PageUtil<BaseInstruction> list(BaseInstructionQueryObj query) {
@@ -79,6 +82,7 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
         return PageUtil.of(collect,totalCount,query.getSize(),query.getPage());
     }
 
+
     @Override
     @Transactional
     public void  save(BaseInstruction baseInstruction, MultipartFile file) {
@@ -105,6 +109,7 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
         save(baseInstruction);
     }
 
+
     @Override
     @Transactional
     public void update(BaseInstruction baseInstruction, MultipartFile file) {
@@ -114,8 +119,13 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
             throw new MMException("数据库不存在该记录");
         }
         if(file !=null){
-            File deletefile = new File(baseInstruction.getFileUrl());
-            deletefile.delete();
+            try {
+                File deletefile = new File(baseInstruction.getFileUrl());
+                deletefile.delete();
+            }catch (Exception e){
+
+            }
+
             baseInstruction.setExtension( file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")));
             //上次文件
             baseInstruction.setFileUrl(uploadFile(file,baseInstruction.getInstructionCode(),baseInstruction.getRevsion().toString()));
@@ -186,3 +196,5 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
 
 
 }
+
+
