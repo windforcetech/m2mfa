@@ -147,14 +147,22 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
     @Override
     public QualitySolutionDescInfo info(String id) {
         QualitySolutionDescInfo qualitySolutionDescInfo = new QualitySolutionDescInfo();
-        //抽检方案下拉框
-        List<AqlDescSelect> aqlDesc = getAqlDesc();
-        qualitySolutionDescInfo.setAqlDescSelects(aqlDesc);
+
         //抽检方案主档
         BaseQualitySolutionDesc baseQualitySolutionDesc = findById(id).orElse(null);
         BaseAqlDesc baseAqlDesc = baseAqlDescService.findById(baseQualitySolutionDesc.getAqlId()).orElse(null);
         baseQualitySolutionDesc.setAqlName(baseAqlDesc.getAqlName());
         qualitySolutionDescInfo.setBaseQualitySolutionDesc(baseQualitySolutionDesc);
+        //抽检方案下拉框
+        List<AqlDescSelect> aqlDesc = getAqlDesc();
+        AqlDescSelect aqlDescSelect = new AqlDescSelect();
+        aqlDescSelect.setAqlId(baseQualitySolutionDesc.getAqlId());
+        aqlDescSelect.setAqlName(baseQualitySolutionDesc.getAqlName());
+        //原先是有效的，修改的时候变成无效的，此时为了下拉选项还是加上去
+        if(aqlDesc!=null&&aqlDesc.size()>0&&(!aqlDesc.contains(aqlDescSelect))){
+            aqlDesc.add(aqlDescSelect);
+        }
+        qualitySolutionDescInfo.setAqlDescSelects(aqlDesc);
         //抽检方案明细
         List<BaseQualitySolutionDef> baseQualitySolutionDefs = baseQualitySolutionDefRepository.findBySolutionId(baseQualitySolutionDesc.getSolutionId());
         baseQualitySolutionDefs.stream().forEach(baseQualitySolutionDef->{
