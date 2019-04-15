@@ -12,6 +12,8 @@ public class BaseDefectQuery extends Query {
   private String ectCode;
   @ApiModelProperty(value = "不良名称")
   private String ectName;
+  @ApiModelProperty(value = "状态")
+  private boolean enabled ;
 
 
 }
