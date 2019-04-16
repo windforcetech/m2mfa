@@ -266,7 +266,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     @Override
     public PageUtil<ScheduleObj> list(ScheduleQuery query) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(ScheduleObj.class);
-        String sql = "SELECT t.schedule_id,t.schedule_no,t.machine_id,t.part_id, t2.part_no,t2.name part_name,t.schedule_qty,t1.name machine_name FROM factory_application.mes_mo_schedule t" +
+        String sql = "SELECT t.schedule_id,t.schedule_no,t.machine_id,t.part_id, t2.part_no,t2.name part_name,t.schedule_qty,t1.name machine_name FROM mes_mo_schedule t" +
                 "     left join base_machine t1" +
                 "        on t1.id=t.machine_id" +
                 "        left join base_parts t2" +
@@ -275,7 +275,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "        t.flag in(0,1) and" +
                 "        t.enabled=1 ";
 
-        String sql2 = "SELECT count(*) FROM factory_application.mes_mo_schedule t" +
+        String sql2 = "SELECT count(*) FROM mes_mo_schedule t" +
                 "     left join base_machine t1" +
                 "        on t1.id=t.machine_id" +
                 "        left join base_parts t2" +
@@ -314,7 +314,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "        cus.name customer_name," +
                 "        cus.code customer_code," +
                 "        mo.order_seq order_seq" +
-                "        FROM factory_application.mes_mo_schedule t" +
+                "        FROM mes_mo_schedule t" +
                 "        left join base_machine t1" +
                 "        on t1.id=t.machine_id" +
                 "        left join base_parts t2" +
