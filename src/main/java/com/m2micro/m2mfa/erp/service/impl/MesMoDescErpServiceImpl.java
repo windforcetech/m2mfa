@@ -81,6 +81,9 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
       }
       mesMoDescs.add(MesMoDesc);
       MesMoBom mesMoBom = getMesMoBom(sfaFiles, i, moid);
+      if(mesMoBom==null){
+        continue;
+      }
       mesMoBoms.add(mesMoBom);
     }
     mesMoBomService.saveAll(mesMoBoms);
@@ -150,7 +153,13 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     mesMoBom.setMoId(moid);
     mesMoBom.setPartId(sfaFile.getSfa03());
     mesMoBom.setSentPartId(sfaFile.getSfa27());
-    mesMoBom.setPartName(basePartsRepository.findByPartNo(sfaFile.getSfa03()).get(0).getName());
+
+    try {
+      mesMoBom.setPartName(basePartsRepository.findByPartNo(sfaFile.getSfa03()).get(0).getName());
+    }catch (Exception e){
+      return null;
+    }
+
     mesMoBom.setUnit(sfaFile.getSfa12());
     mesMoBom.setQpa(sfaFile.getSfa16());
     mesMoBom.setShouldQty(sfaFile.getSfa05());
@@ -159,10 +168,17 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     mesMoBom.setReturnQty(new BigDecimal(0));
     mesMoBom.setReturnedQty(new BigDecimal(0));
     mesMoBom.setExceedQty(new BigDecimal(0));
-    mesMoBom.setSubstitute(sfaFile.getSfa03().equals(sfaFile.getSfa27() ) ? true :false);
+    try {
+      mesMoBom.setSubstitute(sfaFile.getSfa03().equals(sfaFile.getSfa27() ) ? true :false);
+    }catch (Exception e){
+      return null;
+    }
+
     mesMoBom.setEnabled(true);
     return mesMoBom;
   }
 
 
 }
+
+
