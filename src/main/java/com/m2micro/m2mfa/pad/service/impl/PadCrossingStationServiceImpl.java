@@ -291,7 +291,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //获取结余量
         Integer surplusQty = getSurplusQty(para.getProcessId(), source,beforeProcessId);
         //投入数量，产出数量：包装量小于结余量，以包装量为准，否则以结余量为主
-        Integer packQty = basePack.getQty().intValue();
+        Integer packQty = basePack.getQty()==null?0:basePack.getQty().intValue();
         //包装量小于结余量
         if(packQty<surplusQty){
             mesRecordWipRec.setInputQty(packQty);
