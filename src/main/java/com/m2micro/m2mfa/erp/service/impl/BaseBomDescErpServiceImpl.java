@@ -49,6 +49,7 @@ public class BaseBomDescErpServiceImpl implements BaseBomDescErpService {
   BaseUnitRepository baseUnitRepository;
   @Autowired
   BaseBomDefService baseBomDefService;
+
   @Override
   @Transactional
   public boolean erpBasebomdesc(String partNo,String  distinguish ) {
@@ -81,6 +82,11 @@ public class BaseBomDescErpServiceImpl implements BaseBomDescErpService {
       String bomid =UUIDUtil.getUUID();
       BaseBomDesc baseBomDescobj = new BaseBomDesc();
       baseBomDescobj.setBomId(bomid);
+     try {
+       baseBomDescobj.setPartId(basePartsRepository.findByPartNo(bmaFile.getBma01()).get(0).getPartId());
+     }catch (Exception e){
+       continue;
+     }
       baseBomDescobj.setPartId(basePartsRepository.findByPartNo(bmaFile.getBma01()).get(0).getPartId());
       baseBomDescobj.setVersion(0);
       baseBomDescobj.setDistinguish(bmaFile.getBma06());
@@ -137,3 +143,5 @@ public class BaseBomDescErpServiceImpl implements BaseBomDescErpService {
   }
 
 }
+
+
