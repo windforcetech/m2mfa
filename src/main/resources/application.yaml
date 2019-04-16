@@ -7,7 +7,7 @@ server:
 
 spring:
   profiles:
-    active: dev
+    active: docker
   jpa:
     hibernate:
       ddl-auto: update
