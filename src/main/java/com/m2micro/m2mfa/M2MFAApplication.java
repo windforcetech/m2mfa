@@ -17,7 +17,7 @@ public class M2MFAApplication {
     public static void main(String[] args) {
         SpringApplication.run(M2MFAApplication.class, args);
     }
-//    @Bean
+//    @Bean//
 //    MultipartConfigElement multipartConfigElement() {
 //        MultipartConfigFactory factory = new MultipartConfigFactory();
 //        factory.setLocation("/");
