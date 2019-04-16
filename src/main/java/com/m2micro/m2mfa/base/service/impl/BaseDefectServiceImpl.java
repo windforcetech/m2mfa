@@ -58,8 +58,11 @@ public class BaseDefectServiceImpl implements BaseDefectService {
         if(StringUtils.isNotEmpty(query.getEctName())){
             totalCountsql +=  " AND bd.ect_name = '"+query.getEctName()+"'\n" ;
         }
-        if(!query.isEnabled()){
+        if(query.getEnabled()!=null && query.getEnabled()){
             totalCountsql +=  " AND bd.enabled = '"+1+"'\n" ;
+        }
+        if(query.getEnabled()!=null && !query.getEnabled()){
+            totalCountsql +=  " AND bd.enabled = '"+0+"'\n" ;
         }
          Long totalCount = jdbcTemplate.queryForObject(totalCountsql, Long.class);
 
@@ -82,8 +85,11 @@ public class BaseDefectServiceImpl implements BaseDefectService {
             if(StringUtils.isNotEmpty(query.getEctName())){
                 sql +=  " AND bd.ect_name = '"+query.getEctName()+"'\n" ;
             }
-            if(!query.isEnabled()){
-                sql +=  " AND bd.enabled = '"+1+"'\n" ;
+            if(query.getEnabled()!=null && query.getEnabled()){
+            sql +=  " AND bd.enabled = '"+1+"'\n" ;
+            }
+            if(query.getEnabled()!=null && !query.getEnabled()){
+                sql +=  " AND bd.enabled = '"+0+"'\n" ;
             }
            sql += " ORDER BY\n" +
             "	bd.ect_id ASC\n" +

@@ -7,6 +7,7 @@ import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.BaseDefect;
+import com.m2micro.m2mfa.base.query.BaseDefectQuery;
 import com.m2micro.m2mfa.base.service.BaseDefectService;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
@@ -38,6 +39,8 @@ public class PadDefectController {
     PadDefectServie padDefectServie;
     @Autowired
     PadHomeService padHomeService;
+    @Autowired
+    BaseDefectService baseDefectService;
 
     /**
      * 列表
@@ -45,8 +48,9 @@ public class PadDefectController {
     @RequestMapping("/list")
     @ApiOperation(value="不良現象代碼列表")
     @UserOperationLog("不良現象代碼列表")
-    public ResponseMessage<PageUtil<BaseDefect>> list(Query query){
-        PageUtil<BaseDefect> page = padDefectServie.list(query);
+    public ResponseMessage<PageUtil<BaseDefect>> list(BaseDefectQuery query){
+        query.setEnabled(true);
+        PageUtil<BaseDefect> page =baseDefectService.listQuery(query);
         return ResponseMessage.ok(page);
     }
 
