@@ -159,7 +159,7 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
         aqlDescSelect.setAqlId(baseQualitySolutionDesc.getAqlId());
         aqlDescSelect.setAqlName(baseQualitySolutionDesc.getAqlName());
         //原先是有效的，修改的时候变成无效的，此时为了下拉选项还是加上去
-        if(aqlDesc!=null&&aqlDesc.size()>0&&(!aqlDesc.contains(aqlDescSelect))){
+        if(aqlDesc!=null&&(!aqlDesc.contains(aqlDescSelect))){
             aqlDesc.add(aqlDescSelect);
         }
         qualitySolutionDescInfo.setAqlDescSelects(aqlDesc);
