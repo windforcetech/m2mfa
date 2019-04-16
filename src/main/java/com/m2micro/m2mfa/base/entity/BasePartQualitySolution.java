@@ -28,6 +28,7 @@ public class BasePartQualitySolution extends BaseEntity implements Serializable 
     @Id
     private String psId;
     @ApiModelProperty(value = "料件id")
+    @NotEmpty(message="料件id不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String partId;
     @ApiModelProperty(value = "料件编号")
     private String partNo;
@@ -35,6 +36,7 @@ public class BasePartQualitySolution extends BaseEntity implements Serializable 
     @ApiModelProperty(value = "品名")
     private String partName;
     @ApiModelProperty(value = "检验方案id")
+    @NotEmpty(message="检验方案id不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String solutionId;
     @Transient
     @ApiModelProperty(value = "检验方案名称")
