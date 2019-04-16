@@ -157,7 +157,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "and schedule.schedule_id=t.source\n" +
                 "and t.category=t3.id\n" +
                 "and mo.mo_id=schedule.mo_id " +
-                "and t.flag=0  ";
+                "and t.flag in(0,1)  ";
 
         String sql2 = " select\n" +
                 " count(t.id) \n" +
@@ -174,7 +174,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "and t.part_id=p.part_id\n" +
                 "and schedule.schedule_id=t.source\n" +
                 "and t.category=t3.id\n" +
-                "and t.flag=0  ;";
+                "and t.flag in(0,1)  ;";
 
         Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
         sql += " order by t.id limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
@@ -228,7 +228,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "and schedule.schedule_id=t.source\n" +
                 "and t.category=t3.id\n" +
                 "and mo.mo_id=schedule.mo_id " +
-                "and t.flag=0  " +
+                "and t.flag in(0,1)  " +
                 "and t.check_flag=1 ";
 
         String sql2 = " select\n" +
@@ -246,7 +246,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "and t.part_id=p.part_id\n" +
                 "and schedule.schedule_id=t.source\n" +
                 "and t.category=t3.id\n" +
-                "and t.flag=0  ;";
+                "and t.flag in(0,1)  ;";
 
         Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
         sql += " order by t.id limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
