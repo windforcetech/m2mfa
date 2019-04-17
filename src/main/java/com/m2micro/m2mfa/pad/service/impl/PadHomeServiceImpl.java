@@ -117,7 +117,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
       }
 
        //达成率
-      rate = actualOutput.doubleValue()/standardOutput.longValue();
+      rate = standardOutput.longValue()==0?0:(actualOutput.doubleValue()/standardOutput.longValue());
     }
 
     Integer partInput = partInput(rwId);
