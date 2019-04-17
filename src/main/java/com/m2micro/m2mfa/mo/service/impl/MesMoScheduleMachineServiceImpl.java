@@ -19,8 +19,10 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleShiftRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleDispatchService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleMachineService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -39,6 +41,7 @@ import java.util.List;
 public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineService {
 
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesMoScheduleDispatchService mesMoScheduleDispatchService;
@@ -48,6 +51,8 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
     MesMoScheduleService mesMoScheduleService;
     @Autowired
     MesMoScheduleShiftRepository mesMoScheduleShiftRepository;
+    @Autowired
+    PadBottomDisplayService padBottomDisplayService;
 
 
     @Override
@@ -86,7 +91,14 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
         }
         sql = sql + " ORDER BY mms.sequence ASC";
         RowMapper<MesMoScheduleModel> rowMapper = BeanPropertyRowMapper.newInstance(MesMoScheduleModel.class);
-        return jdbcTemplate.query(sql, rowMapper);
+        List<MesMoScheduleModel> list = jdbcTemplate.query(sql, rowMapper);
+        return mesMoScheduleService.getScheduleModelForOutput(list);
+    }
+
+    private Integer getOutput(String scheduleId) {
+        List scheduleIds = new ArrayList();
+        scheduleIds.add(scheduleId);
+        return padBottomDisplayService.getOutPutQtys(scheduleId, scheduleIds);
     }
 
     @Override
@@ -168,8 +180,10 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
             //如果排产单状态是初始或是已审核
             else if(MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())||
                     MoScheduleStatus.AUDITED.getKey().equals(mesMoSchedule.getFlag())){
+                //新机台上的最大顺序
+                Integer integer = mesMoScheduleService.maxSequence(scheduleMachineParaModel.getNewMachineId());
                 //直接更新机台id
-                mesMoScheduleRepository.updateMachineIdByScheduleId(scheduleMachineParaModel.getNewMachineId(),mesMoSchedule.getScheduleId());
+                mesMoScheduleRepository.updateMachineIdByScheduleId(scheduleMachineParaModel.getNewMachineId(),integer+1,mesMoSchedule.getScheduleId());
             }
             else {
                 //选中之后，排产单状态已发生改变，抛出异常
@@ -321,7 +335,10 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
         newMesMoSchedule.setFlag(MoScheduleStatus.INITIAL.getKey());
         newMesMoSchedule.setScheduleNo(mesMoScheduleService.getScheduleNoByMoId(mesMoSchedule.getMoId()));
         newMesMoSchedule.setMachineId(scheduleMachineParaModel.getNewMachineId());
-        newMesMoSchedule.setScheduleQty(mesMoScheduleService.getUncompletedQty(mesMoSchedule.getScheduleId()));
+
+        Integer outPutQtys = getOutput(mesMoSchedule.getScheduleId());
+        newMesMoSchedule.setScheduleQty(mesMoSchedule.getScheduleQty()-outPutQtys);
+
         newMesMoSchedule.setCreateBy(null);
         newMesMoSchedule.setCreateOn(null);
         newMesMoSchedule.setModifiedBy(null);

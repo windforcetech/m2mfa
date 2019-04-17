@@ -1,30 +1,26 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
-import com.m2micro.m2mfa.base.query.BaseDefectQuery;
-import com.m2micro.m2mfa.base.service.BaseDefectService;
-import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.common.util.ValidatorUtil;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.Api;
-import com.m2micro.m2mfa.common.util.UUIDUtil;
-import io.swagger.annotations.ApiOperation;
 import com.m2micro.m2mfa.base.entity.BaseDefect;
+import com.m2micro.m2mfa.base.query.BaseDefectQuery;
+import com.m2micro.m2mfa.base.repository.BaseDefectRepository;
+import com.m2micro.m2mfa.base.repository.BaseItemsTargetRepository;
+import com.m2micro.m2mfa.base.service.BaseDefectService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 不良現象代碼 前端控制器
- * @author chenshuhong
- * @since 2019-01-24
+ * @author liaotao
+ * @since 2019-03-05
  */
 @RestController
 @RequestMapping("/base/baseDefect")
@@ -33,7 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class BaseDefectController {
     @Autowired
     BaseDefectService baseDefectService;
-
+    @Autowired
+    BaseDefectRepository baseDefectRepository;
+    @Autowired
+    BaseItemsTargetRepository baseItemsTargetRepository;
     /**
      * 列表
      */
@@ -53,6 +52,7 @@ public class BaseDefectController {
     @UserOperationLog("不良現象代碼详情")
     public ResponseMessage<BaseDefect> info(@PathVariable("id") String id){
         BaseDefect baseDefect = baseDefectService.findById(id).orElse(null);
+        baseDefect.setCategoryName(baseItemsTargetRepository.findById(baseDefect.getCategory()).orElse(null).getItemName());
         return ResponseMessage.ok(baseDefect);
     }
 
@@ -63,11 +63,8 @@ public class BaseDefectController {
     @ApiOperation(value="保存不良現象代碼")
     @UserOperationLog("保存不良現象代碼")
     public ResponseMessage<BaseDefect> save(@RequestBody BaseDefect baseDefect){
-        BaseDefect baseDefect1 =baseDefectService.findById(baseDefect.getEctCode()).orElse(null);
-        if(baseDefect1!=null){
-            throw  new MMException(baseDefect.getEctCode()+"该编码已被应用。");
-        }
-        return ResponseMessage.ok(baseDefectService.save(baseDefect));
+        baseDefectService.saveEntity(baseDefect);
+        return ResponseMessage.ok();
     }
 
     /**
@@ -77,15 +74,8 @@ public class BaseDefectController {
     @ApiOperation(value="更新不良現象代碼")
     @UserOperationLog("更新不良現象代碼")
     public ResponseMessage<BaseDefect> update(@RequestBody BaseDefect baseDefect){
-        ValidatorUtil.validateEntity(baseDefect, UpdateGroup.class);
-        BaseDefect baseDefectOld = baseDefectService.findById(baseDefect.getEctCode()).orElse(null);
-        if(baseDefectOld==null){
-            throw new MMException("数据库不存在该记录");
-        }
-        PropertyUtil.copy(baseDefect,baseDefectOld);
-        return ResponseMessage.ok(baseDefectService.save(baseDefectOld));
+        return ResponseMessage.ok(baseDefectService.updateEntity(baseDefect));
     }
-
     /**
      * 删除
      */
@@ -93,12 +83,11 @@ public class BaseDefectController {
     @ApiOperation(value="删除不良現象代碼")
     @UserOperationLog("删除不良現象代碼")
     public ResponseMessage delete(@RequestBody String[] ids){
-      String msg =  baseDefectService.deleteIds(ids);
+        String msg =  baseDefectService.deleteIds(ids);
         ResponseMessage rm = ResponseMessage.ok();
         if(msg.trim()!=""){
             rm.setMessage(msg.trim()+"已被引用不可删除。");
         }
         return  rm;
     }
-
 }

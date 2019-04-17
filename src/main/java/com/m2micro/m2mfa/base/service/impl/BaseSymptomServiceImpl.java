@@ -15,6 +15,7 @@ import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -41,6 +42,7 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
     @Autowired
     JPAQueryFactory queryFactory;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
     @Autowired
     BaseItemsTargetService baseItemsTargetService;
@@ -91,7 +93,13 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BaseSymptom> rm = BeanPropertyRowMapper.newInstance(BaseSymptom.class);
         List<BaseSymptom> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_symptom";
+        String countSql = "select count(*) from base_symptom bs where 1=1\n";
+        if(StringUtils.isNotEmpty(query.getSymptomCode())){
+            countSql = countSql + " and bs.symptom_code like '%"+query.getSymptomCode()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSymptomName())){
+            countSql = countSql + " and bs.symptom_name like '%"+query.getSymptomName()+"%'";
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
@@ -108,12 +116,12 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
         //校验不良原因代码
         List<BaseSymptom> listByCode = baseSymptomRepository.findBySymptomCodeAndSymptomIdNot(baseSymptom.getSymptomCode(), "");
         if(listByCode!=null&&listByCode.size()>0){
-            throw new MMException("不良原因代码不唯一！");
+            throw new MMException("不良代码不唯一！");
         }
         //校验不良原因名称
         List<BaseSymptom> listByName = baseSymptomRepository.findBySymptomNameAndSymptomIdNot(baseSymptom.getSymptomName(), "");
         if(listByName!=null&&listByName.size()>0){
-            throw new MMException("不良原因名称不唯一！");
+            throw new MMException("不良名称不唯一！");
         }
         baseSymptom.setSymptomId(UUIDUtil.getUUID());
         return save(baseSymptom);
@@ -130,12 +138,12 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
         //校验不良原因代码
         List<BaseSymptom> listByCode = baseSymptomRepository.findBySymptomCodeAndSymptomIdNot(baseSymptom.getSymptomCode(), baseSymptom.getSymptomId());
         if(listByCode!=null&&listByCode.size()>0){
-            throw new MMException("不良原因代码不唯一！");
+            throw new MMException("不良代码不唯一！");
         }
         //校验不良原因名称
         List<BaseSymptom> listByName = baseSymptomRepository.findBySymptomNameAndSymptomIdNot(baseSymptom.getSymptomName(), baseSymptom.getSymptomId());
         if(listByName!=null&&listByName.size()>0){
-            throw new MMException("不良原因名称不唯一！");
+            throw new MMException("不良名称不唯一！");
         }
         PropertyUtil.copy(baseSymptom,baseSymptomOld);
         return save(baseSymptomOld);
@@ -157,7 +165,7 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
     @Override
     @Transactional
     public void deleteEntitys(String[] ids) {
-        deleteEntitys(ids);
+        deleteByIds(ids);
     }
 
 

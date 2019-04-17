@@ -13,6 +13,6 @@ import org.springframework.stereotype.Component;
 @Data
 public class IotConstant {
     // 注塑成型工序的id
-    @Value("${m2mfa.iot.processId}")
-    private String processId ;
+//    @Value("${m2mfa.iot.processId}")
+//    private String processId ;
 }

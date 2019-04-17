@@ -26,4 +26,7 @@ public interface BasePartsRepository extends BaseRepository<BaseParts,String> {
     @Query(value = "select * from base_parts  where  part_no=?1 and enabled=1 ",nativeQuery=true)
     BaseParts selectpartNo(String partNo);
     int countByPartNo(String partNo);
+
+    List<BaseParts> findByPartNo(String partNo);
+
 }

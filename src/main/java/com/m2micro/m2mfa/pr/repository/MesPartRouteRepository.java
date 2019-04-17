@@ -28,4 +28,16 @@ public interface MesPartRouteRepository extends BaseRepository<MesPartRoute,Stri
 
     @Query("select r.partRouteId  from  MesPartRoute  as r  where r.routeId =?1  and  r.partId=?2")
     String  is_experience( String routeId,String partId );
+
+
+    @Query(value = "SELECT\n" +
+            "	mpr.part_route_id\n" +
+            "FROM\n" +
+            "	mes_mo_schedule mms,\n" +
+            "	mes_mo_desc mmd,\n" +
+            "	mes_part_route mpr \n" +
+            "WHERE mms.mo_id = mmd.mo_id\n" +
+            "AND mmd.part_id = mpr.part_id\n" +
+            "AND mms.schedule_id=?1",nativeQuery = true)
+    String getPartRouteId(String partRouteId);
 }

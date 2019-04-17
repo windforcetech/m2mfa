@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -45,6 +46,22 @@ public interface BaseItemsTargetService extends BaseService<BaseItemsTarget,Stri
      * @return  资料对应表的所有树形选项
      */
     TreeNode getTreeNode(String itemCode);
+
+    /**
+     * 保存
+     * @param baseItemsTarget
+     * @return
+     */
+    BaseItemsTarget saveEntity(BaseItemsTarget baseItemsTarget);
+
+    /**
+     * 修改
+     * @param baseItemsTarget
+     * @return
+     */
+    BaseItemsTarget updateEntity(BaseItemsTarget baseItemsTarget);
+
+    ResponseMessage  delete(String [] ids);
 
 
 }

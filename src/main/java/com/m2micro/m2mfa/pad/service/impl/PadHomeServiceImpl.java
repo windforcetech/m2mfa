@@ -22,6 +22,7 @@ import com.m2micro.m2mfa.pr.entity.MesPartRouteStation;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteStationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +52,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
   @Autowired
   private BaseItemsTargetService baseItemsTargetService;
   @Autowired
+  @Qualifier("secondaryJdbcTemplate")
   private JdbcTemplate jdbcTemplate;
   @Autowired
   private IotMachineOutputService iotMachineOutputService;
@@ -99,24 +101,38 @@ public class PadHomeServiceImpl  implements PadHomeService {
     Date  startTime = startTime(rwId,PadStaffUtil.getStaff().getStaffId());
     BigDecimal standardOutput = new BigDecimal(0);
     BigDecimal actualOutput  = new BigDecimal(0);
-    float rate=0;
+    double rate=0.00;
     if(startTime !=null){
       BigDecimal standardHours = mesPartRouteStation.getStandardHours();
       BigDecimal bdhours = new BigDecimal((new Date().getTime()-startTime.getTime())/1000);
-       standardOutput = bdhours.divide(standardHours, 2, RoundingMode.HALF_UP);
+      if(standardHours.compareTo(BigDecimal.ZERO)!=0){
+        standardOutput = bdhours.divide(standardHours, 2, RoundingMode.HALF_UP);
+      }
+
       //获取当前员工开始模数
       BigDecimal startMolds=startMolds(rwId,PadStaffUtil.getStaff().getStaffId());
       //实际产出
-       actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
+      if(startMolds !=null && startMolds.compareTo(BigDecimal.ZERO)!=0){
+        actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
+      }
+
        //达成率
-       rate = (float)actualOutput.longValue()/standardOutput.longValue();
+      rate = standardOutput.longValue()==0?0:(actualOutput.doubleValue()/standardOutput.longValue());
     }
 
     Integer partInput = partInput(rwId);
     Integer partOutput = 0;
     return PadHomeModel.builder().staffCode(baseStaff.getCode()).staffName(baseStaff.getStaffName()).staffDepartmentName(organizationService.findByUUID(baseStaff.getDepartmentId()).getDepartmentName())
         .staffShiftName(baseShift.getName()).staffOnTime(startTime).standardOutput(standardOutput.longValue()).actualOutput(actualOutput.longValue()).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
-        .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate( getReach(rate)).build();
+        .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate( (long)( rate*100)).build();
+  }
+
+
+  public static void main(String args[]) {
+    BigDecimal standardOutput = new BigDecimal(5);
+    BigDecimal actualOutput  = new BigDecimal(50);
+   double  rate = actualOutput.doubleValue()/standardOutput.doubleValue();
+   System.out.println((long)( rate*100));
   }
 
   @Override
@@ -135,22 +151,7 @@ public class PadHomeServiceImpl  implements PadHomeService {
     return padHomePara.getTotalamount()>actualOutput.longValue() ? true : false;
   }
 
-  /**
-   * 获取达成效
-   * @param rate
-   * @return
-   */
-  private long getReach(float rate) {
-    NumberFormat nt = NumberFormat.getPercentInstance();
-    nt.setMinimumFractionDigits(0);
-    long reach =0;
-    try {
-      reach= Long.parseLong(nt.format(rate).replace("%","").split(",")[0]);
-        }catch (Exception  e){
 
-    }
-    return reach;
-  }
 
 
   /**

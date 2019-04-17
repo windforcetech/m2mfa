@@ -25,6 +25,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -60,6 +61,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
     @Autowired
     MesMoScheduleService mesMoScheduleService;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
     @Autowired
     JPAQueryFactory queryFactory;

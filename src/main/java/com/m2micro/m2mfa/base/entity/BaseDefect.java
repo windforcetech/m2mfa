@@ -1,49 +1,45 @@
 package com.m2micro.m2mfa.base.entity;
 
 
+import javax.jdo.annotations.Transactional;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
  * 不良現象代碼
- * @author chenshuhong
- * @since 2019-01-24
+ * @author liaotao
+ * @since 2019-03-05
  */
 @Entity
 @ApiModel(value="BaseDefect对象", description="不良現象代碼")
 public class BaseDefect extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @ApiModelProperty(value = "主键")
-    private String ectId;
-    @ApiModelProperty(value = "不良代码")
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
     @Id
+    private String ectId;
     private String ectCode;
-    @NotEmpty(message="名称不能为空",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "名称长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
-    @ApiModelProperty(value = "不良名称")
     private String ectName;
-    @ApiModelProperty(value = "不良类型")
     private String category;
-    @ApiModelProperty(value = "不良分类")
     private Integer sortCode;
-    @ApiModelProperty(value = "不良状态")
     private Boolean enabled;
-    @ApiModelProperty(value = "描述")
     private String description;
+    @Transactional
+    private String categoryName;
 
     public String getEctId() {
         return ectId;
     }
+
     public void setEctId(String ectId) {
         this.ectId = ectId;
     }
@@ -51,6 +47,7 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public String getEctCode() {
         return ectCode;
     }
+
     public void setEctCode(String ectCode) {
         this.ectCode = ectCode;
     }
@@ -58,6 +55,7 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public String getEctName() {
         return ectName;
     }
+
     public void setEctName(String ectName) {
         this.ectName = ectName;
     }
@@ -65,6 +63,7 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public String getCategory() {
         return category;
     }
+
     public void setCategory(String category) {
         this.category = category;
     }
@@ -72,6 +71,7 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public Integer getSortCode() {
         return sortCode;
     }
+
     public void setSortCode(Integer sortCode) {
         this.sortCode = sortCode;
     }
@@ -79,6 +79,7 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public Boolean getEnabled() {
         return enabled;
     }
+
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
@@ -86,10 +87,18 @@ public class BaseDefect extends BaseEntity implements Serializable {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 
 
 }

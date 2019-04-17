@@ -16,8 +16,8 @@ public class PadBakingServiceImpl extends BaseOperateImpl  implements PadBakingS
 
 
     @Override
-    public OperationInfo getOperationInfo(String scheduleId, String stationId) {
-        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId);
+    public OperationInfo getOperationInfo(String scheduleId, String stationId,String processId) {
+        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId,processId);
         //烤料没有不良输入，置灰
         operationInfo.setDefectiveProducts("0");
         //烤料没有作业输入，置灰

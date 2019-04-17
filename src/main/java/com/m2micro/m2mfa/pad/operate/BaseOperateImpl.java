@@ -1,6 +1,9 @@
 package com.m2micro.m2mfa.pad.operate;
 
+import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
+import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
@@ -13,19 +16,23 @@ import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
+import com.m2micro.m2mfa.mo.entity.MesMoScheduleStation;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleStationRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleStaffService;
 import com.m2micro.m2mfa.pad.constant.PadConstant;
 import com.m2micro.m2mfa.pad.constant.StationConstant;
 import com.m2micro.m2mfa.pad.model.*;
+import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
 import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
+import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
 import com.m2micro.m2mfa.record.entity.MesRecordFail;
 import com.m2micro.m2mfa.record.entity.MesRecordMold;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
@@ -40,6 +47,7 @@ import com.m2micro.m2mfa.record.service.MesRecordWorkService;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -63,6 +71,7 @@ public class BaseOperateImpl implements BaseOperate {
     @Autowired
     PadConstant padConstant;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesRecordWorkService mesRecordWorkService;
@@ -100,14 +109,22 @@ public class BaseOperateImpl implements BaseOperate {
     BaseProcessService baseProcessService;
     @Autowired
     BaseItemsTargetService baseItemsTargetService;
+    @Autowired
+    MesMoScheduleStationRepository mesMoScheduleStationRepository;
+    @Autowired
+    PadBottomDisplayService padBottomDisplayService;
+    @Autowired
+    ProcessConstant processConstant;
+    @Autowired
+    MesPartRouteRepository mesPartRouteRepository;
 
-protected MesMoSchedule findMesMoScheduleById(String scheduleId){
+    protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return mesMoScheduleRepository.findById(scheduleId).orElse(null);
     }
 
 
-@Override
-    public OperationInfo getOperationInfo(String scheduleId, String stationId) {
+    @Override
+    public OperationInfo getOperationInfo(String scheduleId, String stationId,String processId) {
 
         if(StringUtils.isEmpty(scheduleId)){
             throw new MMException("当前没有可处理的排产单！");
@@ -115,6 +132,9 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         if(StringUtils.isEmpty(stationId)){
             throw new MMException("当前岗位为空，请刷新！");
         }
+        /*if(StringUtils.isEmpty(processId)){
+            throw new MMException("当前工序为空，请刷新！");
+        }*/
         MesMoSchedule mesMoSchedule = findMesMoScheduleById(scheduleId);
         //校验排产单状态
         isScheduleFlag(mesMoSchedule);
@@ -135,11 +155,37 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         setOtherByWork(operationInfo);
         //5.根据提报异常标志设置其他按钮是否置灰
         setOtherByAbnormal(operationInfo);
+        //6.根据工序设置作业输入是否置灰
+        //MesMoScheduleStation mesMoScheduleStation = mesMoScheduleStationRepository.findByScheduleIdAndStationId(scheduleId, stationId);
+        //BaseProcess baseProcess = baseProcessService.findById(mesMoScheduleStation.getProcessId()).orElse(null);
+        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
+        setOtherByProcess(operationInfo,baseProcess);
+        //7.禁用扫描过站的不良输入
+        setDefectiveProducts(operationInfo,baseProcess);
         return operationInfo;
     }
 
+    /**
+     * 禁用扫描过站的不良输入
+     * @param operationInfo
+     * @param baseProcess
+     */
+    private void setDefectiveProducts(OperationInfo operationInfo, BaseProcess baseProcess) {
+        //禁用扫描过站的不良输入
+        if(BaseItemsTargetConstant.SCAN.equalsIgnoreCase(getCollection(baseProcess))){
+            //不良品数(0:置灰,1:不置灰)
+            operationInfo.setDefectiveProducts("0");
+        }
+    }
 
-/**
+    private String getCollection(BaseProcess baseProcess) {
+        BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null);
+        return baseItemsTarget.getItemValue();
+    }
+
+
+
+    /**
      * 根据上下工标志设置其他按钮是否置灰
      * @param operationInfo
      */
@@ -162,7 +208,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
      * 根据提报异常标志设置其他按钮是否置灰
      * @param operationInfo
      */
@@ -178,6 +224,22 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
 
 
 /**
+     * 根据提报异常标志设置其他按钮是否置灰
+     * @param operationInfo
+     */
+    private void setOtherByProcess(OperationInfo operationInfo,BaseProcess baseProcess) {
+        if(operationInfo.getWorkFlag().equalsIgnoreCase("1")){
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseProcess.getCategory()).orElse(null);
+            //一般作业站不置灰
+            if(BaseItemsTargetConstant.SYSCOMMON.equalsIgnoreCase(baseItemsTarget.getItemValue())){
+                //作业输入(0:置灰,1:不置灰)
+                operationInfo.setJobInput("1");
+            }
+        }
+    }
+
+
+    /**
      * 初始化，默认全部都有
      * @param operationInfo
      */
@@ -189,19 +251,19 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         //不良品数(0:置灰,1:不置灰)
         operationInfo.setDefectiveProducts("1");
         //提报异常(0:置灰,1:不置灰)
-        operationInfo.setReportingAnomalies("1");
+        operationInfo.setReportingAnomalies("0");
         //作业输入(0:置灰,1:不置灰)
-        operationInfo.setJobInput("1");
+        operationInfo.setJobInput("0");
         //作业指导(0:置灰,1:不置灰)
-        operationInfo.setHomeworkGuidance("1");
+        operationInfo.setHomeworkGuidance("0");
         //操作历史(0:置灰,1:不置灰)
-        operationInfo.setOperationHistory("1");
+        operationInfo.setOperationHistory("0");
         //结束作业(0:置灰,1:不置灰)
         operationInfo.setFinishHomework("1");
     }
 
 
-/**
+    /**
      * 获取当前员工在当前排产单的当前岗位上的上工最新时间信息
      * @param staffId
      * @param scheduleId
@@ -231,7 +293,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
      *获取在当前排产单的当前岗位上的提报异常最新信息
      * @param scheduleId
      * @param stationId
@@ -254,7 +316,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
      * 设置上下工标志
      * @param recordWorks
      * @param operationInfo
@@ -291,7 +353,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
      * 设置提报异常标志
      * @param recordAbnormals
      *
@@ -326,7 +388,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-@Override
+    @Override
     @Transactional
     public StartWorkPara startWork(PadPara obj) {
         MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(obj.getScheduleId()).orElse(null);
@@ -355,7 +417,7 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     }
 
 
-/**
+    /**
     * 上工模具添加
     * @param moId
     * @param rwId
@@ -586,7 +648,10 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         if(!isNotWork(obj.getRwid(),PadStaffUtil.getStaff().getStaffId())){
             throw new MMException("当前员工没有上工，不存在下工！");
         }
-        saveRecordFail(obj);
+        if(obj.getMesRecordFails()!=null&&obj.getMesRecordFails().size()>0){
+            saveRecordFail(obj);
+        }
+
         //更新职员作业记录表结束时间
         updateRecordStaffEndTime(obj.getRecordStaffId());
         if(isMesRecorWorkEnd(obj.getRwid())){
@@ -636,16 +701,16 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
     public FinishHomeworkModel finishHomework(FinishHomeworkPara obj) {
         FinishHomeworkModel finishHomeworkModel = new FinishHomeworkModel();
         //是否是扫描或继承站
-        if(isProcessCollection(obj.getProcessId())){
+        /*if(isProcessCollection(obj.getProcessId())){
             //预留
             return finishHomeworkModel;
-        }
+        }*/
         return handleFinishHomework(obj, finishHomeworkModel);
     }
 
 
 /**
-     * 处理作业结束
+     * 处理
      * @param obj
      * @param finishHomeworkModel
      * @return
@@ -666,12 +731,44 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         MesRecordWork mesRecordWork = findMesRecordWorkById(obj.getRwid());
         IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         //产出量>=目标量
-        if(isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork)){
+
+      //Integer num =  isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork);
+        Integer num =  isCompeledForProcess(mesMoSchedule,obj);
+        if(num>0){
             //结束工序
             endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
             endStationTime(obj.getScheduleId(),obj.getProcessId());
+            //排产单状态“已超量”
+            updateSchedulFlag(obj.getScheduleId());
+        }
+        if(num==0){
+            endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
+            endStationTime(obj.getScheduleId(),obj.getProcessId());
+            //排产单状态“已完成”
+            scheduleclose(obj.getScheduleId());
         }
         return finishHomeworkModel;
+    }
+
+
+
+
+    public Integer isCompeledForProcess( MesMoSchedule  mesMoSchedule,  FinishHomeworkPara obj){
+      BaseProcess baseProcess = baseProcessService.findById(obj.getProcessId()).orElse(null);
+      Integer outputQtyForProcess = padBottomDisplayService.getOutputQtyForProcess(obj.getScheduleId(), baseProcess);
+      Integer scheduleQty = mesMoSchedule.getScheduleQty();
+      return  outputQtyForProcess.compareTo(scheduleQty);
+    }
+
+
+
+
+/**
+     * 排产单已完成
+     * @param scheduleId
+     */
+    protected  void scheduleclose(String scheduleId){
+        mesMoScheduleRepository.setFlagFor(MoScheduleStatus.CLOSE.getKey(),scheduleId);
     }
 
 
@@ -681,30 +778,60 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return null;
     }
 
-    @Transactional
+
+@Transactional
     protected void saveMesRocerdRail(Padbad padbad) {
         for(MesRecordFail mesRecordFail1 :  padbad.getMesRecordFails()){
             saveMesRecordFail(mesRecordFail1);
         }
    }
-    @Transactional
+
+
+@Transactional
     public  void saveMesRecordFail(MesRecordFail mesRecordFail1) {
         MesRecordFail mesRecordFail = new MesRecordFail();
         mesRecordFail.setRwId(mesRecordFail1.getRwId());
         mesRecordFail.setId(UUIDUtil.getUUID());
         mesRecordFail.setDefectCode(mesRecordFail1.getDefectCode());
-        if(mesRecordFail1.getQty()<0){
-            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +mesRecordFail1.getRwId() + "'";
-            long badsum = jdbcTemplate.queryForObject(sql, Long.class);
+        MesRecordWork mesRecordWork = mesRecordWorkService.findById(mesRecordFail1.getRwId()).orElse(null);
+        //完工数量
+       //Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesRecordWork.getMachineId()), mesRecordWork.getScheduleId(), mesRecordWork.getScheduleId()).intValue();
+        MoDescInfoModel moDescForStationFail = getMoDescForStationFail(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
+        Integer completedQty = padBottomDisplayService.getOutputQtyForStation(mesRecordWork.getScheduleId(), mesRecordWork.getStationId(), mesRecordWork.getProcessId(), mesRecordWork.getMachineId(), moDescForStationFail);
+        if(mesRecordFail1.getQty()>completedQty){
+            throw new MMException("不良负数量不可大于完工数量");
+        }
+
+        long badsum = getBadsum(mesRecordFail1);
+        //不良数量为负
+        if(mesRecordFail1.getQty() <0){
             long qtynum= Math.abs(mesRecordFail1.getQty());
             if (qtynum > badsum) {
                 throw new MMException("不良负数量不可大于原有数量");
             }
         }
+         Long qty = mesRecordFail1.getQty();
+         if(badsum>completedQty  ||  qty > completedQty ){
+                throw new MMException("不良负数量不可大于完工数量");
+            }
+
+
         mesRecordFail.setQty(mesRecordFail1.getQty());
         mesRecordFail.setCreateOn(new Date());
         mesRecordFailRepository.save(mesRecordFail);
     }
+
+
+    private long getBadsum(MesRecordFail mesRecordFail1) {
+            long num=0;
+            String sql = "select IFNULL(SUM(qty),0) from mes_record_fail   where rw_id='" +mesRecordFail1.getRwId() + "'";
+            try {
+                num =   jdbcTemplate.queryForObject(sql, Long.class);
+            }catch (Exception e){
+
+            }
+            return num;
+        }
 
 
     @Override
@@ -941,13 +1068,15 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
      */
     @Transactional
     protected  void endStationTime(String scheduleId,String processId ){
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(scheduleId).orElse(null);
+        IotMachineOutput iotMachineOutputByMachineId = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
         String sql ="SELECT mrw.rwid FROM mes_record_work mrw WHERE mrw.schedule_id = '"+scheduleId+"' AND mrw.process_id = '"+processId+"' AND mrw.station_id != ( SELECT bs.station_id FROM base_station bs WHERE bs. CODE = '"+StationConstant.BOOT.getKey()+"' ) AND start_time IS NOT NULL AND end_time IS NULL";
             List<String> rwids = jdbcTemplate.queryForList(sql, String.class);
             if( !rwids.isEmpty()){
                 for(String rwid :rwids){
-                    sql ="update mes_record_staff  set end_time='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  where start_time is NOT NULL  and end_time is NULL and rw_id='"+rwid+"'";
+                    sql ="update mes_record_staff  set end_time='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  ,end_molds ='"+iotMachineOutputByMachineId.getOutput()+"'  where start_time is NOT NULL  and end_time is NULL and rw_id='"+rwid+"'";
                     jdbcTemplate.update(sql);
-                    sql ="update mes_record_work   set end_time='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  where start_time is NOT NULL  and end_time is NULL and rwid='"+rwid+"'";
+                    sql ="update mes_record_work   set end_time='"+ DateUtil.format(new Date(),DateUtil.DATE_TIME_PATTERN)+"'  ,end_molds ='"+iotMachineOutputByMachineId.getOutput()+"'  where start_time is NOT NULL  and end_time is NULL and rwid='"+rwid+"'";
                     jdbcTemplate.update(sql);
                 }
             }
@@ -959,8 +1088,8 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
      * @return
      */
     protected boolean isMesRecorWorkEnd(String rwId) {
-        MesRecordStaff mesRecordStaff = mesRecordStaffRepository.findByRwIdAndStartTimeNotNullAndEndTimeIsNull(rwId);
-        if(mesRecordStaff==null){
+       List< MesRecordStaff> mesRecordStaff = mesRecordStaffRepository.findByRwIdAndStartTimeNotNullAndEndTimeIsNull(rwId);
+        if(mesRecordStaff.isEmpty()){
             return true;
         }
         return false;
@@ -1051,14 +1180,14 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
      * @param mesMoSchedule
      * @return  机台产量>=目标量 true
      */
-    protected Boolean isCompleted(IotMachineOutput iotMachineOutput,MesMoSchedule mesMoSchedule,MesRecordWork mesRecordWork){
+    protected Integer isCompleted(IotMachineOutput iotMachineOutput,MesMoSchedule mesMoSchedule,MesRecordWork mesRecordWork){
         Integer scheduleQty = mesMoSchedule.getScheduleQty();
         BigDecimal qty = new BigDecimal(scheduleQty);
         BigDecimal completedQty = getCompletedQty(iotMachineOutput,mesRecordWork.getScheduleId(),mesRecordWork.getStationId());
         MoDescInfoModel moDescForStationFail = getMoDescForStationFail(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
         BigDecimal fail = new BigDecimal(moDescForStationFail.getQty());
         BigDecimal output = completedQty.subtract(fail);
-        return output.compareTo(qty)==-1?false:true;
+        return output.compareTo(qty);
     }
 
     /**
@@ -1330,6 +1459,54 @@ protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return  false;
     }
 
+    /**
+     * 更新排产单状态为已超量
+     * @param scheduleId
+     */
+    protected  void  updateSchedulFlag(String scheduleId){
+        mesMoScheduleRepository.setFlagFor(MoScheduleStatus.EXCEEDED.getKey(),scheduleId);
+    }
+
+    /**
+     * 当前工序是产出工序时更新排产单状态为已超量
+     * @param scheduleId
+     * @param processId
+     */
+    protected void handUpdateSchedulFlag(String scheduleId,String processId){
+        if(isOutputProcessId(scheduleId,processId)){
+            updateSchedulFlag(scheduleId);
+        }
+
+    }
+
+    /**
+     * 当前工序是产出工序时更新排产单状态为已完结
+     * @param scheduleId
+     * @param processId
+     */
+    protected  void handScheduleclose(String scheduleId,String processId){
+        if(isOutputProcessId(scheduleId,processId)){
+            scheduleclose(scheduleId);
+        }
+    }
+
+    /**
+     * 当前工序是否是产出工序
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+    protected Boolean isOutputProcessId(String scheduleId,String processId){
+        //获取料件途程id
+        String partRouteId = mesPartRouteRepository.getPartRouteId(scheduleId);
+        //获取产出工序
+        MesPartRoute mesPartRoute = mesPartRouteRepository.findById(partRouteId).orElse(null);
+        //当前工序是产出工序
+        if(processId.equals(mesPartRoute.getOutputProcessId())){
+            return true;
+        }
+        return false;
+    }
 
 }
 

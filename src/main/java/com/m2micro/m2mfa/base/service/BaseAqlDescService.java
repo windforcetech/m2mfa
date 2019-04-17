@@ -5,7 +5,10 @@ import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.query.BaseAqlDescQuery;
+import com.m2micro.m2mfa.base.vo.AqlDescSelect;
 import com.m2micro.m2mfa.base.vo.AqlDescvo;
+
+import java.util.List;
 
 /**
  * 抽样标准(aql)-主档 服务类
@@ -45,4 +48,10 @@ public interface BaseAqlDescService extends BaseService<BaseAqlDesc,String> {
      * @return
      */
     AqlDescvo   selectAqlDes(String id );
+
+    /**
+     * 获取所有抽样方案
+     * @return
+     */
+    List<AqlDescSelect> getAqlDesc();
 }

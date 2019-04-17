@@ -12,6 +12,7 @@ import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -34,6 +35,7 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
     @Autowired
     MesMoDescRepository mesMoDescRepository;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
 
     public BaseCustomerRepository getRepository() {

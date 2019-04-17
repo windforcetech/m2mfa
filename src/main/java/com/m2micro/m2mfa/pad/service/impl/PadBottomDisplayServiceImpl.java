@@ -1,8 +1,11 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.constant.ProcessConstant;
+import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDescRepository;
+import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.base.service.BaseStationService;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
@@ -11,20 +14,29 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleStaffRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.pad.constant.StationConstant;
 import com.m2micro.m2mfa.pad.model.MoDescInfoModel;
 import com.m2micro.m2mfa.pad.model.StationInfoModel;
 import com.m2micro.m2mfa.pad.operate.BaseOperateImpl;
 import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
+import com.m2micro.m2mfa.record.entity.MesRecordWipLog;
+import com.m2micro.m2mfa.record.entity.MesRecordWipRec;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
+import com.m2micro.m2mfa.record.repository.MesRecordWipLogRepository;
+import com.m2micro.m2mfa.record.repository.MesRecordWipRecRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
+import com.m2micro.m2mfa.record.service.MesRecordWipLogService;
+import com.m2micro.m2mfa.record.service.MesRecordWipRecService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +49,7 @@ import java.util.stream.Collectors;
 public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadBottomDisplayService {
 
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
     @Autowired
     BaseQualitySolutionDescRepository baseQualitySolutionDescRepository;
@@ -52,6 +65,12 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     MesMoScheduleStaffRepository mesMoScheduleStaffRepository;
     @Autowired
     MesRecordWorkRepository mesRecordWorkRepository;
+    @Autowired
+    BaseProcessService baseProcessService;
+    @Autowired
+    ProcessConstant processConstant;
+    @Autowired
+    MesRecordWipLogService mesRecordWipLogService;
 
     @Override
     public MoDescInfoModel getMoDescInfo(String scheduleId) {
@@ -72,7 +91,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     }
 
     @Override
-    public StationInfoModel getStationInfo(String scheduleId, String stationId) {
+    public StationInfoModel getStationInfo(String scheduleId, String stationId,String processId) {
         if(StringUtils.isEmpty(scheduleId)||StringUtils.isEmpty(stationId)){
             throw new MMException("排产单和工位id不能为空！");
         }
@@ -97,44 +116,186 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         Boolean abnormal = isAbnormal(scheduleId, stationId);
         stationInfoModel.setAbnormalFlag(abnormal);
 
+        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
+        //注塑成型并且不是开机
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())&& (!StationConstant.BOOT.getKey().equals(baseStation.getCode()))){
+            stationInfoModel.setCompletedQty(0);
+            stationInfoModel.setQty(0l);
+            stationInfoModel.setScrapQty(0);
+            stationInfoModel.setCompletionRate(0);
+            stationInfoModel.setFailRate(0);
+            stationInfoModel.setScrapRate(0);
+            return stationInfoModel;
+        }
+
         //不良数量,报废数量（不良数量是每个工位的和）
         MoDescInfoModel moDescForStationFail = getMoDescForStationFail(scheduleId, stationId);
         stationInfoModel.setQty(moDescForStationFail.getQty());
         stationInfoModel.setScrapQty(moDescForStationFail.getScrapQty());
+        //获取工位完成量（已排除不良）
+        Integer completedQty = getOutputQtyForStation(scheduleId, stationId, processId, mesMoSchedule.getMachineId(), moDescForStationFail);
+        stationInfoModel.setCompletedQty(completedQty);
+        /*Integer completedQty = getOutputQtyForProcess(scheduleId, baseProcess);
+        stationInfoModel.setCompletedQty(completedQty);*/
 
-        //完工数量
-        Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesMoSchedule.getMachineId()), scheduleId, stationId).intValue();
-        stationInfoModel.setCompletedQty(completedQty-moDescForStationFail.getQty().intValue());
         /*完成比 :完工数量/排产数量 *100%
           不良率:不良数量/完工数量*100%
           报废率:报废数量/完工数量*100%*/
         //完成率
         Integer completionRate = stationInfoModel.getCompletedQty()*100/stationInfoModel.getScheduleQty();
         stationInfoModel.setCompletionRate(completionRate);
-        //不良率,报废率
-        if(completedQty.equals(0)){
+        //不良率,报废率（完工数 包含不良）
+        Integer com = stationInfoModel.getCompletedQty()+stationInfoModel.getQty().intValue();
+        if(com.equals(0)){
             stationInfoModel.setFailRate(null);
             stationInfoModel.setScrapRate(null);
         }else{
             //不良率
-            Long failRate = stationInfoModel.getQty()*100/ completedQty;
+            Long failRate = stationInfoModel.getQty()*100/ com;
             stationInfoModel.setFailRate(failRate.intValue());
             //报废率
-            Integer scrapRate = stationInfoModel.getScrapQty()*100/completedQty;
+            Integer scrapRate = stationInfoModel.getScrapQty()*100/com;
             stationInfoModel.setScrapRate(scrapRate);
         }
         return stationInfoModel;
     }
 
+    @Override
+    public Integer getOutputQtyForStation(String scheduleId, String stationId, String processId,String machineId, MoDescInfoModel moDescForStationFail) {
+        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
+        //产出工序是注塑成型
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            //完工数量
+            Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(machineId), scheduleId, stationId).intValue();
+            return completedQty-moDescForStationFail.getQty().intValue();
+        }else {
+            //从在制信息获取完工数,此时拿的是工序的产出,因为在制没有工位产出
+            Integer completedQty = mesRecordWipLogService.getAllOutputQty(scheduleId, processId);
+            return completedQty;
+        }
+    }
+
     /**
-     * 获取工单完工数量
+     * 获取单个排产单完工数（已排除不良********常用方法）
      * @param scheduleId
      * @return
      */
+
+    public Integer getOutPutQtys(String scheduleId) {
+        List<String> scheduleIds = new ArrayList<>();
+        scheduleIds.add(scheduleId);
+        //获取工单的产出工序
+        String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
+        BaseProcess baseProcess = baseProcessService.findById(outputProcessId).orElse(null);
+        return getOutputQtyForProcess(scheduleId, baseProcess);
+    }
+
+    /**
+     * 获取工序的完成量（工序的产量**************常用方法）
+     * @param scheduleId
+     * @param baseProcess
+     * @return
+     */
+    public Integer getOutputQtyForProcess(String scheduleId,BaseProcess baseProcess) {
+        //如果产出工序是注塑成型
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            return getMachineOutputQty(scheduleId, baseProcess.getProcessId());
+        }
+        //如果不是从在制表拿
+        return mesRecordWipLogService.getAllOutputQty(scheduleId,baseProcess.getProcessId());
+    }
+
+    /**
+     * 获取机台产量
+     * @param scheduleId
+     * @return
+     */
+    /*@Override
+    public Integer getMachineOutputQty(String scheduleId) {
+        //获取工单的产出工序
+        String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
+        return getMachineOutputQty(scheduleId, outputProcessId);
+    }*/
+
+    /**
+     * 获取机台产量（注塑成型工序的产量***************常用方法）
+     * @param scheduleId
+     *          机台关联的排产单
+     * @param outputProcessId
+     *          产出工序并且是注塑成型工序
+     * @return
+     */
     @Override
+    public Integer getMachineOutputQty(String scheduleId, String outputProcessId) {
+        //获取产出工序的最后一个工位
+        BaseStation baseStation = atlastStation(outputProcessId);
+        String stationId=baseStation.getStationId();
+
+        //获取工单完工数量(包含不良数量)
+        BigDecimal completedQty = new BigDecimal(0);
+
+        //注意：每个排产单绑定的机器id不一样，这里只能循环计算
+        MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleId).orElse(null);
+        IotMachineOutput iotMachineOutput = findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        completedQty = completedQty.add(getCompletedQty(iotMachineOutput, scheduleId, stationId));
+
+        List scheduleIds = new ArrayList();
+        scheduleIds.add(scheduleId);
+        //获取不良数量(产出工位的不良)
+        Integer failQty = getFailQty(scheduleIds, stationId);
+        failQty = failQty==null?0:failQty;
+        if(failQty>completedQty.intValue()){
+            throw new MMException("不良数量大于完工数量");
+        }
+        return  completedQty.intValue()-failQty;
+    }
+
+    /**
+     * 获取工单完工数量（排产单来自同一工单才能调用，不是同一工单scheduleIds只能传一个）
+     * @param scheduleId
+     * @see <code>getOutPutQtys(String scheduleId)</code>
+     * @return
+     */
+    @Override
+    @Deprecated
     public Integer getOutPutQtys(String scheduleId,List<String> scheduleIds) {
         //获取工单的产出工序
         String outputProcessId = baseQualitySolutionDescRepository.getOutputProcessId(scheduleId);
+        return getOutPutQtys(scheduleIds, outputProcessId);
+    }
+
+    /**
+     * 同一工单的排产单（料件途程相同，产出工序相同）
+     * @param scheduleIds
+     * @param outputProcessId
+     * @see <code>getOutPutQtys(String scheduleId)/code>
+     * @return
+     */
+    @Override
+    @Deprecated
+    public Integer getOutPutQtys(List<String> scheduleIds, String outputProcessId) {
+        //如果产出工序是注塑成型(预留)
+        BaseProcess baseProcess = baseProcessService.findById(outputProcessId).orElse(null);
+        //如果产出工序是注塑成型
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            return getMachineOutputQty(scheduleIds, outputProcessId);
+        }
+        //如果不是从在制表拿
+        return mesRecordWipLogService.getAllOutputQty(scheduleIds, outputProcessId);
+    }
+
+
+
+    /**
+     * 获取机台产量（注塑成型工序的产量）
+     * @param scheduleIds
+     * @param outputProcessId
+     * @see <code>getMachineOutputQty(String scheduleId,String processId)</code>
+     * @return
+     */
+    @Override
+    @Deprecated
+    public Integer getMachineOutputQty(List<String> scheduleIds, String outputProcessId) {
         //获取产出工序的最后一个工位
         BaseStation baseStation = atlastStation(outputProcessId);
         String stationId=baseStation.getStationId();

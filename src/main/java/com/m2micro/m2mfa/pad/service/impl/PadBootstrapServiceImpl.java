@@ -3,14 +3,17 @@ package com.m2micro.m2mfa.pad.service.impl;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
+import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.operate.BaseOperateImpl;
 import com.m2micro.m2mfa.pad.service.PadBootstrapService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.record.entity.MesRecordStaff;
 import com.m2micro.m2mfa.record.entity.MesRecordWork;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +27,8 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
 
 
     @Override
-    public OperationInfo getOperationInfo(String scheduleId, String stationId) {
-        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId);
+    public OperationInfo getOperationInfo(String scheduleId, String stationId,String processId) {
+        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId,processId);
         //开机没有作业输入，置灰
         operationInfo.setJobInput("0");
         return operationInfo;
@@ -65,7 +68,7 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
     @Transactional
     public StopWorkModel stopWorkForReal(StopWorkPara obj, StopWorkModel stopWorkModel, MesRecordWork mesRecordWork, MesMoSchedule mesMoSchedule, IotMachineOutput iotMachineOutput) {
         //保存不良输入
-        if(!obj.getMesRecordFails().isEmpty()){
+        if(obj.getMesRecordFails()!=null){
             Padbad padbad= new Padbad();
             padbad.setMesRecordFails(obj.getMesRecordFails());
             saveMesRocerdRail(padbad);
@@ -74,9 +77,12 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         //下工
         stopWorkForOutput(obj.getRwid(), PadStaffUtil.getStaff().getStaffId(),iotMachineOutput);
         //是否已完成目标量
-        if(isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork)){
+        //产出量>=目标量
+        Integer num =  isCompleted(iotMachineOutput,mesMoSchedule,mesRecordWork);
+
+        if(num>=0){
             //已完成目标量
-            return stopWorkForCompleted(obj,stopWorkModel,iotMachineOutput,mesRecordWork, mesMoSchedule);
+            return stopWorkForCompleted(obj,stopWorkModel,iotMachineOutput,mesRecordWork, mesMoSchedule, num);
         }
         //没有完成目标量
         return stopWorkForUnCompleted(obj,stopWorkModel,iotMachineOutput,mesRecordWork);
@@ -118,14 +124,26 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
      * @return
      */
     @Transactional
-    public StopWorkModel stopWorkForCompleted(StopWorkPara obj,StopWorkModel stopWorkModel,IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork,MesMoSchedule mesMoSchedule){
+    public StopWorkModel stopWorkForCompleted(StopWorkPara obj,StopWorkModel stopWorkModel,IotMachineOutput iotMachineOutput,MesRecordWork mesRecordWork,MesMoSchedule mesMoSchedule,Integer num){
         //退料
 
         //下模
 
         //结束工序
-        endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
-        endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
+        if(num>0){
+            //结束工序
+            endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
+            endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
+            //排产单状态“已超量”
+            updateSchedulFlag(obj.getScheduleId());
+        }
+        if(num==0){
+            endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
+            endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
+            //排产单状态“已完成”
+            scheduleclose(obj.getScheduleId());
+        }
+
         //是否交接班
         if(!isChangeShifts(PadStaffUtil.getStaff().getStaffId())){
             //不交接班

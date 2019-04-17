@@ -239,7 +239,7 @@ public class BaseStaffshiftController {
 
                     /*BaseStaffshift baseStaffshift1 = baseStaffs.get(0);
                     baseStaffshift1.setShiftId(baseStaffshift.getShiftId());
-                    baseStaffshiftService.updateById(baseStaffshift1.getId(), baseStaffshift1);*/
+                    baseBomDescService.updateById(baseStaffshift1.getId(), baseStaffshift1);*/
 
                     //再新增一条
                     baseStaffshiftService.save(baseStaffshift);

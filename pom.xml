@@ -18,7 +18,7 @@
     </parent>
 
     <properties>
-        <project.base.version>2.2.0</project.base.version>
+        <project.base.version>2.3.0</project.base.version>
         <project.release.version>${project.base.version}-SNAPSHOT</project.release.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -31,6 +31,7 @@
         <mybatis.plus>3.0.1</mybatis.plus>
         <flowable.version>6.4.0</flowable.version>
         <druid.version>1.1.10</druid.version>
+        <easypoi.version>4.0.0</easypoi.version>
     </properties>
 
     <dependencyManagement>
@@ -65,6 +66,28 @@
 
 
     <dependencies>
+        <!--<dependency>
+            <groupId>cn.afterturn</groupId>
+            <artifactId>easypoi-base</artifactId>
+            <version>${easypoi.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>cn.afterturn</groupId>
+            <artifactId>easypoi-web</artifactId>
+            <version>${easypoi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.afterturn</groupId>
+            <artifactId>easypoi-annotation</artifactId>
+            <version>${easypoi.version}</version>
+        </dependency>-->
+
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
@@ -187,6 +210,14 @@
             <artifactId>converter-gson</artifactId>
             <version>2.3.0</version>
         </dependency>
+        <!-- oracle -->
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.2.0.3</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>

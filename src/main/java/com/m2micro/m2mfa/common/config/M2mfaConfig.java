@@ -26,7 +26,7 @@ import java.nio.file.Path;
 @EnableAsync
 public class M2mfaConfig {
 
-//    @Value("${}")
+    //    @Value("${}")
 //    private String baseFileDirectory;
     @Bean
     public JPAQueryFactory jpaQueryFactory(EntityManager entityManager) {
@@ -34,10 +34,10 @@ public class M2mfaConfig {
     }
 
     @Bean
-    public LabServerConfig getLabServerConfig(@Value("${labServer.url}") String labserverurl){
-        LabServerConfig labServerConfig=new LabServerConfig();
+    public LabServerConfig getLabServerConfig(@Value("${labServer.url}") String labserverurl) {
+        LabServerConfig labServerConfig = new LabServerConfig();
         labServerConfig.setLabServerUrl("http://192.168.2.16:9666/api/");
-        if(labserverurl!=null||labserverurl!=""){
+         if (labserverurl != null || labserverurl != "") {
 
             labServerConfig.setLabServerUrl(labserverurl);
         }
@@ -45,11 +45,12 @@ public class M2mfaConfig {
     }
 
     @Bean
-    MultipartConfigElement multipartConfigElement(@Value("${file.baseDir}")String filepathDir) {
+    public MultipartConfigElement multipartConfigElement(@Value("${file.baseDir}") String filepathDir) {
         MultipartConfigFactory factory = new MultipartConfigFactory();
+        System.out.println("99999999999999999999999999999-------------------------------------");
         //String path="/m2m_mes_files";
-        File file =new File(filepathDir);
-        if(!file.exists()){
+        File file = new File(filepathDir);
+        if (!file.exists()) {
             file.mkdirs();
         }
         factory.setLocation(filepathDir);

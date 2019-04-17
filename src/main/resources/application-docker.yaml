@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    secondary:
+      jdbc-url: jdbc:mysql://192.168.1.132:3306/verify?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
+      username: root
+      password:
+      driverClassName: com.mysql.jdbc.Driver
+      druid:
+        max-active: 10
+        min-idle: 2
+        max-wait: 60000
+        initial-size: 5
+    primary:
+      jdbc-url: jdbc:oracle:thin:@192.168.2.17:1521:XE
+      username: chenshuhong
+      password: chenshuhong
+      driver-class-name: oracle.jdbc.OracleDriver
+  cache:
+    type: redis
+  redis:
+    host: 192.168.1.111
+    port: 6379
+
+m2miot:
+  client:
+    url: http://192.168.1.111:8082
+file:
+  baseDir: /home/test001/m2m_mes/files
+labServer:
+  url: http://192.168.1.32:61080/api/

@@ -5,6 +5,8 @@ import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.framework.commons.BaseRepository;
+import com.m2micro.m2mfa.mo.model.ScheduleAndPartsModel;
+import com.m2micro.m2mfa.pad.model.StationRelationModel;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -55,6 +57,18 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
     @Query("update MesMoSchedule m set m.flag = ?1 , m.prefreezingState = ?2 where m.scheduleId = ?3")
     Integer setFlagAndPrefreezingStateFor(Integer flag,Integer prefreezingState, String scheduleId);
 
+    /**
+     * 更新工单状态及冻结前状态及顺序
+     * @param flag
+     * @param prefreezingState
+     * @param sequence
+     * @param scheduleId
+     * @return
+     */
+    @Modifying
+    @Query("update MesMoSchedule m set m.flag = ?1 , m.prefreezingState = ?2 ,m.sequence=?3 where m.scheduleId = ?4")
+    Integer setFlagAndPrefreezingStateAndSequence(Integer flag,Integer prefreezingState,Integer sequence, String scheduleId);
+
 
     /**
      * 通过机台id查找排产单数量
@@ -89,8 +103,8 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      * @return  影响行数
      */
     @Modifying
-    @Query("update MesMoSchedule m set m.machineId = ?1 where m.scheduleId = ?2")
-    Integer updateMachineIdByScheduleId(String machineId,String scheduleId);
+    @Query("update MesMoSchedule m set m.machineId = ?1 ,m.sequence=?2 where m.scheduleId = ?3")
+    Integer updateMachineIdByScheduleId(String machineId,Integer sequence, String scheduleId);
 
     /**
      * 获取当前机器正在生产的排产单
@@ -119,4 +133,18 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      * @return
      */
     List<MesMoSchedule> findByMoId(String moId);
+
+    @Query(value = "SELECT\n" +
+                    "	mms.schedule_id,\n" +
+                    "	mms.schedule_no scheduleNo,\n" +
+                    "	bpt.part_no partNo,\n" +
+                    "	bpt.`name` partName,\n" +
+                    "	bpt.spec partSpec \n" +
+                    "FROM\n" +
+                    "	mes_mo_schedule mms,\n" +
+                    "	base_parts bpt \n" +
+                    "WHERE\n" +
+                    "	mms.part_id = bpt.part_id \n" +
+                    "	AND mms.schedule_id = ?1",nativeQuery = true)
+    ScheduleAndPartsModel getStationRelationModel(String scheduleId);
 }

@@ -31,7 +31,7 @@ public class PadDispatchServiceImpl implements PadDispatchService {
     BaseStationService baseStationService;
 
     @Override
-    public OperationInfo getOperationInfo(String scheduleId, String stationId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public OperationInfo getOperationInfo(String scheduleId, String stationId,String processId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         if(!mesMoScheduleService.isScheduleFlag(scheduleId)){
             throw  new MMException("排产单状态不可执行");
@@ -40,8 +40,8 @@ public class PadDispatchServiceImpl implements PadDispatchService {
         String handle = PadDispatchConstant.getHandle(baseStation.getCode());
         Class<?> clazz = Class.forName(handle);
         Object handleInstance = SpringContextUtil.getBean(clazz);
-        Method method = clazz.getMethod("getOperationInfo",String.class,String.class);
-        return (OperationInfo)method.invoke(handleInstance,scheduleId,stationId);
+        Method method = clazz.getMethod("getOperationInfo",String.class,String.class,String.class);
+        return (OperationInfo)method.invoke(handleInstance,scheduleId,stationId,processId);
     }
 
 

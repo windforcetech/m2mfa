@@ -32,4 +32,12 @@ public interface MesMoScheduleStationRepository extends BaseRepository<MesMoSche
      * @return  排程工位
      */
     List<MesMoScheduleStation> findByScheduleId(String scheduleId);
+
+    /**
+     * 获取排程工位
+     * @param scheduleId
+     * @param stationId
+     * @return
+     */
+    MesMoScheduleStation findByScheduleIdAndStationId(String scheduleId,String stationId);
 }

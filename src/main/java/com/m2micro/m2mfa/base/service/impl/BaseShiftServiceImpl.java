@@ -11,6 +11,7 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleShiftRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,6 +37,7 @@ public class BaseShiftServiceImpl implements BaseShiftService {
     @Autowired
     JPAQueryFactory queryFactory;
     @Autowired
+    @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
     @Autowired
     MesMoScheduleShiftRepository mesMoScheduleShiftRepository;

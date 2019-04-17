@@ -36,7 +36,7 @@ public class PadBottomDisplayController {
     @GetMapping("/getStationInfo")
     @ApiOperation(value="获取工位作业信息及进度")
     @UserOperationLog("获取工位作业信息及进度")
-    public ResponseMessage<StationInfoModel> getStationInfo(String scheduleId,String stationId){
-        return ResponseMessage.ok(padBottomDisplayService.getStationInfo(scheduleId, stationId));
+    public ResponseMessage<StationInfoModel> getStationInfo(String scheduleId,String stationId,String processId){
+        return ResponseMessage.ok(padBottomDisplayService.getStationInfo(scheduleId, stationId,processId));
     }
 }

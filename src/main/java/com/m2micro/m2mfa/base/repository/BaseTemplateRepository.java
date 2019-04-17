@@ -3,6 +3,9 @@ package com.m2micro.m2mfa.base.repository;
 import com.m2micro.m2mfa.base.entity.BaseTemplate;
 import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
 /**
  * 标签模板 Repository 接口
  * @author liaotao
@@ -14,4 +17,5 @@ public interface BaseTemplateRepository extends BaseRepository<BaseTemplate,Stri
     int countByNumber(String number);
     int countByNumberAndIdNot(String number,String id);
     void  deleteByIdIn(String[] templateIds);
+    List<BaseTemplate> findByCategory(String category);
 }

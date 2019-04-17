@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 @Service("padMoldService")
 public class PadMoldServiceImpl extends BaseOperateImpl implements PadMoldService {
     @Override
-    public OperationInfo getOperationInfo(String scheduleId, String stationId) {
-        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId);
+    public OperationInfo getOperationInfo(String scheduleId, String stationId,String processId) {
+        OperationInfo operationInfo = super.getOperationInfo(scheduleId, stationId, processId);
         //架模没有不良输入，置灰
         operationInfo.setDefectiveProducts("0");
         return operationInfo;

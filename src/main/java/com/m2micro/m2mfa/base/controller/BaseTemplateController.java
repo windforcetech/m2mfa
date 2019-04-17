@@ -127,4 +127,22 @@ public class BaseTemplateController {
         return ResponseMessage.ok(baseTemplateObj1);
     }
 
+
+    /**
+     * 通过料号，标签类型获取模板列表列表
+     */
+    @GetMapping("/listByPartAndCategory")
+    @ApiOperation(value = "通过料号，标签类型获取模板列表列表")
+    @UserOperationLog("通过料号，标签类型获取模板列表列表")
+    public ResponseMessage<List<BaseTemplateObj>> listByPartAndCategory(String partId, String categoryId) {
+        List<BaseTemplateObj> byCategoryIdAndNotUsedByPart = baseTemplateService.getByCategoryIdAndNotUsedByPart(partId, categoryId);
+        return ResponseMessage.ok(byCategoryIdAndNotUsedByPart);
+    }
+
+    @GetMapping("/infoByPartId/{partId}")
+    @ApiOperation(value = "通过料件id获取模板详情")
+    public ResponseMessage<BaseTemplateObj> getTemplateByPartName(@PathVariable("partId") String partId) {
+        BaseTemplateObj byCategoryIdAndNotUsedByPart = baseTemplateService.getBaseTemplateObjByPartId(partId);
+        return ResponseMessage.ok(byCategoryIdAndNotUsedByPart);
+    }
 }

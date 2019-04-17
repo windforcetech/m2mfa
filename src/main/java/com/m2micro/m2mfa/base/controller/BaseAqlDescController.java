@@ -94,8 +94,8 @@ public class BaseAqlDescController {
     public ResponseMessage delete(@RequestBody String[] ids){
         String msg =baseAqlDescService.deleteIds(ids);
         ResponseMessage rm = ResponseMessage.ok();
-        if(msg.trim()!=""){
-            rm.setMessage(msg.trim()+"已被引用不可删除。");
+        if(msg!=null){
+            rm.setMessage("抽样编码【"+msg.trim()+"】已产生业务,不允许删除！");
         }
         return  rm;
     }

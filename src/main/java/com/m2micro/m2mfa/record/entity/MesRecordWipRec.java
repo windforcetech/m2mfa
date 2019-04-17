@@ -78,6 +78,16 @@ public class MesRecordWipRec implements Serializable {
     private String wipNowProcess;
     @ApiModelProperty(value = "下一工序")
     private String wipNextProcess;
+    @ApiModelProperty(value = "排产单id")
+    private String scheduleId;
+
+    public String getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(String scheduleId) {
+        this.scheduleId = scheduleId;
+    }
 
     public String getId() {
         return id;

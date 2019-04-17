@@ -1,14 +1,23 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.m2mfa.base.entity.BaseInstruction;
 import com.m2micro.m2mfa.base.entity.BaseItems;
 import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.node.TreeNode;
+import com.m2micro.m2mfa.base.repository.BaseInstructionRepository;
 import com.m2micro.m2mfa.base.repository.BaseItemsRepository;
 import com.m2micro.m2mfa.base.repository.BaseItemsTargetRepository;
 import com.m2micro.m2mfa.base.service.BaseItemsService;
 import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
+import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
+import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -16,9 +25,12 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.base.entity.QBaseItemsTarget;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 /**
  * 参考资料对应表 服务实现类
  * @author liaotao
@@ -32,7 +44,8 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
     JPAQueryFactory queryFactory;
     @Autowired
     BaseItemsRepository baseItemsRepository;
-
+    @Autowired
+    BaseInstructionRepository baseInstructionRepository;
 
     public BaseItemsTargetRepository getRepository() {
         return baseItemsTargetRepository;
@@ -136,6 +149,51 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
             throw new MMException("资料主档不存在或异常");
         }
         return getAllTreeNode(items.get(0));
+    }
+
+    @Override
+    @Transactional
+    public BaseItemsTarget saveEntity(BaseItemsTarget baseItemsTarget) {
+        ValidatorUtil.validateEntity(baseItemsTarget, AddGroup.class);
+
+        BaseItemsTarget baseItemsTargetParent = baseItemsTargetRepository.findById(baseItemsTarget.getTreeParentId()).orElse(null);
+        baseItemsTarget.setId(UUIDUtil.getUUID());
+        baseItemsTarget.setItemId(baseItemsTargetParent.getItemId());
+        return save(baseItemsTarget);
+    }
+
+    @Override
+    @Transactional
+    public BaseItemsTarget updateEntity(BaseItemsTarget baseItemsTarget) {
+        ValidatorUtil.validateEntity(baseItemsTarget, UpdateGroup.class);
+        BaseItemsTarget baseItemsTargetOld = findById(baseItemsTarget.getId()).orElse(null);
+        if(baseItemsTargetOld==null){
+            throw new MMException("数据库不存在该记录");
+        }
+        PropertyUtil.copy(baseItemsTarget,baseItemsTargetOld);
+        return save(baseItemsTargetOld);
+    }
+
+    @Override
+    public ResponseMessage delete(String[] ids) {
+        ResponseMessage responseMessage = ResponseMessage.ok();
+        List <BaseItemsTarget> ls = new ArrayList<>();
+        for(String id :ids){
+            List<BaseInstruction> byCategory = baseInstructionRepository.findByCategory(id);
+            BaseItemsTarget baseItemsTarget = findById(id).orElse(null);
+            if(byCategory.isEmpty()){
+                deleteById(id);
+            }else {
+                ls.add(baseItemsTarget);
+            }
+
+        }
+
+        if(!ls.isEmpty()){
+            String [] strings = ls.stream().map(BaseItemsTarget::getItemName).toArray(String[]::new);
+            responseMessage.setMessage("类型【"+String.join(",", strings)+"】被作业指导书引用");
+        }
+       return responseMessage;
     }
 
     /**
