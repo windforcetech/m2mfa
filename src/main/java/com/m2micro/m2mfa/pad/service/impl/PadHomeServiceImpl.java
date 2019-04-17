@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.pad.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.starter.services.OrganizationService;
+import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
@@ -12,6 +13,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoScheduleStaff;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleStaffRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.pad.constant.StationConstant;
 import com.m2micro.m2mfa.pad.model.PadHomeModel;
 import com.m2micro.m2mfa.pad.model.PadHomePara;
 import com.m2micro.m2mfa.pad.model.PadYieldPara;
@@ -62,6 +64,10 @@ public class PadHomeServiceImpl  implements PadHomeService {
   private OrganizationService organizationService;
   @Autowired
   private BaseShiftService baseShiftService;
+  @Autowired
+  ProcessConstant processConstant;
+  @Autowired
+  private BaseStationService baseStationService;
 
   @Override
   public PadHomeModel findByHome(PadHomePara padHomePara) {
@@ -122,6 +128,14 @@ public class PadHomeServiceImpl  implements PadHomeService {
 
     Integer partInput = partInput(rwId);
     Integer partOutput = 0;
+    BaseStation baseStation = baseStationService.findById(padHomePara.getStationId()).orElse(null);
+    if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())&& (!StationConstant.BOOT.getKey().equals(baseStation.getCode()))){
+
+      return PadHomeModel.builder().staffCode(baseStaff.getCode()).staffName(baseStaff.getStaffName()).staffDepartmentName(organizationService.findByUUID(baseStaff.getDepartmentId()).getDepartmentName())
+          .staffShiftName(baseShift.getName()).staffOnTime(startTime).standardOutput(0).actualOutput(0).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
+          .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate(0).build();
+    }
+
     return PadHomeModel.builder().staffCode(baseStaff.getCode()).staffName(baseStaff.getStaffName()).staffDepartmentName(organizationService.findByUUID(baseStaff.getDepartmentId()).getDepartmentName())
         .staffShiftName(baseShift.getName()).staffOnTime(startTime).standardOutput(standardOutput.longValue()).actualOutput(actualOutput.longValue()).machineName(baseMachine.getName()).collection(baseItemsTargetService.findById(baseProcess.getCollection()).orElse(null).getItemName())
         .partInput(partInput).partOutput(partOutput).partRemaining((partInput-partOutput)).rate( (long)( rate*100)).build();
