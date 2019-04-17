@@ -14,6 +14,7 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleStaffRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
+import com.m2micro.m2mfa.pad.constant.StationConstant;
 import com.m2micro.m2mfa.pad.model.MoDescInfoModel;
 import com.m2micro.m2mfa.pad.model.StationInfoModel;
 import com.m2micro.m2mfa.pad.operate.BaseOperateImpl;
@@ -114,6 +115,18 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         //提报异常
         Boolean abnormal = isAbnormal(scheduleId, stationId);
         stationInfoModel.setAbnormalFlag(abnormal);
+
+        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
+        //注塑成型并且不是开机
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())&& (!StationConstant.BOOT.getKey().equals(baseStation.getCode()))){
+            stationInfoModel.setCompletedQty(0);
+            stationInfoModel.setQty(0l);
+            stationInfoModel.setScrapQty(0);
+            stationInfoModel.setCompletionRate(0);
+            stationInfoModel.setFailRate(0);
+            stationInfoModel.setScrapRate(0);
+            return stationInfoModel;
+        }
 
         //不良数量,报废数量（不良数量是每个工位的和）
         MoDescInfoModel moDescForStationFail = getMoDescForStationFail(scheduleId, stationId);
