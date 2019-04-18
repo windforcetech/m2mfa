@@ -360,6 +360,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         barcodePrintApply.setFlag(0);
         barcodePrintApply.setEnabled(true);
         barcodePrintApply.setCheckFlag(0);
+        barcodePrintApply.setSequence(0);
         if (barcodePrintApplyRepository.countBySource(barcodePrintApply.getSource()) > 0) {
             throw new MMException("来源单号已存在，不可重复申请打印。");
         }
@@ -627,9 +628,15 @@ name: "日期函数"
             String data=JSONObject.toJSONString(item);
 //            one.setDescription("..");
             one.setBarcode(data);
-            barcodePrintResourcesRepository.save(one);
+            String barcode = one.getBarcode();
+            JSONObject parse = JSONObject.parseObject(barcode);
+            Object barCode =  parse.get("BarCode");
+            if(barCode !=null){
+                one.setBarcode((String) barCode);
+            }
             rs.add(one);
         }
+        barcodePrintResourcesRepository.saveAll(rs);
         return rs;
     }
 
