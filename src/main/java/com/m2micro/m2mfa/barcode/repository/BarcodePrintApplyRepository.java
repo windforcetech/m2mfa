@@ -16,7 +16,7 @@ import java.util.List;
 @Repository
 public interface BarcodePrintApplyRepository extends BaseRepository<BarcodePrintApply, String> {
     @Query(value = "SELECT\n" +
-            "	bpa.source \n" +
+            " distinct	bpa.source \n" +
             "FROM\n" +
             "	barcode_print_resources bpr,\n" +
             "	barcode_print_apply bpa \n" +

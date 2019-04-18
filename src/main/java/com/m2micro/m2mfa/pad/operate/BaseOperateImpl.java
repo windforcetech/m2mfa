@@ -224,7 +224,7 @@ public class BaseOperateImpl implements BaseOperate {
 
 
 /**
-     * 根据提报异常标志设置其他按钮是否置灰
+     * 根据一般作业站设置其他按钮是否置灰
      * @param operationInfo
      */
     private void setOtherByProcess(OperationInfo operationInfo,BaseProcess baseProcess) {
