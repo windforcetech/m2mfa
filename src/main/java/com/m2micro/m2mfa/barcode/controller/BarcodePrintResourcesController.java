@@ -68,12 +68,6 @@ public class BarcodePrintResourcesController {
     public ResponseMessage<BarcodePrintResources> save(@RequestBody BarcodePrintResources barcodePrintResources){
         ValidatorUtil.validateEntity(barcodePrintResources, AddGroup.class);
         barcodePrintResources.setId(UUIDUtil.getUUID());
-        String barcode = barcodePrintResources.getBarcode();
-        JSONObject parse = JSONObject.parseObject(barcode);
-        Object barCode =  parse.get("BarCode");
-        if(barCode !=null){
-            barcodePrintResources.setBarcode((String) barCode);
-        }
         return ResponseMessage.ok(barcodePrintResourcesService.save(barcodePrintResources));
     }
 

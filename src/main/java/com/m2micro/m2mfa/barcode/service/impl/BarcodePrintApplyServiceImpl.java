@@ -628,6 +628,12 @@ name: "日期函数"
             String data=JSONObject.toJSONString(item);
 //            one.setDescription("..");
             one.setBarcode(data);
+            String barcode = one.getBarcode();
+            JSONObject parse = JSONObject.parseObject(barcode);
+            Object barCode =  parse.get("BarCode");
+            if(barCode !=null){
+                one.setBarcode((String) barCode);
+            }
             barcodePrintResourcesRepository.save(one);
             rs.add(one);
         }
