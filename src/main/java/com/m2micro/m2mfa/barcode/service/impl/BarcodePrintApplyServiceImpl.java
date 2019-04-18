@@ -634,9 +634,9 @@ name: "日期函数"
             if(barCode !=null){
                 one.setBarcode((String) barCode);
             }
-            barcodePrintResourcesRepository.save(one);
             rs.add(one);
         }
+        barcodePrintResourcesRepository.saveAll(rs);
         return rs;
     }
 
