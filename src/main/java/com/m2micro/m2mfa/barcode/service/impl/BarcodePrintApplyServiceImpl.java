@@ -33,20 +33,22 @@ import java.util.*;
  */
 @Service
 public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
+
     @Autowired
     BarcodePrintApplyRepository barcodePrintApplyRepository;
     @Autowired
     JPAQueryFactory queryFactory;
-
     @Autowired
     BarcodePrintResourcesRepository barcodePrintResourcesRepository;
     @Autowired
     @Qualifier("secondaryJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
+    @Override
     public BarcodePrintApplyRepository getRepository() {
         return barcodePrintApplyRepository;
     }
+
 
 //    @Override
 //    public PageUtil<BarcodePrintApply> list(Query query) {
@@ -262,6 +264,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         return barcodePrintApplyRepository.countByCategoryAndSourceAndPartId(sourceCategory, sourceNo, partId) > 0;
     }
 
+
     //模糊分页查询排产单
     @Override
     public PageUtil<ScheduleObj> list(ScheduleQuery query) {
@@ -297,6 +300,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         List<ScheduleObj> templateList = jdbcTemplate.query(sql, rm);
         return PageUtil.of(templateList, count, query.getSize(), query.getPage());
     }
+
 
     @Override
     public ScheduleObj scheduleInfo(String scheduleId) {
@@ -340,6 +344,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         return scheduleObj;
     }
 
+
     private String getId() {
         Integer i = 0;
         boolean exist = true;
@@ -353,6 +358,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         }
         return id;
     }
+
 
     @Override
     public BarcodePrintApply add(BarcodePrintApply barcodePrintApply) {
@@ -368,7 +374,9 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         return save;
     }
 
+
     //批量审核
+    @Override
     @Transactional
     public void checkList(String[] ids) {
         for (String id : ids) {
@@ -376,7 +384,9 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         }
     }
 
+
     //审核
+    @Override
     public void check(String barcodePrintApplyId) {
         Optional<BarcodePrintApply> byId = barcodePrintApplyRepository.findById(barcodePrintApplyId);
         BarcodePrintApply one = byId.get();
@@ -385,6 +395,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         barcodePrintApplyRepository.save(one);
 
     }
+
 
     @Override
     public void deleteList(String[] ids) {
@@ -490,10 +501,15 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         return printApplyObj;
     }
 
+
     // 生成打印标签
     @Override
     @Transactional
-    public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*份数*/) {
+    public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*份数*/){
+        BarcodePrintApply barcodePrintApply = barcodePrintApplyRepository.findById(applyId).orElse(null);
+        if(barcodePrintApply.getFlag() ==1){
+            throw  new MMException(" 标签已打印。");
+        }
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
         String dateNow = df.format(new Date());
         PrintApplyObj printApplyObj = printDetail(applyId);
@@ -515,13 +531,18 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
             HashMap<String, String> lable = new HashMap<>();
             for (TemplateVarObj varObj : templateVarObjList) {
                 List<RuleObj> ruleObjList = varObj.getRuleObjList();
-                Collections.sort(ruleObjList, new Comparator<RuleObj>() {
-                    @Override
+                Collections.sort(ruleObjList, new
+
+                    Comparator<RuleObj>() {
+
+                        @Override
                     public int compare(RuleObj o1, RuleObj o2) {
 
                         return o1.getPosition() > o2.getPosition() ? 1 : -1;
                     }
-                });
+
+
+                    });
                 String value = "";
                 for (RuleObj rule : ruleObjList) {
 
@@ -636,6 +657,15 @@ name: "日期函数"
             }
             rs.add(one);
         }
+     try {
+         Thread.sleep(3000);
+     }catch (Exception e){
+
+     }
+
+
+        barcodePrintApply.setFlag(1);
+        barcodePrintApplyRepository.save(barcodePrintApply);
         barcodePrintResourcesRepository.saveAll(rs);
         return rs;
     }
@@ -669,3 +699,5 @@ name: "日期函数"
 
 
 }
+
+

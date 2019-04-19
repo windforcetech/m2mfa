@@ -3,6 +3,9 @@ package com.m2micro.m2mfa.barcode.repository;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintResources;
 import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
 /**
  * 标签打印记录 Repository 接口
  * @author liaotao
@@ -16,4 +19,6 @@ public interface BarcodePrintResourcesRepository extends BaseRepository<BarcodeP
      * @return
      */
     BarcodePrintResources findByBarcode(String barcode);
+
+    List<BarcodePrintResources>findByApplyId(String applyid);
 }
