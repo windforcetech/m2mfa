@@ -29,8 +29,7 @@ public class JdbcAspect {
     @Around("query()")
     public Object error(ProceedingJoinPoint point) throws Throwable {
         long beginTime = System.currentTimeMillis();
-        //执行方法
-        Object result = point.proceed();
+
         //执行时长(毫秒)
         long time = System.currentTimeMillis() - beginTime;
 
@@ -50,6 +49,10 @@ public class JdbcAspect {
         ExpressionParser parser = new SpelExpressionParser();
         Expression expression = parser.parseExpression("#sql");
         String sql = expression.getValue(context, String.class);
+
+
+        //执行方法
+        Object result = point.proceed();
 
         if(StringUtils.isEmpty(sql)){
             return result;
