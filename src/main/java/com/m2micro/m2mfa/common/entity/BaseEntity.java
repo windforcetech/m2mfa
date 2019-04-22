@@ -22,7 +22,7 @@ import java.util.Date;
 @ApiModel(value="BaseEntity对象")
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class BaseEntity {
+public class BaseEntity extends CommonEntity {
     @ApiModelProperty(value = "创建日期",example = "2018-11-21 12:00:00")
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreatedDate
