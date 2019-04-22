@@ -167,7 +167,10 @@ public class BaseStaffshiftController {
         if (StringUtils.isNotEmpty(staffShiftObj.getExcludeStaffId())) {
             String[] split = staffShiftObj.getExcludeStaffId().split(",");
             List<String> strings = Arrays.asList(split);
-            stringst.removeAll(strings);
+            //stringst.removeAll(strings);
+            stringst= stringst.stream()
+                    .filter(id -> !strings.contains(id))
+                    .collect(Collectors.toList());
         }
         if (stringst.size() == 0) {
             throw new MMException("员工个数为零");
