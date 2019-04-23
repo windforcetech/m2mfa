@@ -69,21 +69,7 @@ public class BasePackController {
         return ResponseMessage.ok(basePackService.findByPartId(partId));
     }
 
-//    /**
-//     * 添加
-//     */
-//    @RequestMapping(value = "/save",method = RequestMethod.POST)
-//    @ApiOperation(value="添加包装")
-//    @UserOperationLog("添加包装")
-//    public ResponseMessage<BasePack> save(@RequestBody BasePack basePack){
-//        ValidatorUtil.validateEntity(basePack, AddGroup.class);
-//        basePack.setId(UUIDUtil.getUUID());
-//        if(basePackService.countByPartIdAndcAndCategory(basePack.getPartId(),basePack.getCategory())>0)
-//        {
-//            throw new MMException("料号包装类型不唯一！");
-//        }
-//        return ResponseMessage.ok(basePackService.save(basePack));
-//    }
+
 
     /**
      * 添加料件的包装，list(四个包装类型一起)
@@ -122,25 +108,6 @@ public class BasePackController {
         return ResponseMessage.ok(basePacks);
     }
 
-//    /**
-//     * 更新
-//     */
-//    @RequestMapping(value = "/update",method = RequestMethod.POST)
-//    @ApiOperation(value="更新包装")
-//    @UserOperationLog("更新包装")
-//    public ResponseMessage<BasePack> update(@RequestBody BasePack basePack){
-//        ValidatorUtil.validateEntity(basePack, UpdateGroup.class);
-//        BasePack basePackOld = basePackService.findById(basePack.getId()).orElse(null);
-//        if(basePackOld==null){
-//            throw new MMException("数据库不存在该记录");
-//        }
-//        if(basePackService.countByIdNotAndpAndPartIdAndcAndCategory(basePack.getId(),basePack.getPartId(),basePack.getCategory())>0)
-//        {
-//            throw new MMException("料号包装类型不唯一！");
-//        }
-//        PropertyUtil.copy(basePack,basePackOld);
-//        return ResponseMessage.ok(basePackService.save(basePackOld));
-//    }
 
 
     /**
@@ -182,16 +149,7 @@ public class BasePackController {
         return ResponseMessage.ok(basePackService.saveAll(oldList));
     }
 
-//    /**
-//     * 删除
-//     */
-//    @RequestMapping(value = "/delete", method = RequestMethod.POST)
-//    @ApiOperation(value = "删除包装")
-//    @UserOperationLog("删除包装")
-//    public ResponseMessage delete(@RequestBody String[] ids) {
-//        basePackService.deleteByIds(ids);
-//        return ResponseMessage.ok();
-//    }
+
 
     /**
      * 删除
@@ -200,12 +158,8 @@ public class BasePackController {
     @ApiOperation(value = "删除包装,传入的是料件编号id 数组")
     @UserOperationLog("删除包装")
     public ResponseMessage delete(@RequestBody List<String> partIds) {
-        List<String> ids= basePackService.findByPartIdIn(partIds);
-       // String[] idss = new String[ids.size()];
-        String[] idx = ids.toArray(new String[0]);
-        //String[] idss = (String[])ids.toArray();
-        //String[] idss = ids.stream().toArray(String[]::new);
-        basePackService.deleteByIds(idx);
-        return ResponseMessage.ok();
+
+
+        return   basePackService.findByPartIdIn(partIds);
     }
 }

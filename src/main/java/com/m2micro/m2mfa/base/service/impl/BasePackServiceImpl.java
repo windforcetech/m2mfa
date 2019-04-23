@@ -1,12 +1,18 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BasePack;
+import com.m2micro.m2mfa.base.entity.BasePartTemplate;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.QBasePack;
 import com.m2micro.m2mfa.base.query.BasePackQuery;
 import com.m2micro.m2mfa.base.repository.BasePackRepository;
+import com.m2micro.m2mfa.base.repository.BasePartTemplateRepository;
+import com.m2micro.m2mfa.base.repository.BasePartsRepository;
 import com.m2micro.m2mfa.base.service.BasePackService;
+import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -32,6 +38,11 @@ public class BasePackServiceImpl implements BasePackService {
     BasePackRepository basePackRepository;
     @Autowired
     JPAQueryFactory queryFactory;
+    @Autowired
+    BasePartTemplateRepository basePartTemplateRepository;
+    @Autowired
+    BasePartsRepository basePartsRepository;
+
 
     public BasePackRepository getRepository() {
         return basePackRepository;
@@ -73,13 +84,32 @@ public class BasePackServiceImpl implements BasePackService {
     }
 
     @Override
-    public List<String> findByPartIdIn(List<String> partIds) {
+    public ResponseMessage findByPartIdIn(List<String> partIds) {
         List<String> ids=new ArrayList<>();
+        List<BaseParts> disableDelete=new ArrayList<>();
         List<BasePack> byPartIdIn = basePackRepository.findByPartIdIn(partIds);
         for(BasePack on :byPartIdIn){
+            List<BaseParts> byPartNo = basePartsRepository.findByPartNo(on.getPartId());
+            if(byPartNo.isEmpty()){
+                throw  new MMException("料件编号有误。");
+            }
+            List<BasePartTemplate> byPartId = basePartTemplateRepository.findByPartId(byPartNo.get(0).getPartId());
+            if(!byPartId.isEmpty()){
+                disableDelete.add(byPartNo.get(0));
+                continue;
+            }
             ids.add(on.getId());
         }
-        return ids;
+        String[] idx = ids.toArray(new String[0]);
+        deleteByIds(idx);
+        ResponseMessage re =   ResponseMessage.ok("操作成功");
+        if(disableDelete.size()>0){
+            String[] strings = disableDelete.stream().map(BaseParts::getPartNo).toArray(String[]::new);
+            re.setMessage("物料编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return re;
+        }else{
+            return re;
+        }
     }
 
 }

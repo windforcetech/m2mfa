@@ -169,6 +169,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(query.isIsom()){
           sql+="   and  mpr.part_id=bp.part_id";
         }
+        if(query.isTemplate()){
+          sql = sql+"  and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
+        }
         sql = sql + " order by bp.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
@@ -209,6 +212,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(query.isIsom()){
           countSql +="   and  mpr.part_id=bp.part_id";
         }
+      if(query.isTemplate()){
+         countSql += " and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
+      }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
 
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
