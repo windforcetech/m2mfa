@@ -739,13 +739,13 @@ public class BaseOperateImpl implements BaseOperate {
             endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
             endStationTime(obj.getScheduleId(),obj.getProcessId());
             //排产单状态“已超量”
-            updateSchedulFlag(obj.getScheduleId());
+            //updateSchedulFlag(obj.getScheduleId());
         }
         if(num==0){
             endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
             endStationTime(obj.getScheduleId(),obj.getProcessId());
             //排产单状态“已完成”
-            scheduleclose(obj.getScheduleId());
+            //scheduleclose(obj.getScheduleId());
         }
         return finishHomeworkModel;
     }
