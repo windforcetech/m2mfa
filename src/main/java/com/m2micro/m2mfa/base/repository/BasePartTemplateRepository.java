@@ -15,4 +15,6 @@ import java.util.List;
 public interface BasePartTemplateRepository extends BaseRepository<BasePartTemplate,String> {
 
    List<BasePartTemplate>findByPartId(String partId);
+
+   List<BasePartTemplate>findByTemplateId(String templateId);
 }

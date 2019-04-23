@@ -1,11 +1,11 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.m2mfa.base.entity.BaseTemplate;
-import com.m2micro.m2mfa.base.entity.BaseTemplateVar;
-import com.m2micro.m2mfa.base.entity.QBaseTemplate;
+import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseTemplateQuery;
+import com.m2micro.m2mfa.base.repository.BasePartTemplateRepository;
 import com.m2micro.m2mfa.base.repository.BaseTemplateRepository;
 import com.m2micro.m2mfa.base.repository.BaseTemplateVarRepository;
 import com.m2micro.m2mfa.base.service.BaseTemplateService;
@@ -18,6 +18,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.sql.Template;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,7 +43,8 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
     BaseTemplateRepository baseTemplateRepository;
     @Autowired
     JPAQueryFactory queryFactory;
-
+    @Autowired
+    BasePartTemplateRepository basePartTemplateRepository;
     @Autowired
     @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
@@ -165,10 +167,30 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
 
     @Transactional
     @Override
-    public void deleteByTemplateIds(String[] templateIds) {
+    public ResponseMessage deleteByTemplateIds(String[] templateIds) {
 
-        baseTemplateRepository.deleteByIdIn(templateIds);
-        baseTemplateVarRepository.deleteByTemplateIdIn(templateIds);
+      List<String>ids = new ArrayList<>();
+      List<BaseTemplate> deletetemplate = new ArrayList<>();
+      for(String id :templateIds){
+        List<BasePartTemplate> byTemplateId = basePartTemplateRepository.findByTemplateId(id);
+        if(!byTemplateId.isEmpty()){
+          BaseTemplate baseTemplate = findById(id).orElse(null);
+          deletetemplate.add(baseTemplate);
+          continue;
+        }
+        ids.add(id);
+      }
+      String[] strings = ids.stream().toArray(String[]::new);
+        baseTemplateRepository.deleteByIdIn(strings);
+        baseTemplateVarRepository.deleteByTemplateIdIn(strings);
+      ResponseMessage re =   ResponseMessage.ok("操作成功");
+      if(!deletetemplate.isEmpty()){
+        String[] ts = deletetemplate.stream().map(BaseTemplate::getNumber).toArray(String[]::new);
+        re.setMessage("模板编号【"+String.join(",", ts)+"】已产生业务,不允许删除！");
+        return re;
+      }else{
+        return re;
+      }
     }
 
     @Override

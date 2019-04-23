@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseTemplate;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -28,7 +29,7 @@ public interface BaseTemplateService extends BaseService<BaseTemplate, String> {
 
     BaseTemplateObj getByTemplateId(String templateId);
 
-    void deleteByTemplateIds(String[] templateIds);
+    ResponseMessage deleteByTemplateIds(String[] templateIds);
 
     /*
      *通过标签类型筛选模板

@@ -96,8 +96,7 @@ public class BaseTemplateController {
     @ApiOperation(value = "删除标签模板")
     @UserOperationLog("删除标签模板")
     public ResponseMessage delete(@RequestBody String[] ids) {
-        baseTemplateService.deleteByTemplateIds(ids);
-        return ResponseMessage.ok();
+        return  baseTemplateService.deleteByTemplateIds(ids);
     }
 
     @PostMapping("/uploadTemplateFile")
