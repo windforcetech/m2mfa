@@ -15,10 +15,14 @@ import java.util.List;
 public interface BaseTemplateVarRepository extends BaseRepository<BaseTemplateVar,String> {
 
     int countByTemplateIdAndName(String templateId,String name);
+
     int countByIdNotAndTemplateIdAndName(String varId,String templateId,String name);
 
     void deleteByTemplateId(String templateId);
+
     List<BaseTemplateVar> findByTemplateId(String templateId);
 
     void deleteByTemplateIdIn(String[] templateIds);
+
+    List<BaseTemplateVar>findByRuleId(String ruleId);
 }

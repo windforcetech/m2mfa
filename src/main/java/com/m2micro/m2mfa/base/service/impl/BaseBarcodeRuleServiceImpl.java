@@ -1,11 +1,12 @@
 package com.m2micro.m2mfa.base.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.m2mfa.base.entity.BaseBarcodeRule;
-import com.m2micro.m2mfa.base.entity.BaseBarcodeRuleDef;
+import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseBarcodeRuleQuery;
 import com.m2micro.m2mfa.base.repository.BaseBarcodeRuleDefRepository;
 import com.m2micro.m2mfa.base.repository.BaseBarcodeRuleRepository;
+import com.m2micro.m2mfa.base.repository.BaseTemplateVarRepository;
 import com.m2micro.m2mfa.base.service.BaseBarcodeRuleDefService;
 import com.m2micro.m2mfa.base.service.BaseBarcodeRuleService;
 import com.m2micro.m2mfa.base.vo.BaseBarcodeRuleObj;
@@ -21,7 +22,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.base.entity.QBaseBarcodeRule;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -44,6 +44,8 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
     @Autowired
     BaseBarcodeRuleDefService baseBarcodeRuleDefService;
 
+    @Autowired
+    BaseTemplateVarRepository baseTemplateVarRepository;
 
     public BaseBarcodeRuleRepository getRepository() {
         return baseBarcodeRuleRepository;
@@ -87,9 +89,30 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
 
     @Transactional
     @Override
-    public void deleteByIdIn(List<String> ids) {
-        baseBarcodeRuleRepository.deleteByIdIn(ids);
-        baseBarcodeRuleDefService.deleteByBarcodeIdIn(ids);
+    public ResponseMessage deleteByIdIn(List<String> ids) {
+        List<BaseBarcodeRule> disableDelete = new ArrayList<>();
+        List<String> deleteids =new ArrayList<>();
+        for(String id :ids){
+            List<BaseTemplateVar> byRuleId = baseTemplateVarRepository.findByRuleId(id);
+            if(!byRuleId.isEmpty()){
+                BaseBarcodeRule baseBarcodeRule = findById(id).orElse(null);
+                disableDelete.add(baseBarcodeRule);
+                continue;
+            }
+            deleteids.add(id);
+        }
+
+        baseBarcodeRuleRepository.deleteByIdIn(deleteids);
+        baseBarcodeRuleDefService.deleteByBarcodeIdIn(deleteids);
+
+        ResponseMessage re =   ResponseMessage.ok("操作成功");
+        if(disableDelete.size()>0){
+            String[] strings = disableDelete.stream().map(BaseBarcodeRule::getRuleCode).toArray(String[]::new);
+            re.setMessage("规则编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return re;
+        }else{
+            return re;
+        }
     }
 
     @Override

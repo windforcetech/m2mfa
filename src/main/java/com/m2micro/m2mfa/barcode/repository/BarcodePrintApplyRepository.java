@@ -32,4 +32,6 @@ public interface BarcodePrintApplyRepository extends BaseRepository<BarcodePrint
     Integer countByCategoryAndSourceAndPartId(String sourceCategory, String sourceNo, String partId);
 
     Integer countBySource(String source);
+
+    List<BarcodePrintApply>findByTemplateId(String templateId);
 }

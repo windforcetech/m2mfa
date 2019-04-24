@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BasePartTemplate;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -20,4 +21,11 @@ public interface BasePartTemplateService extends BaseService<BasePartTemplate,St
      * @return  分页信息
      */
     PageUtil<BasePartTemplateObj> list(BasePartTemplateQuery query);
+
+    /**
+     * 删除
+     * @param ids
+     * @return
+     */
+    ResponseMessage delete(String [] ids );
 }

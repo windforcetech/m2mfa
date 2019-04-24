@@ -293,8 +293,8 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
             sql2 += " and t.shedule_no like '" + query.getScheduleNo() + "'";
         }
         if (!StringUtils.isEmpty(query.getPartNo())) {
-            sql += " and t.part_no like '" + query.getPartNo() + "'";
-            sql2 += " and t.part_no like '" + query.getPartNo() + "'";
+            sql += " and t2.part_no like '" + query.getPartNo() + "'";
+            sql2 += " and t2.part_no like '" + query.getPartNo() + "'";
         }
         Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
         sql += " order by t.schedule_no limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
@@ -712,16 +712,12 @@ public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*ไป
             for (TemplateVarObj varObj : templateVarObjList) {
                 List<RuleObj> ruleObjList = varObj.getRuleObjList();
                 Collections.sort(ruleObjList, new
-
                     Comparator<RuleObj>() {
-
                         @Override
                     public int compare(RuleObj o1, RuleObj o2) {
 
                         return o1.getPosition() > o2.getPosition() ? 1 : -1;
                     }
-
-
                     });
                 String value = "";
                 for (RuleObj rule : ruleObjList) {
@@ -822,9 +818,9 @@ public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*ไป
      }
 
 
-        barcodePrintApply.setFlag(1);
-        barcodePrintApplyRepository.save(barcodePrintApply);
-        barcodePrintResourcesRepository.saveAll(rs);
+//        barcodePrintApply.setFlag(1);
+//        barcodePrintApplyRepository.save(barcodePrintApply);
+//        barcodePrintResourcesRepository.saveAll(rs);
         return rs;
     }
 

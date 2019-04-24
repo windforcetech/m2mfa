@@ -96,8 +96,8 @@ public class BaseBarcodeRuleController {
     @ApiOperation(value="批量删除条形码规则")
     @UserOperationLog("批量删除条形码主表")
     public ResponseMessage delete(@RequestBody List<String> ids){
-        baseBarcodeRuleService.deleteByIdIn(ids);
-        return ResponseMessage.ok();
+
+        return  baseBarcodeRuleService.deleteByIdIn(ids);
     }
 
     /**

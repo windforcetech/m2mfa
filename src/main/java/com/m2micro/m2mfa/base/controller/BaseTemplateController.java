@@ -61,33 +61,7 @@ public class BaseTemplateController {
         return ResponseMessage.ok(byTemplateId);
     }
 
-//    /**
-//     * 保存
-//     */
-//    @RequestMapping("/save")
-//    @ApiOperation(value = "保存标签模板")
-//    @UserOperationLog("保存标签模板")
-//    public ResponseMessage<BaseTemplate> save(@RequestBody BaseTemplate baseTemplate) {
-//        ValidatorUtil.validateEntity(baseTemplate, AddGroup.class);
-//        baseTemplate.setId(UUIDUtil.getUUID());
-//        return ResponseMessage.ok(baseTemplateService.save(baseTemplate));
-//    }
 
-//    /**
-//     * 更新
-//     */
-//    @RequestMapping("/update")
-//    @ApiOperation(value = "更新标签模板")
-//    @UserOperationLog("更新标签模板")
-//    public ResponseMessage<BaseTemplate> update(@RequestBody BaseTemplate baseTemplate) {
-//        ValidatorUtil.validateEntity(baseTemplate, UpdateGroup.class);
-//        BaseTemplate baseTemplateOld = baseTemplateService.findById(baseTemplate.getId()).orElse(null);
-//        if (baseTemplateOld == null) {
-//            throw new MMException("数据库不存在该记录");
-//        }
-//        PropertyUtil.copy(baseTemplate, baseTemplateOld);
-//        return ResponseMessage.ok(baseTemplateService.save(baseTemplateOld));
-//    }
 
     /**
      * 删除
