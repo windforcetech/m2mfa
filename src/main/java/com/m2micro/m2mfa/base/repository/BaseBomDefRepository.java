@@ -19,4 +19,12 @@ public interface BaseBomDefRepository extends BaseRepository<BaseBomDef, String>
     void deleteAllByBomIdIsIn(List<String> ids);
 
     List<BaseBomDef> findAllByBomId(String bomid);
+
+    /**
+     * 获取料件物料清单明细
+     * @param partId
+     *          料件id
+     * @return
+     */
+    List<BaseBomDef> findByPartId(String partId);
 }
