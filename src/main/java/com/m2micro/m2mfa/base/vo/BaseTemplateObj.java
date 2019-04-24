@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.vo;
 
+import com.m2micro.m2mfa.base.entity.BaseBarcodeRule;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
@@ -41,7 +42,8 @@ public class BaseTemplateObj {
     private String description;
     @ApiModelProperty(value = "模板变量")
     private List<BaseTemplateVarObj> templateVarObjList;
-
+    @ApiModelProperty(value = "规则")
+    private List<BaseBarcodeRule> baseBarcodeRules;
     public String getId() {
         return id;
     }
@@ -128,5 +130,13 @@ public class BaseTemplateObj {
 
     public void setTemplateVarObjList(List<BaseTemplateVarObj> templateVarObjList) {
         this.templateVarObjList = templateVarObjList;
+    }
+
+    public List<BaseBarcodeRule> getBaseBarcodeRules() {
+        return baseBarcodeRules;
+    }
+
+    public void setBaseBarcodeRules(List<BaseBarcodeRule> baseBarcodeRules) {
+        this.baseBarcodeRules = baseBarcodeRules;
     }
 }
