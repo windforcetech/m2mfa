@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -70,14 +71,14 @@ public class BaseBomDescController {
 
         baseBomDescs.forEach(baseBomDesc1 -> {
             BaseParts baseParts = basePartsService.selectpartNo(baseBomDesc1.getPartId());
-            baseBomDesc1.setName(baseParts.getName());
-            baseBomDesc1.setSpec(baseParts.getSpec());
-            baseBomDesc1.setProductionUnit(baseParts.getProductionUnit());
+            baseBomDesc1.setName(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getName());
+            baseBomDesc1.setSpec(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getSpec());
+            baseBomDesc1.setProductionUnit(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getProductionUnit());
 
             List<BaseBomDef> allByBomId = baseBomDefService.findAllByBomId(baseBomDesc1.getBomId());
             allByBomId.forEach(baseBomDef -> {
                 BaseParts baseParts1 = basePartsService.selectpartNo(baseBomDef.getPartId());
-                baseBomDef.setName(baseParts1.getName());
+                baseBomDef.setName(baseParts1 == null ? "空指针错误(物料不存在)" : baseParts1.getName());
             });
 
             List<BaseBomSubstitute> baseBomSubstituteList = baseBomSubstituteService.findAllByBomId(baseBomDesc1.getBomId());
@@ -272,7 +273,7 @@ public class BaseBomDescController {
     }
 
     /**
-     * 删除替代维护
+     * 审核bom
      */
     @PostMapping("/check")
     @ApiOperation(value = "审核bom")
@@ -366,13 +367,13 @@ public class BaseBomDescController {
         showBom.setPartId(baseBomDesc.getPartId());
         showBom.setDistinguish(baseBomDesc.getDistinguish());
         BaseParts baseParts = basePartsService.selectpartNo(baseBomDesc.getPartId());
-        showBom.setName(baseParts.getName());
-        showBom.setSpec(baseParts.getSpec());
+        showBom.setName(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getName());
+        showBom.setSpec(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getSpec());
         showBom.setEffectiveDate(baseBomDesc.getEffectiveDate());
         showBom.setInvalidDate(baseBomDesc.getInvalidDate());
-        showBom.setUnit(baseParts.getSentUnit());
-        showBom.setLossRate(baseParts.getProductionLossRate());
-        showBom.setSource(baseParts.getSource());
+        showBom.setUnit(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getSentUnit());
+        showBom.setLossRate(baseParts == null ? BigDecimal.ZERO : baseParts.getProductionLossRate());
+        showBom.setSource(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getSource());
 
         return showBom;
 
@@ -383,13 +384,13 @@ public class BaseBomDescController {
         showBom.setPartId(baseBomDef.getPartId());
         showBom.setDistinguish(baseBomDef.getDistinguish());
         BaseParts baseParts = basePartsService.selectpartNo(baseBomDef.getPartId());
-        showBom.setName(baseParts.getName());
-        showBom.setSpec(baseParts.getSpec());
+        showBom.setName(baseParts == null ? "空指针错误(物料不存在)" :baseParts.getName());
+        showBom.setSpec(baseParts == null ? "空指针错误(物料不存在)" :baseParts.getSpec());
         showBom.setEffectiveDate(baseBomDef.getEffectiveDate());
         showBom.setInvalidDate(baseBomDef.getInvalidDate());
         showBom.setUnit(baseBomDef.getUnit());
         showBom.setLossRate(baseBomDef.getLossRate());
-        showBom.setSource(baseParts.getSource());
+        showBom.setSource(baseParts == null ? "空指针错误(物料不存在)" :baseParts.getSource());
 
         return showBom;
 
