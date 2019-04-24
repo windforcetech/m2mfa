@@ -135,13 +135,13 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
             endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
             endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
             //排产单状态“已超量”
-            updateSchedulFlag(obj.getScheduleId());
+            //updateSchedulFlag(obj.getScheduleId());
         }
         if(num==0){
             endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
             endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
             //排产单状态“已完成”
-            scheduleclose(obj.getScheduleId());
+            //scheduleclose(obj.getScheduleId());
         }
 
         //是否交接班

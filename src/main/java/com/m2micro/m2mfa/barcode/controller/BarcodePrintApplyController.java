@@ -43,68 +43,6 @@ public class BarcodePrintApplyController {
     @Autowired
     BarcodePrintApplyService barcodePrintApplyService;
 
-//    /**
-//     * 列表
-//     */
-//    @RequestMapping("/list")
-//    @ApiOperation(value = "标签打印表单列表")
-//    @UserOperationLog("标签打印表单列表")
-//    public ResponseMessage<PageUtil<BarcodePrintApply>> list(Query query) {
-//        PageUtil<BarcodePrintApply> page = barcodePrintApplyService.list(query);
-//        return ResponseMessage.ok(page);
-//    }
-//
-//    /**
-//     * 详情
-//     */
-//    @RequestMapping("/info/{id}")
-//    @ApiOperation(value = "标签打印表单详情")
-//    @UserOperationLog("标签打印表单详情")
-//    public ResponseMessage<BarcodePrintApply> info(@PathVariable("id") String id) {
-//        BarcodePrintApply barcodePrintApply = barcodePrintApplyService.findById(id).orElse(null);
-//        return ResponseMessage.ok(barcodePrintApply);
-//    }
-//
-//    /**
-//     * 保存
-//     */
-//    @RequestMapping("/save")
-//    @ApiOperation(value = "保存标签打印表单")
-//    @UserOperationLog("保存标签打印表单")
-//    public ResponseMessage<BarcodePrintApply> save(@RequestBody BarcodePrintApply barcodePrintApply) {
-//        ValidatorUtil.validateEntity(barcodePrintApply, AddGroup.class);
-//        barcodePrintApply.setId(UUIDUtil.getUUID());
-////        barcodePrintApplyService.exist(barcodePrintApply)
-//        return ResponseMessage.ok(barcodePrintApplyService.save(barcodePrintApply));
-//    }
-//
-//    /**
-//     * 更新
-//     */
-//    @RequestMapping("/update")
-//    @ApiOperation(value = "更新标签打印表单")
-//    @UserOperationLog("更新标签打印表单")
-//    public ResponseMessage<BarcodePrintApply> update(@RequestBody BarcodePrintApply barcodePrintApply) {
-//        ValidatorUtil.validateEntity(barcodePrintApply, UpdateGroup.class);
-//        BarcodePrintApply barcodePrintApplyOld = barcodePrintApplyService.findById(barcodePrintApply.getId()).orElse(null);
-//        if (barcodePrintApplyOld == null) {
-//            throw new MMException("数据库不存在该记录");
-//        }
-//        PropertyUtil.copy(barcodePrintApply, barcodePrintApplyOld);
-//        return ResponseMessage.ok(barcodePrintApplyService.save(barcodePrintApplyOld));
-//    }
-//
-//    /**
-//     * 删除
-//     */
-//    @RequestMapping("/delete")
-//    @ApiOperation(value = "删除标签打印表单")
-//    @UserOperationLog("删除标签打印表单")
-//    public ResponseMessage delete(@RequestBody String[] ids) {
-//        barcodePrintApplyService.deleteByIds(ids);
-//        return ResponseMessage.ok();
-//    }
-
 
     @GetMapping("/Schedulelist")
     @ApiOperation(value = "模糊分页查询排产单")

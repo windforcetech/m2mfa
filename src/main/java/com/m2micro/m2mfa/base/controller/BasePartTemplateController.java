@@ -36,55 +36,6 @@ public class BasePartTemplateController {
     @Autowired
     BasePartTemplateService basePartTemplateService;
 
-//    /**
-//     * 列表
-//     */
-//    @RequestMapping("/list")
-//    @ApiOperation(value="料件模板关联表列表")
-//    @UserOperationLog("料件模板关联表列表")
-//    public ResponseMessage<PageUtil<BasePartTemplate>> list(Query query){
-//        PageUtil<BasePartTemplate> page = basePartTemplateService.list(query);
-//        return ResponseMessage.ok(page);
-//    }
-
-//    /**
-//     * 详情
-//     */
-//    @RequestMapping("/info/{id}")
-//    @ApiOperation(value="料件模板关联表详情")
-//    @UserOperationLog("料件模板关联表详情")
-//    public ResponseMessage<BasePartTemplate> info(@PathVariable("id") String id){
-//        BasePartTemplate basePartTemplate = basePartTemplateService.findById(id).orElse(null);
-//        return ResponseMessage.ok(basePartTemplate);
-//    }
-
-//    /**
-//     * 保存
-//     */
-//    @RequestMapping("/save")
-//    @ApiOperation(value="保存料件模板关联表")
-//    @UserOperationLog("保存料件模板关联表")
-//    public ResponseMessage<BasePartTemplate> save(@RequestBody BasePartTemplate basePartTemplate){
-//        ValidatorUtil.validateEntity(basePartTemplate, AddGroup.class);
-//        basePartTemplate.setId(UUIDUtil.getUUID());
-//        return ResponseMessage.ok(basePartTemplateService.save(basePartTemplate));
-//    }
-
-//    /**
-//     * 更新
-//     */
-//    @RequestMapping("/update")
-//    @ApiOperation(value="更新料件模板关联表")
-//    @UserOperationLog("更新料件模板关联表")
-//    public ResponseMessage<BasePartTemplate> update(@RequestBody BasePartTemplate basePartTemplate){
-//        ValidatorUtil.validateEntity(basePartTemplate, UpdateGroup.class);
-//        BasePartTemplate basePartTemplateOld = basePartTemplateService.findById(basePartTemplate.getId()).orElse(null);
-//        if(basePartTemplateOld==null){
-//            throw new MMException("数据库不存在该记录");
-//        }
-//        PropertyUtil.copy(basePartTemplate,basePartTemplateOld);
-//        return ResponseMessage.ok(basePartTemplateService.save(basePartTemplateOld));
-//    }
 
     /**
      * 删除

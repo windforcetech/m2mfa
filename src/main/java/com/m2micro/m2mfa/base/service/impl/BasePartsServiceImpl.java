@@ -4,9 +4,7 @@ import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BasePartsQuery;
-import com.m2micro.m2mfa.base.repository.BasePackRepository;
-import com.m2micro.m2mfa.base.repository.BasePartInstructionRepository;
-import com.m2micro.m2mfa.base.repository.BasePartsRepository;
+import com.m2micro.m2mfa.base.repository.*;
 import com.m2micro.m2mfa.base.service.BasePackService;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
@@ -53,6 +51,13 @@ public class BasePartsServiceImpl implements BasePartsService {
     BasePackRepository basePackRepository;
     @Autowired
     private BasePartInstructionRepository basePartInstructionRepository;
+    @Autowired
+    private BaseBomDescRepository baseBomDescRepository;
+    @Autowired
+    private BaseBomDefRepository baseBomDefRepository;
+    @Autowired
+    private BaseBomSubstituteRepository baseBomSubstituteRepository;
+
     public BasePartsRepository getRepository() {
         return basePartsRepository;
     }
@@ -169,6 +174,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(query.isIsom()){
           sql+="   and  mpr.part_id=bp.part_id";
         }
+        if(query.isTemplate()){
+          sql = sql+"  and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
+        }
         sql = sql + " order by bp.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
@@ -209,6 +217,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(query.isIsom()){
           countSql +="   and  mpr.part_id=bp.part_id";
         }
+      if(query.isTemplate()){
+         countSql += " and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
+      }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
 
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
@@ -323,21 +334,35 @@ public class BasePartsServiceImpl implements BasePartsService {
             }
             List<MesMoDesc> list = mesMoDescRepository.findByPartId(bp.getPartId());
             List<BasePack> basePacks = basePackRepository.findByPartId(bp.getPartId());
-
+            List<BaseBomDesc> baseBomDescs = baseBomDescRepository.findAllByPartId(bp.getPartId());
+            List<BaseBomDef> baseBomDefs = baseBomDefRepository.findByPartId(bp.getPartId());
+            List<BaseBomSubstitute> baseBomSubstitutes = baseBomSubstituteRepository.findByPartId(bp.getPartId());
 
             if(list!=null&&list.size()>0){
                 disableDelete.add(bp);
                 continue;
                 //throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
-            }else {
-                //过滤完工单是否有业务，再过滤包装
-                if(basePacks!=null&&basePacks.size()>0){
-                    disableDelete.add(bp);
-                    continue;
-                    //throw new MMException("物料编号【"+bp.getPartNo()+"】已产生业务,不允许删除！");
-                }
+            }
+            //过滤完工单是否有业务，再过滤包装
+            if(basePacks!=null&&basePacks.size()>0){
+                disableDelete.add(bp);
+                continue;
             }
 
+            if(baseBomDescs!=null&&baseBomDescs.size()>0){
+                disableDelete.add(bp);
+                continue;
+            }
+
+            if(baseBomDefs!=null&&baseBomDefs.size()>0){
+                disableDelete.add(bp);
+                continue;
+            }
+
+            if(baseBomSubstitutes!=null&&baseBomSubstitutes.size()>0){
+                disableDelete.add(bp);
+                continue;
+            }
             enableDelete.add(bp);
         }
         //如无业务则删除。同时删除相关的表【Mes_Part_Route】【Mes_Part_Route_Process】【Mes_Part_Route_Station】

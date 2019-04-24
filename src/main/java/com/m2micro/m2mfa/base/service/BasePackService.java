@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BasePack;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -22,8 +23,12 @@ public interface BasePackService extends BaseService<BasePack,String> {
      * @return  分页信息
      */
     PageUtil<BasePack> list(BasePackQuery query);
+
     int countByPartIdAndCategory(String partId,Integer category);
+
     int countByIdNotAndPartIdAndCategory(String id,String partId,Integer category);
+
     List<BasePack> findByPartId(String partId);
-    List<String> findByPartIdIn(List<String> partIds);
+
+    ResponseMessage findByPartIdIn(List<String> partIds);
 }
