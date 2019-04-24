@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 标签模板 服务实现类
@@ -151,19 +152,17 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
     }
 
     @Override
-    public BaseTemplateObj getByTemplateId(String templateId) {
-        BaseTemplateObj baseTemplateObj = new BaseTemplateObj();
-        BaseTemplate template = baseTemplateRepository.findById(templateId).orElse(null);
-        BeanUtils.copyProperties(template, baseTemplateObj);
-        List<BaseTemplateVar> valList = baseTemplateVarRepository.findByTemplateId(templateId);
-        List<BaseTemplateVarObj> varObjs = new ArrayList<>();
-        for (BaseTemplateVar one : valList) {
-            BaseTemplateVarObj two = new BaseTemplateVarObj();
-            BeanUtils.copyProperties(one, two);
-            varObjs.add(two);
-        }
-        baseTemplateObj.setTemplateVarObjList(varObjs);
-        return baseTemplateObj;
+    public BaseTemplate  getByTemplateId(String templateId) {
+        BaseTemplate baseTemplate = findById(templateId).orElse(null);
+        List<BaseTemplateVar> byTemplateId = baseTemplateVarRepository.findByTemplateId(baseTemplate.getId());
+        List<BaseTemplateVar> collect = byTemplateId.stream().filter(x -> {
+            BaseBarcodeRule baseBarcodeRule = baseBarcodeRuleRepository.findById(x.getRuleId()).orElse(null);
+            baseBarcodeRule.setBaseBarcodeRuleDefs(baseBarcodeRuleDefRepository.findByBarcodeId(baseBarcodeRule.getId()));
+            x.setBaseBarcodeRule(baseBarcodeRule);
+            return true;
+        }).collect(Collectors.toList());
+        baseTemplate.setBaseTemplateVars(collect);
+        return baseTemplate;
     }
 
     @Transactional
@@ -220,34 +219,27 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
     public List<BaseTemplateObj> getByCategoryIdAndNotUsedByPart(String partId, String tagId) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseTemplate.class);
         String sql = "select b.* from base_template b where \n" +
-                "b.id not in(select a.template_id from base_part_template a where part_id='" + partId + "')\n" +
-                "and b.category='" + tagId + "' order by b.name ;";
-
+            "b.id not in(select a.template_id from base_part_template a where part_id='" + partId + "')\n" +
+            "and b.category='" + tagId + "' order by b.name ;";
         List<BaseTemplate> templateList = jdbcTemplate.query(sql, rm);
         List<BaseTemplateObj> rs = new ArrayList<>();
+        BaseTemplateObj baseTemplateObj = null;
         for (BaseTemplate one : templateList) {
-            BaseTemplateObj baseTemplateObj = new BaseTemplateObj();
-            BaseTemplateVarObj baseTemplateVarObj = new BaseTemplateVarObj();
+            baseTemplateObj = new BaseTemplateObj();
             BeanUtils.copyProperties(one, baseTemplateObj);
             List<BaseTemplateVar> valList = baseTemplateVarRepository.findByTemplateId(one.getId());
-            List<BaseBarcodeRule> baseBarcodeRules = new ArrayList<>();
+            List<BaseTemplateVarObj> varObjs = new ArrayList<>();
             for (BaseTemplateVar item : valList) {
                 BaseTemplateVarObj two = new BaseTemplateVarObj();
                 BeanUtils.copyProperties(item, two);
-                BaseBarcodeRule baseBarcodeRule = baseBarcodeRuleRepository.findById(item.getRuleId()).orElse(null);
-
-                List<BaseBarcodeRuleDef> byBarcodeId = baseBarcodeRuleDefRepository.findByBarcodeId(baseBarcodeRule.getId());
-                if(!byBarcodeId.isEmpty()){
-                    baseBarcodeRule.setBaseBarcodeRuleDefs(byBarcodeId);
-                }
-                baseBarcodeRules.add(baseBarcodeRule);
+                varObjs.add(two);
             }
-            baseTemplateObj.setBaseBarcodeRules(baseBarcodeRules);
+            baseTemplateObj.setTemplateVarObjList(varObjs);
             rs.add(baseTemplateObj);
-
         }
         return rs;
     }
+
 
     @Override
     public BaseTemplateObj getBaseTemplateObjByPartId(String partId) {

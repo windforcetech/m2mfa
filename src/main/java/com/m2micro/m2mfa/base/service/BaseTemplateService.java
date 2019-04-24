@@ -27,7 +27,7 @@ public interface BaseTemplateService extends BaseService<BaseTemplate, String> {
 
     BaseTemplateObj addOrUpdate(BaseTemplateObj baseTemplateObj);
 
-    BaseTemplateObj getByTemplateId(String templateId);
+    BaseTemplate  getByTemplateId(String templateId);
 
     ResponseMessage deleteByTemplateIds(String[] templateIds);
 

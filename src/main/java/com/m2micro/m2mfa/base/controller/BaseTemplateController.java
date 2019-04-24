@@ -54,11 +54,10 @@ public class BaseTemplateController {
     @GetMapping("/info/{id}")
     @ApiOperation(value = "标签模板详情")
     @UserOperationLog("标签模板详情")
-    public ResponseMessage<BaseTemplateObj> info(@PathVariable("id") String id) {
-        //   BaseTemplateObj baseTemplate = baseTemplateService.findById(id).orElse(null);
-        //   return ResponseMessage.ok(baseTemplate);
-        BaseTemplateObj byTemplateId = baseTemplateService.getByTemplateId(id);
-        return ResponseMessage.ok(byTemplateId);
+    public ResponseMessage<BaseTemplate > info(@PathVariable("id") String id) {
+
+
+        return ResponseMessage.ok(baseTemplateService.getByTemplateId(id));
     }
 
 
