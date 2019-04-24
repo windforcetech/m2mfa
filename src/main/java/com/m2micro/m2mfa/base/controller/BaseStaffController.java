@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -128,7 +129,7 @@ public class BaseStaffController {
                 iUserService.updateUser(mm);
                 userId = mm.getId();
             } else {
-                ResponseMessage responseMessage = iUserService.saveUser(user);
+                ResponseMessage responseMessage = iUserService.saveUser(user, TokenInfo.getUserGroupId());
                 userId = user.getId();
                 if (responseMessage.getStatus() != 200) {
                     return responseMessage;
