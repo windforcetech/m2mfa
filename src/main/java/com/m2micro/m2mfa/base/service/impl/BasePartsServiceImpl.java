@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
@@ -91,50 +92,50 @@ public class BasePartsServiceImpl implements BasePartsService {
     @Override
     public PageUtil<BaseParts> list(BasePartsQuery query) {
         String sql = "SELECT\n" +
-                    "	bp.part_id partId,\n" +
-                    "	bp.part_no partNo,\n" +
-                    "	bp.name name,\n" +
-                    "	bp.spec spec,\n" +
-                    "	bp.version version,\n" +
-                    "	bp.grade grade,\n" +
-                    "	bp.source source,\n" +
-                    "	bp.category category,\n" +
-                    "	bp.single single,\n" +
-                    "	bp.is_check isCheck,\n" +
-                    "	bp.stock_unit stockUnit,\n" +
-                    "	bp.safety_stock safetyStock,\n" +
-                    "	bp.max_stock maxStock,\n" +
-                    "	bp.main_warehouse mainWarehouse,\n" +
-                    "	bp.main_storage mainStorage,\n" +
-                    "	bp.production_unit productionUnit,\n" +
-                    "	bp.production_conversion_rate productionConversionRate,\n" +
-                    "	bp.min_production_qty minProductionQty,\n" +
-                    "	bp.production_loss_rate productionLossRate,\n" +
-                    "	bp.sent_unit sentUnit,\n" +
-                    "	bp.sent_conversion_rate sentConversionRate,\n" +
-                    "	bp.min_sent_qty minSentQty,\n" +
-                    "	bp.is_consume isConsume,\n" +
-                    "	bp.validity_days validityDays,\n" +
-                    "	bp.main_line_warehouse mainLineWarehouse,\n" +
-                    "	bp.main_line_storage mainLineStorage,\n" +
-                    "	bp.positive_image_url positiveImageUrl,\n" +
-                    "	bp.negative_image negativeImage,\n" +
-                    "	bp.enabled enabled,\n" +
-                    "	bp.description description,\n" +
-                    "	bp.create_on createOn,\n" +
-                    "	bp.create_by createBy,\n" +
-                    "	bp.modified_on modifiedOn,\n" +
-                    "	bp.modified_by modifiedBy,\n" +
-                    "	bi.item_name categoryName,\n" +
-                    "	bi2.item_name sourceName\n" +
-                    "FROM\n" ;
-                  if(query.isIsom()){
-                    sql = sql+"mes_part_route mpr ,  ";
-                  }
-                  sql+=   "	base_parts bp\n" +
-                    "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
-                    "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
-                    "WHERE 1 = 1";
+                "	bp.part_id partId,\n" +
+                "	bp.part_no partNo,\n" +
+                "	bp.name name,\n" +
+                "	bp.spec spec,\n" +
+                "	bp.version version,\n" +
+                "	bp.grade grade,\n" +
+                "	bp.source source,\n" +
+                "	bp.category category,\n" +
+                "	bp.single single,\n" +
+                "	bp.is_check isCheck,\n" +
+                "	bp.stock_unit stockUnit,\n" +
+                "	bp.safety_stock safetyStock,\n" +
+                "	bp.max_stock maxStock,\n" +
+                "	bp.main_warehouse mainWarehouse,\n" +
+                "	bp.main_storage mainStorage,\n" +
+                "	bp.production_unit productionUnit,\n" +
+                "	bp.production_conversion_rate productionConversionRate,\n" +
+                "	bp.min_production_qty minProductionQty,\n" +
+                "	bp.production_loss_rate productionLossRate,\n" +
+                "	bp.sent_unit sentUnit,\n" +
+                "	bp.sent_conversion_rate sentConversionRate,\n" +
+                "	bp.min_sent_qty minSentQty,\n" +
+                "	bp.is_consume isConsume,\n" +
+                "	bp.validity_days validityDays,\n" +
+                "	bp.main_line_warehouse mainLineWarehouse,\n" +
+                "	bp.main_line_storage mainLineStorage,\n" +
+                "	bp.positive_image_url positiveImageUrl,\n" +
+                "	bp.negative_image negativeImage,\n" +
+                "	bp.enabled enabled,\n" +
+                "	bp.description description,\n" +
+                "	bp.create_on createOn,\n" +
+                "	bp.create_by createBy,\n" +
+                "	bp.modified_on modifiedOn,\n" +
+                "	bp.modified_by modifiedBy,\n" +
+                "	bi.item_name categoryName,\n" +
+                "	bi2.item_name sourceName\n" +
+                "FROM\n" ;
+        if(query.isIsom()){
+            sql = sql+"mes_part_route mpr ,  ";
+        }
+        sql+=   "	base_parts bp\n" +
+                "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
+                "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
+                "WHERE 1 = 1";
 
         if(StringUtils.isNotEmpty(query.getPartNo())){
             sql = sql+" and bp.part_no like '%"+query.getPartNo()+"%'";
@@ -151,6 +152,10 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(query.getEnabled()!=null){
             sql = sql+" and bp.enabled = "+query.getEnabled()+"";
         }
+        String groupId = TokenInfo.getUserGroupId();
+        //if(StringUtils.isNotEmpty(groupId)){
+            sql = sql+" and bp.group_id = '"+groupId+"'";
+        //}
 
         if(StringUtils.isNotEmpty(query.getCategory())){
             BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
@@ -164,28 +169,32 @@ public class BasePartsServiceImpl implements BasePartsService {
         String collect="";
         if(StringUtils.isNotEmpty(query.getTypesof())){
             List<BasePartInstruction> all = basePartInstructionRepository.findAll();
-             collect = all.stream().filter(v->{
+            collect = all.stream().filter(v->{
                 boolean flag = !ids.contains(v.getPartId());
                 ids.add(v.getPartId());
                 return flag;
             }).map(e -> e.getPartId()).collect(Collectors.joining(",","'","'"));
             sql+=" and bp.part_id NOT in("+collect+")";
-       }
+        }
         if(query.isIsom()){
-          sql+="   and  mpr.part_id=bp.part_id";
+            sql+="   and  mpr.part_id=bp.part_id";
         }
-        if(query.isTemplate()){
-          sql = sql+"  and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
+        if(query.isIsom()){
+            sql+="   and  mpr.group_id='"+groupId+"' ";
         }
-        sql = sql + " order by bp.modified_on desc";
+        //排序字段
+        String order = StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder();
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by bp."+order+" "+direct;
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql,rm);
         String countSql = "select count(*) from ";
-      if(query.isIsom()){
-        countSql = countSql+"mes_part_route mpr ,  ";
-      }
-      countSql +="base_parts bp where 1=1 ";
+        if(query.isIsom()){
+            countSql = countSql+"mes_part_route mpr ,  ";
+        }
+        countSql +="base_parts bp where 1=1 ";
 
         if(StringUtils.isNotEmpty(query.getPartNo())){
             countSql = countSql+" and bp.part_no like '%"+query.getPartNo()+"%'";
@@ -205,6 +214,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(StringUtils.isNotEmpty(query.getTypesof())){
             countSql +=" and bp.part_id NOT in("+collect+")";
         }
+        //if(StringUtils.isNotEmpty(groupId)){
+            countSql = countSql+" and bp.group_id = '"+groupId+"' ";
+        //}
 
         if(StringUtils.isNotEmpty(query.getCategory())){
             BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
@@ -215,11 +227,11 @@ public class BasePartsServiceImpl implements BasePartsService {
 
         }
         if(query.isIsom()){
-          countSql +="   and  mpr.part_id=bp.part_id";
+            countSql +="   and  mpr.part_id=bp.part_id";
         }
-      if(query.isTemplate()){
-         countSql += " and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
-      }
+        if(query.isIsom()){
+            countSql+="   and  mpr.group_id='"+groupId+"' ";
+        }
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
 
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
@@ -287,12 +299,20 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(StringUtils.isNotEmpty(query.getCategory())){
             sql = sql+" and bp.category = '"+query.getCategory()+"'";
         }
-        sql = sql + " order by bp.modified_on desc";
+        String groupId = TokenInfo.getUserGroupId();
+        //if(StringUtils.isNotEmpty(groupId)){
+            sql = sql+" and bp.group_id = '"+groupId+"' ";
+        //}
+        //排序字段
+        String order = StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder();
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by bp."+order+" "+direct;
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql,rm);
         String countSql = "select count(*) from base_parts bp where 1=1 AND bp.enabled=1 \n"+
-            "AND not EXISTS (SELECT mpr.part_id part_id from mes_part_route mpr where mpr.part_id=bp.part_id)\n";
+                "AND not EXISTS (SELECT mpr.part_id part_id from mes_part_route mpr where mpr.part_id=bp.part_id)\n";
 
         if(StringUtils.isNotEmpty(query.getPartNo())){
             countSql = countSql+" and bp.part_no like '%"+query.getPartNo()+"%'";
@@ -309,6 +329,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(StringUtils.isNotEmpty(query.getCategory())){
             countSql = countSql+" and bp.category = '"+query.getCategory()+"'";
         }
+        //if(StringUtils.isNotEmpty(groupId)){
+            countSql = sql+" and bp.group_id = '"+groupId+"' ";
+        //}
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
 
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
@@ -316,7 +339,7 @@ public class BasePartsServiceImpl implements BasePartsService {
 
     @Override
     public List<BaseParts> findByPartNoAndPartIdNot(String partNo, String partId) {
-        return basePartsRepository.findByPartNoAndPartIdNot(partNo, partId);
+        return basePartsRepository.findByPartNoAndGroupIdAndPartIdNot(partNo, TokenInfo.getUserGroupId() ,partId);
     }
 
     @Override
@@ -327,16 +350,17 @@ public class BasePartsServiceImpl implements BasePartsService {
         //这里可以优化，做关联查询。
         List<BaseParts> enableDelete = new ArrayList<>();
         List<BaseParts> disableDelete = new ArrayList<>();
+        String groupId = TokenInfo.getUserGroupId();
         for (String id:ids){
             BaseParts bp = findById(id).orElse(null);
             if(bp==null){
                 throw new MMException("数据库不存在数据！");
             }
-            List<MesMoDesc> list = mesMoDescRepository.findByPartId(bp.getPartId());
-            List<BasePack> basePacks = basePackRepository.findByPartId(bp.getPartId());
-            List<BaseBomDesc> baseBomDescs = baseBomDescRepository.findAllByPartId(bp.getPartId());
-            List<BaseBomDef> baseBomDefs = baseBomDefRepository.findByPartId(bp.getPartId());
-            List<BaseBomSubstitute> baseBomSubstitutes = baseBomSubstituteRepository.findByPartId(bp.getPartId());
+            List<MesMoDesc> list = mesMoDescRepository.findByPartIdAndGroupId(bp.getPartId(), groupId);
+            List<BasePack> basePacks = basePackRepository.findByPartIdAndGroupId(bp.getPartId(),groupId);
+            List<BaseBomDesc> baseBomDescs = baseBomDescRepository.findAllByPartIdAndGroupId(bp.getPartId(),groupId);
+            List<BaseBomDef> baseBomDefs = baseBomDefRepository.findByPartIdAndGroupId(bp.getPartId(),groupId);
+            List<BaseBomSubstitute> baseBomSubstitutes = baseBomSubstituteRepository.findByPartIdAndGroupId(bp.getPartId(),groupId);
 
             if(list!=null&&list.size()>0){
                 disableDelete.add(bp);
@@ -388,7 +412,7 @@ public class BasePartsServiceImpl implements BasePartsService {
 
     @Override
     public BaseParts selectpartNo(String partNo) {
-        return basePartsRepository.selectpartNo(partNo);
+        return basePartsRepository.selectpartNoAndGroupId(partNo,TokenInfo.getUserGroupId());
     }
 
     @Override
@@ -413,7 +437,16 @@ public class BasePartsServiceImpl implements BasePartsService {
             sql+=" and t.spec like '%"+query.getSpec()+"%' ";
             sqlCount+=" and t.spec like '%"+query.getSpec()+"%' ";
         }
-        sql+= "  order by t.part_id ";
+        String groupId = TokenInfo.getUserGroupId();
+        //if(StringUtils.isNotEmpty(groupId)){
+            sql+=" and t.group_id='"+groupId+"' ";
+            sqlCount+=" and t.group_id='"+groupId+"' ";
+        //}
+        //排序字段
+        String order = StringUtils.isEmpty(query.getOrder())?"part_id":query.getOrder();
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"":query.getDirect();
+        sql+= " order by t."+order+" "+direct;
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql,rm);

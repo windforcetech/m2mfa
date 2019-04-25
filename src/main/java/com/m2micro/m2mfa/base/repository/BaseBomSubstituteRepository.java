@@ -25,5 +25,5 @@ public interface BaseBomSubstituteRepository extends BaseRepository<BaseBomSubst
       *             料件id
       * @return
       */
-     List<BaseBomSubstitute> findByPartId(String partId);
+     List<BaseBomSubstitute> findByPartIdAndGroupId(String partId,String groupId);
 }
