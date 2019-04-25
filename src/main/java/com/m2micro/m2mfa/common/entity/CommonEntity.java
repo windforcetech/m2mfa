@@ -3,6 +3,9 @@ package com.m2micro.m2mfa.common.entity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.persistence.MappedSuperclass;
+
+@MappedSuperclass
 @ApiModel(value="CommonEntity")
 public class CommonEntity {
     @ApiModelProperty(value = "分组")
