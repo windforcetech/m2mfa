@@ -1,32 +1,26 @@
 package com.m2micro.m2mfa.barcode.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.commons.annotation.UserOperationLog;
+import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintResources;
+import com.m2micro.m2mfa.barcode.query.BarcodeQuery;
 import com.m2micro.m2mfa.barcode.query.PrintApplyQuery;
 import com.m2micro.m2mfa.barcode.query.ScheduleQuery;
 import com.m2micro.m2mfa.barcode.service.BarcodePrintApplyService;
-import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.barcode.vo.CheckObj;
 import com.m2micro.m2mfa.barcode.vo.PrintApplyObj;
+import com.m2micro.m2mfa.barcode.vo.PrintResourceObj;
 import com.m2micro.m2mfa.barcode.vo.ScheduleObj;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
-import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
-import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
-import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -115,14 +109,22 @@ public class BarcodePrintApplyController {
     }
 
 
-    @GetMapping("/printApplyDetail/{id}")
+    @PostMapping("/printApplyDetail")
     @ApiOperation(value = "获取打印申请详情")
     @UserOperationLog("获取打印申请详情")
-    public ResponseMessage<PrintApplyObj> printApplyDetail(@PathVariable("id") String applyId) {
-        PrintApplyObj printApplyObj = barcodePrintApplyService.printDetail(applyId);
+    public ResponseMessage< PageUtil<PrintResourceObj>> list(BarcodeQuery query) {
+        query.setApplyId("201904250000");
+        PageUtil<PrintResourceObj>  printApplyObj = barcodePrintApplyService.printApplylist(query);
         return ResponseMessage.ok(printApplyObj);
     }
 
+    @PostMapping("/getPrintApplyObj")
+    @ApiOperation(value = "获取打印主档")
+    @UserOperationLog("获取打印主档")
+    public ResponseMessage< PrintApplyObj> getPrintApplyObj(String applyId) {
+        PrintApplyObj printApplyObj = barcodePrintApplyService.getPrintApplyObj(applyId);
+        return ResponseMessage.ok(printApplyObj);
+    }
 
 
     @PostMapping("/printApplyGenerate")

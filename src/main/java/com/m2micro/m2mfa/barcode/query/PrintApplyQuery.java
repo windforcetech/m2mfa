@@ -1,7 +1,6 @@
 package com.m2micro.m2mfa.barcode.query;
 
 import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.pad.model.StartWorkPara;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 

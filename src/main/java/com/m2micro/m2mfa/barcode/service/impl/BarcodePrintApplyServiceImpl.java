@@ -3,16 +3,15 @@ package com.m2micro.m2mfa.barcode.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.m2mfa.barcode.constant.BarcodeConstant;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintResources;
+import com.m2micro.m2mfa.barcode.query.BarcodeQuery;
 import com.m2micro.m2mfa.barcode.query.PrintApplyQuery;
 import com.m2micro.m2mfa.barcode.query.ScheduleQuery;
 import com.m2micro.m2mfa.barcode.repository.BarcodePrintApplyRepository;
 import com.m2micro.m2mfa.barcode.repository.BarcodePrintResourcesRepository;
 import com.m2micro.m2mfa.barcode.service.BarcodePrintApplyService;
 import com.m2micro.m2mfa.barcode.vo.*;
-import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -409,56 +408,98 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         }
     }
 
-
     @Override
-    public PrintApplyObj printDetail(String applyId) {
+    public PageUtil<PrintResourceObj> printApplylist(BarcodeQuery barcodeQuery) {
+        PrintApplyObj printApplyObj = getPrintApplyObj(barcodeQuery.getApplyId());
+        RowMapper rm1 = BeanPropertyRowMapper.newInstance(TemplatePrintObj.class);
+        String sql1 = " SELECT t1.id,t1.name,t1.description,t1.version,t1.category,f.file_name FROM base_template t1,base_file f\n" +
+            "where t1.label_file_url=f.id \n" +
+            "and t1.id='" + printApplyObj.getTemplateId() + "' ; ";
+        List<TemplatePrintObj> templatePrintObjList = jdbcTemplate.query(sql1, rm1);
+        TemplatePrintObj templatePrintObj = templatePrintObjList.get(0);
+        printApplyObj.setTemplatePrintObj(templatePrintObj);
+        RowMapper rm111 = BeanPropertyRowMapper.newInstance(PrintResourceObj.class);
+        String sql111 = " SELECT t.id,t.apply_id,t.content,t.flag FROM barcode_print_resources t \n" +
+            "where t.apply_id='" + printApplyObj.getApplyId() + "'  ";
+        sql111 = sql111 + " limit "+(barcodeQuery.getPage()-1)*barcodeQuery.getSize()+","+barcodeQuery.getSize();
+        List<PrintResourceObj> printResourceObjList = jdbcTemplate.query(sql111, rm111);
+        printApplyObj.setPrintResourceObjList(printResourceObjList);
+        RowMapper rm11 = BeanPropertyRowMapper.newInstance(PackObj.class);
+        String sql11 = " select p.id,p.qty,p.nw,p.gw,p.cuft from base_pack p " +
+            "where p.part_id='" + printApplyObj.getPartNo() + "' and p.category=2; ";
+        List<PackObj> packObjList = jdbcTemplate.query(sql11, rm11);
+        PackObj packObj = packObjList.get(0);
+        printApplyObj.setPackObj(packObj);
+        RowMapper rm2 = BeanPropertyRowMapper.newInstance(TemplateVarObj.class);
+        String sql2 = " SELECT v.id,v.name,v.rule_id FROM base_template_var v\n" +
+            "where v.template_id='" + templatePrintObj.getId() + "' ; ";
+        List<TemplateVarObj> templateVarObjList = jdbcTemplate.query(sql2, rm2);
+        templatePrintObj.setTemplateVarObjList(templateVarObjList);
+        for (TemplateVarObj one : templateVarObjList) {
+            RowMapper rm3 = BeanPropertyRowMapper.newInstance(RuleObj.class);
+            String sql3 = " select t.id,t.position,t.category,t.defaults,t.length,t.ary  from base_barcode_rule_def t \n" +
+                "where t.barcode_id='" + one.getRuleId() + "'; ";
+            List<RuleObj> ruleObjList = jdbcTemplate.query(sql3, rm3);
+            one.setRuleObjList(ruleObjList);
+        }
+        String sqlcpum = " SELECT count(*)  FROM barcode_print_resources t \n" +
+            "where t.apply_id='" + printApplyObj.getApplyId() + "'  ";
+        long  totalCount = jdbcTemplate.queryForObject(sqlcpum, long.class);
+        return PageUtil.of(printApplyObj.getPrintResourceObjList() ,totalCount,barcodeQuery.getSize(),barcodeQuery.getPage());
+    }
+
+    public  PrintApplyObj getPrintApplyObj(String applyId) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
         String sql = " select t3.item_name source_type,\n" +
-                "t3.id source_id,\n" +
-                "t2.item_name flag_type,\n" +
-                "t1.name template_name,\n" +
-                "t1.id template_id,\n" +
-                "t1.version template_version,\n" +
-                "cus.code customer_code,\n" +
-                "cus.name customer_name,\n" +
-                "t.id apply_id,\n" +
-                "t.category,\n" +
-                "t.source,\n" +
-                "schedule.schedule_no,\n" +
-                "t.print_category,\n" +
-                "t.qty,\n" +
-                "t.check_On,\n" +
-                "t.flag,\n" +
-                "t.description,\n" +
-                "t.check_flag,\n" +
-                "t.enabled,\n" +
-                "p.part_id,\n" +
-                "p.part_no,\n" +
-                "p.name part_name,\n" +
-                " p.spec,  \n" +
-                " mo.mo_number,  \n" +
-                " mo.order_seq  \n" +
-                "from barcode_print_apply t ,\n" +
-                "base_parts p,\n" +
-                "base_template t1,\n" +
-                "base_items_target t2,\n" +
-                "base_customer cus,\n" +
-                "mes_mo_schedule schedule,\n" +
-                "base_items_target t3,\n" +
-                " mes_mo_desc mo \n " +
-                "where t1.category=t2.id\n" +
-                "and t1.id= t.template_id\n" +
-                "and t.customer_no=cus.code\n" +
-                "and t.part_id=p.part_id\n" +
-                "and schedule.schedule_id=t.source\n" +
-                "and t.category=t3.id\n" +
+            "t3.id source_id,\n" +
+            "t2.item_name flag_type,\n" +
+            "t1.name template_name,\n" +
+            "t1.id template_id,\n" +
+            "t1.version template_version,\n" +
+            "cus.code customer_code,\n" +
+            "cus.name customer_name,\n" +
+            "t.id apply_id,\n" +
+            "t.category,\n" +
+            "t.source,\n" +
+            "schedule.schedule_no,\n" +
+            "t.print_category,\n" +
+            "t.qty,\n" +
+            "t.check_On,\n" +
+            "t.flag,\n" +
+            "t.description,\n" +
+            "t.check_flag,\n" +
+            "t.enabled,\n" +
+            "p.part_id,\n" +
+            "p.part_no,\n" +
+            "p.name part_name,\n" +
+            " p.spec,  \n" +
+            " mo.mo_number,  \n" +
+            " mo.order_seq  \n" +
+            "from barcode_print_apply t ,\n" +
+            "base_parts p,\n" +
+            "base_template t1,\n" +
+            "base_items_target t2,\n" +
+            "base_customer cus,\n" +
+            "mes_mo_schedule schedule,\n" +
+            "base_items_target t3,\n" +
+            " mes_mo_desc mo \n " +
+            "where t1.category=t2.id\n" +
+            "and t1.id= t.template_id\n" +
+            "and t.customer_no=cus.code\n" +
+            "and t.part_id=p.part_id\n" +
+            "and schedule.schedule_id=t.source\n" +
+            "and t.category=t3.id\n" +
 //                "and t.flag=1  " +
-                "and mo.mo_id=schedule.mo_id " +
-                "and t.id='" + applyId + "' ;";
+            "and mo.mo_id=schedule.mo_id " +
+            "and t.id='" + applyId + "' ;";
 
         List<PrintApplyObj> templateList = jdbcTemplate.query(sql, rm);
-        PrintApplyObj printApplyObj = templateList.get(0);
-        //
+        return templateList.get(0);
+    }
+
+
+    public PrintApplyObj printDetail(String applyId) {
+        PrintApplyObj printApplyObj = getPrintApplyObj(applyId);
         RowMapper rm1 = BeanPropertyRowMapper.newInstance(TemplatePrintObj.class);
         String sql1 = " SELECT t1.id,t1.name,t1.description,t1.version,t1.category,f.file_name FROM base_template t1,base_file f\n" +
                 "where t1.label_file_url=f.id \n" +
@@ -467,26 +508,17 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         List<TemplatePrintObj> templatePrintObjList = jdbcTemplate.query(sql1, rm1);
         TemplatePrintObj templatePrintObj = templatePrintObjList.get(0);
         printApplyObj.setTemplatePrintObj(templatePrintObj);
-
-        //
-
         RowMapper rm111 = BeanPropertyRowMapper.newInstance(PrintResourceObj.class);
         String sql111 = " SELECT t.id,t.apply_id,t.content,t.flag FROM barcode_print_resources t \n" +
                 "where t.apply_id='" + printApplyObj.getApplyId() + "' ; ";
-
         List<PrintResourceObj> printResourceObjList = jdbcTemplate.query(sql111, rm111);
-
         printApplyObj.setPrintResourceObjList(printResourceObjList);
-        //
         RowMapper rm11 = BeanPropertyRowMapper.newInstance(PackObj.class);
         String sql11 = " select p.id,p.qty,p.nw,p.gw,p.cuft from base_pack p " +
                 "where p.part_id='" + printApplyObj.getPartNo() + "' and p.category=2; ";
-
         List<PackObj> packObjList = jdbcTemplate.query(sql11, rm11);
         PackObj packObj = packObjList.get(0);
         printApplyObj.setPackObj(packObj);
-        //
-
         RowMapper rm2 = BeanPropertyRowMapper.newInstance(TemplateVarObj.class);
         String sql2 = " SELECT v.id,v.name,v.rule_id FROM base_template_var v\n" +
                 "where v.template_id='" + templatePrintObj.getId() + "' ; ";
