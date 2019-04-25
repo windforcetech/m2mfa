@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.node.TreeNode;
@@ -78,6 +79,7 @@ public class BaseShiftController {
     @ApiOperation(value="保存班别基本资料")
     @UserOperationLog("保存班别基本资料")
     public ResponseMessage<BaseShift> save(@RequestBody BaseShift baseShift){
+        baseShift.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseShift, AddGroup.class);
         baseShift.setShiftId(UUIDUtil.getUUID());
         //校验编号唯一性
@@ -95,6 +97,7 @@ public class BaseShiftController {
     @ApiOperation(value="更新班别基本资料")
     @UserOperationLog("更新班别基本资料")
     public ResponseMessage<BaseShift> update(@RequestBody BaseShift baseShift){
+        baseShift.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseShift, UpdateGroup.class);
         BaseShift baseShiftOld = baseShiftService.findById(baseShift.getShiftId()).orElse(null);
         if(baseShiftOld==null){

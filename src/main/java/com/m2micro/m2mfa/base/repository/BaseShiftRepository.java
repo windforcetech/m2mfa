@@ -22,7 +22,7 @@ public interface BaseShiftRepository extends BaseRepository<BaseShift,String> {
      *              主键
      * @return     班别基本资料
      */
-    List<BaseShift> findByCodeAndShiftIdNot(String code ,String shiftId);
+    List<BaseShift> findByCodeAndGroupIdAndShiftIdNot(String code,String groupId,String shiftId);
 
     /**
      * 获取有效的班班信息

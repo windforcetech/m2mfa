@@ -39,5 +39,5 @@ public interface MesMoScheduleShiftRepository extends BaseRepository<MesMoSchedu
      * @param shiftId
      * @return
      */
-    Integer countByShiftId(String shiftId);
+    Integer countByShiftIdAndGroupId(String shiftId,String groupId);
 }
