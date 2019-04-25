@@ -45,7 +45,6 @@ public class GroupIdAspect {
             if(obj instanceof CommonEntity){
                 CommonEntity commonEntity=(CommonEntity) obj;
                 commonEntity.setGroupId(TokenInfo.getUserGroupId());
-                args[0]=commonEntity;
                 return point.proceed(args);
             }
         }
