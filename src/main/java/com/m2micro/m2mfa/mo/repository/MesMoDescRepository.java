@@ -20,7 +20,7 @@ public interface MesMoDescRepository extends BaseRepository<MesMoDesc,String> {
      * @param partId
      * @return
      */
-    List<MesMoDesc> findByPartId(String partId);
+    List<MesMoDesc> findByPartIdAndGroupId(String partId,String groupId);
 
     /**
      * 根据客户id查找工单主档

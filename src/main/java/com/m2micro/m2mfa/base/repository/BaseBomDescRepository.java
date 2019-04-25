@@ -16,6 +16,6 @@ import java.util.List;
 @Repository
 public interface BaseBomDescRepository extends BaseRepository<BaseBomDesc, String> {
 
-    List<BaseBomDesc> findAllByPartId(String partid);
+    List<BaseBomDesc> findAllByPartIdAndGroupId(String partid,String groupId);
 
 }

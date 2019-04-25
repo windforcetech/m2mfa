@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -80,7 +81,7 @@ public class BasePackServiceImpl implements BasePackService {
 
     @Override
     public List<BasePack> findByPartId(String partId) {
-        return basePackRepository.findByPartId(partId);
+        return basePackRepository.findByPartIdAndGroupId(partId, TokenInfo.getUserGroupId());
     }
 
     @Override

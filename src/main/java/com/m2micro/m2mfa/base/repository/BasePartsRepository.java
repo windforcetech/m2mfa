@@ -21,10 +21,10 @@ public interface BasePartsRepository extends BaseRepository<BaseParts,String> {
      * @param partId
      * @return
      */
-    List<BaseParts> findByPartNoAndPartIdNot(String partNo,String partId);
+    List<BaseParts> findByPartNoAndGroupIdAndPartIdNot(String partNo,String groupId,String partId);
 
-    @Query(value = "select * from base_parts  where  part_no=?1 and enabled=1 ",nativeQuery=true)
-    BaseParts selectpartNo(String partNo);
+    @Query(value = "select * from base_parts  where  part_no=?1 and enabled=1 and group_id=?2",nativeQuery=true)
+    BaseParts selectpartNoAndGroupId(String partNo,String groupId);
     int countByPartNo(String partNo);
 
     List<BaseParts> findByPartNo(String partNo);

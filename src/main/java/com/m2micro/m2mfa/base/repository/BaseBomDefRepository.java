@@ -26,5 +26,5 @@ public interface BaseBomDefRepository extends BaseRepository<BaseBomDef, String>
      *          料件id
      * @return
      */
-    List<BaseBomDef> findByPartId(String partId);
+    List<BaseBomDef> findByPartIdAndGroupId(String partId,String groupId);
 }
