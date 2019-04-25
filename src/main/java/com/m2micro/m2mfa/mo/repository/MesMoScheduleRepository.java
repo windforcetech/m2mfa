@@ -76,7 +76,7 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      *          机台id
      * @return
      */
-    Integer countByMachineId(String machineId);
+    Integer countByMachineIdAndGroupId(String machineId,String groupId);
 
     /**
      * 获取排产编号，如果为空表示数据库一次也没有生成
