@@ -10,5 +10,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface DisplayColumnRepository extends BaseRepository<DisplayColumn,String> {
-
+    /**
+     * 获取显示列信息
+     * @return
+     */
+    DisplayColumn findByUserIdAndModuleIdAndGroupId(String userId,String moduleId,String groupId);
 }

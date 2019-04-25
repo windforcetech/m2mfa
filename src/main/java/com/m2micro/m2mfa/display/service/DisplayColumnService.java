@@ -17,4 +17,25 @@ public interface DisplayColumnService extends BaseService<DisplayColumn,String> 
      * @return  分页信息
      */
     PageUtil<DisplayColumn> list(Query query);
+
+    /**
+     * 保存
+     * @param displayColumn
+     * @return
+     */
+    DisplayColumn saveEntity(DisplayColumn displayColumn);
+
+    /**
+     * 修改
+     * @param displayColumn
+     * @return
+     */
+    DisplayColumn updateEntity(DisplayColumn displayColumn);
+
+    /**
+     * 详情
+     * @param id
+     * @return
+     */
+    DisplayColumn info();
 }
