@@ -52,8 +52,21 @@ public class DisplayColumnServiceImpl implements DisplayColumnService {
 
     @Override
     public DisplayColumn saveEntity(DisplayColumn displayColumn) {
-        ValidatorUtil.validateEntity(displayColumn, AddGroup.class);
+        TokenInfo tokenInfo = TokenInfo.getTokenInfo();
+        String userId = tokenInfo.getUserID();
+        displayColumn.setUserId(userId);
+        String groupId = TokenInfo.getUserGroupId();
+        displayColumn.setGroupId(groupId);
+        if(StringUtils.isEmpty(displayColumn.getModuleId())){
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            displayColumn.setModuleId(request.getHeader("requestPage"));
+        }
         displayColumn.setColumnId(UUIDUtil.getUUID());
+        ValidatorUtil.validateEntity(displayColumn, AddGroup.class);
+        DisplayColumn displayColumnOld = displayColumnRepository.findByUserIdAndModuleIdAndGroupId(userId, displayColumn.getModuleId(), groupId);
+        if(displayColumnOld!=null){
+            throw new MMException("数据库已存在，只能新增一次！");
+        }
         return save(displayColumn);
     }
 
@@ -69,12 +82,14 @@ public class DisplayColumnServiceImpl implements DisplayColumnService {
     }
 
     @Override
-    public DisplayColumn info() {
+    public DisplayColumn info(String moduleId) {
         TokenInfo tokenInfo = TokenInfo.getTokenInfo();
         String userId = tokenInfo.getUserID();
         String groupId = TokenInfo.getUserGroupId();
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        String moduleId = request.getHeader("requestPage");
+        if(StringUtils.isEmpty(moduleId)){
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            moduleId = request.getHeader("requestPage");
+        }
         if(StringUtils.isEmpty(userId)||StringUtils.isEmpty(groupId)||StringUtils.isEmpty(moduleId)){
             throw new MMException("请求参数有误！");
         }

@@ -47,11 +47,11 @@ public class DisplayColumnController {
     /**
      * 详情
      */
-    @GetMapping("/info/{id}")
+    @GetMapping("/info")
     @ApiOperation(value="显示列详情")
     @UserOperationLog("显示列详情")
-    public ResponseMessage<DisplayColumn> info(){
-        return ResponseMessage.ok(displayColumnService.info());
+    public ResponseMessage<DisplayColumn> info(String moduleId){
+        return ResponseMessage.ok(displayColumnService.info(moduleId));
     }
 
     /**

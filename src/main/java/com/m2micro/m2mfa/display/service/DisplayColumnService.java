@@ -34,8 +34,8 @@ public interface DisplayColumnService extends BaseService<DisplayColumn,String> 
 
     /**
      * 详情
-     * @param id
+     * @param moduleId
      * @return
      */
-    DisplayColumn info();
+    DisplayColumn info(String moduleId);
 }
