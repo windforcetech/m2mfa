@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.node.TreeNode;
@@ -90,6 +91,7 @@ public class BaseMoldController {
     @ApiOperation(value="保存模具主档")
     @UserOperationLog("保存模具主档")
     public ResponseMessage<BaseMold> save(@RequestBody BaseMold baseMold){
+        baseMold.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseMold, AddGroup.class);
         baseMold.setMoldId(UUIDUtil.getUUID());
         //校验code唯一性
@@ -107,8 +109,8 @@ public class BaseMoldController {
     @ApiOperation(value="更新模具主档")
     @UserOperationLog("更新模具主档")
     public ResponseMessage<BaseMold> update(@RequestBody BaseMold baseMold){
+        baseMold.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseMold, UpdateGroup.class);
-
         BaseMold baseMoldOld = baseMoldService.findById(baseMold.getMoldId()).orElse(null);
         if(baseMoldOld==null){
             throw new MMException("数据库不存在该记录");

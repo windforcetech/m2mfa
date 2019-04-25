@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseMoldQuery;
@@ -153,6 +154,7 @@ public class BaseMoldServiceImpl implements BaseMoldService {
 
     @Override
     public PageUtil<BaseMold> list(BaseMoldQuery query) {
+        String groupId = TokenInfo.getUserGroupId();
         String sql = "SELECT\n" +
                         "   bm.mold_id moldId,\n" +
                         "	bm.code code,\n" +
@@ -207,7 +209,8 @@ public class BaseMoldServiceImpl implements BaseMoldService {
                     "LEFT JOIN base_items_target bi ON  bi.id = bm.category_id\n" +
                     "LEFT JOIN base_items_target bi2 ON bi2.id = bm.flag\n" +
                     "LEFT JOIN base_items_target bi3 ON bi3.id = bm.placement\n" +
-                    "LEFT JOIN base_customer bc ON bm.customer_id = bc.customer_id where 1=1 ";
+                    "LEFT JOIN base_customer bc ON (bm.customer_id = bc.customer_id AND bc.group_id = '"+groupId+"')\n" +
+                    "where 1=1 ";
         if(StringUtils.isNotEmpty(query.getCode())){
             sql = sql+" and bm.code like '%"+query.getCode()+"%'";
         }
@@ -227,7 +230,14 @@ public class BaseMoldServiceImpl implements BaseMoldService {
                 sql = sql+" and bm.category_id = '"+query.getCategoryId()+"'";
             }
         }
-        sql = sql + " order by bm.modified_on desc";
+        //if(StringUtils.isNotEmpty(groupId)){
+            sql = sql+" and bm.group_id = '"+groupId+"'";
+        //}
+        //排序字段
+        String order = StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder();
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by bm."+order+" "+direct;
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMold.class);
         List<BaseMold> list = jdbcTemplate.query(sql,rm);
@@ -251,6 +261,9 @@ public class BaseMoldServiceImpl implements BaseMoldService {
                 countSql = countSql+" and bm.category_id = '"+query.getCategoryId()+"'";
             }
         }
+        //if(StringUtils.isNotEmpty(groupId)){
+            countSql = countSql+" and bm.group_id = '"+groupId+"'";
+        //}
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
@@ -262,7 +275,7 @@ public class BaseMoldServiceImpl implements BaseMoldService {
 
     @Override
     public List<BaseMold> findByCodeAndMoldIdNot(String code, String moldId) {
-        return baseMoldRepository.findByCodeAndMoldIdNot(code,moldId);
+        return baseMoldRepository.findByCodeAndGroupIdAndMoldIdNot(code,TokenInfo.getUserGroupId(),moldId);
     }
 
     @Override
@@ -272,7 +285,7 @@ public class BaseMoldServiceImpl implements BaseMoldService {
         List<BaseMold> disableDelete = new ArrayList<>();
         for (String id:ids){
             BaseMold baseMold = baseMoldRepository.findById(id).orElse(null);
-            List<MesMoScheduleProcess> list = mesMoScheduleProcessRepository.findByMoldId(id);
+            List<MesMoScheduleProcess> list = mesMoScheduleProcessRepository.findByMoldIdAndGroupId(id,TokenInfo.getUserGroupId());
             if(list!=null&&list.size()>0){
                 disableDelete.add(baseMold);
                 continue;
@@ -293,7 +306,7 @@ public class BaseMoldServiceImpl implements BaseMoldService {
 
     @Override
     public List<BaseMold> findbyisMold() {
-        return baseMoldRepository.findByEnabled(true);
+        return baseMoldRepository.findByEnabledAndGroupId(true,TokenInfo.getUserGroupId());
     }
 
 }

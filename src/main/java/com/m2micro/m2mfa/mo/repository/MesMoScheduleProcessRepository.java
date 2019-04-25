@@ -87,5 +87,5 @@ public interface MesMoScheduleProcessRepository extends BaseRepository<MesMoSche
      * @param moldId
      * @return
      */
-    List<MesMoScheduleProcess> findByMoldId(String moldId);
+    List<MesMoScheduleProcess> findByMoldIdAndGroupId(String moldId,String groupId);
 }
