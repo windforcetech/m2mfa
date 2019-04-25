@@ -113,7 +113,6 @@ public class BarcodePrintApplyController {
     @ApiOperation(value = "获取打印申请详情")
     @UserOperationLog("获取打印申请详情")
     public ResponseMessage< PageUtil<PrintResourceObj>> list(BarcodeQuery query) {
-        query.setApplyId("201904250000");
         PageUtil<PrintResourceObj>  printApplyObj = barcodePrintApplyService.printApplylist(query);
         return ResponseMessage.ok(printApplyObj);
     }
