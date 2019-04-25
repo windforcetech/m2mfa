@@ -106,8 +106,8 @@ public class BaseTemplateController {
     @GetMapping("/listByPartAndCategory")
     @ApiOperation(value = "通过料号，标签类型获取模板列表列表")
     @UserOperationLog("通过料号，标签类型获取模板列表列表")
-    public ResponseMessage<List<BaseTemplateObj>> listByPartAndCategory(String partId, String categoryId) {
-        List<BaseTemplateObj> byCategoryIdAndNotUsedByPart = baseTemplateService.getByCategoryIdAndNotUsedByPart(partId, categoryId);
+    public ResponseMessage<List<BaseTemplate>> listByPartAndCategory(String partId, String categoryId) {
+        List<BaseTemplate> byCategoryIdAndNotUsedByPart = baseTemplateService.getByCategoryIdAndNotUsedByPart(partId, categoryId);
         return ResponseMessage.ok(byCategoryIdAndNotUsedByPart);
     }
 

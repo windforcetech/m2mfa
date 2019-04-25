@@ -216,30 +216,20 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
     }
 
     @Override
-    public List<BaseTemplateObj> getByCategoryIdAndNotUsedByPart(String partId, String tagId) {
+    public List<BaseTemplate> getByCategoryIdAndNotUsedByPart(String partId, String tagId) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseTemplate.class);
         String sql = "select b.* from base_template b where \n" +
             "b.id not in(select a.template_id from base_part_template a where part_id='" + partId + "')\n" +
             "and b.category='" + tagId + "' order by b.name ;";
         List<BaseTemplate> templateList = jdbcTemplate.query(sql, rm);
-        List<BaseTemplateObj> rs = new ArrayList<>();
-        BaseTemplateObj baseTemplateObj = null;
-        for (BaseTemplate one : templateList) {
-            baseTemplateObj = new BaseTemplateObj();
-            BeanUtils.copyProperties(one, baseTemplateObj);
-            List<BaseTemplateVar> valList = baseTemplateVarRepository.findByTemplateId(one.getId());
-            List<BaseTemplateVarObj> varObjs = new ArrayList<>();
-            for (BaseTemplateVar item : valList) {
-                BaseTemplateVarObj two = new BaseTemplateVarObj();
-                BeanUtils.copyProperties(item, two);
-                varObjs.add(two);
-            }
-            baseTemplateObj.setTemplateVarObjList(varObjs);
-            rs.add(baseTemplateObj);
+        List<BaseTemplate> baseTemplates= new ArrayList<>();
+        for(BaseTemplate baseTemplate :templateList){
+            BaseTemplate baseTemplate1 = getByTemplateId(baseTemplate.getId());
+            baseTemplates.add(baseTemplate1);
         }
-        return rs;
-    }
 
+        return baseTemplates;
+    }
 
     @Override
     public BaseTemplateObj getBaseTemplateObjByPartId(String partId) {

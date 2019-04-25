@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.barcode.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.m2mfa.barcode.constant.BarcodeConstant;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintResources;
 import com.m2micro.m2mfa.barcode.query.BarcodeQuery;
@@ -818,7 +819,7 @@ public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*‰ª
     private String getbarcodeLable(String dateNow, PrintApplyObj printApplyObj, Integer allQty, int n, Integer i, String serialCode, String value, RuleObj rule) {
         String category = rule.getCategory();
         String str = "";
-       // BarcodeConstant barcodeConstant = BarcodeConstant.barcodevalueOf(category);
+        BarcodeConstant barcodeConstant = BarcodeConstant.barcodevalueOf(category);
         switch (category) {
             //Âõ∫ÂÆöÁ†Å
             case "10000310":
@@ -869,7 +870,6 @@ public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*‰ª
                 str = addZeroForNum(str, rule.getLength());
             }
             if (str.length() > rule.getLength()) {
-                // Integer start = str.length() - rule.getLength();
                 str = str.substring(0, rule.getLength());
             }
         }
