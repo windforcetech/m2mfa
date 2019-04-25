@@ -27,7 +27,7 @@ public interface MesMoDescRepository extends BaseRepository<MesMoDesc,String> {
      * @param customerId
      * @return
      */
-    List<MesMoDesc> findByCustomerId(String customerId);
+    List<MesMoDesc> findByCustomerIdAndGroupId(String customerId,String groupId);
 
     /**
      * 根据编号查找工单主档
@@ -101,5 +101,5 @@ public interface MesMoDescRepository extends BaseRepository<MesMoDesc,String> {
      * @param customerId
      * @return
      */
-    Integer countByCustomerId(String customerId);
+    Integer countByCustomerIdAndGroupId(String customerId,String groupId);
 }
