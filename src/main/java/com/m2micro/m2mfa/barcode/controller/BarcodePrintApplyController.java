@@ -123,13 +123,7 @@ public class BarcodePrintApplyController {
         return ResponseMessage.ok(printApplyObj);
     }
 
-//    @PostMapping("/printApplyGenerate")
-//    @ApiOperation(value = "打印条码生成")
-//    @UserOperationLog("打印条码生成")
-//    public ResponseMessage<List<HashMap<String, String>>> printApplyGenerate(String applyId, Integer num) {
-//        List<HashMap<String, String>> labels = barcodePrintApplyService.generateLabel(applyId, num);
-//        return ResponseMessage.ok(labels);
-//    }
+
 
     @PostMapping("/printApplyGenerate")
     @ApiOperation(value = "打印条码生成")

@@ -688,11 +688,10 @@ public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*�
     if (barcodePrintApply.getFlag() == 1) {
         throw new MMException(" 标签已打印。");
     }
+    //日期包装
+    String dateNow = getString();
 
-
-        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-        String dateNow = df.format(new Date());
-        PrintApplyObj printApplyObj = printDetail(applyId);
+    PrintApplyObj printApplyObj = printDetail(applyId);
         PackObj packObj = printApplyObj.getPackObj();
 
         Integer allQty = printApplyObj.getQty();
@@ -707,7 +706,6 @@ public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*�
             n++;
         }
         for (Integer i = 1; i <= n; i++) {
-            String serialCode = BarcodePrintApply.serialNumber(i);
             HashMap<String, String> lable = new HashMap<>();
             for (TemplateVarObj varObj : templateVarObjList) {
                 List<RuleObj> ruleObjList = varObj.getRuleObjList();
@@ -715,70 +713,38 @@ public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*�
                     Comparator<RuleObj>() {
                         @Override
                     public int compare(RuleObj o1, RuleObj o2) {
-
                         return o1.getPosition() > o2.getPosition() ? 1 : -1;
                     }
-                    });
-                String value = "";
-                for (RuleObj rule : ruleObjList) {
-                    String category = rule.getCategory();
-                    String str = "";
-                    BarcodeConstant barcodeConstant = BarcodeConstant.barcodevalueOf(category);
 
-                    switch (category) {
-                        //固定码
-                        case "10000310":
-                            str = rule.getDefaults();
-                            break;
-                        //流水码
-                        case "10000311":
-                            str = serialCode;
-                            break;
-                        //日期
-                        case "10000312":
-                            str = dateNow;
-                            break;
-                        case "10000313":
-                            str = printApplyObj.getMoNumber();
-                            break;
-                        case "10000314":
-                            str = printApplyObj.getPartNo();
-                            break;
-                        case "10000315":
-                            str = "" + printApplyObj.getPackObj().getNw().intValue();
-                            break;
-                        case "10000316":
-                            if (i == n) {
-                                str = "" + (allQty - (i - 1) * printApplyObj.getPackObj().getQty().intValue());
-                            } else {
-                                str = "" + printApplyObj.getPackObj().getQty().intValue();
-                            }
-                            break;
-                        case "10000336":
-                            str = "" + printApplyObj.getPackObj().getGw().intValue();
-                            break;
-                        case "10000337":
-                            str = "" + printApplyObj.getPackObj().getCuft().intValue();
-                            break;
-                        case "10000338":
-                            str = printApplyObj.getPartName();
-                            break;
-                        case "10000339":
-                            str = printApplyObj.getSpec();
-                            break;
-                        default:
-                            break;
+                });
+                String value = "";
+                for (int x =0;x<ruleObjList.size();x++) {
+                    RuleObj rule=ruleObjList.get(x);
+                    //生成条码长度
+                    Integer length = rule.getLength()==null? 0: rule.getLength();
+                    //默认值
+                    String defaults = rule.getDefaults();
+                    //进制
+                    Integer ary = rule.getAry();
+                    String serialCode ="";
+                    String s = String.valueOf(i);
+                    int length1 = s.length();
+                    if(length1>=length){
+                        serialCode=s;
+                    }else {
+                        //s 补0
+                      int numlength =  length-length1;
+                      String seria="";
+                      for(int l = 0; l<numlength; l++){
+                          seria+="0";
+                      }
+                        serialCode=seria+s;
                     }
-                    if (rule.getLength() != null && rule.getLength() != 0) {
-                        if (str.length() < rule.getLength()) {
-                            str = addZeroForNum(str, rule.getLength());
-                        }
-                        if (str.length() > rule.getLength()) {
-                            // Integer start = str.length() - rule.getLength();
-                            str = str.substring(0, rule.getLength());
-                        }
-                    }
-                    value += str;
+
+                    System.out.println("流水号》》》"+serialCode);
+                    //生成barcode规则
+                    value = getbarcodeLable(dateNow, printApplyObj, allQty, n, i, serialCode, value, rule);
+
                 }
                 lable.put(varObj.getName(), value);
             }
@@ -801,7 +767,6 @@ public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*�
             one.setContent(content);
             one.setFlag(0);
             String data=JSONObject.toJSONString(item);
-//            one.setDescription("..");
             one.setBarcode(data);
             String barcode = one.getBarcode();
             JSONObject parse = JSONObject.parseObject(barcode);
@@ -811,17 +776,79 @@ public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*�
             }
             rs.add(one);
         }
-     try {
-         Thread.sleep(3000);
-     }catch (Exception e){
-
-     }
-
-
-//        barcodePrintApply.setFlag(1);
-//        barcodePrintApplyRepository.save(barcodePrintApply);
-//        barcodePrintResourcesRepository.saveAll(rs);
+        barcodePrintApply.setFlag(1);
+        barcodePrintApplyRepository.save(barcodePrintApply);
+        barcodePrintResourcesRepository.saveAll(rs);
         return rs;
+    }
+
+
+    private String getbarcodeLable(String dateNow, PrintApplyObj printApplyObj, Integer allQty, int n, Integer i, String serialCode, String value, RuleObj rule) {
+        String category = rule.getCategory();
+        String str = "";
+       // BarcodeConstant barcodeConstant = BarcodeConstant.barcodevalueOf(category);
+        switch (category) {
+            //固定码
+            case "10000310":
+                str = rule.getDefaults();
+                break;
+            //流水码
+            case "10000311":
+                str = serialCode;
+                break;
+            //日期
+            case "10000312":
+                str = dateNow;
+                break;
+            case "10000313":
+                str = printApplyObj.getMoNumber();
+                break;
+            case "10000314":
+                str = printApplyObj.getPartNo();
+                break;
+            case "10000315":
+                str = "" + printApplyObj.getPackObj().getNw().intValue();
+                break;
+            case "10000316":
+                if (i == n) {
+                    str = "" + (allQty - (i - 1) * printApplyObj.getPackObj().getQty().intValue());
+                    System.out.println("ooo"+(allQty - (i - 1) * printApplyObj.getPackObj().getQty().intValue()));
+                } else {
+                    str = "" + printApplyObj.getPackObj().getQty().intValue();
+                }
+                break;
+            case "10000336":
+                str = "" + printApplyObj.getPackObj().getGw().intValue();
+                break;
+            case "10000337":
+                str = "" + printApplyObj.getPackObj().getCuft().intValue();
+                break;
+            case "10000338":
+                str = printApplyObj.getPartName();
+                break;
+            case "10000339":
+                str = printApplyObj.getSpec();
+                break;
+            default:
+                break;
+        }
+        if (rule.getLength() != null && rule.getLength() != 0) {
+            if (str.length() < rule.getLength()) {
+                str = addZeroForNum(str, rule.getLength());
+            }
+            if (str.length() > rule.getLength()) {
+                // Integer start = str.length() - rule.getLength();
+                str = str.substring(0, rule.getLength());
+            }
+        }
+        value += str;
+        return value;
+    }
+
+
+    private String getString() {
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+        return df.format(new Date());
     }
 
 
