@@ -47,7 +47,7 @@ public class DisplayColumnController {
     /**
      * 详情
      */
-    @RequestMapping("/info/{id}")
+    @GetMapping("/info/{id}")
     @ApiOperation(value="显示列详情")
     @UserOperationLog("显示列详情")
     public ResponseMessage<DisplayColumn> info(){
