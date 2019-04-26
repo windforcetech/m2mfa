@@ -136,12 +136,30 @@ public class BasePartsServiceImpl implements BasePartsService {
                 "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
                 "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
                 "WHERE 1 = 1";
+        sql = addSqlCondition(sql,query);
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
+        List<BaseParts> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select count(*) from ";
+        if(query.isIsom()){
+            countSql = countSql+"mes_part_route mpr ,  ";
+        }
+        countSql +="base_parts bp where 1=1 ";
+        countSql = addSqlCondition(countSql,query);
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
 
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    private String addSqlCondition(String sql, BasePartsQuery query) {
         if(StringUtils.isNotEmpty(query.getPartNo())){
             sql = sql+" and bp.part_no like '%"+query.getPartNo()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getName())){
             sql = sql+" and bp.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getVersion())){
+            sql = sql+" and bp.version like '%"+query.getVersion()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getSpec())){
             sql = sql+" and bp.spec like '%"+query.getSpec()+"%'";
@@ -149,12 +167,46 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(StringUtils.isNotEmpty(query.getSource())){
             sql = sql+" and bp.source = '"+query.getSource()+"'";
         }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            sql = sql+" and bp.category = '"+query.getCategory()+"'";
+        }
+        if(query.getIsCheck()!=null){
+            sql = sql+" and bp.is_check = "+query.getIsCheck()+"";
+        }
+        if(StringUtils.isNotEmpty(query.getStockUnit())){
+            sql = sql+" and bp.stock_unit = '"+query.getStockUnit()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getMainWarehouse())){
+            sql = sql+" and bp.main_warehouse like '%"+query.getMainWarehouse()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getMainStorage())){
+            sql = sql+" and bp.main_storage like '%"+query.getMainStorage()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getProductionUnit())){
+            sql = sql+" and bp.production_unit = '"+query.getProductionUnit()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getSentUnit())){
+            sql = sql+" and bp.sent_unit = '"+query.getSentUnit()+"'";
+        }
+        if(query.getIsConsume()!=null){
+            sql = sql+" and bp.is_consume = "+query.getIsConsume()+"";
+        }
+        if(StringUtils.isNotEmpty(query.getMainLineWarehouse())){
+            sql = sql+" and bp.main_line_warehouse = '"+query.getMainLineWarehouse()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getMainLineStorage())){
+            sql = sql+" and bp.main_line_storage = '"+query.getMainLineStorage()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql = sql+" and bp.description like '%"+query.getDescription()+"%'";
+        }
+
         if(query.getEnabled()!=null){
             sql = sql+" and bp.enabled = "+query.getEnabled()+"";
         }
         String groupId = TokenInfo.getUserGroupId();
         //if(StringUtils.isNotEmpty(groupId)){
-            sql = sql+" and bp.group_id = '"+groupId+"'";
+        sql = sql+" and bp.group_id = '"+groupId+"'";
         //}
 
         if(StringUtils.isNotEmpty(query.getCategory())){
@@ -187,54 +239,7 @@ public class BasePartsServiceImpl implements BasePartsService {
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         sql = sql + " order by bp."+order+" "+direct;
-        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
-        List<BaseParts> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from ";
-        if(query.isIsom()){
-            countSql = countSql+"mes_part_route mpr ,  ";
-        }
-        countSql +="base_parts bp where 1=1 ";
-
-        if(StringUtils.isNotEmpty(query.getPartNo())){
-            countSql = countSql+" and bp.part_no like '%"+query.getPartNo()+"%'";
-        }
-        if(StringUtils.isNotEmpty(query.getName())){
-            countSql = countSql+" and bp.name like '%"+query.getName()+"%'";
-        }
-        if(StringUtils.isNotEmpty(query.getSpec())){
-            countSql = countSql+" and bp.spec like '%"+query.getSpec()+"%'";
-        }
-        if(StringUtils.isNotEmpty(query.getSource())){
-            countSql = countSql+" and bp.source = '"+query.getSource()+"'";
-        }
-        if(query.getEnabled()!=null){
-            countSql = countSql+" and bp.enabled = "+query.getEnabled()+"";
-        }
-        if(StringUtils.isNotEmpty(query.getTypesof())){
-            countSql +=" and bp.part_id NOT in("+collect+")";
-        }
-        //if(StringUtils.isNotEmpty(groupId)){
-            countSql = countSql+" and bp.group_id = '"+groupId+"' ";
-        //}
-
-        if(StringUtils.isNotEmpty(query.getCategory())){
-            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
-            //不等于全部
-            if(!(baseItemsTarget!=null&&"全部".equals(baseItemsTarget.getItemName()))){
-                countSql = countSql+" and bp.category = '"+query.getCategory()+"'";
-            }
-
-        }
-        if(query.isIsom()){
-            countSql +="   and  mpr.part_id=bp.part_id";
-        }
-        if(query.isIsom()){
-            countSql+="   and  mpr.group_id='"+groupId+"' ";
-        }
-        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
-
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        return sql;
     }
 
     @Override
