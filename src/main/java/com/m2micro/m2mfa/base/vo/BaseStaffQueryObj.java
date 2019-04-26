@@ -32,5 +32,5 @@ public class BaseStaffQueryObj extends Query {
 
 
     @ApiModelProperty(value = "是否有效 ")
-    private boolean enabled;
+    private Boolean enabled;
 }

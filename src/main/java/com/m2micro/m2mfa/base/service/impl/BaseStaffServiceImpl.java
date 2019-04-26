@@ -1,10 +1,10 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.starter.entity.Organization;
 import com.m2micro.framework.starter.services.OrganizationService;
-import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.entity.BaseStaffshift;
 import com.m2micro.m2mfa.base.entity.QBaseStaff;
@@ -13,9 +13,7 @@ import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
 import com.m2micro.m2mfa.base.repository.BaseStaffshiftRepository;
 import com.m2micro.m2mfa.base.service.BaseStaffService;
 import com.m2micro.m2mfa.base.vo.BaseStaffDetailObj;
-import com.m2micro.m2mfa.base.vo.BaseStaffQueryObj;
 import com.m2micro.m2mfa.base.vo.MesMoscheduleQueryObj;
-import com.m2micro.m2mfa.mo.model.MesMoDescModel;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -30,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 员工（职员）表 服务实现类
@@ -57,61 +56,144 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         return baseStaffRepository;
     }
 
+//    @Override
+//    public PageUtil<BaseStaffDetailObj> list1(BaseStaffQuery query) {
+//        QBaseStaff qBaseStaff = QBaseStaff.baseStaff;
+//        JPAQuery<BaseStaff> jq = queryFactory.selectFrom(qBaseStaff);
+//        BooleanBuilder condition = new BooleanBuilder();
+//        condition.and(qBaseStaff.deletionStateCode.isFalse());
+//        if (StringUtils.isNotEmpty(query.getCode())) {
+//            condition.and(qBaseStaff.code.like("%" + query.getCode() + "%"));
+//        }
+//        if (StringUtils.isNotEmpty(query.getName())) {
+//            condition.and(qBaseStaff.staffName.like("%" + query.getName() + "%"));
+//        }
+//        if (query.getEnabled()==true) {
+//            condition.and(qBaseStaff.enabled.eq(true));
+//        }
+//        if (query.getDepartmentIds() != null && query.getDepartmentIds().size() > 0) {
+//            condition.and(qBaseStaff.departmentId.in(query.getDepartmentIds()));
+//        }
+//        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
+//        List<BaseStaff> list = jq.fetch();
+//        List<BaseStaffDetailObj> rs = new ArrayList<>();
+//        for (BaseStaff one : list) {
+//            BaseStaffDetailObj item = new BaseStaffDetailObj();
+//            Organization department = organizationService.findByUUID(one.getDepartmentId());
+//            //  Organization department = organizationService.findById(duty.getParentNode()).get();
+//            item.setId(one.getStaffId());
+//            item.setCode(one.getCode());
+//            if(department!=null){
+//                item.setDepartment(department.getDepartmentName());
+//            }
+//                    item.setDimission(one.getDimission());
+//            String sql = "select item_name from base_items_target where id='" + one.getDutyId() + "'";
+//
+//            item.setDuty(jdbcTemplate.queryForObject(sql, String.class));
+//            item.setEnabled(one.getEnabled());
+//            item.setGender(one.getGender());
+//            item.setMobile(one.getMobile());
+//            item.setName(one.getStaffName());
+//            item.setTelephone(one.getTelephone());
+//            rs.add(item);
+//        }
+//        long totalCount = jq.fetchCount();
+//        return PageUtil.of(rs, totalCount, query.getSize(), query.getPage());
+//    }
     @Override
     public PageUtil<BaseStaffDetailObj> list(BaseStaffQuery query) {
-        QBaseStaff qBaseStaff = QBaseStaff.baseStaff;
-        JPAQuery<BaseStaff> jq = queryFactory.selectFrom(qBaseStaff);
-        BooleanBuilder condition = new BooleanBuilder();
-        condition.and(qBaseStaff.deletionStateCode.isFalse());
-        if (StringUtils.isNotEmpty(query.getCode())) {
-            condition.and(qBaseStaff.code.like("%" + query.getCode() + "%"));
+        String groupId = TokenInfo.getUserGroupId();
+        String sql = "SELECT\n" +
+                " sf.staff_id AS id,\n" +
+                " sf.code AS code,\n" +
+                " sf.staff_name AS name,\n" +
+                " sf.gender AS gender,\n" +
+                " sf.is_dimission AS isDimission,\n" +
+                " sf.enabled AS enabled,\n" +
+                " sf.mobile AS mobile,\n" +
+                " sf.staff_name AS staffName,\n" +
+                " sf.telephone AS telephone,\n" +
+                " sf.id_card AS idCard,\n" +
+                " it.item_name AS duty,\n" +
+                " o.department_name AS department\n" +
+                "FROM\n" +
+                " base_staff sf\n" +
+                "LEFT JOIN base_items_target it ON it.id = sf.duty_id\n" +
+                "LEFT JOIN organization o ON (sf.department_id = o.uuid AND o.group_id = '"+groupId+"')"+
+                "WHERE 1 = 1";
+        sql = addSqlCondition(sql,query);
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseStaffDetailObj.class);
+        List<BaseStaffDetailObj> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select count(sf.staff_id) from base_staff sf where 1=1 ";
+        countSql = addSqlCondition(countSql,query);
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+        return  PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    private String addSqlCondition(String sql, BaseStaffQuery query) {
+        if(StringUtils.isNotEmpty(query.getCode())){
+            sql = sql+" and sf.code like '%"+query.getCode()+"%'";
         }
-        if (StringUtils.isNotEmpty(query.getName())) {
-            condition.and(qBaseStaff.staffName.like("%" + query.getName() + "%"));
+        if(StringUtils.isNotEmpty(query.getName())){
+            sql = sql+" and sf.staff_name like '%"+query.getName()+"%'";
         }
-        if (query.isEnabled()==true) {
-            condition.and(qBaseStaff.enabled.eq(true));
+        if(StringUtils.isNotEmpty(query.getDutyId())){
+            sql = sql+" and sf.duty_id = '"+query.getDutyId()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getIdCard())){
+            sql = sql+" and sf.id_card like '%"+query.getIdCard()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getEmail())){
+            sql = sql+" and sf.email like '%"+query.getEmail()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getMobile())){
+            sql = sql+" and sf.mobile like '%"+query.getMobile()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getTelephone())){
+            sql = sql+" and sf.telephone like '%"+query.getTelephone()+"%'";
+        }
+        if(query.getIsDimission()!=null){
+            sql = sql+" and sf.is_dimission = "+query.getIsDimission()+"";
+        }
+        if(query.getIcCard()!=null){
+            sql = sql+" and sf.ic_card = '"+query.getIcCard()+"'";
         }
         if (query.getDepartmentIds() != null && query.getDepartmentIds().size() > 0) {
-            condition.and(qBaseStaff.departmentId.in(query.getDepartmentIds()));
+            String collect = query.getDepartmentIds().stream().collect(Collectors.joining("','", "'", "'"));
+            sql = sql+" and sf.department_id IN ("+collect+")";
         }
-        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-        List<BaseStaff> list = jq.fetch();
-        List<BaseStaffDetailObj> rs = new ArrayList<>();
-        for (BaseStaff one : list) {
-            BaseStaffDetailObj item = new BaseStaffDetailObj();
-            Organization department = organizationService.findByUUID(one.getDepartmentId());
-            //  Organization department = organizationService.findById(duty.getParentNode()).get();
-            item.setId(one.getStaffId());
-            item.setCode(one.getCode());
-            if(department!=null){
-                item.setDepartment(department.getDepartmentName());
-            }
-            item.setDimission(one.getDimission());
-            String sql = "select item_name from base_items_target where id='" + one.getDutyId() + "'";
-
-            item.setDuty(jdbcTemplate.queryForObject(sql, String.class));
-            item.setEnabled(one.getEnabled());
-            item.setGender(one.getGender());
-            item.setMobile(one.getMobile());
-            item.setName(one.getStaffName());
-            item.setTelephone(one.getTelephone());
-            rs.add(item);
+        if(query.getEnabled()!=null){
+            sql = sql+" and sf.enabled = "+query.getEnabled()+"";
         }
-        long totalCount = jq.fetchCount();
-        return PageUtil.of(rs, totalCount, query.getSize(), query.getPage());
+        String groupId = TokenInfo.getUserGroupId();
+        sql = sql+" and sf.group_id = '"+groupId+"'";
+        //排序字段
+        String order = StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder();
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by sf."+order+" "+direct;
+        return sql;
     }
+
 
     @Override
     public List<BaseStaff> productionlist(MesMoscheduleQueryObj baseStaffQueryObj) {
+        String groupId = TokenInfo.getUserGroupId();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseStaff.class);
-        String sql ="SELECT bs.*  FROM base_staffshift bss LEFT JOIN base_staff bs ON bss.staff_id = bs.staff_id WHERE bss.shift_id = '"+baseStaffQueryObj.getShiftId()+" 'AND bss.shift_date = '"+baseStaffQueryObj.getShiftDate()+"'";
+        String sql = "SELECT " +
+                " bs.*  " +
+                " FROM base_staffshift bss " +
+                " LEFT JOIN base_staff bs ON (bss.staff_id = bs.staff_id AND bs.group_id = '" +groupId+"')"+
+                " WHERE bss.shift_id = '" + baseStaffQueryObj.getShiftId() + "'"+
+                " AND bss.shift_date = '" + baseStaffQueryObj.getShiftDate() + "'"+
+                " AND bss.group_id = '"+groupId+"'";
         return  jdbcTemplate.query(sql,rm);
     }
 
     @Override
     public List<BaseStaff> findByCodeAndStaffIdNot(String code, String staffId) {
-        return baseStaffRepository.findByCodeAndStaffIdNot(code, staffId);
+        return baseStaffRepository.findByCodeAndGroupIdAndStaffIdNot(code,TokenInfo.getUserGroupId(),staffId);
     }
 
     @Override
@@ -170,12 +252,12 @@ public class BaseStaffServiceImpl implements BaseStaffService {
     @Override
     public boolean existByIcCard(String icCard) {
 
-        return baseStaffRepository.countByIcCard(icCard)>0;
+        return baseStaffRepository.countByIcCardAndGroupId(icCard,TokenInfo.getUserGroupId())>0;
     }
 
     @Override
     public boolean existByIcCardAndIdNot(String icCard, String id) {
-        return baseStaffRepository.countByIcCardAndStaffIdNot(icCard,id)>0;
+        return baseStaffRepository.countByIcCardAndGroupIdAndStaffIdNot(icCard,TokenInfo.getUserGroupId(),id)>0;
     }
 
     @Transactional

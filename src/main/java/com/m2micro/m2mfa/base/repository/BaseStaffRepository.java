@@ -15,7 +15,7 @@ import java.util.List;
 @Repository
 public interface BaseStaffRepository extends BaseRepository<BaseStaff,String> {
 
-    List<BaseStaff> findByCodeAndStaffIdNot(String code,String staffId);
+    List<BaseStaff> findByCodeAndGroupIdAndStaffIdNot(String code,String groupId,String staffId);
    // List<BaseStaff> findByCodeOrStaffNameOrdOrDutyIdIn(String code,String staffName,List<String> dutyIds);
     @Query(value = "select * from base_staff where  `code` =?1", nativeQuery = true)
     BaseStaff finydbStaffNo(String code);
@@ -38,7 +38,7 @@ public interface BaseStaffRepository extends BaseRepository<BaseStaff,String> {
      */
     BaseStaff findByIcCard(String idCard);
 
-    int countByIcCard(String icCard);
+    int countByIcCardAndGroupId(String icCard,String groupId);
 
-    int countByIcCardAndStaffIdNot(String icCard,String staffId);
+    int countByIcCardAndGroupIdAndStaffIdNot(String icCard,String groupId,String staffId);
 }

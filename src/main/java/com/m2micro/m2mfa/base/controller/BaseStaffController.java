@@ -67,7 +67,9 @@ public class BaseStaffController {
         }
         query.setSize(baseStaffQueryObj.getSize());
         query.setPage(baseStaffQueryObj.getPage());
-        query.setEnabled(baseStaffQueryObj.isEnabled());
+        query.setEnabled(baseStaffQueryObj.getEnabled());
+        query.setOrder(baseStaffQueryObj.getOrder());
+        query.setDirect(baseStaffQueryObj.getDirect());
         PageUtil<BaseStaffDetailObj> page = baseStaffService.list(query);
 
         return ResponseMessage.ok(page);
@@ -91,6 +93,7 @@ public class BaseStaffController {
     @ApiOperation(value = "添加员工（职员）表")
     @UserOperationLog("添加员工（职员）表")
     public ResponseMessage<BaseStaff> save(@RequestBody BaseStaff baseStaff) {
+        baseStaff.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseStaff, AddGroup.class);
         baseStaff.setStaffId(UUIDUtil.getUUID());
         baseStaff.setDeletionStateCode(false);
@@ -149,6 +152,7 @@ public class BaseStaffController {
     @ApiOperation(value = "更新员工（职员）表")
     @UserOperationLog("更新员工（职员）表")
     public ResponseMessage<BaseStaff> update(@RequestBody BaseStaff baseStaff) {
+        baseStaff.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseStaff, UpdateGroup.class);
         BaseStaff baseStaffOld = baseStaffService.findById(baseStaff.getStaffId()).orElse(null);
         if (baseStaffOld == null) {
