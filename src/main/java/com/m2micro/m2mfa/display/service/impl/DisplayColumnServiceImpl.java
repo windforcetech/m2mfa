@@ -72,12 +72,15 @@ public class DisplayColumnServiceImpl implements DisplayColumnService {
 
     @Override
     public DisplayColumn updateEntity(DisplayColumn displayColumn) {
-        ValidatorUtil.validateEntity(displayColumn, UpdateGroup.class);
+        if(StringUtils.isEmpty(displayColumn.getColumnId())){
+            throw new MMException("主键不能为空！");
+        }
         DisplayColumn displayColumnOld = findById(displayColumn.getColumnId()).orElse(null);
         if(displayColumnOld==null){
             throw new MMException("数据库不存在该记录");
         }
         PropertyUtil.copy(displayColumn,displayColumnOld);
+        ValidatorUtil.validateEntity(displayColumnOld, UpdateGroup.class);
         return save(displayColumnOld);
     }
 
