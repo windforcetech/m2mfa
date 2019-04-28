@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
 import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -234,8 +235,8 @@ public class BasePartsServiceImpl implements BasePartsService {
         if(query.isIsom()){
             sql+="   and  mpr.group_id='"+groupId+"' ";
         }
-        //排序字段
-        String order = StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder();
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         sql = sql + " order by bp."+order+" "+direct;
