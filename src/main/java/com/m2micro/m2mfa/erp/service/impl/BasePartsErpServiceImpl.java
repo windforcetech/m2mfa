@@ -58,20 +58,34 @@ public class BasePartsErpServiceImpl implements BasePartsErpService {
       baseParts.setSource(getSource(imaFile.getIma08()));
       baseParts.setCategory(getCategory(imaFile.getIma06()));
       baseParts.setSingle(imaFile.getIma18());
-      baseParts.setIsCheck(imaFile.getIma24());
-      baseParts.setStockUnit(baseUnitRepository.findById(imaFile.getIma25()).orElse(null).getUnit());
+      baseParts.setIsCheck(imaFile.getIma24()=="1"?true:false);
+      try {
+        baseParts.setStockUnit(baseUnitRepository.findById(imaFile.getIma25()).orElse(null).getUnit());
+      }catch (Exception e){
+
+      }
+      try {
+      baseParts.setProductionUnit(baseUnitRepository.findById(imaFile.getIma55()).orElse(null).getUnit());
+      }catch (Exception e){
+
+      }
+      try {
+        baseParts.setSentUnit(baseUnitRepository.findById(imaFile.getIma63()).orElse(null).getUnit());
+      }catch (Exception e){
+
+      }
+
       baseParts.setSafetyStock(imaFile.getIma27());
       baseParts.setMaxStock(imaFile.getIma271());
       baseParts.setMainWarehouse(imaFile.getIma35());
       baseParts.setMainStorage(imaFile.getIma36());
-      baseParts.setProductionUnit(baseUnitRepository.findById(imaFile.getIma55()).orElse(null).getUnit());
       baseParts.setProductionConversionRate(imaFile.getIma55Fac());
       baseParts.setMinProductionQty(imaFile.getIma561());
       baseParts.setProductionLossRate(imaFile.getIma562());
-      baseParts.setSentUnit(baseUnitRepository.findById(imaFile.getIma63()).orElse(null).getUnit());
+
       baseParts.setSentConversionRate(imaFile.getIma63Fac());
       baseParts.setMinSentQty(imaFile.getIma641());
-      baseParts.setIsConsume(imaFile.getIma70());
+      baseParts.setIsConsume(imaFile.getIma70()=="1"?true:false);
       baseParts.setValidityDays(imaFile.getIma71());
       baseParts.setEnabled(true);
       //校验编号唯一性

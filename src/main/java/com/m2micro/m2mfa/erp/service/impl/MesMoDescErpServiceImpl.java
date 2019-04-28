@@ -57,7 +57,7 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     if(StringUtils.isNotEmpty(moNumber)){
       String[] split = moNumber.split(",");
       String join = Arrays.stream(split).collect(Collectors.joining("','","'","'"));
-          sql +="  and sfb01 in("+moNumber+") ";
+          sql +="  and sfb01 in("+join+") ";
     }
     RowMapper rm = BeanPropertyRowMapper.newInstance(SfbFile.class);
     List<SfbFile> list = primaryJdbcTemplate.query(sql, rm);
@@ -101,10 +101,26 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     moDesc.setMoId(moid);
     moDesc.setMoNumber(sfbFile.getSfb01());
     moDesc.setCategory(sfbFile.getSfb02());
-    BaseParts baseParts = basePartsRepository.findByPartNo(sfbFile.getSfb05()).get(0);
-    moDesc.setPartId(baseParts.getPartId());
-    moDesc.setPartNo(baseParts.getPartNo());
-    moDesc.setPartName(baseParts.getName());
+    try {
+      BaseParts baseParts = basePartsRepository.findByPartNo(sfbFile.getSfb05()).get(0);
+      moDesc.setPartId(baseParts.getPartId());
+      moDesc.setPartNo(baseParts.getPartNo());
+      moDesc.setPartName(baseParts.getName());
+      try {
+        MesPartRoute mesPartRoute = mesPartRouteRepository.findByPartId(baseParts.getPartId()).get(0);
+        moDesc.setRouteId(mesPartRoute.getRouteId());
+        moDesc.setOutputProcessId(mesPartRoute.getOutputProcessId());
+        moDesc.setInputProcessId(mesPartRoute.getInputProcessId());
+      }catch (Exception e){
+        oerrArrys.add(baseParts.getName());
+        System.out.println("该料件为绑定途程");
+        return  null;
+
+      }
+    }catch (Exception e){
+      return  null;
+    }
+
     moDesc.setTargetQty(sfbFile.getSfb08());
     moDesc.setRevsion(sfbFile.getSfb07());
     moDesc.setDistinguish(sfbFile.getSfb95());
@@ -112,18 +128,6 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     moDesc.setBomRevsion(0);
     moDesc.setPlanInputDate(sfbFile.getSfb13());
     moDesc.setPlanCloseDate(sfbFile.getSfb15());
-    try {
-      MesPartRoute mesPartRoute = mesPartRouteRepository.findByPartId(baseParts.getPartId()).get(0);
-      moDesc.setRouteId(mesPartRoute.getRouteId());
-      moDesc.setOutputProcessId(mesPartRoute.getOutputProcessId());
-      moDesc.setInputProcessId(mesPartRoute.getInputProcessId());
-    }catch (Exception e){
-      oerrArrys.add(baseParts.getName());
-      System.out.println("该料件为绑定途程");
-      return  null;
-
-    }
-
     moDesc.setReachDate(sfbFile.getSfb20());
     moDesc.setMachineQty(1);
     moDesc.setOrderId(sfbFile.getSfb22());

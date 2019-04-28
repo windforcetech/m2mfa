@@ -9,6 +9,7 @@ import com.m2micro.m2mfa.barcode.entity.BarcodePrintResources;
 import com.m2micro.m2mfa.barcode.query.BarcodeQuery;
 import com.m2micro.m2mfa.barcode.query.PrintApplyQuery;
 import com.m2micro.m2mfa.barcode.query.ScheduleQuery;
+import com.m2micro.m2mfa.barcode.repository.BarcodePrintResourcesRepository;
 import com.m2micro.m2mfa.barcode.service.BarcodePrintApplyService;
 import com.m2micro.m2mfa.barcode.vo.CheckObj;
 import com.m2micro.m2mfa.barcode.vo.PrintApplyObj;
@@ -36,6 +37,7 @@ import java.util.List;
 public class BarcodePrintApplyController {
     @Autowired
     BarcodePrintApplyService barcodePrintApplyService;
+    BarcodePrintResourcesRepository barcodePrintResourcesRepository;
 
 
     @GetMapping("/Schedulelist")
@@ -83,6 +85,7 @@ public class BarcodePrintApplyController {
     @UserOperationLog("批量删除打印申请")
     public ResponseMessage deleteList(@RequestBody String[] ids) {
         barcodePrintApplyService.deleteByIds(ids);
+        barcodePrintResourcesRepository.deleteAllByApplyId(ids);
         return ResponseMessage.ok();
     }
 
@@ -129,9 +132,9 @@ public class BarcodePrintApplyController {
     @PostMapping("/printApplyGenerate")
     @ApiOperation(value = "打印条码生成")
     @UserOperationLog("打印条码生成")
-    public ResponseMessage<List<BarcodePrintResources>> printApplyGenerate(String applyId, Integer num) {
-        List<BarcodePrintResources> labels = barcodePrintApplyService.generateLabel(applyId, num);
-        return ResponseMessage.ok(labels);
+    public ResponseMessage printApplyGenerate(String applyId, Integer num) {
+      barcodePrintApplyService.generateLabel(applyId, num);
+        return ResponseMessage.ok();
     }
 
 

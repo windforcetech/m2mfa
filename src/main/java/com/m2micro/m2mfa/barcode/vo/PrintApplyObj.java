@@ -44,7 +44,7 @@ public class PrintApplyObj {
     @ApiModelProperty("申请时间")
     private Date checkOn;
     @ApiModelProperty("状态")
-    private String flg;
+    private String flag;
     @ApiModelProperty("描述")
     private String description;
 
@@ -249,12 +249,20 @@ public class PrintApplyObj {
         this.checkOn = checkOn;
     }
 
+    public String getFlag() {
+        return flag;
+    }
+
+    public void setFlag(String flag) {
+        this.flag = flag;
+    }
+
     public String getFlg() {
-        return flg;
+        return flag;
     }
 
     public void setFlg(String flg) {
-        this.flg = flg;
+        this.flag = flg;
     }
 
     public String getDescription() {

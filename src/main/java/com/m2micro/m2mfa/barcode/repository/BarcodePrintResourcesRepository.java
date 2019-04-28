@@ -21,4 +21,6 @@ public interface BarcodePrintResourcesRepository extends BaseRepository<BarcodeP
     BarcodePrintResources findByBarcode(String barcode);
 
     List<BarcodePrintResources>findByApplyId(String applyid);
+
+    void deleteAllByApplyId(String [] ids);
 }
