@@ -26,7 +26,7 @@ public interface BarcodePrintApplyService extends BaseService<BarcodePrintApply,
      * @return  分页信息
      */
 //    PageUtil<BarcodePrintApply> list(PrintApplyQuery query);
-    boolean exist(String sourceCategory, String sourceNo, String partId);
+    boolean exist(String sourceCategory,String sourceNo,String partId);
 
     PageUtil<ScheduleObj> list(ScheduleQuery query);
 
@@ -48,7 +48,7 @@ public interface BarcodePrintApplyService extends BaseService<BarcodePrintApply,
 
     void generateLabel(String applyId, Integer num/*份数*/) ;
 
-    void printCheckList(String[] ids, Integer flag);
+    void printCheckList(String[] ids,Integer flag);
 
     PrintApplyObj getPrintApplyObj(String applyId);
 }

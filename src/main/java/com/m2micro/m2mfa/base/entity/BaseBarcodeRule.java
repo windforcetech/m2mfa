@@ -1,11 +1,15 @@
 package com.m2micro.m2mfa.base.entity;
 
 
+import javax.jdo.annotations.Transactional;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -37,9 +41,18 @@ public class BaseBarcodeRule extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     private String description;
 
+    @Transient
+    @ApiModelProperty(value = "规则变量")
+    private List<BaseBarcodeRuleDef>  baseBarcodeRuleDefs;
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
     public String getId() {
         return id;
     }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -47,6 +60,7 @@ public class BaseBarcodeRule extends BaseEntity implements Serializable {
     public String getRuleCode() {
         return ruleCode;
     }
+
     public void setRuleCode(String ruleCode) {
         this.ruleCode = ruleCode;
     }
@@ -54,6 +68,7 @@ public class BaseBarcodeRule extends BaseEntity implements Serializable {
     public String getRuleName() {
         return ruleName;
     }
+
     public void setRuleName(String ruleName) {
         this.ruleName = ruleName;
     }
@@ -61,6 +76,7 @@ public class BaseBarcodeRule extends BaseEntity implements Serializable {
     public Integer getSortCode() {
         return sortCode;
     }
+
     public void setSortCode(Integer sortCode) {
         this.sortCode = sortCode;
     }
@@ -68,6 +84,7 @@ public class BaseBarcodeRule extends BaseEntity implements Serializable {
     public Boolean getEnabled() {
         return enabled;
     }
+
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
@@ -75,10 +92,16 @@ public class BaseBarcodeRule extends BaseEntity implements Serializable {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
 
+    public List<BaseBarcodeRuleDef> getBaseBarcodeRuleDefs() {
+        return baseBarcodeRuleDefs;
+    }
 
-
+    public void setBaseBarcodeRuleDefs(List<BaseBarcodeRuleDef> baseBarcodeRuleDefs) {
+        this.baseBarcodeRuleDefs = baseBarcodeRuleDefs;
+    }
 }

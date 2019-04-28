@@ -44,8 +44,7 @@ public class BasePartTemplateController {
     @ApiOperation(value = "删除料件模板关联表")
     @UserOperationLog("删除料件模板关联表")
     public ResponseMessage delete(@RequestBody String[] ids) {
-        basePartTemplateService.deleteByIds(ids);
-        return ResponseMessage.ok();
+        return basePartTemplateService.delete(ids);
     }
 
     /**

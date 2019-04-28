@@ -5,9 +5,7 @@ import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseTemplateQuery;
-import com.m2micro.m2mfa.base.repository.BasePartTemplateRepository;
-import com.m2micro.m2mfa.base.repository.BaseTemplateRepository;
-import com.m2micro.m2mfa.base.repository.BaseTemplateVarRepository;
+import com.m2micro.m2mfa.base.repository.*;
 import com.m2micro.m2mfa.base.service.BaseTemplateService;
 import com.m2micro.m2mfa.base.vo.BaseTemplateObj;
 import com.m2micro.m2mfa.base.vo.BaseTemplateVarObj;
@@ -30,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 标签模板 服务实现类
@@ -48,7 +47,10 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
     @Autowired
     @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
-
+    @Autowired
+    BaseBarcodeRuleRepository baseBarcodeRuleRepository;
+    @Autowired
+    BaseBarcodeRuleDefRepository baseBarcodeRuleDefRepository;
     @Autowired
     BaseTemplateVarRepository baseTemplateVarRepository;
 
@@ -150,19 +152,17 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
     }
 
     @Override
-    public BaseTemplateObj getByTemplateId(String templateId) {
-        BaseTemplateObj baseTemplateObj = new BaseTemplateObj();
-        BaseTemplate template = baseTemplateRepository.findById(templateId).orElse(null);
-        BeanUtils.copyProperties(template, baseTemplateObj);
-        List<BaseTemplateVar> valList = baseTemplateVarRepository.findByTemplateId(templateId);
-        List<BaseTemplateVarObj> varObjs = new ArrayList<>();
-        for (BaseTemplateVar one : valList) {
-            BaseTemplateVarObj two = new BaseTemplateVarObj();
-            BeanUtils.copyProperties(one, two);
-            varObjs.add(two);
-        }
-        baseTemplateObj.setTemplateVarObjList(varObjs);
-        return baseTemplateObj;
+    public BaseTemplate  getByTemplateId(String templateId) {
+        BaseTemplate baseTemplate = findById(templateId).orElse(null);
+        List<BaseTemplateVar> byTemplateId = baseTemplateVarRepository.findByTemplateId(baseTemplate.getId());
+        List<BaseTemplateVar> collect = byTemplateId.stream().filter(x -> {
+            BaseBarcodeRule baseBarcodeRule = baseBarcodeRuleRepository.findById(x.getRuleId()).orElse(null);
+            baseBarcodeRule.setBaseBarcodeRuleDefs(baseBarcodeRuleDefRepository.findByBarcodeId(baseBarcodeRule.getId()));
+            x.setBaseBarcodeRule(baseBarcodeRule);
+            return true;
+        }).collect(Collectors.toList());
+        baseTemplate.setBaseTemplateVars(collect);
+        return baseTemplate;
     }
 
     @Transactional
@@ -216,28 +216,19 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
     }
 
     @Override
-    public List<BaseTemplateObj> getByCategoryIdAndNotUsedByPart(String partId, String tagId) {
+    public List<BaseTemplate> getByCategoryIdAndNotUsedByPart(String partId, String tagId) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseTemplate.class);
         String sql = "select b.* from base_template b where \n" +
-                "b.id not in(select a.template_id from base_part_template a where part_id='" + partId + "')\n" +
-                "and b.category='" + tagId + "' order by b.name ;";
+            "b.id not in(select a.template_id from base_part_template a where part_id='" + partId + "')\n" +
+            "and b.category='" + tagId + "' order by b.name ;";
         List<BaseTemplate> templateList = jdbcTemplate.query(sql, rm);
-        List<BaseTemplateObj> rs = new ArrayList<>();
-        BaseTemplateObj baseTemplateObj = null;
-        for (BaseTemplate one : templateList) {
-            baseTemplateObj = new BaseTemplateObj();
-            BeanUtils.copyProperties(one, baseTemplateObj);
-            List<BaseTemplateVar> valList = baseTemplateVarRepository.findByTemplateId(one.getId());
-            List<BaseTemplateVarObj> varObjs = new ArrayList<>();
-            for (BaseTemplateVar item : valList) {
-                BaseTemplateVarObj two = new BaseTemplateVarObj();
-                BeanUtils.copyProperties(item, two);
-                varObjs.add(two);
-            }
-            baseTemplateObj.setTemplateVarObjList(varObjs);
-            rs.add(baseTemplateObj);
+        List<BaseTemplate> baseTemplates= new ArrayList<>();
+        for(BaseTemplate baseTemplate :templateList){
+            BaseTemplate baseTemplate1 = getByTemplateId(baseTemplate.getId());
+            baseTemplates.add(baseTemplate1);
         }
-        return rs;
+
+        return baseTemplates;
     }
 
     @Override

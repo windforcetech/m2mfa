@@ -54,40 +54,13 @@ public class BaseTemplateController {
     @GetMapping("/info/{id}")
     @ApiOperation(value = "标签模板详情")
     @UserOperationLog("标签模板详情")
-    public ResponseMessage<BaseTemplateObj> info(@PathVariable("id") String id) {
-        //   BaseTemplateObj baseTemplate = baseTemplateService.findById(id).orElse(null);
-        //   return ResponseMessage.ok(baseTemplate);
-        BaseTemplateObj byTemplateId = baseTemplateService.getByTemplateId(id);
-        return ResponseMessage.ok(byTemplateId);
+    public ResponseMessage<BaseTemplate > info(@PathVariable("id") String id) {
+
+
+        return ResponseMessage.ok(baseTemplateService.getByTemplateId(id));
     }
 
-//    /**
-//     * 保存
-//     */
-//    @RequestMapping("/save")
-//    @ApiOperation(value = "保存标签模板")
-//    @UserOperationLog("保存标签模板")
-//    public ResponseMessage<BaseTemplate> save(@RequestBody BaseTemplate baseTemplate) {
-//        ValidatorUtil.validateEntity(baseTemplate, AddGroup.class);
-//        baseTemplate.setId(UUIDUtil.getUUID());
-//        return ResponseMessage.ok(baseTemplateService.save(baseTemplate));
-//    }
 
-//    /**
-//     * 更新
-//     */
-//    @RequestMapping("/update")
-//    @ApiOperation(value = "更新标签模板")
-//    @UserOperationLog("更新标签模板")
-//    public ResponseMessage<BaseTemplate> update(@RequestBody BaseTemplate baseTemplate) {
-//        ValidatorUtil.validateEntity(baseTemplate, UpdateGroup.class);
-//        BaseTemplate baseTemplateOld = baseTemplateService.findById(baseTemplate.getId()).orElse(null);
-//        if (baseTemplateOld == null) {
-//            throw new MMException("数据库不存在该记录");
-//        }
-//        PropertyUtil.copy(baseTemplate, baseTemplateOld);
-//        return ResponseMessage.ok(baseTemplateService.save(baseTemplateOld));
-//    }
 
     /**
      * 删除
@@ -133,8 +106,8 @@ public class BaseTemplateController {
     @GetMapping("/listByPartAndCategory")
     @ApiOperation(value = "通过料号，标签类型获取模板列表列表")
     @UserOperationLog("通过料号，标签类型获取模板列表列表")
-    public ResponseMessage<List<BaseTemplateObj>> listByPartAndCategory(String partId, String categoryId) {
-        List<BaseTemplateObj> byCategoryIdAndNotUsedByPart = baseTemplateService.getByCategoryIdAndNotUsedByPart(partId, categoryId);
+    public ResponseMessage<List<BaseTemplate>> listByPartAndCategory(String partId, String categoryId) {
+        List<BaseTemplate> byCategoryIdAndNotUsedByPart = baseTemplateService.getByCategoryIdAndNotUsedByPart(partId, categoryId);
         return ResponseMessage.ok(byCategoryIdAndNotUsedByPart);
     }
 

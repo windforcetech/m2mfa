@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseBarcodeRule;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -25,8 +26,11 @@ public interface BaseBarcodeRuleService extends BaseService<BaseBarcodeRule,Stri
     PageUtil<BaseBarcodeRule> list(BaseBarcodeRuleQuery query);
 
     BaseBarcodeRuleObj AddOrUpdate(BaseBarcodeRuleObj baseBarcodeRuleObj);
-    void deleteByIdIn(List<String> ids);
+
+    ResponseMessage deleteByIdIn(List<String> ids);
+
     BaseBarcodeRuleObj findByRuleId(String ruleId);
+
     void deleteVal(List<String> varIds);
 
 }

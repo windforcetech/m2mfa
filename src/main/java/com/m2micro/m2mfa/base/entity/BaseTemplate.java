@@ -3,10 +3,13 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -50,7 +53,9 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
-
+    @Transient
+    @ApiModelProperty(value = "模板变量")
+    private List<BaseTemplateVar> baseTemplateVars;
     public String getId() {
         return id;
     }
@@ -121,6 +126,11 @@ public class BaseTemplate extends BaseEntity implements Serializable {
         this.description = description;
     }
 
+    public List<BaseTemplateVar> getBaseTemplateVars() {
+        return baseTemplateVars;
+    }
 
-
+    public void setBaseTemplateVars(List<BaseTemplateVar> baseTemplateVars) {
+        this.baseTemplateVars = baseTemplateVars;
+    }
 }

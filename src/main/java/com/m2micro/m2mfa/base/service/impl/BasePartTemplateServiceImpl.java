@@ -1,9 +1,15 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
+import com.m2micro.m2mfa.barcode.repository.BarcodePrintApplyRepository;
+import com.m2micro.m2mfa.base.entity.BasePartTemplate;
+import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.query.BasePartTemplateQuery;
 import com.m2micro.m2mfa.base.repository.BasePartTemplateRepository;
 import com.m2micro.m2mfa.base.service.BasePartTemplateService;
+import com.m2micro.m2mfa.base.service.BaseTemplateService;
 import com.m2micro.m2mfa.base.vo.BasePartTemplateObj;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +19,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,6 +34,10 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
     BasePartTemplateRepository basePartTemplateRepository;
     @Autowired
     JPAQueryFactory queryFactory;
+    @Autowired
+    BarcodePrintApplyRepository barcodePrintApplyRepository;
+    @Autowired
+    BaseTemplateService baseTemplateService;
 
     @Autowired
     @Qualifier("secondaryJdbcTemplate")
@@ -79,6 +90,31 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
 //        List<BasePartTemplate> list = jq.fetch();
 //        long totalCount = jq.fetchCount();
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+    }
+
+    @Override
+    public ResponseMessage delete(String[] ids) {
+
+      List<String>deleids = new ArrayList<>();
+      List<String>deletemsg = new ArrayList<>();
+      for(String id :ids){
+          BasePartTemplate basePartTemplate = findById(id).orElse(null);
+          List<BarcodePrintApply> byTemplateId = barcodePrintApplyRepository.findByTemplateId(basePartTemplate.getTemplateId());
+          if(!byTemplateId.isEmpty()){
+              deletemsg.add(baseTemplateService.findById(basePartTemplate.getTemplateId()).orElse(null).getName());
+              continue;
+          }
+          deleids.add(id);
+      }
+      deleteByIds(deleids.stream().toArray(String [] ::new));
+        ResponseMessage re =   ResponseMessage.ok("操作成功");
+        if(deletemsg.size()>0){
+            String[] strings = deletemsg.stream().toArray(String[]::new);
+            re.setMessage("模板编号【"+String.join(",", strings)+"】已产生业务,不允许删除！");
+            return re;
+        }else{
+            return re;
+        }
     }
 
 }
