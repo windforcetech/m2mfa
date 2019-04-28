@@ -151,6 +151,134 @@ public class BasePartsServiceImpl implements BasePartsService {
 
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }
+    @Override
+    public PageUtil<BaseParts> barcodePartslist(BasePartsQuery query) {
+        String sql = "SELECT\n" +
+            "	bp.part_id partId,\n" +
+            "	bp.part_no partNo,\n" +
+            "	bp.name name,\n" +
+            "	bp.spec spec,\n" +
+            "	bp.version version,\n" +
+            "	bp.grade grade,\n" +
+            "	bp.source source,\n" +
+            "	bp.category category,\n" +
+            "	bp.single single,\n" +
+            "	bp.is_check isCheck,\n" +
+            "	bp.stock_unit stockUnit,\n" +
+            "	bp.safety_stock safetyStock,\n" +
+            "	bp.max_stock maxStock,\n" +
+            "	bp.main_warehouse mainWarehouse,\n" +
+            "	bp.main_storage mainStorage,\n" +
+            "	bp.production_unit productionUnit,\n" +
+            "	bp.production_conversion_rate productionConversionRate,\n" +
+            "	bp.min_production_qty minProductionQty,\n" +
+            "	bp.production_loss_rate productionLossRate,\n" +
+            "	bp.sent_unit sentUnit,\n" +
+            "	bp.sent_conversion_rate sentConversionRate,\n" +
+            "	bp.min_sent_qty minSentQty,\n" +
+            "	bp.is_consume isConsume,\n" +
+            "	bp.validity_days validityDays,\n" +
+            "	bp.main_line_warehouse mainLineWarehouse,\n" +
+            "	bp.main_line_storage mainLineStorage,\n" +
+            "	bp.positive_image_url positiveImageUrl,\n" +
+            "	bp.negative_image negativeImage,\n" +
+            "	bp.enabled enabled,\n" +
+            "	bp.description description,\n" +
+            "	bp.create_on createOn,\n" +
+            "	bp.create_by createBy,\n" +
+            "	bp.modified_on modifiedOn,\n" +
+            "	bp.modified_by modifiedBy,\n" +
+            "	bi.item_name categoryName,\n" +
+            "	bi2.item_name sourceName\n" +
+            "FROM\n" ;
+        if(query.isIsom()){
+            sql = sql+"mes_part_route mpr ,  ";
+        }
+        sql+=   "	base_parts bp\n" +
+            "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
+            "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
+            "WHERE 1 = 1";
+
+        if(StringUtils.isNotEmpty(query.getPartNo())){
+            sql = sql+" and bp.part_no like '%"+query.getPartNo()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            sql = sql+" and bp.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSpec())){
+            sql = sql+" and bp.spec like '%"+query.getSpec()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSource())){
+            sql = sql+" and bp.source = '"+query.getSource()+"'";
+        }
+
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
+            //不等于全部
+            if(!(baseItemsTarget!=null&&"全部".equals(baseItemsTarget.getItemName()))){
+                sql = sql+" and bp.category = '"+query.getCategory()+"'";
+            }
+
+        }
+        List<String> ids = new ArrayList<>();
+        String collect="";
+        if(StringUtils.isNotEmpty(query.getTypesof())){
+            List<BasePartInstruction> all = basePartInstructionRepository.findAll();
+            collect = all.stream().filter(v->{
+                boolean flag = !ids.contains(v.getPartId());
+                ids.add(v.getPartId());
+                return flag;
+            }).map(e -> e.getPartId()).collect(Collectors.joining(",","'","'"));
+            sql+=" and bp.part_id NOT in("+collect+")";
+        }
+        if(query.isIsom()){
+            sql+="   and  mpr.part_id=bp.part_id";
+        }
+        if(query.getIsTemplate()!=null && query.getIsTemplate() ){
+            sql = sql+"  and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
+        }
+        sql = sql + " order by bp.modified_on desc";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
+        List<BaseParts> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select count(*) from ";
+        if(query.isIsom()){
+            countSql = countSql+"mes_part_route mpr ,  ";
+        }
+        countSql +="base_parts bp where 1=1 ";
+
+        if(StringUtils.isNotEmpty(query.getPartNo())){
+            countSql = countSql+" and bp.part_no like '%"+query.getPartNo()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            countSql = countSql+" and bp.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSpec())){
+            countSql = countSql+" and bp.spec like '%"+query.getSpec()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSource())){
+            countSql = countSql+" and bp.source = '"+query.getSource()+"'";
+        }
+
+        if(StringUtils.isNotEmpty(query.getTypesof())){
+            countSql +=" and bp.part_id NOT in("+collect+")";
+        }
+
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
+            //不等于全部
+            if(!(baseItemsTarget!=null&&"全部".equals(baseItemsTarget.getItemName()))){
+                countSql = countSql+" and bp.category = '"+query.getCategory()+"'";
+            }
+
+        }
+        if(query.getIsTemplate()!=null &&  query.getIsTemplate()){
+            countSql += " and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
+        }
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
 
     private String addSqlCondition(String sql, BasePartsQuery query) {
         if(StringUtils.isNotEmpty(query.getPartNo())){

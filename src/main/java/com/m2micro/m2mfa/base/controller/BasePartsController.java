@@ -59,6 +59,19 @@ public class BasePartsController {
         return ResponseMessage.ok(page);
     }
 
+
+    /**
+     * 列表
+     */
+    @RequestMapping("/barcodePartslist")
+    @ApiOperation(value="料件基本资料列表（过滤编码打印）")
+    @UserOperationLog("料件基本资料列表（过滤编码打印）")
+    public ResponseMessage<PageUtil<BaseParts>> barcodePartslist(BasePartsQuery query){
+            PageUtil<BaseParts> page = basePartsService.barcodePartslist(query);
+        return ResponseMessage.ok(page);
+    }
+
+
     /**
      * 列表
      */
