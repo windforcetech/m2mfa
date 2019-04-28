@@ -802,7 +802,7 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
             String data=JSONObject.toJSONString(item);
             one.setBarcode(item.get("barcode"));
             String barcode = one.getBarcode();
-            JSONObject parse = JSONObject.parseObject(barcode);
+            JSONObject parse = JSONObject.parseObject(data);
             Object barCode =  parse.get("BarCode");
             if(barCode !=null){
                 one.setBarcode((String) barCode);
