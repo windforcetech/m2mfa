@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
 import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -130,7 +131,24 @@ public class BaseMachineServiceImpl implements BaseMachineService {
                     "	AND o.typesof = '部门' and o.group_id = '" +groupId+"' "+
                     ")\n"+
                     "WHERE 1 = 1 ";
+        sql = addSqlCondition(sql,query,groupId);
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
+        List<BaseMachine> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select " +
+                          " count(bm.machine_id) " +
+                          " from base_machine bm " +
+                          " LEFT JOIN organization o ON (\n" +
+                          "	bm.department_id = o.uuid\n" +
+                          "	AND o.typesof = '部门' and o.group_id = '" +groupId+"' "+
+                          " )\n"+
+                          " where 1=1 \n";
+        countSql = addSqlCondition(countSql,query,groupId);
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
 
+    private String addSqlCondition(String sql, BaseMachineQuery query, String groupId) {
         if(StringUtils.isNotEmpty(query.getCode())){
             sql = sql + " and bm.code like '%"+query.getCode()+"%'";
         }
@@ -143,49 +161,37 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         if(StringUtils.isNotEmpty(query.getDepartmentId())){
             sql = sql + " and bm.department_id = '"+query.getDepartmentId()+"'";
         }
-        if(StringUtils.isNotEmpty(query.getPlacement())){
-            sql = sql + " and bm.placement= '"+query.getPlacement()+"'";
+        if(StringUtils.isNotEmpty(query.getAssdtId())){
+            sql = sql + " and bm.assdt_id like '%"+query.getAssdtId()+"%'";
         }
-        //if(StringUtils.isNotEmpty(groupId)){
-            sql = sql+" and bm.group_id = '"+groupId+"' ";
-        //}
+        if(StringUtils.isNotEmpty(query.getCategoryId())){
+            sql = sql + " and bm.category_id = '"+query.getCategoryId()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getUnit())){
+            sql = sql + " and bm.unit = '"+query.getUnit()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getMaintenanceStaff())){
+            sql = sql + " and bm.maintenance_staff = '"+query.getMaintenanceStaff()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getTechnicalStaff())){
+            sql = sql + " and bm.technical_staff = '"+query.getTechnicalStaff()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getManagerStaff())){
+            sql = sql + " and bm.manager_staff = '"+query.getManagerStaff()+"'";
+        }
+        if(query.getEnabled()!=null){
+            sql = sql + " and bm.enabled = "+query.getEnabled()+"";
+        }
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql = sql + " and bm.description like '%"+query.getDescription()+"%'";
+        }
+        sql = sql+" and bm.group_id = '"+groupId+"' ";
         //排序字段
-        String order = StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder();
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
         //排序方向
-        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect()+",modified_on desc";
         sql = sql + " order by bm."+order+" "+direct;
-        //sql = sql + " order by bm.modified_on desc";
-        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
-        List<BaseMachine> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select " +
-                          " count(*) " +
-                          " from base_machine bm " +
-                          " LEFT JOIN organization o ON (\n" +
-                          "	bm.department_id = o.uuid\n" +
-                          "	AND o.typesof = '部门' and o.group_id = '" +groupId+"' "+
-                          " )\n"+
-                          " where 1=1 \n";
-        if(StringUtils.isNotEmpty(query.getCode())){
-            countSql = countSql + " and bm.code like '%"+query.getCode()+"%'";
-        }
-        if(StringUtils.isNotEmpty(query.getName())){
-            countSql = countSql + " and bm.name like '%"+query.getName()+"%'";
-        }
-        if(StringUtils.isNotEmpty(query.getFlag())){
-            countSql = countSql + " and bm.flag = '"+query.getFlag()+"'";
-        }
-        if(StringUtils.isNotEmpty(query.getDepartmentId())){
-            countSql = countSql + " and bm.department_id = '"+query.getDepartmentId()+"'";
-        }
-        if(StringUtils.isNotEmpty(query.getPlacement())){
-            countSql = countSql + " and bm.placement= '"+query.getPlacement()+"'";
-        }
-        //if(StringUtils.isNotEmpty(groupId)){
-            countSql = countSql+" and bm.group_id = '"+groupId+"' ";
-        //}
-        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        return sql;
     }
 
     @Override
