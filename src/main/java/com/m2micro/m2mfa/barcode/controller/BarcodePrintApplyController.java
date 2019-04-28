@@ -22,7 +22,9 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * 标签打印表单 前端控制器
@@ -35,10 +37,11 @@ import java.util.List;
 @Api(value = "标签打印表单 前端控制器", description = "打印申请接口")
 @Authorize
 public class BarcodePrintApplyController {
+
     @Autowired
     BarcodePrintApplyService barcodePrintApplyService;
+    @Autowired
     BarcodePrintResourcesRepository barcodePrintResourcesRepository;
-
 
     @GetMapping("/Schedulelist")
     @ApiOperation(value = "模糊分页查询排产单")
@@ -69,6 +72,7 @@ public class BarcodePrintApplyController {
         return ResponseMessage.ok(barcodePrintApplyService.add(barcodePrintApply));
     }
 
+
     /**
      * 批量审核
      */
@@ -80,14 +84,18 @@ public class BarcodePrintApplyController {
         return ResponseMessage.ok();
     }
 
+
     @PostMapping("/deleteList")
     @ApiOperation(value = "批量删除打印申请")
     @UserOperationLog("批量删除打印申请")
     public ResponseMessage deleteList(@RequestBody String[] ids) {
         barcodePrintApplyService.deleteByIds(ids);
-        barcodePrintResourcesRepository.deleteAllByApplyId(ids);
+      for(String id :ids ){
+          barcodePrintResourcesRepository.deleteByApplyId(id);
+      }
         return ResponseMessage.ok();
     }
+
 
     /**
      * 列表
@@ -99,6 +107,7 @@ public class BarcodePrintApplyController {
         PageUtil<PrintApplyObj> page = barcodePrintApplyService.printApplyList(query);
         return ResponseMessage.ok(page);
     }
+
 
     /**
      * 列表
@@ -119,6 +128,7 @@ public class BarcodePrintApplyController {
         PageUtil<PrintResourceObj>  printApplyObj = barcodePrintApplyService.printApplylist(query);
         return ResponseMessage.ok(printApplyObj);
     }
+
 
     @PostMapping("/getPrintApplyObj")
     @ApiOperation(value = "获取打印主档")
@@ -148,5 +158,6 @@ public class BarcodePrintApplyController {
         barcodePrintApplyService.printCheckList(checkObj.getIds(),checkObj.getFlag());
         return ResponseMessage.ok();
     }
+
 
 }
