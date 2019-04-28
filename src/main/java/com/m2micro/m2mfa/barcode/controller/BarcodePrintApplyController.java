@@ -100,7 +100,7 @@ public class BarcodePrintApplyController {
     /**
      * 列表
      */
-    @GetMapping("/printApplyList")
+    @RequestMapping("/printApplyList")
     @ApiOperation(value = "标签打印表单列表")
     @UserOperationLog("标签打印表单列表")
     public ResponseMessage<PageUtil<PrintApplyObj>> printApplyList(PrintApplyQuery query) {
@@ -121,7 +121,7 @@ public class BarcodePrintApplyController {
     }
 
 
-    @PostMapping("/printApplyDetail")
+    @RequestMapping("/printApplyDetail")
     @ApiOperation(value = "获取打印申请详情")
     @UserOperationLog("获取打印申请详情")
     public ResponseMessage< PageUtil<PrintResourceObj>> list(BarcodeQuery query) {
