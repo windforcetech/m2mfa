@@ -189,8 +189,8 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         //排序字段
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
         //排序方向
-        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect()+",modified_on desc";
-        sql = sql + " order by bm."+order+" "+direct;
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by bm."+order+" "+direct+",bm.modified_on desc ";
         return sql;
     }
 
