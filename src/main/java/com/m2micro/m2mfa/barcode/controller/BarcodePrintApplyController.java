@@ -90,9 +90,9 @@ public class BarcodePrintApplyController {
     @UserOperationLog("批量删除打印申请")
     public ResponseMessage deleteList(@RequestBody String[] ids) {
         barcodePrintApplyService.deleteByIds(ids);
-      for(String id :ids ){
-          barcodePrintResourcesRepository.deleteByApplyId(id);
-      }
+        for(String id :ids ){
+            barcodePrintResourcesRepository.deleteByApplyId(id);
+        }
         return ResponseMessage.ok();
     }
 
@@ -100,7 +100,7 @@ public class BarcodePrintApplyController {
     /**
      * 列表
      */
-    @GetMapping("/printApplyList")
+    @RequestMapping("/printApplyList")
     @ApiOperation(value = "标签打印表单列表")
     @UserOperationLog("标签打印表单列表")
     public ResponseMessage<PageUtil<PrintApplyObj>> printApplyList(PrintApplyQuery query) {
@@ -143,7 +143,7 @@ public class BarcodePrintApplyController {
     @ApiOperation(value = "打印条码生成")
     @UserOperationLog("打印条码生成")
     public ResponseMessage printApplyGenerate(String applyId, Integer num) {
-      barcodePrintApplyService.generateLabel(applyId, num);
+        barcodePrintApplyService.generateLabel(applyId, num);
         return ResponseMessage.ok();
     }
 

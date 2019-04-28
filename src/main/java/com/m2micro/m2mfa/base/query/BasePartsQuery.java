@@ -71,5 +71,5 @@ public class BasePartsQuery extends Query {
     @ApiModelProperty(value = "是否为工单")
     private boolean  isom;
     @ApiModelProperty(value = "是否为模板")
-    private boolean  isTemplate;
+    private Boolean  isTemplate;
 }
