@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
 import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -66,6 +67,7 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
 
     @Override
     public PageUtil<BaseCustomer> list(BaseCustomerQuery query) {
+        String groupId = TokenInfo.getUserGroupId();
         String sql = "SELECT\n" +
                     "	bc.customer_id customerId,\n" +
                     "	bc.code code,\n" +
@@ -89,41 +91,54 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
                     "LEFT JOIN base_items_target bi ON bi.id = bc.category\n" +
                     "WHERE\n" +
                     "	1 = 1";
+        sql = addSqlCondition(sql,query,groupId);
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseCustomer.class);
+        List<BaseCustomer> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select count(bc.customer_id) from base_customer bc where 1=1 \n";
+        countSql = addSqlCondition(countSql,query,groupId);
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
 
+    private String addSqlCondition(String sql, BaseCustomerQuery query, String groupId) {
         if(StringUtils.isNotEmpty(query.getCode())){
             sql = sql+" and bc.code like '%"+query.getCode()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getName())){
             sql = sql+" and (bc.name like '%"+query.getName()+"%'"+" or bc.fullname like '%"+query.getName()+"%')";
         }
-        String groupId = TokenInfo.getUserGroupId();
-        //if(StringUtils.isNotEmpty(groupId)){
-            sql = sql+" and (bc.group_id  = '"+groupId+"')";
-        //}
-        /*if(StringUtils.isNotEmpty(query.getFullname())){
-            sql = sql+" and bc.fullname like '%"+query.getFullname()+"%'";
-        }*/
-        //排序字段
-        String order = StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder();
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            sql = sql+" and bc.category = '"+query.getCategory()+"' ";
+        }
+        if(query.getEnabled()!=null){
+            sql = sql+" and bc.enabled = "+query.getEnabled()+" ";
+        }
+        if(StringUtils.isNotEmpty(query.getAbbreviation())){
+            sql = sql+" and bc.abbreviation like '%"+query.getAbbreviation()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getArea())){
+            sql = sql+" and bc.area like '%"+query.getArea()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getTelephone())){
+            sql = sql+" and bc.telephone like '%"+query.getTelephone()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getFax())){
+            sql = sql+" and bc.fax like '%"+query.getFax()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getWeb())){
+            sql = sql+" and bc.web like '%"+query.getWeb()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql = sql+" and bc.description like '%"+query.getDescription()+"%'";
+        }
+        sql = sql+" and (bc.group_id  = '"+groupId+"')";
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
-        sql = sql + " order by bc."+order+" "+direct;
-        //sql = sql + " order by bc.modified_on desc";
-        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseCustomer.class);
-        List<BaseCustomer> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_customer bc where 1=1 \n";
-        if(StringUtils.isNotEmpty(query.getCode())){
-            countSql = countSql+" and bc.code like '%"+query.getCode()+"%'";
-        }
-        if(StringUtils.isNotEmpty(query.getName())){
-            countSql = countSql+" and (bc.name like '%"+query.getName()+"%'"+" or bc.fullname like '%"+query.getName()+"%')";
-        }
-        //if(StringUtils.isNotEmpty(groupId)){
-            countSql = countSql+" and bc.group_id = '"+groupId+"'";
-        //}
-        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        sql = sql + " order by bc."+order+" "+direct+",bc.modified_on desc";
+        return sql;
     }
 
     @Override
