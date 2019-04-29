@@ -409,6 +409,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         }
     }
 
+
     @Override
     public PageUtil<PrintResourceObj> printApplylist(BarcodeQuery barcodeQuery) {
         PrintApplyObj printApplyObj = getPrintApplyObj(barcodeQuery.getApplyId());
@@ -449,6 +450,8 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         return PageUtil.of(printApplyObj.getPrintResourceObjList() ,totalCount,barcodeQuery.getSize(),barcodeQuery.getPage());
     }
 
+
+    @Override
     public  PrintApplyObj getPrintApplyObj(String applyId) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
         String sql = " select t3.item_name source_type,\n" +
@@ -743,40 +746,23 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
             for (TemplateVarObj varObj : templateVarObjList) {
                 List<RuleObj> ruleObjList = varObj.getRuleObjList();
                 Collections.sort(ruleObjList, new
+
                     Comparator<RuleObj>() {
+
                         @Override
                     public int compare(RuleObj o1, RuleObj o2) {
                         return o1.getPosition() > o2.getPosition() ? 1 : -1;
                     }
 
-                });
+
+                    });
                 String value = "";
                 for (int x =0;x<ruleObjList.size();x++) {
                     RuleObj rule=ruleObjList.get(x);
-                    //生成条码长度
-                    Integer length = rule.getLength()==null? 0: rule.getLength();
-                    //默认值
-                    String defaults = rule.getDefaults();
-                    //进制
-                    Integer ary = rule.getAry();
-                    String serialCode ="";
-                    String s = String.valueOf(i);
-                    int length1 = s.length();
-                    if(length1>=length){
-                        serialCode=s;
-                    }else {
-                        //s 补0
-                      int numlength =  length-length1;
-                      String seria="";
-                      for(int l = 0; l<numlength; l++){
-                          seria+="0";
-                      }
-                        serialCode=seria+s;
-                    }
 
-                    System.out.println("流水号》》》"+serialCode);
+
                     //生成barcode规则
-                    value = getbarcodeLable(dateNow, printApplyObj, allQty, n, i, serialCode, value, rule);
+                    value = getbarcodeLable(dateNow, printApplyObj, allQty, n, i, value, rule);
 
                 }
                 lable.put(varObj.getName(), value);
@@ -816,7 +802,7 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
     }
 
 
-    private String getbarcodeLable(String dateNow, PrintApplyObj printApplyObj, Integer allQty, int n, Integer i, String serialCode, String value, RuleObj rule) {
+    private String getbarcodeLable(String dateNow, PrintApplyObj printApplyObj, Integer allQty, int n, Integer i, String value, RuleObj rule) {
         String category = rule.getCategory();
         String str = "";
         BarcodeConstant barcodeConstant = BarcodeConstant.barcodevalueOf(category);
@@ -827,7 +813,7 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
                 break;
             //流水码
             case "10000311":
-                str = serialCode;
+                str = getSerialCode(rule,i);
                 break;
             //日期
             case "10000312":
@@ -865,18 +851,50 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
             default:
                 break;
         }
-        if (rule.getLength() != null && rule.getLength() != 0) {
-            if (str.length() < rule.getLength()) {
-                str = addZeroForNum(str, rule.getLength());
-            }
-            if (str.length() > rule.getLength()) {
-                str = str.substring(0, rule.getLength());
-            }
-        }
+//        if (rule.getLength() != null && rule.getLength() != 0) {
+//            if (str.length() < rule.getLength()) {
+//                str = addZeroForNum(str, rule.getLength());
+//            }
+//            if (str.length() > rule.getLength()) {
+//                str = str.substring(0, rule.getLength());
+//            }
+//        }
         value += str;
         return value;
     }
 
+    /**
+     * 生成流水号
+     * @param rule
+     * @param i
+     * @return
+     */
+    public String getSerialCode(RuleObj  rule,int i){
+        //生成条码长度
+        Integer length = rule.getLength()==null? 0: rule.getLength();
+        //默认值
+        Integer defaults = rule.getDefaults()==null? 0: Integer.parseInt(rule.getDefaults());
+        if(defaults!=0){
+            defaults=defaults-1;
+        }
+        //进制
+        Integer ary = rule.getAry();
+        String serialCode ="";
+            String s = String.valueOf(i+defaults);
+            int length1 = s.length();
+            if(length1>=length){
+                serialCode=s;
+            }else {
+                //s 补0
+                int numlength =  length-length1;
+                String seria="";
+                for(int l = 0; l<numlength; l++){
+                    seria+="0";
+                }
+                serialCode=seria+s;
+            }
+        return  serialCode;
+    }
 
     private String getString() {
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
