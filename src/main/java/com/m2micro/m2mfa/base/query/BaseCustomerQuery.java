@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.query;
 import com.m2micro.framework.commons.util.Query;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 
 /**
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @Date: 2018/12/5 11:29
  * @Description:
  */
+@Data
 @ApiModel(description = "客户基本资料档")
 public class BaseCustomerQuery extends Query {
     @ApiModelProperty(value = "编号")
@@ -20,36 +22,19 @@ public class BaseCustomerQuery extends Query {
     private String category;
     @ApiModelProperty(value = "全称")
     private String fullname;
+    @ApiModelProperty(value = "简码")
+    private String abbreviation;
+    @ApiModelProperty(value = "区域")
+    private String area;
+    @ApiModelProperty(value = "电话号码")
+    private String telephone;
+    @ApiModelProperty(value = "传真号码")
+    private String fax;
+    @ApiModelProperty(value = "公司主页")
+    private String web;
+    @ApiModelProperty(value = "有效否")
+    private Boolean enabled;
+    @ApiModelProperty(value = "描述")
+    private String description;
 
-    public String getFullname() {
-        return fullname;
-    }
-
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
 }
