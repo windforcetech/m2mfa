@@ -1,12 +1,13 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseBarcodeRule;
 import com.m2micro.m2mfa.base.entity.BaseBarcodeRuleDef;
 import com.m2micro.m2mfa.base.entity.BaseTemplateVar;
-import com.m2micro.m2mfa.base.entity.QBaseBarcodeRule;
 import com.m2micro.m2mfa.base.query.BaseBarcodeRuleQuery;
 import com.m2micro.m2mfa.base.repository.BaseBarcodeRuleRepository;
 import com.m2micro.m2mfa.base.repository.BaseTemplateVarRepository;
@@ -17,11 +18,13 @@ import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +41,13 @@ import java.util.List;
 public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
     @Autowired
     BaseBarcodeRuleRepository baseBarcodeRuleRepository;
+
     @Autowired
     JPAQueryFactory queryFactory;
 
+    @Autowired
+    @Qualifier("secondaryJdbcTemplate")
+    JdbcTemplate jdbcTemplate;
     @Autowired
     BaseBarcodeRuleDefService baseBarcodeRuleDefService;
 
@@ -53,19 +60,67 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
 
     @Override
     public PageUtil<BaseBarcodeRule> list(BaseBarcodeRuleQuery query) {
-        QBaseBarcodeRule qBaseBarcodeRule = QBaseBarcodeRule.baseBarcodeRule;
-        JPAQuery<BaseBarcodeRule> jq = queryFactory.selectFrom(qBaseBarcodeRule);
-        BooleanBuilder condition = new BooleanBuilder();
+//        QBaseBarcodeRule qBaseBarcodeRule = QBaseBarcodeRule.baseBarcodeRule;
+//        JPAQuery<BaseBarcodeRule> jq = queryFactory.selectFrom(qBaseBarcodeRule);
+//        BooleanBuilder condition = new BooleanBuilder();
+//        if (StringUtils.isNotEmpty(query.getRuleCode())) {
+//            condition.and(qBaseBarcodeRule.ruleCode.like("%" + query.getRuleCode() + "%"));
+//        }
+//        if (StringUtils.isNotEmpty(query.getRuleName())) {
+//            condition.and(qBaseBarcodeRule.ruleName.like("%" + query.getRuleName() + "%"));
+//        }
+//        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
+//        List<BaseBarcodeRule> list = jq.fetch();
+//        long totalCount = jq.fetchCount();
+//        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+        String groupId = TokenInfo.getUserGroupId();
+        List<BaseBarcodeRule> baseBarcodeRules = getBaseBarcodeRules(query, groupId);
+
+        Integer totalCount = getTotalCunt(query, groupId);
+        return PageUtil.of(baseBarcodeRules, totalCount, query.getSize(), query.getPage());
+    }
+
+    /**
+     * 获取对应的集合数据
+     * @param query
+     * @param groupId
+     * @return
+     */
+    private List<BaseBarcodeRule> getBaseBarcodeRules(BaseBarcodeRuleQuery query, String groupId) {
+        String    sql ="select * from base_barcode_rule  where 1=1 ";
         if (StringUtils.isNotEmpty(query.getRuleCode())) {
-            condition.and(qBaseBarcodeRule.ruleCode.like("%" + query.getRuleCode() + "%"));
+          sql +=" and  rule_code LIKE '%"+query.getRuleCode()+"%'  ";
         }
         if (StringUtils.isNotEmpty(query.getRuleName())) {
-            condition.and(qBaseBarcodeRule.ruleName.like("%" + query.getRuleName() + "%"));
+            sql +=" and  rule_name LIKE '%"+query.getRuleName()+"%'  ";
         }
-        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-        List<BaseBarcodeRule> list = jq.fetch();
-        long totalCount = jq.fetchCount();
-        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+        sql +="and  group_id ='"+groupId+"'";
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        sql = sql + " order by "+order+" "+direct+",modified_on desc";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseBarcodeRule.class);
+        return jdbcTemplate.query(sql, rm);
+    }
+
+    /**
+     * 获取总页数
+     * @param query
+     * @param groupId
+     * @return
+     */
+    private Integer getTotalCunt(BaseBarcodeRuleQuery query, String groupId) {
+        String countsql ="select count(*)  from base_barcode_rule  where 1=1";
+        if (StringUtils.isNotEmpty(query.getRuleCode())) {
+            countsql +=" and  rule_code LIKE '%"+query.getRuleCode()+"%'  ";
+        }
+        if (StringUtils.isNotEmpty(query.getRuleName())) {
+            countsql +=" and  rule_name LIKE '%"+query.getRuleName()+"%'  ";
+        }
+        countsql +=" and  group_id ='"+groupId+"'";
+        return jdbcTemplate.queryForObject(countsql, Integer.class);
     }
 
     @Transactional
