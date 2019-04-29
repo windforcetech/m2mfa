@@ -19,7 +19,6 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.mapping.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,10 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 作业指导书 服务实现类
@@ -72,7 +69,7 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
        if(query.getEnabled()){
          condition.and(qBaseInstruction.enabled.eq(true));
        }
-        if(query.getCheckflag()){
+        if(query.getCheckflag()!=null &&  query.getCheckflag()){
             condition.and(qBaseInstruction.checkFlag.eq(true));
         }
         jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
