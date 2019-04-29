@@ -39,6 +39,9 @@ public class BaseTemplate extends BaseEntity implements Serializable {
     @NotEmpty(message="标签类型不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "标签类型")
     private String category;
+    @Transient
+    @ApiModelProperty(value = "标签类型名称")
+    private String categoryName;
     @ApiModelProperty(value = "版本")
     private Integer version;
     @ApiModelProperty(value = "标签图片")
@@ -132,5 +135,13 @@ public class BaseTemplate extends BaseEntity implements Serializable {
 
     public void setBaseTemplateVars(List<BaseTemplateVar> baseTemplateVars) {
         this.baseTemplateVars = baseTemplateVars;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

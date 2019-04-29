@@ -22,7 +22,8 @@ public class BaseTemplateQuery extends Query {
     private String number;
     @ApiModelProperty(value = "名称")
     private String name;
-
+    @ApiModelProperty(value = "标签类型")
+    private String category;
     public String getNumber() {
         return number;
     }
@@ -37,5 +38,13 @@ public class BaseTemplateQuery extends Query {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
