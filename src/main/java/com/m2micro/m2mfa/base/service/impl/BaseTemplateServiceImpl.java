@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -60,22 +62,68 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
 
     @Override
     public PageUtil<BaseTemplate> list(BaseTemplateQuery query) {
-        QBaseTemplate qBaseTemplate = QBaseTemplate.baseTemplate;
-        JPAQuery<BaseTemplate> jq = queryFactory.selectFrom(qBaseTemplate);
-        BooleanBuilder condition = new BooleanBuilder();
-        if (StringUtils.isNotEmpty(query.getName())) {
+//        QBaseTemplate qBaseTemplate = QBaseTemplate.baseTemplate;
+//        JPAQuery<BaseTemplate> jq = queryFactory.selectFrom(qBaseTemplate);
+//        BooleanBuilder condition = new BooleanBuilder();
+//        if (StringUtils.isNotEmpty(query.getName())) {
+//
+//            condition.and(qBaseTemplate.name.like("%" + query.getName() + "%"));
+//        }
+//        if (StringUtils.isNotEmpty(query.getNumber())) {
+//
+//            condition.and(qBaseTemplate.number.like("%" + query.getNumber() + "%"));
+//        }
+//        long totalCount = jq.where(condition).fetchCount();
+//        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
+//        List<BaseTemplate> list = jq.fetch();
+        String groupId = TokenInfo.getUserGroupId();
+        List<BaseTemplate> baseTemplates =   getTemplates(query, groupId);
+        Integer totalCount = getTemplatesCount(query, groupId);
+        return PageUtil.of(baseTemplates, totalCount, query.getSize(), query.getPage());
+    }
 
-            condition.and(qBaseTemplate.name.like("%" + query.getName() + "%"));
+    /**
+     * 获取总页数
+     * @param query
+     * @param groupId
+     * @return
+     */
+    private Integer getTemplatesCount(BaseTemplateQuery query, String groupId) {
+        String countSql ="select count(*) from base_template where 1=1";
+        if (StringUtils.isNotEmpty(query.getName())) {
+            countSql +=" and  name  LIKE '%"+query.getName()+"%'  ";
         }
         if (StringUtils.isNotEmpty(query.getNumber())) {
-
-            condition.and(qBaseTemplate.number.like("%" + query.getNumber() + "%"));
+            countSql +=" and  number  LIKE '%"+query.getNumber()+"%'  ";
         }
-        long totalCount = jq.where(condition).fetchCount();
-        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-        List<BaseTemplate> list = jq.fetch();
-        //long totalCount = jq.fetchCount();
-        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+        if (StringUtils.isNotEmpty(query.getCategory())) {
+            countSql +=" and  category = '"+query.getCategory()+"'  ";
+        }
+        countSql +=" and  group_id ='"+groupId+"'";
+        return jdbcTemplate.queryForObject(countSql, Integer.class);
+    }
+
+    private List<BaseTemplate> getTemplates(BaseTemplateQuery query, String groupId) {
+        String sql ="select bt.*, bit.item_name categoryName   from   base_template bt LEFT JOIN base_items_target bit ON bt.category = bit.id   where 1=1";
+        if (StringUtils.isNotEmpty(query.getName())) {
+            sql +=" and  bt.name LIKE '%"+query.getName()+"%'  ";
+        }
+        if (StringUtils.isNotEmpty(query.getNumber())) {
+            sql +=" and  bt.number LIKE '%"+query.getNumber()+"%'  ";
+        }
+        if (StringUtils.isNotEmpty(query.getCategory())) {
+            sql +=" and  bt.category = '"+query.getCategory()+"'  ";
+        }
+
+        sql +=" and  bt.group_id ='"+groupId+"'";
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"bt.modified_on":query.getOrder());
+        sql = sql + " order by "+order+" "+direct+",bt.modified_on desc";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseTemplate.class);
+        return jdbcTemplate.query(sql, rm);
     }
 
     @Transactional

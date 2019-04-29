@@ -60,22 +60,10 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
 
     @Override
     public PageUtil<BaseBarcodeRule> list(BaseBarcodeRuleQuery query) {
-//        QBaseBarcodeRule qBaseBarcodeRule = QBaseBarcodeRule.baseBarcodeRule;
-//        JPAQuery<BaseBarcodeRule> jq = queryFactory.selectFrom(qBaseBarcodeRule);
-//        BooleanBuilder condition = new BooleanBuilder();
-//        if (StringUtils.isNotEmpty(query.getRuleCode())) {
-//            condition.and(qBaseBarcodeRule.ruleCode.like("%" + query.getRuleCode() + "%"));
-//        }
-//        if (StringUtils.isNotEmpty(query.getRuleName())) {
-//            condition.and(qBaseBarcodeRule.ruleName.like("%" + query.getRuleName() + "%"));
-//        }
-//        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-//        List<BaseBarcodeRule> list = jq.fetch();
-//        long totalCount = jq.fetchCount();
-//        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
-        String groupId = TokenInfo.getUserGroupId();
-        List<BaseBarcodeRule> baseBarcodeRules = getBaseBarcodeRules(query, groupId);
 
+        String groupId = TokenInfo.getUserGroupId();
+
+        List<BaseBarcodeRule> baseBarcodeRules = getBaseBarcodeRules(query, groupId);
         Integer totalCount = getTotalCunt(query, groupId);
         return PageUtil.of(baseBarcodeRules, totalCount, query.getSize(), query.getPage());
     }
@@ -172,7 +160,7 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
 
     @Override
     public BaseBarcodeRuleObj findByRuleId(String ruleId) {
-        BaseBarcodeRule rule = this.findById(ruleId).get();
+        BaseBarcodeRule rule = this.findById(ruleId).orElse(null);
         List<BaseBarcodeRuleDef> ones = baseBarcodeRuleDefService.findByBarcodeId(rule.getId());
         return BaseBarcodeRuleObj.createSelf(rule, ones);
     }
@@ -183,9 +171,6 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
         String[] ids = new String[varIds.size()];
         String[] strings = varIds.toArray(ids);
         baseBarcodeRuleDefService.deleteByIds(strings);
-//        for(String one:varIds){
-//        baseBarcodeRuleDefService.deleteById(one);
-//        }
     }
 
 

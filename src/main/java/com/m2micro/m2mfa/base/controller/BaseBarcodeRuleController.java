@@ -61,34 +61,6 @@ public class BaseBarcodeRuleController {
         return ResponseMessage.ok(baseBarcodeRuleObj);
     }
 
-//    /**
-//     * 保存
-//     */
-//    @RequestMapping("/save")
-//    @ApiOperation(value="保存条形码主表定义")
-//    @UserOperationLog("保存条形码主表定义")
-//    public ResponseMessage<BaseBarcodeRule> save(@RequestBody BaseBarcodeRule baseBarcodeRule){
-//        ValidatorUtil.validateEntity(baseBarcodeRule, AddGroup.class);
-//        baseBarcodeRule.setId(UUIDUtil.getUUID());
-//        return ResponseMessage.ok(baseBarcodeRuleService.save(baseBarcodeRule));
-//    }
-
-//    /**
-//     * 更新
-//     */
-//    @RequestMapping("/update")
-//    @ApiOperation(value="更新条形码主表定义")
-//    @UserOperationLog("更新条形码主表定义")
-//    public ResponseMessage<BaseBarcodeRule> update(@RequestBody BaseBarcodeRule baseBarcodeRule){
-//        ValidatorUtil.validateEntity(baseBarcodeRule, UpdateGroup.class);
-//        BaseBarcodeRule baseBarcodeRuleOld = baseBarcodeRuleService.findById(baseBarcodeRule.getId()).orElse(null);
-//        if(baseBarcodeRuleOld==null){
-//            throw new MMException("数据库不存在该记录");
-//        }
-//        PropertyUtil.copy(baseBarcodeRule,baseBarcodeRuleOld);
-//        return ResponseMessage.ok(baseBarcodeRuleService.save(baseBarcodeRuleOld));
-//    }
-
     /**
      * 删除
      */
