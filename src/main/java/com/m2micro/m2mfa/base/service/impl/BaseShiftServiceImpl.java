@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
 import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -94,27 +95,39 @@ public class BaseShiftServiceImpl implements BaseShiftService {
                         "LEFT JOIN base_items_target bi ON bi.id = bs.category\n" +
                         "WHERE\n" +
                         "	1 = 1";
-        if(query.isEnabled()==true){
-            sql +="  and bs.enabled = 1";
-        }
-        sql = sql+" and bs.group_id = '"+groupId+"'";
-        //排序字段
-        String order = StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder();
-        //排序方向
-        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
-        sql = sql + " order by bs."+order+" "+direct;
-        //sql = sql + " order by bs.modified_on desc";
+        sql = addSqlCondition(sql,query,groupId);
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseShift.class);
         List<BaseShift> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_shift";
-        countSql = countSql+" where group_id = '"+groupId+"'";
-        if(query.isEnabled()==true){
-            countSql +="  and  enabled = 1 ";
-        }
+        String countSql = "select count(bs.shift_id) from base_shift bs WHERE 1=1 ";
+        countSql = addSqlCondition(countSql,query,groupId);
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
-
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    private String addSqlCondition(String sql, BaseShiftQuery query, String groupId) {
+        if(query.getEnabled()!=null){
+            sql +="  and bs.enabled = "+query.getEnabled();
+        }
+        if(StringUtils.isNotEmpty(query.getCode())){
+            sql = sql + " and bs.code like '%"+query.getCode()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getName())){
+            sql = sql + " and bs.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            sql = sql + " and bs.category = '"+query.getCategory()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql = sql + " and bs.description like '%"+query.getDescription()+"%'";
+        }
+        sql = sql+" and bs.group_id = '"+groupId+"'";
+        //排序字段
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by bs."+order+" "+direct+",bs.modified_on desc ";
+        return sql;
     }
 
 
