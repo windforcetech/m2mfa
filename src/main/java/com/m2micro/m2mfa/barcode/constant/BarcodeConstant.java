@@ -1,5 +1,8 @@
 package com.m2micro.m2mfa.barcode.constant;
 
+import com.m2micro.m2mfa.barcode.vo.PrintApplyObj;
+import com.m2micro.m2mfa.barcode.vo.RuleObj;
+
 /**
  * 编码生成规则定义
  */
@@ -73,4 +76,96 @@ public enum  BarcodeConstant
     }
     return  ms;
   }
+
+  /**
+   * 条码生成
+   * @param key
+   * @param dateNow
+   * @param printApplyObj
+   * @param allQty
+   * @param n
+   * @param i
+   * @param rule
+   * @return
+   */
+  public static String  barCodeGeneration(String  key, String dateNow, PrintApplyObj printApplyObj, Integer allQty, int n, Integer i, RuleObj rule) {
+    String str = "";
+    switch (key){
+      case "10000313":
+        str = printApplyObj.getMoNumber();
+        break;
+      case "10000314":
+        str = printApplyObj.getPartNo();
+        break;
+      case "10000315":
+        str = "" + printApplyObj.getPackObj().getNw().intValue();
+        break;
+      case "10000316":
+        if (i == n) {
+          str = "" + (allQty - (i - 1) * printApplyObj.getPackObj().getQty().intValue());
+          System.out.println("ooo"+(allQty - (i - 1) * printApplyObj.getPackObj().getQty().intValue()));
+        } else {
+          str = "" + printApplyObj.getPackObj().getQty().intValue();
+        }
+        break;
+      case "10000336":
+        str = "" + printApplyObj.getPackObj().getGw().intValue();
+        break;
+      case "10000337":
+        str = "" + printApplyObj.getPackObj().getCuft().intValue();
+        break;
+      case "10000338":
+        str = printApplyObj.getPartName();
+        break;
+      case "10000339":
+        str = printApplyObj.getSpec();
+        break;
+      case "10000310":
+        str = rule.getDefaults();
+        break;
+      case "10000311":
+        str = getSerialCode(rule,i);
+        break;
+      case "10000312":
+        str = dateNow;
+        break;
+      default:
+        break;
+    }
+    return  str;
+  }
+
+  /**
+   * 生成流水号
+   * @param rule
+   * @param i
+   * @return
+   */
+  public static String getSerialCode(RuleObj  rule,int i){
+    //生成条码长度
+    Integer length = rule.getLength()==null? 0: rule.getLength();
+    //默认值
+    Integer defaults = rule.getDefaults()==null || rule.getDefaults().trim().equals("") ? 0: Integer.parseInt(rule.getDefaults());
+    if(defaults!=0){
+      defaults=defaults-1;
+    }
+    //进制
+    Integer ary = rule.getAry();
+    String serialCode ="";
+    String s = String.valueOf(i+defaults);
+    int length1 = s.length();
+    if(length1>=length){
+      serialCode=s;
+    }else {
+      //s 补0
+      int numlength =  length-length1;
+      String seria="";
+      for(int l = 0; l<numlength; l++){
+        seria+="0";
+      }
+      serialCode=seria+s;
+    }
+    return  serialCode;
+  }
+
 }

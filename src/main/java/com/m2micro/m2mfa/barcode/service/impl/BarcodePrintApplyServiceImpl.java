@@ -804,53 +804,8 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
 
     private String getbarcodeLable(String dateNow, PrintApplyObj printApplyObj, Integer allQty, int n, Integer i, String value, RuleObj rule) {
         String category = rule.getCategory();
-        String str = "";
-        BarcodeConstant barcodeConstant = BarcodeConstant.barcodevalueOf(category);
-        switch (category) {
-            //固定码
-            case "10000310":
-                str = rule.getDefaults();
-                break;
-            //流水码
-            case "10000311":
-                str = getSerialCode(rule,i);
-                break;
-            //日期
-            case "10000312":
-                str = dateNow;
-                break;
-            case "10000313":
-                str = printApplyObj.getMoNumber();
-                break;
-            case "10000314":
-                str = printApplyObj.getPartNo();
-                break;
-            case "10000315":
-                str = "" + printApplyObj.getPackObj().getNw().intValue();
-                break;
-            case "10000316":
-                if (i == n) {
-                    str = "" + (allQty - (i - 1) * printApplyObj.getPackObj().getQty().intValue());
-                    System.out.println("ooo"+(allQty - (i - 1) * printApplyObj.getPackObj().getQty().intValue()));
-                } else {
-                    str = "" + printApplyObj.getPackObj().getQty().intValue();
-                }
-                break;
-            case "10000336":
-                str = "" + printApplyObj.getPackObj().getGw().intValue();
-                break;
-            case "10000337":
-                str = "" + printApplyObj.getPackObj().getCuft().intValue();
-                break;
-            case "10000338":
-                str = printApplyObj.getPartName();
-                break;
-            case "10000339":
-                str = printApplyObj.getSpec();
-                break;
-            default:
-                break;
-        }
+        String str = BarcodeConstant.barCodeGeneration(category, dateNow, printApplyObj, allQty, n, i, rule);
+
 //        if (rule.getLength() != null && rule.getLength() != 0) {
 //            if (str.length() < rule.getLength()) {
 //                str = addZeroForNum(str, rule.getLength());
@@ -863,38 +818,6 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
         return value;
     }
 
-    /**
-     * 生成流水号
-     * @param rule
-     * @param i
-     * @return
-     */
-    public String getSerialCode(RuleObj  rule,int i){
-        //生成条码长度
-        Integer length = rule.getLength()==null? 0: rule.getLength();
-        //默认值
-        Integer defaults = rule.getDefaults()==null? 0: Integer.parseInt(rule.getDefaults());
-        if(defaults!=0){
-            defaults=defaults-1;
-        }
-        //进制
-        Integer ary = rule.getAry();
-        String serialCode ="";
-            String s = String.valueOf(i+defaults);
-            int length1 = s.length();
-            if(length1>=length){
-                serialCode=s;
-            }else {
-                //s 补0
-                int numlength =  length-length1;
-                String seria="";
-                for(int l = 0; l<numlength; l++){
-                    seria+="0";
-                }
-                serialCode=seria+s;
-            }
-        return  serialCode;
-    }
 
     private String getString() {
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
