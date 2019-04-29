@@ -60,4 +60,6 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
      * @return
      */
     PageUtil<BaseParts> barcodePartslist(BasePartsQuery query);
+
+    List<BaseParts> findAllByCategory(String category);
 }
