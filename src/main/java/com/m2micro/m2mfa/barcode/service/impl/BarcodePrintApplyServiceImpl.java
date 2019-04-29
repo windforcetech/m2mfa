@@ -67,47 +67,47 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     public PageUtil<PrintApplyObj> printApplyList1(PrintApplyQuery query) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
         String sql = " select\n" +
-                " t2.item_name flag_type,\n" +
-                " t1.name template_name,\n" +
-                " t1.version template_version,\n" +
-                " cus.code customer_code,\n" +
-                " cus.name customer_name,\n" +
-                " t.id apply_id,\n" +
-                " t.sequence sequence,\n" +
-                " t.category,\n" +
-                " t.source,\n" +
-                " t.print_category,\n" +
-                " t.qty,\n" +
-                " t.check_On,\n" +
-                " t.flag,\n" +
-                " t.description,\n" +
-                " t.check_flag,\n" +
-                " t.enabled,\n" +
-                " p.part_id,\n" +
-                " p.name part_no\n" +
-                " from barcode_print_apply t ,\n" +
-                " base_parts p,\n" +
-                " base_template t1,\n" +
-                " base_items_target t2,\n" +
-                " base_customer cus\n" +
-                " where t1.category=t2.id\n" +
-                " and t1.id= t.template_id " +
-                " and t.customer_no=cus.code\n" +
-                " and t.part_id=p.part_id\n" +
-                " and t.flag=0  ";
+            " t2.item_name flag_type,\n" +
+            " t1.name template_name,\n" +
+            " t1.version template_version,\n" +
+            " cus.code customer_code,\n" +
+            " cus.name customer_name,\n" +
+            " t.id apply_id,\n" +
+            " t.sequence sequence,\n" +
+            " t.category,\n" +
+            " t.source,\n" +
+            " t.print_category,\n" +
+            " t.qty,\n" +
+            " t.check_On,\n" +
+            " t.flag,\n" +
+            " t.description,\n" +
+            " t.check_flag,\n" +
+            " t.enabled,\n" +
+            " p.part_id,\n" +
+            " p.name part_no\n" +
+            " from barcode_print_apply t ,\n" +
+            " base_parts p,\n" +
+            " base_template t1,\n" +
+            " base_items_target t2,\n" +
+            " base_customer cus\n" +
+            " where t1.category=t2.id\n" +
+            " and t1.id= t.template_id " +
+            " and t.customer_no=cus.code\n" +
+            " and t.part_id=p.part_id\n" +
+            " and t.flag=0  ";
 
         String sql2 = " select\n" +
-                " count(t.id) \n" +
-                " from barcode_print_apply t ,\n" +
-                " base_parts p,\n" +
-                " base_template t1,\n" +
-                " base_items_target t2,\n" +
-                " base_customer cus\n" +
-                " where t1.category=t2.id\n" +
-                " and t1.id= t.template_id " +
-                " and t.customer_no=cus.code\n" +
-                " and t.part_id=p.part_id\n" +
-                " and t.flag=0 ;";
+            " count(t.id) \n" +
+            " from barcode_print_apply t ,\n" +
+            " base_parts p,\n" +
+            " base_template t1,\n" +
+            " base_items_target t2,\n" +
+            " base_customer cus\n" +
+            " where t1.category=t2.id\n" +
+            " and t1.id= t.template_id " +
+            " and t.customer_no=cus.code\n" +
+            " and t.part_id=p.part_id\n" +
+            " and t.flag=0 ;";
 
         Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
         sql += " order by t.id limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
@@ -122,63 +122,63 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     public PageUtil<PrintApplyObj> printApplyList(PrintApplyQuery query) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
         String sql = " select t3.item_name source_type,\n" +
-                "t3.id source_id,\n" +
-                "t2.item_name flag_type,\n" +
-                "t1.name template_name,\n" +
-                "t1.id template_id,\n" +
-                "t1.version template_version,\n" +
-                "cus.code customer_code,\n" +
-                "cus.name customer_name,\n" +
-                "t.id apply_id,\n" +
-                "t.category,\n" +
-                "t.source,\n" +
-                "schedule.schedule_no,\n" +
-                "t.print_category,\n" +
-                "t.qty,\n" +
-                "t.check_On,\n" +
-                "t.flag,\n" +
-                "t.description,\n" +
-                "t.check_flag,\n" +
-                "t.enabled,\n" +
-                "p.part_id,\n" +
-                "p.part_no,\n" +
-                "p.name part_name ,\n" +
-                " p.spec  ,\n" +
-                " mo.mo_number,  \n" +
-                " mo.order_seq  \n" +
-                "from barcode_print_apply t ,\n" +
-                "base_parts p,\n" +
-                "base_template t1,\n" +
-                "base_items_target t2,\n" +
-                "base_customer cus,\n" +
-                "mes_mo_schedule schedule,\n" +
-                "base_items_target t3,\n" +
-                " mes_mo_desc mo \n " +
-                "where t1.category=t2.id\n" +
-                "and t1.id= t.template_id\n" +
-                "and t.customer_no=cus.code\n" +
-                "and t.part_id=p.part_id\n" +
-                "and schedule.schedule_id=t.source\n" +
-                "and t.category=t3.id\n" +
-                "and mo.mo_id=schedule.mo_id " +
-                "and t.flag in(0,1)  ";
+            "t3.id source_id,\n" +
+            "t2.item_name flag_type,\n" +
+            "t1.name template_name,\n" +
+            "t1.id template_id,\n" +
+            "t1.version template_version,\n" +
+            "cus.code customer_code,\n" +
+            "cus.name customer_name,\n" +
+            "t.id apply_id,\n" +
+            "t.category,\n" +
+            "t.source,\n" +
+            "schedule.schedule_no,\n" +
+            "t.print_category,\n" +
+            "t.qty,\n" +
+            "t.check_On,\n" +
+            "t.flag,\n" +
+            "t.description,\n" +
+            "t.check_flag,\n" +
+            "t.enabled,\n" +
+            "p.part_id,\n" +
+            "p.part_no,\n" +
+            "p.name part_name ,\n" +
+            " p.spec  ,\n" +
+            " mo.mo_number,  \n" +
+            " mo.order_seq  \n" +
+            "from barcode_print_apply t ,\n" +
+            "base_parts p,\n" +
+            "base_template t1,\n" +
+            "base_items_target t2,\n" +
+            "base_customer cus,\n" +
+            "mes_mo_schedule schedule,\n" +
+            "base_items_target t3,\n" +
+            " mes_mo_desc mo \n " +
+            "where t1.category=t2.id\n" +
+            "and t1.id= t.template_id\n" +
+            "and t.customer_no=cus.code\n" +
+            "and t.part_id=p.part_id\n" +
+            "and schedule.schedule_id=t.source\n" +
+            "and t.category=t3.id\n" +
+            "and mo.mo_id=schedule.mo_id " +
+            "and t.flag in(0,1)  ";
 
         String sql2 = " select\n" +
-                " count(t.id) \n" +
-                "from barcode_print_apply t ,\n" +
-                "base_parts p,\n" +
-                "base_template t1,\n" +
-                "base_items_target t2,\n" +
-                "base_customer cus,\n" +
-                "mes_mo_schedule schedule,\n" +
-                "base_items_target t3\n" +
-                "where t1.category=t2.id\n" +
-                "and t1.id= t.template_id\n" +
-                "and t.customer_no=cus.code\n" +
-                "and t.part_id=p.part_id\n" +
-                "and schedule.schedule_id=t.source\n" +
-                "and t.category=t3.id\n" +
-                "and t.flag in(0,1)  ;";
+            " count(t.id) \n" +
+            "from barcode_print_apply t ,\n" +
+            "base_parts p,\n" +
+            "base_template t1,\n" +
+            "base_items_target t2,\n" +
+            "base_customer cus,\n" +
+            "mes_mo_schedule schedule,\n" +
+            "base_items_target t3\n" +
+            "where t1.category=t2.id\n" +
+            "and t1.id= t.template_id\n" +
+            "and t.customer_no=cus.code\n" +
+            "and t.part_id=p.part_id\n" +
+            "and schedule.schedule_id=t.source\n" +
+            "and t.category=t3.id\n" +
+            "and t.flag in(0,1)  ;";
 
         Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
         sql += " order by t.id limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
@@ -193,64 +193,64 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     public PageUtil<PrintApplyObj> printApplyListAfterCheckedOk(PrintApplyQuery query) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
         String sql = " select t3.item_name source_type,\n" +
-                "t3.id source_id,\n" +
-                "t2.item_name flag_type,\n" +
-                "t1.name template_name,\n" +
-                "t1.id template_id,\n" +
-                "t1.version template_version,\n" +
-                "cus.code customer_code,\n" +
-                "cus.name customer_name,\n" +
-                "t.id apply_id,\n" +
-                "t.category,\n" +
-                "t.source,\n" +
-                "schedule.schedule_no,\n" +
-                "t.print_category,\n" +
-                "t.qty,\n" +
-                "t.check_On,\n" +
-                "t.flag,\n" +
-                "t.description,\n" +
-                "t.check_flag,\n" +
-                "t.enabled,\n" +
-                "p.part_id,\n" +
-                "p.part_no,\n" +
-                "p.name part_name ,\n" +
-                " p.spec  ,\n" +
-                " mo.mo_number,  \n" +
-                " mo.order_seq  \n" +
-                "from barcode_print_apply t ,\n" +
-                "base_parts p,\n" +
-                "base_template t1,\n" +
-                "base_items_target t2,\n" +
-                "base_customer cus,\n" +
-                "mes_mo_schedule schedule,\n" +
-                "base_items_target t3,\n" +
-                " mes_mo_desc mo \n " +
-                "where t1.category=t2.id\n" +
-                "and t1.id= t.template_id\n" +
-                "and t.customer_no=cus.code\n" +
-                "and t.part_id=p.part_id\n" +
-                "and schedule.schedule_id=t.source\n" +
-                "and t.category=t3.id\n" +
-                "and mo.mo_id=schedule.mo_id " +
-                "and t.flag in(0,1)  " +
-                "and t.check_flag=1 ";
+            "t3.id source_id,\n" +
+            "t2.item_name flag_type,\n" +
+            "t1.name template_name,\n" +
+            "t1.id template_id,\n" +
+            "t1.version template_version,\n" +
+            "cus.code customer_code,\n" +
+            "cus.name customer_name,\n" +
+            "t.id apply_id,\n" +
+            "t.category,\n" +
+            "t.source,\n" +
+            "schedule.schedule_no,\n" +
+            "t.print_category,\n" +
+            "t.qty,\n" +
+            "t.check_On,\n" +
+            "t.flag,\n" +
+            "t.description,\n" +
+            "t.check_flag,\n" +
+            "t.enabled,\n" +
+            "p.part_id,\n" +
+            "p.part_no,\n" +
+            "p.name part_name ,\n" +
+            " p.spec  ,\n" +
+            " mo.mo_number,  \n" +
+            " mo.order_seq  \n" +
+            "from barcode_print_apply t ,\n" +
+            "base_parts p,\n" +
+            "base_template t1,\n" +
+            "base_items_target t2,\n" +
+            "base_customer cus,\n" +
+            "mes_mo_schedule schedule,\n" +
+            "base_items_target t3,\n" +
+            " mes_mo_desc mo \n " +
+            "where t1.category=t2.id\n" +
+            "and t1.id= t.template_id\n" +
+            "and t.customer_no=cus.code\n" +
+            "and t.part_id=p.part_id\n" +
+            "and schedule.schedule_id=t.source\n" +
+            "and t.category=t3.id\n" +
+            "and mo.mo_id=schedule.mo_id " +
+            "and t.flag in(0,1)  " +
+            "and t.check_flag=1 ";
 
         String sql2 = " select\n" +
-                " count(t.id) \n" +
-                "from barcode_print_apply t ,\n" +
-                "base_parts p,\n" +
-                "base_template t1,\n" +
-                "base_items_target t2,\n" +
-                "base_customer cus,\n" +
-                "mes_mo_schedule schedule,\n" +
-                "base_items_target t3\n" +
-                "where t1.category=t2.id\n" +
-                "and t1.id= t.template_id\n" +
-                "and t.customer_no=cus.code\n" +
-                "and t.part_id=p.part_id\n" +
-                "and schedule.schedule_id=t.source\n" +
-                "and t.category=t3.id\n" +
-                "and t.flag in(0,1)  ;";
+            " count(t.id) \n" +
+            "from barcode_print_apply t ,\n" +
+            "base_parts p,\n" +
+            "base_template t1,\n" +
+            "base_items_target t2,\n" +
+            "base_customer cus,\n" +
+            "mes_mo_schedule schedule,\n" +
+            "base_items_target t3\n" +
+            "where t1.category=t2.id\n" +
+            "and t1.id= t.template_id\n" +
+            "and t.customer_no=cus.code\n" +
+            "and t.part_id=p.part_id\n" +
+            "and schedule.schedule_id=t.source\n" +
+            "and t.category=t3.id\n" +
+            "and t.flag in(0,1)  ;";
 
         Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
         sql += " order by t.id limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
@@ -272,22 +272,22 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     public PageUtil<ScheduleObj> list(ScheduleQuery query) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(ScheduleObj.class);
         String sql = "SELECT t.schedule_id,t.schedule_no,t.machine_id,t.part_id, t2.part_no,t2.name part_name,t.schedule_qty,t1.name machine_name FROM mes_mo_schedule t" +
-                "     left join base_machine t1" +
-                "        on t1.id=t.machine_id" +
-                "        left join base_parts t2" +
-                "        on t2.part_id=t.part_id" +
-                "        where" +
-                "        t.flag in(0,1) and   (select COUNT(*) from base_pack t3 where  t2.part_no = t3.part_id) >0  and  (select COUNT(*) from  base_part_template bpt where bpt.part_id= t2.part_id)>0  and" +
-                "        t.enabled=1 ";
+            "     left join base_machine t1" +
+            "        on t1.id=t.machine_id" +
+            "        left join base_parts t2" +
+            "        on t2.part_id=t.part_id" +
+            "        where" +
+            "        t.flag in(0,1) and   (select COUNT(*) from base_pack t3 where  t2.part_no = t3.part_id) >0  and  (select COUNT(*) from  base_part_template bpt where bpt.part_id= t2.part_id)>0  and" +
+            "        t.enabled=1 ";
 
         String sql2 = "SELECT count(*) FROM mes_mo_schedule t" +
-                "     left join base_machine t1" +
-                "        on t1.id=t.machine_id" +
-                "        left join base_parts t2" +
-                "        on t2.part_id=t.part_id" +
-                "        where" +
-                "        t.flag in(0,1) and   (select COUNT(*) from base_pack t3 where  t2.part_no = t3.part_id) >0 and  (select COUNT(*) from  base_part_template bpt where bpt.part_id= t2.part_id)>0   and  " +
-                "        t.enabled=1 ";
+            "     left join base_machine t1" +
+            "        on t1.id=t.machine_id" +
+            "        left join base_parts t2" +
+            "        on t2.part_id=t.part_id" +
+            "        where" +
+            "        t.flag in(0,1) and   (select COUNT(*) from base_pack t3 where  t2.part_no = t3.part_id) >0 and  (select COUNT(*) from  base_part_template bpt where bpt.part_id= t2.part_id)>0   and  " +
+            "        t.enabled=1 ";
         if (!StringUtils.isEmpty(query.getScheduleNo())) {
             sql += " and t.shedule_no like '" + query.getScheduleNo() + "'";
             sql2 += " and t.shedule_no like '" + query.getScheduleNo() + "'";
@@ -308,38 +308,38 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     public ScheduleObj scheduleInfo(String scheduleId) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(ScheduleObj.class);
         String sql = "SELECT " +
-                "                t.schedule_id," +
-                "                t.schedule_no," +
-                "                t.machine_id," +
-                "                        t.part_id," +
-                "                t2.part_no," +
-                "                        t2.name part_name ," +
-                "                t2.spec part_spec," +
-                "                t.schedule_qty," +
-                "                t1.name machine_name," +
-                "        cus.name customer_name," +
-                "        cus.code customer_code," +
-                "        mo.order_seq order_seq" +
-                "        FROM mes_mo_schedule t" +
-                "        left join base_machine t1" +
-                "        on t1.id=t.machine_id" +
-                "        left join base_parts t2" +
-                "        on t2.part_id=t.part_id" +
-                "        left join mes_mo_desc mo" +
-                "        on t.mo_id=mo.mo_id" +
-                "        left join base_customer cus" +
-                "        on cus.customer_id=mo.customer_id" +
-                "        where" +
-                "        t.flag in(0,1) and" +
-                "        t.enabled=1 and " +
-                " t.schedule_id='" + scheduleId + "' ;";
+            "                t.schedule_id," +
+            "                t.schedule_no," +
+            "                t.machine_id," +
+            "                        t.part_id," +
+            "                t2.part_no," +
+            "                        t2.name part_name ," +
+            "                t2.spec part_spec," +
+            "                t.schedule_qty," +
+            "                t1.name machine_name," +
+            "        cus.name customer_name," +
+            "        cus.code customer_code," +
+            "        mo.order_seq order_seq" +
+            "        FROM mes_mo_schedule t" +
+            "        left join base_machine t1" +
+            "        on t1.id=t.machine_id" +
+            "        left join base_parts t2" +
+            "        on t2.part_id=t.part_id" +
+            "        left join mes_mo_desc mo" +
+            "        on t.mo_id=mo.mo_id" +
+            "        left join base_customer cus" +
+            "        on cus.customer_id=mo.customer_id" +
+            "        where" +
+            "        t.flag in(0,1) and" +
+            "        t.enabled=1 and " +
+            " t.schedule_id='" + scheduleId + "' ;";
         List<ScheduleObj> scheduleObjList = jdbcTemplate.query(sql, rm);
         ScheduleObj scheduleObj = scheduleObjList.get(0);
         String sql2 = "SELECT t1.id,t1.name,t1.version ,t1.description,t2.id tag_id,t2.item_name tag_name FROM base_part_template  t left join  base_template t1 " +
-                "        on t1.id=t.template_id " +
-                "        left join base_items_target t2 " +
-                "        on t2.id=t1.category " +
-                "        where t.part_id='" + scheduleObj.getPartId() + "' ;";
+            "        on t1.id=t.template_id " +
+            "        left join base_items_target t2 " +
+            "        on t2.id=t1.category " +
+            "        where t.part_id='" + scheduleObj.getPartId() + "' ;";
         RowMapper rm2 = BeanPropertyRowMapper.newInstance(TemplateObj.class);
         List<TemplateObj> templateObjList = jdbcTemplate.query(sql2, rm2);
         scheduleObj.setTemplateObjList(templateObjList);
@@ -422,7 +422,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         RowMapper rm111 = BeanPropertyRowMapper.newInstance(PrintResourceObj.class);
         String sql111 = " SELECT t.id,t.apply_id,t.content,t.flag FROM barcode_print_resources t \n" +
             "where t.apply_id='" + printApplyObj.getApplyId() + "'  ";
-        sql111 = sql111 + " limit "+(barcodeQuery.getPage()-1)*barcodeQuery.getSize()+","+barcodeQuery.getSize();
+        sql111 = sql111 + "    ORDER BY t.barcode   limit "+(barcodeQuery.getPage()-1)*barcodeQuery.getSize()+","+barcodeQuery.getSize();
         List<PrintResourceObj> printResourceObjList = jdbcTemplate.query(sql111, rm111);
         printApplyObj.setPrintResourceObjList(printResourceObjList);
         RowMapper rm11 = BeanPropertyRowMapper.newInstance(PackObj.class);
@@ -503,33 +503,33 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         PrintApplyObj printApplyObj = getPrintApplyObj(applyId);
         RowMapper rm1 = BeanPropertyRowMapper.newInstance(TemplatePrintObj.class);
         String sql1 = " SELECT t1.id,t1.name,t1.description,t1.version,t1.category,f.file_name FROM base_template t1,base_file f\n" +
-                "where t1.label_file_url=f.id \n" +
-                "and t1.id='" + printApplyObj.getTemplateId() + "' ; ";
+            "where t1.label_file_url=f.id \n" +
+            "and t1.id='" + printApplyObj.getTemplateId() + "' ; ";
 
         List<TemplatePrintObj> templatePrintObjList = jdbcTemplate.query(sql1, rm1);
         TemplatePrintObj templatePrintObj = templatePrintObjList.get(0);
         printApplyObj.setTemplatePrintObj(templatePrintObj);
         RowMapper rm111 = BeanPropertyRowMapper.newInstance(PrintResourceObj.class);
         String sql111 = " SELECT t.id,t.apply_id,t.content,t.flag FROM barcode_print_resources t \n" +
-                "where t.apply_id='" + printApplyObj.getApplyId() + "' ; ";
+            "where t.apply_id='" + printApplyObj.getApplyId() + "' ; ";
         List<PrintResourceObj> printResourceObjList = jdbcTemplate.query(sql111, rm111);
         printApplyObj.setPrintResourceObjList(printResourceObjList);
         RowMapper rm11 = BeanPropertyRowMapper.newInstance(PackObj.class);
         String sql11 = " select p.id,p.qty,p.nw,p.gw,p.cuft from base_pack p " +
-                "where p.part_id='" + printApplyObj.getPartNo() + "' and p.category=2; ";
+            "where p.part_id='" + printApplyObj.getPartNo() + "' and p.category=2; ";
         List<PackObj> packObjList = jdbcTemplate.query(sql11, rm11);
         PackObj packObj = packObjList.get(0);
         printApplyObj.setPackObj(packObj);
         RowMapper rm2 = BeanPropertyRowMapper.newInstance(TemplateVarObj.class);
         String sql2 = " SELECT v.id,v.name,v.rule_id FROM base_template_var v\n" +
-                "where v.template_id='" + templatePrintObj.getId() + "' ; ";
+            "where v.template_id='" + templatePrintObj.getId() + "' ; ";
         List<TemplateVarObj> templateVarObjList = jdbcTemplate.query(sql2, rm2);
         templatePrintObj.setTemplateVarObjList(templateVarObjList);
 
         for (TemplateVarObj one : templateVarObjList) {
             RowMapper rm3 = BeanPropertyRowMapper.newInstance(RuleObj.class);
             String sql3 = " select t.id,t.position,t.category,t.defaults,t.length,t.ary  from base_barcode_rule_def t \n" +
-                    "where t.barcode_id='" + one.getRuleId() + "'; ";
+                "where t.barcode_id='" + one.getRuleId() + "'; ";
             List<RuleObj> ruleObjList = jdbcTemplate.query(sql3, rm3);
             one.setRuleObjList(ruleObjList);
         }
@@ -710,21 +710,21 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 //    }
 
 
-@Override
-@Transactional
-public void  generateLabel(String applyId, Integer num/*份数*/) {
-    BarcodePrintApply barcodePrintApply = barcodePrintApplyRepository.findById(applyId).orElse(null);
-    List<BarcodePrintResources> byApplyId = barcodePrintResourcesRepository.findByApplyId(applyId);
-    if (!byApplyId.isEmpty()) {
-        throw new MMException(" 标签已打印。");
-    }
-    if (barcodePrintApply.getFlag() == 1) {
-        throw new MMException(" 标签已打印。");
-    }
-    //日期包装
-    String dateNow = getString();
+    @Override
+    @Transactional
+    public void  generateLabel(String applyId, Integer num/*份数*/) {
+        BarcodePrintApply barcodePrintApply = barcodePrintApplyRepository.findById(applyId).orElse(null);
+        List<BarcodePrintResources> byApplyId = barcodePrintResourcesRepository.findByApplyId(applyId);
+        if (!byApplyId.isEmpty()) {
+            throw new MMException(" 标签已打印。");
+        }
+        if (barcodePrintApply.getFlag() == 1) {
+            throw new MMException(" 标签已打印。");
+        }
+        //日期包装
+        String dateNow = getString();
 
-    PrintApplyObj printApplyObj = printDetail(applyId);
+        PrintApplyObj printApplyObj = printDetail(applyId);
         PackObj packObj = printApplyObj.getPackObj();
 
         Integer allQty = printApplyObj.getQty();
@@ -745,11 +745,11 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
                 Collections.sort(ruleObjList, new
                     Comparator<RuleObj>() {
                         @Override
-                    public int compare(RuleObj o1, RuleObj o2) {
-                        return o1.getPosition() > o2.getPosition() ? 1 : -1;
-                    }
+                        public int compare(RuleObj o1, RuleObj o2) {
+                            return o1.getPosition() > o2.getPosition() ? 1 : -1;
+                        }
 
-                });
+                    });
                 String value = "";
                 for (int x =0;x<ruleObjList.size();x++) {
                     RuleObj rule=ruleObjList.get(x);
@@ -766,11 +766,11 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
                         serialCode=s;
                     }else {
                         //s 补0
-                      int numlength =  length-length1;
-                      String seria="";
-                      for(int l = 0; l<numlength; l++){
-                          seria+="0";
-                      }
+                        int numlength =  length-length1;
+                        String seria="";
+                        for(int l = 0; l<numlength; l++){
+                            seria+="0";
+                        }
                         serialCode=seria+s;
                     }
 
@@ -800,9 +800,9 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
             one.setContent(content);
             one.setFlag(0);
             String data=JSONObject.toJSONString(item);
-            one.setBarcode(data);
+            one.setBarcode(item.get("barcode"));
             String barcode = one.getBarcode();
-            JSONObject parse = JSONObject.parseObject(barcode);
+            JSONObject parse = JSONObject.parseObject(data);
             Object barCode =  parse.get("BarCode");
             if(barCode !=null){
                 one.setBarcode((String) barCode);
