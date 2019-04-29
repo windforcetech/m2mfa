@@ -42,7 +42,7 @@ public class BaseBarcodeRuleController {
     /**
      * 列表
      */
-    @PostMapping(value = "/list")
+    @RequestMapping(value = "/list")
     @ApiOperation(value="条形码主表定义列表")
     @UserOperationLog("条形码主表定义列表")
     public ResponseMessage<PageUtil<BaseBarcodeRule>> list(BaseBarcodeRuleQuery query){
