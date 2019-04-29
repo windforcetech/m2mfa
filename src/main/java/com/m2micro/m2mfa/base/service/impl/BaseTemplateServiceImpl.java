@@ -62,20 +62,6 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
 
     @Override
     public PageUtil<BaseTemplate> list(BaseTemplateQuery query) {
-//        QBaseTemplate qBaseTemplate = QBaseTemplate.baseTemplate;
-//        JPAQuery<BaseTemplate> jq = queryFactory.selectFrom(qBaseTemplate);
-//        BooleanBuilder condition = new BooleanBuilder();
-//        if (StringUtils.isNotEmpty(query.getName())) {
-//
-//            condition.and(qBaseTemplate.name.like("%" + query.getName() + "%"));
-//        }
-//        if (StringUtils.isNotEmpty(query.getNumber())) {
-//
-//            condition.and(qBaseTemplate.number.like("%" + query.getNumber() + "%"));
-//        }
-//        long totalCount = jq.where(condition).fetchCount();
-//        jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-//        List<BaseTemplate> list = jq.fetch();
         String groupId = TokenInfo.getUserGroupId();
         List<BaseTemplate> baseTemplates =   getTemplates(query, groupId);
         Integer totalCount = getTemplatesCount(query, groupId);

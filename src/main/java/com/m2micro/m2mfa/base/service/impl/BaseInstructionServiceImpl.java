@@ -72,6 +72,9 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
        if(query.getEnabled()){
          condition.and(qBaseInstruction.enabled.eq(true));
        }
+        if(query.getCheckflag()){
+            condition.and(qBaseInstruction.checkFlag.eq(true));
+        }
         jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
         List<BaseInstruction> list = jq.fetch();
         List<BaseInstruction> collect = list.stream().filter(e -> {

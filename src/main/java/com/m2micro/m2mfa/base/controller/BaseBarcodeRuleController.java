@@ -46,7 +46,7 @@ public class BaseBarcodeRuleController {
     @ApiOperation(value="条形码主表定义列表")
     @UserOperationLog("条形码主表定义列表")
     public ResponseMessage<PageUtil<BaseBarcodeRule>> list(BaseBarcodeRuleQuery query){
-        PageUtil<BaseBarcodeRule> page = baseBarcodeRuleService.list(query);
+         PageUtil<BaseBarcodeRule> page = baseBarcodeRuleService.list(query);
         return ResponseMessage.ok(page);
     }
 
