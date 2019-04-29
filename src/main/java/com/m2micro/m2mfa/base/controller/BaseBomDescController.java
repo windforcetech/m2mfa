@@ -79,7 +79,9 @@ public class BaseBomDescController {
         if (StringUtils.isNotEmpty(query.getPartId())) {
             expression.and(baseBomDesc.partId.like("%" + query.getPartId() + "%"));
         }
-        expression.and((baseBomDesc.partId.in(partIds)));
+        if (StringUtils.isNotEmpty(query.getCategory())) {
+            expression.and((baseBomDesc.partId.in(partIds)));
+        }
 
         List<BaseBomDesc> baseBomDescs = Lists.newArrayList(baseBomDescService.findAll(expression));
 

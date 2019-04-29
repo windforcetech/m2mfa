@@ -17,7 +17,7 @@ public class BmbFile {
   private Integer  bmb07;
   private BigDecimal  bmb08;
   private Boolean  bmb16;
-  private Boolean  bmb19;
+  private String  bmb19;
 
   public Integer getBmb02() {
     return bmb02;
@@ -99,11 +99,11 @@ public class BmbFile {
     this.bmb16 = bmb16;
   }
 
-  public Boolean getBmb19() {
+  public String getBmb19() {
     return bmb19;
   }
 
-  public void setBmb19(Boolean bmb19) {
+  public void setBmb19(String bmb19) {
     this.bmb19 = bmb19;
   }
 }
