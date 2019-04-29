@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
 import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -156,7 +157,7 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         if(query.getIsDimission()!=null){
             sql = sql+" and sf.is_dimission = "+query.getIsDimission()+"";
         }
-        if(query.getIcCard()!=null){
+        if(StringUtils.isNotEmpty(query.getIcCard())){
             sql = sql+" and sf.ic_card = '"+query.getIcCard()+"'";
         }
         if (query.getDepartmentIds() != null && query.getDepartmentIds().size() > 0) {
@@ -168,11 +169,11 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         }
         String groupId = TokenInfo.getUserGroupId();
         sql = sql+" and sf.group_id = '"+groupId+"'";
-        //排序字段
-        String order = StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder();
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
-        sql = sql + " order by sf."+order+" "+direct;
+        sql = sql + " order by sf."+order+" "+direct+",sf.modified_on desc";
         return sql;
     }
 
@@ -219,10 +220,10 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         List<Organization> all = organizationService.findAll();
         Organization org = organizationService.findByUUID(departmentId);
         rs.add(departmentId);
-        getDepartmentidsCore(org.getId(), all, rs);
-
+        if(org!=null){
+            getDepartmentidsCore(org.getId(), all, rs);
+        }
         return rs;
-
     }
 
     //    @Override

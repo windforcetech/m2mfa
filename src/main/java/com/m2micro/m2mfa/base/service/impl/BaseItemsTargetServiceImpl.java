@@ -33,6 +33,7 @@ import java.util.Optional;
 
 /**
  * 参考资料对应表 服务实现类
+ *
  * @author liaotao
  * @since 2018-11-30
  */
@@ -59,7 +60,7 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
         jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
         List<BaseItemsTarget> list = jq.fetch();
         long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
 
     @Override
@@ -67,12 +68,12 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
         // 获取资料主表
         List<BaseItems> items = baseItemsRepository.findAllByItemName(itemName);
         // 如果不存在及不唯一（校验）
-        if(items==null||items.size()!=1){
+        if (items == null || items.size() != 1) {
             throw new MMException("资料主档不存在或异常");
         }
         // 树形
         BaseItems baseItems = items.get(0);
-        if(baseItems.getTree()){
+        if (baseItems.getTree()) {
             return getAllBaseItemsTarget(baseItems.getItemId());
         }
         // 不是树形
@@ -80,23 +81,23 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
     }
 
 
-
     /**
      * 获取资料主档对应的所有子节点
+     *
      * @param itemId
      * @return
      */
-    private List<BaseItemsTarget> getAllBaseItemsTarget(String itemId){
+    private List<BaseItemsTarget> getAllBaseItemsTarget(String itemId) {
         List<BaseItemsTarget> list = new ArrayList<>();
         //获取主档对应的子档资料
         List<BaseItemsTarget> baseItemsTargets = baseItemsTargetRepository.findAllByItemId(itemId);
-        if(baseItemsTargets==null||(baseItemsTargets!=null&&baseItemsTargets.size()==0)){
+        if (baseItemsTargets == null || (baseItemsTargets != null && baseItemsTargets.size() == 0)) {
             throw new MMException("资料主档对应的资料信息不存在！");
         }
         list.addAll(baseItemsTargets);
-        for (BaseItemsTarget baseItemsTarget:baseItemsTargets){
+        for (BaseItemsTarget baseItemsTarget : baseItemsTargets) {
             List<BaseItemsTarget> allChildren = getAllChildren(baseItemsTarget.getId());
-            if(allChildren!=null&&allChildren.size()>0){
+            if (allChildren != null && allChildren.size() > 0) {
                 list.addAll(allChildren);
             }
         }
@@ -105,19 +106,20 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
 
     /**
      * 获取所有资料的子节点
+     *
      * @param id
      * @return
      */
-    private List<BaseItemsTarget> getAllChildren(String id){
+    private List<BaseItemsTarget> getAllChildren(String id) {
         List<BaseItemsTarget> list = new ArrayList<>();
         List<BaseItemsTarget> baseItemsTargets = baseItemsTargetRepository.findAllByTreeParentId(id);
-        if(baseItemsTargets==null){
+        if (baseItemsTargets == null) {
             return null;
         }
         list.addAll(baseItemsTargets);
-        for(BaseItemsTarget baseItemsTarget:baseItemsTargets){
+        for (BaseItemsTarget baseItemsTarget : baseItemsTargets) {
             List<BaseItemsTarget> lt = getAllChildren(baseItemsTarget.getId());
-            if(lt!=null){
+            if (lt != null) {
                 list.addAll(lt);
             }
         }
@@ -129,13 +131,13 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
         // 获取资料主表
         List<BaseItems> items = baseItemsRepository.findAllByItemCode(itemCode);
         // 如果不存在及不唯一（校验）
-        if(items==null||items.size()!=1){
+        if (items == null || items.size() != 1) {
             throw new MMException("资料主档不存在或异常");
         }
         List<BaseItemsTarget> baseItemsTargets = baseItemsTargetRepository.findAllByItemId(items.get(0).getItemId());
         List<SelectNode> list = new ArrayList<>();
-        baseItemsTargets.stream().forEach(baseItemsTarget->{
-             list.add(new SelectNode(baseItemsTarget.getId(),baseItemsTarget.getItemName()));
+        baseItemsTargets.stream().forEach(baseItemsTarget -> {
+            list.add(new SelectNode(baseItemsTarget.getId(), baseItemsTarget.getItemName(), baseItemsTarget.getItemValue()));
         });
         return list;
     }
@@ -145,7 +147,7 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
         // 获取资料主表
         List<BaseItems> items = baseItemsRepository.findAllByItemCode(itemCode);
         // 如果不存在及不唯一（校验）
-        if(items==null||items.size()!=1){
+        if (items == null || items.size() != 1) {
             throw new MMException("资料主档不存在或异常");
         }
         return getAllTreeNode(items.get(0));
@@ -167,72 +169,74 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
     public BaseItemsTarget updateEntity(BaseItemsTarget baseItemsTarget) {
         ValidatorUtil.validateEntity(baseItemsTarget, UpdateGroup.class);
         BaseItemsTarget baseItemsTargetOld = findById(baseItemsTarget.getId()).orElse(null);
-        if(baseItemsTargetOld==null){
+        if (baseItemsTargetOld == null) {
             throw new MMException("数据库不存在该记录");
         }
-        PropertyUtil.copy(baseItemsTarget,baseItemsTargetOld);
+        PropertyUtil.copy(baseItemsTarget, baseItemsTargetOld);
         return save(baseItemsTargetOld);
     }
 
     @Override
     public ResponseMessage delete(String[] ids) {
         ResponseMessage responseMessage = ResponseMessage.ok();
-        List <BaseItemsTarget> ls = new ArrayList<>();
-        for(String id :ids){
+        List<BaseItemsTarget> ls = new ArrayList<>();
+        for (String id : ids) {
             List<BaseInstruction> byCategory = baseInstructionRepository.findByCategory(id);
             BaseItemsTarget baseItemsTarget = findById(id).orElse(null);
-            if(byCategory.isEmpty()){
+            if (byCategory.isEmpty()) {
                 deleteById(id);
-            }else {
+            } else {
                 ls.add(baseItemsTarget);
             }
 
         }
 
-        if(!ls.isEmpty()){
-            String [] strings = ls.stream().map(BaseItemsTarget::getItemName).toArray(String[]::new);
-            responseMessage.setMessage("类型【"+String.join(",", strings)+"】被作业指导书引用");
+        if (!ls.isEmpty()) {
+            String[] strings = ls.stream().map(BaseItemsTarget::getItemName).toArray(String[]::new);
+            responseMessage.setMessage("类型【" + String.join(",", strings) + "】被作业指导书引用");
         }
-       return responseMessage;
+        return responseMessage;
     }
 
     /**
      * 获取所有资料的子节点
+     *
      * @param item
      * @return
      */
-    private TreeNode getAllTreeNode(BaseItems item){
-        TreeNode root = new TreeNode(item.getItemId(),item.getItemName());
+    private TreeNode getAllTreeNode(BaseItems item) {
+        TreeNode root = new TreeNode(item.getItemId(), item.getItemName());
         //获取主档对应的子档资料
         List<BaseItemsTarget> baseItemsTargets = baseItemsTargetRepository.findAllByItemId(item.getItemId());
-        if(baseItemsTargets==null||(baseItemsTargets!=null&&baseItemsTargets.size()==0)){
+        if (baseItemsTargets == null || (baseItemsTargets != null && baseItemsTargets.size() == 0)) {
             throw new MMException("资料主档对应的资料信息不存在！");
         }
         List<TreeNode> firstAllTreeNode = getFirstAllTreeNode(baseItemsTargets);
-        for (TreeNode treeNode:firstAllTreeNode){
-            getAllChildrenTreeNode(treeNode,baseItemsTargets);
+        for (TreeNode treeNode : firstAllTreeNode) {
+            getAllChildrenTreeNode(treeNode, baseItemsTargets);
             root.getChildren().add(treeNode);
         }
         return root;
     }
 
-    private void getAllChildrenTreeNode(TreeNode treeNode,List<BaseItemsTarget> baseItemsTargets){
+    private void getAllChildrenTreeNode(TreeNode treeNode, List<BaseItemsTarget> baseItemsTargets) {
         //获取下一级所有节点
-        List<TreeNode> nextAllTreeNode = getNextAllTreeNode(treeNode,baseItemsTargets);
-        if(nextAllTreeNode==null||(nextAllTreeNode!=null&&nextAllTreeNode.size()==0)){
-            return ;
+        List<TreeNode> nextAllTreeNode = getNextAllTreeNode(treeNode, baseItemsTargets);
+        if (nextAllTreeNode == null || (nextAllTreeNode != null && nextAllTreeNode.size() == 0)) {
+            return;
         }
-        for(TreeNode nextTreeNode:nextAllTreeNode){
-            getAllChildrenTreeNode(nextTreeNode,baseItemsTargets);
+        for (TreeNode nextTreeNode : nextAllTreeNode) {
+            getAllChildrenTreeNode(nextTreeNode, baseItemsTargets);
             treeNode.getChildren().add(nextTreeNode);
         }
     }
-    private List<TreeNode> getFirstAllTreeNode(List<BaseItemsTarget> baseItemsTargets){
+
+    private List<TreeNode> getFirstAllTreeNode(List<BaseItemsTarget> baseItemsTargets) {
         List<TreeNode> list = new ArrayList<>();
         List<BaseItemsTarget> exclude = new ArrayList<>();
-        for (BaseItemsTarget baseItemsTarget:baseItemsTargets){
-            if(baseItemsTarget.getId().equalsIgnoreCase(baseItemsTarget.getTreeParentId())){
-                list.add(new TreeNode(baseItemsTarget.getId(),baseItemsTarget.getItemName()));
+        for (BaseItemsTarget baseItemsTarget : baseItemsTargets) {
+            if (baseItemsTarget.getId().equalsIgnoreCase(baseItemsTarget.getTreeParentId())) {
+                list.add(new TreeNode(baseItemsTarget.getId(), baseItemsTarget.getItemName()));
                 exclude.add(baseItemsTarget);
             }
         }
@@ -241,11 +245,11 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
     }
 
 
-    private List<TreeNode> getNextAllTreeNode(TreeNode treeNode,List<BaseItemsTarget> baseItemsTargets){
+    private List<TreeNode> getNextAllTreeNode(TreeNode treeNode, List<BaseItemsTarget> baseItemsTargets) {
         List<TreeNode> list = new ArrayList<>();
-        for(BaseItemsTarget baseItemsTarget:baseItemsTargets){
-            if(treeNode.getId().equals(baseItemsTarget.getTreeParentId())){
-                list.add(new TreeNode(baseItemsTarget.getId(),baseItemsTarget.getItemName()));
+        for (BaseItemsTarget baseItemsTarget : baseItemsTargets) {
+            if (treeNode.getId().equals(baseItemsTarget.getTreeParentId())) {
+                list.add(new TreeNode(baseItemsTarget.getId(), baseItemsTarget.getItemName()));
             }
         }
         return list;

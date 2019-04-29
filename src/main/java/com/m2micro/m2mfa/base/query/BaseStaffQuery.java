@@ -26,6 +26,9 @@ public class BaseStaffQuery extends Query {
     @ApiModelProperty(value = "性别")
     private String gender;
 
+    @ApiModelProperty(value = "所属部门Id")
+    private String departmentId;
+
     @ApiModelProperty(value = "职位id")
     private String dutyId;
 
@@ -45,7 +48,7 @@ public class BaseStaffQuery extends Query {
     private Boolean isDimission;
 
     @ApiModelProperty(value = "卡号")
-    private Boolean icCard;
+    private String icCard;
 
     @ApiModelProperty(value = "是否有效 ")
     private Boolean enabled;

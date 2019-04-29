@@ -56,22 +56,13 @@ public class BaseStaffController {
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     @ApiOperation(value = "员工（职员）表列表")
     @UserOperationLog("员工（职员）表列表")
-    public ResponseMessage<PageUtil<BaseStaffDetailObj>> list(@RequestBody BaseStaffQueryObj baseStaffQueryObj) {
-        BaseStaffQuery query = new BaseStaffQuery();
-        query.setCode(baseStaffQueryObj.getCode());
-        query.setName(baseStaffQueryObj.getName());
-        if (StringUtils.isNotEmpty(baseStaffQueryObj.getDepartmentId())) {
-            List<String> departmentIds = baseStaffService.getAllIDsOfDepartmentTree(baseStaffQueryObj.getDepartmentId());
+    public ResponseMessage<PageUtil<BaseStaffDetailObj>> list(@RequestBody BaseStaffQuery query) {
+        if (StringUtils.isNotEmpty(query.getDepartmentId())) {
+            List<String> departmentIds = baseStaffService.getAllIDsOfDepartmentTree(query.getDepartmentId());
             //   List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
             query.setDepartmentIds(departmentIds);
         }
-        query.setSize(baseStaffQueryObj.getSize());
-        query.setPage(baseStaffQueryObj.getPage());
-        query.setEnabled(baseStaffQueryObj.getEnabled());
-        query.setOrder(baseStaffQueryObj.getOrder());
-        query.setDirect(baseStaffQueryObj.getDirect());
         PageUtil<BaseStaffDetailObj> page = baseStaffService.list(query);
-
         return ResponseMessage.ok(page);
     }
 
@@ -221,4 +212,5 @@ public class BaseStaffController {
 
         return ResponseMessage.ok(page);
     }
+
 }

@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.m2mfa.base.query.BaseStationQuery;
 import com.m2micro.m2mfa.base.service.BaseStationService;
 import com.m2micro.framework.commons.exception.MMException;
@@ -63,6 +64,7 @@ public class BaseStationController {
     @ApiOperation(value="保存工位基本档")
     @UserOperationLog("保存工位基本档")
     public ResponseMessage<BaseStation> save(@RequestBody BaseStation baseStation){
+        baseStation.setGroupId(TokenInfo.getUserGroupId());
         return ResponseMessage.ok(baseStationService.saveEntity(baseStation));
     }
 
