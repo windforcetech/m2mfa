@@ -13,6 +13,7 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 /**
  * 员工（职员）表
@@ -21,6 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @Entity
 @ApiModel(value="BaseStaff对象", description="员工（职员）表")
+@Data
 public class BaseStaff extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -49,7 +51,6 @@ public class BaseStaff extends BaseEntity implements Serializable {
     //@NotEmpty(message="部门主键不能为空",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "基础组织架构岗位主键")
     private String departmentId;
-
     @ApiModelProperty(value = "mes职能主键")
     private String dutyId;
     @Size(max=50,message = "身份证号码字节不能大于50位",groups = {AddGroup.class, UpdateGroup.class})
@@ -75,11 +76,9 @@ public class BaseStaff extends BaseEntity implements Serializable {
     private Boolean enabled;
     @ApiModelProperty(value = "删除标识")
     private Boolean deletionStateCode;
-
     @Transient
     @ApiModelProperty(value = "所属工位ID")
     private String stationId;
-
     @Transient
     @ApiModelProperty(value = "工位名称")
     private String  stationName;
@@ -87,185 +86,17 @@ public class BaseStaff extends BaseEntity implements Serializable {
     @Size(max=15,message = "卡号长度不能大于15位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "卡号")
     private String icCard;
-
-    public String getIcCard() {
-        return icCard;
-    }
-
-    public void setIcCard(String icCard) {
-        this.icCard = icCard;
-    }
-
-    public String getStationId() {
-        return stationId;
-    }
-
-    public void setStationId(String stationId) {
-        this.stationId = stationId;
-    }
-
-    public String getStationName() {
-        return stationName;
-    }
-
-    public void setStationName(String stationName) {
-        this.stationName = stationName;
-    }
-
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
-
     @Size(max=32,message = "描述字节不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "描述")
     private String description;
     @ApiModelProperty(value = "用户主键")
     private String userId;
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
     @ApiModelProperty(value = "是否自动创建关联账户")
     private  Boolean needAddUser;
 
-    public Boolean getNeedAddUser() {
-        return needAddUser;
-    }
-
-    public void setNeedAddUser(Boolean needAddUser) {
-        this.needAddUser = needAddUser;
-    }
-
-    public String getStaffId() {
-        return staffId;
-    }
-    public void setStaffId(String staffId) {
-        this.staffId = staffId;
-    }
-
-    public String getStaffName() {
-        return staffName;
-    }
-    public void setStaffName(String staffName) {
-        this.staffName = staffName;
-    }
-
-    public String getCode() {
-        return code;
-    }
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
-    }
-
-    public String getCompanyId() {
-        return companyId;
-    }
-    public void setCompanyId(String companyId) {
-        this.companyId = companyId;
-    }
-
-    public String getDepartmentId() {
-        return departmentId;
-    }
-    public void setDepartmentId(String departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    public String getDutyId() {
-        return dutyId;
-    }
-    public void setDutyId(String dutyId) {
-        this.dutyId = dutyId;
-    }
-
-    public String getIdCard() {
-        return idCard;
-    }
-    public void setIdCard(String idCard) {
-        this.idCard = idCard;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getMobile() {
-        return mobile;
-    }
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
-    }
-
-    public String getTelephone() {
-        return telephone;
-    }
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
-
-    public Boolean getDimission() {
-        return isDimission;
-    }
-    public void setDimission(Boolean isDimission) {
-        this.isDimission = isDimission;
-    }
-
-    public Date getDimissionDate() {
-        return dimissionDate;
-    }
-    public void setDimissionDate(Date dimissionDate) {
-        this.dimissionDate = dimissionDate;
-    }
-
-    public String getDimissionCause() {
-        return dimissionCause;
-    }
-    public void setDimissionCause(String dimissionCause) {
-        this.dimissionCause = dimissionCause;
-    }
-
-    public Boolean getEnabled() {
-        return enabled;
-    }
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public Boolean getDeletionStateCode() {
-        return deletionStateCode;
-    }
-    public void setDeletionStateCode(Boolean deletionStateCode) {
-        this.deletionStateCode = deletionStateCode;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
 
 
