@@ -78,7 +78,7 @@ public class BasePartTemplateController {
     /**
      * 列表
      */
-    @GetMapping("/list")
+    @RequestMapping("/list")
     @ApiOperation(value = "料件模板关联表列表")
     @UserOperationLog("料件模板关联表列表")
     public ResponseMessage<PageUtil<BasePartTemplateObj>> list(BasePartTemplateQuery query) {

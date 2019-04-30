@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
@@ -12,6 +14,7 @@ import com.m2micro.m2mfa.base.service.BasePartTemplateService;
 import com.m2micro.m2mfa.base.service.BaseTemplateService;
 import com.m2micro.m2mfa.base.vo.BasePartTemplateObj;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -49,6 +52,7 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
 
     @Override
     public PageUtil<BasePartTemplateObj> list(BasePartTemplateQuery query) {
+        String groupId = TokenInfo.getUserGroupId();
 
 
         String sqlCount = "SELECT count(*) \n" +
@@ -65,10 +69,6 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
                 "where a.part_id=b.part_id\n" +
                 "and a.template_id=c.id\n" +
                 "and c.category=d.id\n";
-//                "and b.part_no like '%%'\n" +
-//                "and c.name like '%%'\n" +
-//                "order by b.part_no \n" +
-//                "limit m,n";
         if (query.getPartNumber() != null && query.getPartNumber() != "") {
             sql += "and b.part_no like '%" + query.getPartNumber() + "%'\n";
             sqlCount += "and b.part_no like '%" + query.getPartNumber() + "%'\n";
@@ -78,17 +78,22 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
             sqlCount += "and c.name like '%" + query.getTemplateName() + "%'\n";
         }
 
+        if (query.getPartName() != null && query.getPartName() != "") {
+            sql += "and b.name '%" + query.getPartName() + "%'\n";
+            sqlCount += "and b.name like '%" + query.getPartName() + "%'\n";
+        }
+
         Long totalCount = jdbcTemplate.queryForObject(sqlCount, Long.class);
-        sql += "order by b.part_no \n";
-        sql += "limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + ";";
+        sql +="and a.group_id ='"+groupId+"'";
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"a.modified_on":query.getOrder());
+        sql = sql + " order by "+order+" "+direct+",a.modified_on desc";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BasePartTemplateObj> rowMapper = BeanPropertyRowMapper.newInstance(BasePartTemplateObj.class);
         List<BasePartTemplateObj> list = jdbcTemplate.query(sql, rowMapper);
-//        QBasePartTemplate qBasePartTemplate = QBasePartTemplate.basePartTemplate;
-//        JPAQuery<BasePartTemplate> jq = queryFactory.selectFrom(qBasePartTemplate);
-//
-//        jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-//        List<BasePartTemplate> list = jq.fetch();
-//        long totalCount = jq.fetchCount();
+
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
 

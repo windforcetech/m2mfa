@@ -11,6 +11,9 @@ public class BasePartTemplateQuery extends Query {
   @ApiModelProperty(value = "模板名称")
   private String templateName;
 
+  @ApiModelProperty(value = "品名")
+  private String partName;
+
   public String getPartNumber() {
     return partNumber;
   }
@@ -25,5 +28,13 @@ public class BasePartTemplateQuery extends Query {
 
   public void setTemplateName(String templateName) {
     this.templateName = templateName;
+  }
+
+  public String getPartName() {
+    return partName;
+  }
+
+  public void setPartName(String partName) {
+    this.partName = partName;
   }
 }
