@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.query.BasePackQuery;
 import com.m2micro.m2mfa.base.service.BasePackService;
@@ -93,6 +94,7 @@ public class BasePackController {
             categorys.add(one.getCategory());
             ValidatorUtil.validateEntity(one, AddGroup.class);
             one.setId(UUIDUtil.getUUID());
+            one.setGroupId(TokenInfo.getUserGroupId());
             if (basePackService.countByPartIdAndCategory(one.getPartId(), one.getCategory()) > 0) {
                 throw new MMException("料号包装类型不唯一！");
             }

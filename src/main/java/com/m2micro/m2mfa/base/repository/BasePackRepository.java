@@ -16,10 +16,10 @@ import java.util.List;
 @Repository
 public interface BasePackRepository extends BaseRepository<BasePack,String> {
 
-    int countByPartIdAndCategory(String partId,Integer category);
+    int countByPartIdAndCategoryAndGroupId(String partId,Integer category,String groupId);
     int countByIdNotAndPartIdAndCategory(String id,String partId,Integer category);
     List<BasePack> findByPartIdAndGroupId(String partId,String groupId);
-    List<BasePack> findByPartIdIn(List<String> partIds);
+    List<BasePack> findByGroupIdAndPartIdIn(String groupId,List<String> partIds);
 
     /**
      * 通过排产单id获取包装数据

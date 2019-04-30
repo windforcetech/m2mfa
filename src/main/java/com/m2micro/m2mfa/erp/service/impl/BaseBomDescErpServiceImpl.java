@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.erp.service.impl;
 
 import com.google.common.collect.Lists;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseBomDef;
 import com.m2micro.m2mfa.base.entity.BaseBomDesc;
@@ -53,7 +54,8 @@ public class BaseBomDescErpServiceImpl implements BaseBomDescErpService {
   @Override
   @Transactional
   public boolean erpBasebomdesc(String partNo,String  distinguish ) {
-    String sql ="select * from BMA_FILE  where 1=1 ";
+      String groupId = TokenInfo.getUserGroupId();
+      String sql ="select * from BMA_FILE  where 1=1 ";
     if(StringUtils.isNotEmpty(partNo)){
     sql+=" and  bma01='"+partNo+"' ";
     }
@@ -83,11 +85,11 @@ public class BaseBomDescErpServiceImpl implements BaseBomDescErpService {
       BaseBomDesc baseBomDescobj = new BaseBomDesc();
       baseBomDescobj.setBomId(bomid);
      try {
-       baseBomDescobj.setPartId(basePartsRepository.findByPartNo(bmaFile.getBma01()).get(0).getPartId());
+       baseBomDescobj.setPartId(basePartsRepository.findByPartNoAndGroupId(bmaFile.getBma01(),groupId).get(0).getPartId());
      }catch (Exception e){
        continue;
      }
-      baseBomDescobj.setPartId(basePartsRepository.findByPartNo(bmaFile.getBma01()).get(0).getPartId());
+      baseBomDescobj.setPartId(basePartsRepository.findByPartNoAndGroupId(bmaFile.getBma01(),groupId).get(0).getPartId());
       baseBomDescobj.setVersion(0);
       baseBomDescobj.setDistinguish(bmaFile.getBma06());
       baseBomDescobj.setCategory(getCategory());
@@ -113,7 +115,7 @@ public class BaseBomDescErpServiceImpl implements BaseBomDescErpService {
       baseBomDef.setId(UUIDUtil.getUUID());
       baseBomDef.setBomId(bomid);
       baseBomDef.setSequence(bmbFile.getBmb02());
-      baseBomDef.setPartId(basePartsRepository.findByPartNo(bmbFile.getBmb03()).get(0).getPartId());
+      baseBomDef.setPartId(basePartsRepository.findByPartNoAndGroupId(bmbFile.getBmb03(),groupId).get(0).getPartId());
       baseBomDef.setDistinguish(bmbFile.getBmb29());
       baseBomDef.setEffectiveDate(bmbFile.getBmb04());
       baseBomDef.setInvalidDate(bmbFile.getBmb05());

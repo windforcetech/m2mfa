@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.erp.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseParts;
@@ -97,12 +98,13 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
 
 
   private MesMoDesc getMesMoDesc(SfbFile sfbFile, String moid,List<String> oerrArrys) {
+    String groupId = TokenInfo.getUserGroupId();
     MesMoDesc moDesc= new MesMoDesc();
     moDesc.setMoId(moid);
     moDesc.setMoNumber(sfbFile.getSfb01());
     moDesc.setCategory(sfbFile.getSfb02());
     try {
-      BaseParts baseParts = basePartsRepository.findByPartNo(sfbFile.getSfb05()).get(0);
+      BaseParts baseParts = basePartsRepository.findByPartNoAndGroupId(sfbFile.getSfb05(),groupId).get(0);
       moDesc.setPartId(baseParts.getPartId());
       moDesc.setPartNo(baseParts.getPartNo());
       moDesc.setPartName(baseParts.getName());
@@ -151,6 +153,7 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
 
 
   private MesMoBom getMesMoBom(List<SfaFile> sfaFiles, int i, String moid) {
+    String groupId = TokenInfo.getUserGroupId();
     SfaFile sfaFile = sfaFiles.get(i);
     MesMoBom mesMoBom = new MesMoBom();
     mesMoBom.setId(UUIDUtil.getUUID());
@@ -159,7 +162,7 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     mesMoBom.setSentPartId(sfaFile.getSfa27());
 
     try {
-      mesMoBom.setPartName(basePartsRepository.findByPartNo(sfaFile.getSfa03()).get(0).getName());
+      mesMoBom.setPartName(basePartsRepository.findByPartNoAndGroupId(sfaFile.getSfa03(),groupId).get(0).getName());
     }catch (Exception e){
       return null;
     }
