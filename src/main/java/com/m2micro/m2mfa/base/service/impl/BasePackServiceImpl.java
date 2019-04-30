@@ -51,17 +51,23 @@ public class BasePackServiceImpl implements BasePackService {
 
     @Override
     public PageUtil<BasePack> list(BasePackQuery query) {
+        String groupId = TokenInfo.getUserGroupId();
         QBasePack qBasePack = QBasePack.basePack;
         JPAQuery<BasePack> jq = queryFactory.selectFrom(qBasePack);
         BooleanBuilder condition = new BooleanBuilder();
         if (StringUtils.isNotEmpty(query.getPartId())) {
             condition.and(qBasePack.partId.like("%" + query.getPartId() + "%"));
         }
-
+        condition.and(qBasePack.groupId.eq(groupId));
 //        jq.where(condition).orderBy(stringOrderSpecifier).offset((query.getPage() - 1) * query.getSize()*4).limit(query.getSize()*4);
         jq.where(condition);
         long totalCount = jq.fetchCount();
-        OrderSpecifier<String> stringOrderSpecifier = qBasePack.partId.asc();
+        OrderSpecifier<String> stringOrderSpecifier;
+        if(StringUtils.isNotEmpty(query.getDirect())&&"desc".equalsIgnoreCase(query.getDirect())){
+            stringOrderSpecifier = qBasePack.partId.desc();
+        }else{
+            stringOrderSpecifier = qBasePack.partId.asc();
+        }
         jq.orderBy(stringOrderSpecifier).offset((query.getPage() - 1) * query.getSize()*4).limit(query.getSize()*4);
 
         List<BasePack> list = jq.fetch();
@@ -71,7 +77,7 @@ public class BasePackServiceImpl implements BasePackService {
 
     @Override
     public int countByPartIdAndCategory(String partId, Integer category) {
-        return basePackRepository.countByPartIdAndCategory(partId, category);
+        return basePackRepository.countByPartIdAndCategoryAndGroupId(partId, category,TokenInfo.getUserGroupId());
     }
 
     @Override
@@ -88,13 +94,13 @@ public class BasePackServiceImpl implements BasePackService {
     public ResponseMessage findByPartIdIn(List<String> partIds) {
         List<String> ids=new ArrayList<>();
         List<BaseParts> disableDelete=new ArrayList<>();
-        List<BasePack> byPartIdIn = basePackRepository.findByPartIdIn(partIds);
+        List<BasePack> byPartIdIn = basePackRepository.findByGroupIdAndPartIdIn(TokenInfo.getUserGroupId(),partIds);
         for(BasePack on :byPartIdIn){
-            List<BaseParts> byPartNo = basePartsRepository.findByPartNo(on.getPartId());
+            List<BaseParts> byPartNo = basePartsRepository.findByPartNoAndGroupId(on.getPartId(),TokenInfo.getUserGroupId());
             if(byPartNo.isEmpty()){
                 throw  new MMException("料件编号有误。");
             }
-            List<BasePartTemplate> byPartId = basePartTemplateRepository.findByPartId(byPartNo.get(0).getPartId());
+            List<BasePartTemplate> byPartId = basePartTemplateRepository.findByPartIdAndGroupId(byPartNo.get(0).getPartId(),TokenInfo.getUserGroupId());
             if(!byPartId.isEmpty()){
                 disableDelete.add(byPartNo.get(0));
                 continue;

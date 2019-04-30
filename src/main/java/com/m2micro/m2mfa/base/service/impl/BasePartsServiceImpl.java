@@ -558,7 +558,7 @@ public class BasePartsServiceImpl implements BasePartsService {
 
     @Override
     public int countByPartNo(String partNo) {
-        return basePartsRepository.countByPartNo(partNo);
+        return basePartsRepository.countByPartNoAndGroupId(partNo,TokenInfo.getUserGroupId());
     }
 
 

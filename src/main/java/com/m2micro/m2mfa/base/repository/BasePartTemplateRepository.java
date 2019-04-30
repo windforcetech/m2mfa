@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface BasePartTemplateRepository extends BaseRepository<BasePartTemplate,String> {
 
-   List<BasePartTemplate>findByPartId(String partId);
+   List<BasePartTemplate>findByPartIdAndGroupId(String partId,String groupId);
 
    List<BasePartTemplate>findByTemplateId(String templateId);
 }
