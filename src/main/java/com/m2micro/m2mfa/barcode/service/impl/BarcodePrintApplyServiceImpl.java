@@ -52,17 +52,6 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     }
 
 
-//    @Override
-//    public PageUtil<BarcodePrintApply> list(Query query) {
-//        QBarcodePrintApply qBarcodePrintApply = QBarcodePrintApply.barcodePrintApply;
-//        JPAQuery<BarcodePrintApply> jq = queryFactory.selectFrom(qBarcodePrintApply);
-//
-//        jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-//        List<BarcodePrintApply> list = jq.fetch();
-//        long totalCount = jq.fetchCount();
-//        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
-//    }
-
 
     public PageUtil<PrintApplyObj> printApplyList1(PrintApplyQuery query) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
