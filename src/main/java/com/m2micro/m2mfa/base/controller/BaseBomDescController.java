@@ -27,10 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -116,6 +113,20 @@ public class BaseBomDescController {
     @Transactional
     public ResponseMessage<List<BaseBomDef>> save(@RequestBody BaseBomDesc staffShiftObj) throws ParseException {
         ValidatorUtil.validateEntity(staffShiftObj, AddGroup.class);
+
+        List<BaseBomDef> bomDefObjList = staffShiftObj.getBomDefObjList();
+        List<String> addPartIds = new ArrayList<>();
+        bomDefObjList.forEach(x -> {
+            addPartIds.add(x.getPartId());
+        });
+
+
+        List<String> partIds = new ArrayList<>();
+        boolean b = checkDeadLoop(staffShiftObj, partIds, addPartIds);
+        if (b) {
+            ResponseMessage.error("物料编号" + partIds.get(0) + "形成死环！");
+        }
+
         QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
         BooleanExpression expression = baseBomDesc.category.eq(staffShiftObj.getCategory())
                 .and(baseBomDesc.partId.eq(staffShiftObj.getPartId()))
@@ -127,7 +138,7 @@ public class BaseBomDescController {
             throw new MMException("料号、类型、版本唯一");
         staffShiftObj.setBomId(UUIDUtil.getUUID());
         BaseBomDesc save = baseBomDescService.save(staffShiftObj);
-        List<BaseBomDef> bomDefObjList = staffShiftObj.getBomDefObjList();
+
         bomDefObjList.forEach(x -> {
             x.setBomId(save.getBomId());
             x.setId(UUIDUtil.getUUID());
@@ -135,6 +146,31 @@ public class BaseBomDescController {
 
         return ResponseMessage.ok(baseBomDefService.saveAll(bomDefObjList));
     }
+
+    private boolean checkDeadLoop(BaseBomDesc staffShiftObj, List<String> partIds, List<String> addPartIds) {
+        QBaseBomDef qBaseBomDef = QBaseBomDef.baseBomDef;
+        BooleanExpression booleanExpression = qBaseBomDef.partId.eq(staffShiftObj.getPartId());
+        //一个主表通过partId与多个子表关联
+        Iterable<BaseBomDef> bomDefIterable = baseBomDefService.findAll(booleanExpression);
+
+        for (BaseBomDef baseBomDef : bomDefIterable) {
+            partIds.add(baseBomDef.getPartId());
+            for (String addpartId : addPartIds) {
+                if (partIds.contains(addpartId)) {
+                    partIds.clear();
+                    partIds.add(addpartId);
+                    return true;
+                }
+            }
+            //一个子表只有一个父表
+            BaseBomDesc baseBomDesc = baseBomDescService.findById(baseBomDef.getBomId()).orElse(null);
+            return checkDeadLoop(baseBomDesc, partIds, addPartIds);
+
+        }
+
+        return false;
+    }
+
 
     /**
      * 更新
