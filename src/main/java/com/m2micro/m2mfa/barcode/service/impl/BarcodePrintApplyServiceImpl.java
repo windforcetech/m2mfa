@@ -1,5 +1,8 @@
 package com.m2micro.m2mfa.barcode.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
+import org.apache.commons.lang3.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -22,7 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -109,6 +112,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 
     @Override
     public PageUtil<PrintApplyObj> printApplyList(PrintApplyQuery query) {
+      String groupId = TokenInfo.getUserGroupId();
         RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
         String sql = " select t3.item_name source_type,\n" +
                 "t3.id source_id,\n" +
@@ -134,7 +138,8 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "p.name part_name ,\n" +
                 " p.spec  ,\n" +
                 " mo.mo_number,  \n" +
-                " mo.order_seq  \n" +
+                " mo.order_seq  ,\n" +
+                 "t.modified_on \n" +
                 "from barcode_print_apply t ,\n" +
                 "base_parts p,\n" +
                 "base_template t1,\n" +
@@ -149,10 +154,11 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "and t.part_id=p.part_id\n" +
                 "and schedule.schedule_id=t.source\n" +
                 "and t.category=t3.id\n" +
-                "and mo.mo_id=schedule.mo_id " +
-                "and t.flag in(0,1)  ";
+                "and mo.mo_id=schedule.mo_id " ;
 
-        String sql2 = " select\n" +
+               sql = getSql(query, groupId, sql);
+
+      String sql2 = " select\n" +
                 " count(t.id) \n" +
                 "from barcode_print_apply t ,\n" +
                 "base_parts p,\n" +
@@ -166,19 +172,93 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "and t.customer_no=cus.code\n" +
                 "and t.part_id=p.part_id\n" +
                 "and schedule.schedule_id=t.source\n" +
-                "and t.category=t3.id\n" +
-                "and t.flag in(0,1)  ;";
+                "and t.category=t3.id\n" ;
 
+         sql2 = getSql(query, groupId, sql2);
         Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
-        sql += " order by t.id limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
+
+
+      //排序方向
+      String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+      //排序字段(驼峰转换)
+      String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"t.modified_on":query.getOrder());
+      sql = sql + " order by "+order+" "+direct+",t.modified_on desc";
+      sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
 
         List<PrintApplyObj> templateList = jdbcTemplate.query(sql, rm);
         return PageUtil.of(templateList, count, query.getSize(), query.getPage());
 
     }
 
+  /**
+   * 查询条件拼接
+   * @param query
+   * @param groupId
+   * @param sql
+   * @return
+   */
+  private String getSql(PrintApplyQuery query, String groupId, String sql) {
+    if(StringUtils.isNotEmpty(query.getFlag())){
+    sql +=  "and t.flag in("+query.getFlag()+")  ";
+    }else {
+      sql += "and t.flag in(0,1)  ";
+    }
 
-    @Override
+    if(StringUtils.isNotEmpty(query.getApplyId())){
+      sql +=  " and  t.id = '"+query.getApplyId()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getCategory())){
+      sql +=  " and  t.category = '"+query.getCategory()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getSourceType())){
+      sql +=  " and  t3.item_name = '"+query.getSourceType()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getSource())){
+      sql +=  " and  t3.id = '"+query.getSource()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getScheduleNo())){
+      sql +=  " and  schedule.schedule_no = '"+query.getScheduleNo()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getFlagType())){
+      sql +=  " and  t2.item_name  = '"+query.getFlagType()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getTemplateName())){
+      sql +=  " and  t1.name  = '"+query.getTemplateName()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getCustomerName())){
+      sql +=  " and  cus.name  = '"+query.getCustomerName()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getCustomerCode())){
+      sql +=  " and  cus.code  = '"+query.getCustomerCode()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getPartName())){
+      sql +=  " and  p.name  = '"+query.getPartName()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getPartNo())){
+      sql +=  " and  p.part_no = '"+query.getPartNo()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getSpec())){
+      sql +=  " and   p.spec = '"+query.getSpec()+"' ";
+    }
+    if(query.getEnabled()!=null){
+      sql +=  " and   t.enabled = '"+query.getEnabled()+"' ";
+    }
+    if(StringUtils.isNotEmpty(query.getCheckFlag())){
+      sql +=  " and   t.check_flag = "+query.getCheckFlag()+" ";
+    }
+    if(StringUtils.isNotEmpty(query.getStartDate())){
+      sql +=  " and t.modified_on>=  '"+query.getStartDate()+"' ";
+    }
+
+    if(StringUtils.isNotEmpty(query.getEndDate())){
+      sql +=  " and  t.modified_on<= '"+query.getEndDate()+"' ";
+    }
+    sql +="and t.group_id ='"+groupId+"'";
+    return sql;
+  }
+
+
+  @Override
     public PageUtil<PrintApplyObj> printApplyListAfterCheckedOk(PrintApplyQuery query) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
         String sql = " select t3.item_name source_type,\n" +
