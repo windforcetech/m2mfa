@@ -5,7 +5,6 @@ import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
-import com.m2micro.m2mfa.barcode.entity.BarcodePrintResources;
 import com.m2micro.m2mfa.barcode.query.BarcodeQuery;
 import com.m2micro.m2mfa.barcode.query.PrintApplyQuery;
 import com.m2micro.m2mfa.barcode.query.ScheduleQuery;
@@ -21,10 +20,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * 标签打印表单 前端控制器

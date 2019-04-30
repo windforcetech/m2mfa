@@ -69,9 +69,9 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
                 "where a.part_id=b.part_id\n" +
                 "and a.template_id=c.id\n" +
                 "and c.category=d.id\n";
-        if (query.getPartNumber() != null && query.getPartNumber() != "") {
-            sql += "and b.part_no like '%" + query.getPartNumber() + "%'\n";
-            sqlCount += "and b.part_no like '%" + query.getPartNumber() + "%'\n";
+        if (query.getPartNo() != null && query.getPartNo() != "") {
+            sql += "and b.part_no like '%" + query.getPartNo() + "%'\n";
+            sqlCount += "and b.part_no like '%" + query.getPartNo() + "%'\n";
         }
         if (query.getTemplateName() != null && query.getTemplateName() != "") {
             sql += "and c.name like '%" + query.getTemplateName() + "%'\n";
