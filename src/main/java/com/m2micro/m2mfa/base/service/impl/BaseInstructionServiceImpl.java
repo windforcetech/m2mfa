@@ -16,6 +16,7 @@ import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,15 +66,54 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
             condition.and(qBaseInstruction.instructionName.like("%"+query.getInstructionName()+"%"));
         }
         if(StringUtils.isNotEmpty(query.getCategory())){
-            condition.and(qBaseInstruction.category.like("%"+query.getCategory()+"%"));
+            condition.and(qBaseInstruction.category.eq(query.getCategory()));
         }
-       if(query.getEnabled()){
-         condition.and(qBaseInstruction.enabled.eq(true));
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            condition.and(qBaseInstruction.description.like("%"+query.getDescription()+"%"));
+        }
+       if(query.getEnabled()!=null){
+         condition.and(qBaseInstruction.enabled.eq(query.getEnabled()));
        }
-        if(query.getCheckflag()!=null &&  query.getCheckflag()){
-            condition.and(qBaseInstruction.checkFlag.eq(true));
+        if(query.getCheckflag()!=null){
+            condition.and(qBaseInstruction.checkFlag.eq(query.getCheckflag()));
         }
-        jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
+        jq.where(condition);
+        OrderSpecifier orderSpecifier = null;
+        if(orderSpecifier==null||"createOn".equals(query.getDirect())){
+            orderSpecifier = qBaseInstruction.createOn.desc();
+        }
+        if(StringUtils.isNotEmpty(query.getDirect())){
+            if("instructionCode".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = qBaseInstruction.instructionCode.desc();
+                }else{
+                    orderSpecifier = qBaseInstruction.instructionCode.asc();
+                }
+            }
+            if("instructionName".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = qBaseInstruction.instructionName.desc();
+                }else{
+                    orderSpecifier = qBaseInstruction.instructionName.asc();
+                }
+            }
+            if("category".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = qBaseInstruction.category.desc();
+                }else{
+                    orderSpecifier = qBaseInstruction.category.asc();
+                }
+            }
+            if("enabled".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = qBaseInstruction.enabled.desc();
+                }else{
+                    orderSpecifier = qBaseInstruction.enabled.asc();
+                }
+            }
+
+        }
+        jq.orderBy(orderSpecifier).orderBy(qBaseInstruction.createOn.desc()).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
         List<BaseInstruction> list = jq.fetch();
         List<BaseInstruction> collect = list.stream().filter(e -> {
             e.setCategoryName(baseItemsTargetService.findById(e.getCategory()).orElse(null).getItemName());

@@ -18,6 +18,8 @@ public class BaseInstructionQueryObj extends Query {
   private String category;
   @ApiModelProperty(value = "有效否")
   private Boolean checkflag;
+  @ApiModelProperty(value = "描述")
+  private String description;
 
 
 
