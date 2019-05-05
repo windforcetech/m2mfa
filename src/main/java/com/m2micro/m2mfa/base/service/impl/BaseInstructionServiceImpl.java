@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -127,6 +128,7 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
     @Override
     @Transactional
     public void  save(BaseInstruction baseInstruction, MultipartFile file) {
+        baseInstruction.setGroupId(TokenInfo.getUserGroupId());
         //获取原有的版本，有的话全部为“无效”，
         if(file==null){
             throw  new MMException("请选择作业指导书文件");

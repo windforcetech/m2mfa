@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
 import com.m2micro.m2mfa.base.entity.BasePartInstruction;
 import com.m2micro.m2mfa.base.query.BasePartInstructionQuery;
 import com.m2micro.m2mfa.base.repository.BasePartInstructionRepository;
@@ -74,6 +75,12 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             }
             if(StringUtils.isNotEmpty(query.getInstructionCode())){
                 sql+=" and bi.instruction_code='"+query.getInstructionCode()+"' \n";
+             }
+            if(query.getEnabled()!=null){
+                sql+=" and bpi.enabled = "+query.getEnabled()+" \n";
+            }
+            if(StringUtils.isNotEmpty(query.getDescription())){
+                sql+=" and bpi.description like '%"+query.getDescription()+"%' \n";
             }
 
         String Countsql ="select COUNT(*) from base_part_instruction bpis where bpis.id in( SELECT\n" +
@@ -93,6 +100,17 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
         if(StringUtils.isNotEmpty(query.getInstructionCode())){
             Countsql+=" and bi.instruction_code='"+query.getInstructionCode()+"' \n";
         }
+        if(query.getEnabled()!=null){
+            Countsql+=" and bpi.enabled = "+query.getEnabled()+" \n";
+        }
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            Countsql+=" and bpi.description like '%"+query.getDescription()+"%' \n";
+        }
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by bpi."+order+" "+direct+",bpi.modified_on desc";
         sql+="  limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BasePartInstructionModel> rowMapper = BeanPropertyRowMapper.newInstance(BasePartInstructionModel.class);
         List<BasePartInstructionModel>basePartInstructionModels= jdbcTemplate.query(sql,rowMapper);

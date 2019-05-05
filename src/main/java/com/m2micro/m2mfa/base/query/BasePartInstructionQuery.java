@@ -11,4 +11,8 @@ public class BasePartInstructionQuery extends Query {
   private String partNo;
   @ApiModelProperty(value = "编号")
   private String instructionCode;
+  @ApiModelProperty(value = "有效否")
+  private Boolean enabled;
+  @ApiModelProperty(value = "描述")
+  private String description;
 }
