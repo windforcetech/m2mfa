@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.controller;
 
 import com.google.common.collect.Lists;
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseStaffshiftQuery;
 import com.m2micro.m2mfa.base.service.BaseShiftService;
@@ -76,7 +77,7 @@ public class BaseStaffshiftController {
     public ResponseMessage<StaffShiftByOne> listbystaff(BaseStaffshiftQuery query) {
         QBaseStaffshift qBaseStaff = QBaseStaffshift.baseStaffshift;
         BooleanExpression expression = qBaseStaff.shiftDate.between(query.getStartTime(), query.getEndTime())
-                .and(qBaseStaff.staffId.eq(query.getStaffId()));
+                .and(qBaseStaff.staffId.eq(query.getStaffId())).and(qBaseStaff.groupId.eq(TokenInfo.getUserGroupId()));
         ArrayList<BaseStaffshift> baseStaffs = Lists.newArrayList(baseStaffshiftService.findAll(expression));
 
 //        List<String> baseShiftIdList = baseStaffs.stream()
@@ -151,13 +152,14 @@ public class BaseStaffshiftController {
     @ApiOperation(value = "保存员工排班表")
     @UserOperationLog("保存员工排班表")
     public ResponseMessage<List<StaffShiftResult>> save(@RequestBody StaffShiftObj staffShiftObj) throws ParseException {
+        String groupId = TokenInfo.getUserGroupId();
         ValidatorUtil.validateEntity(staffShiftObj, AddGroup.class);
         List<BaseStaffshift> baseStaffshiftList = new ArrayList<>();
         List<String> stringst;
         //员工id为空，取部门所有人员
         if (StringUtils.isEmpty(staffShiftObj.getStaffId())) {
             QBaseStaff qBaseStaff = QBaseStaff.baseStaff;
-            BooleanExpression expression = qBaseStaff.departmentId.eq(staffShiftObj.getDepartmentId());
+            BooleanExpression expression = qBaseStaff.departmentId.eq(staffShiftObj.getDepartmentId()).and(qBaseStaff.groupId.eq(groupId));
             ArrayList<BaseStaff> baseStaffs = Lists.newArrayList(baseStaffService.findAll(expression));
             stringst = baseStaffs.stream().map(x -> x.getStaffId()).collect(Collectors.toList());
         } else {
@@ -233,7 +235,8 @@ public class BaseStaffshiftController {
                 QBaseStaffshift qBaseStaff = QBaseStaffshift.baseStaffshift;
                 BooleanExpression expression = qBaseStaff.shiftDate.eq(baseStaffshift.getShiftDate())
                         //.and(qBaseStaff.shiftId.eq(baseStaffshift.getShiftId()))
-                        .and(qBaseStaff.staffId.eq(baseStaffshift.getStaffId()));
+                        .and(qBaseStaff.staffId.eq(baseStaffshift.getStaffId()))
+                        .and(qBaseStaff.groupId.eq(groupId));
                 ArrayList<BaseStaffshift> baseStaffs = Lists.newArrayList(baseStaffshiftService.findAll(expression));
                 if (baseStaffs.size() > 0) {
 
@@ -257,7 +260,8 @@ public class BaseStaffshiftController {
                 QBaseStaffshift qBaseStaff = QBaseStaffshift.baseStaffshift;
                 BooleanExpression expression = qBaseStaff.shiftDate.eq(baseStaffshift.getShiftDate())
                         .and(qBaseStaff.shiftId.eq(baseStaffshift.getShiftId()))
-                        .and(qBaseStaff.staffId.eq(baseStaffshift.getStaffId()));
+                        .and(qBaseStaff.staffId.eq(baseStaffshift.getStaffId()))
+                        .and(qBaseStaff.groupId.eq(groupId));
                 ArrayList<BaseStaffshift> baseStaffs = Lists.newArrayList(baseStaffshiftService.findAll(expression));
                 if (baseStaffs.size() == 0) {
                     baseStaffshiftService.save(baseStaffshift);
@@ -283,8 +287,7 @@ public class BaseStaffshiftController {
 
         List<BaseStaffshift> list = new ArrayList<>();
         List<String> listDelete = new ArrayList<>();
-        for (BaseStaffshift baseStaffshift1 : baseStaffshift
-        ) {
+        for (BaseStaffshift baseStaffshift1 : baseStaffshift) {
             ValidatorUtil.validateEntity(baseStaffshift1, UpdateGroup.class);
             BaseStaffshift baseStaffshiftOld = baseStaffshiftService.findById(baseStaffshift1.getId()).orElse(null);
             if (baseStaffshiftOld == null) {
