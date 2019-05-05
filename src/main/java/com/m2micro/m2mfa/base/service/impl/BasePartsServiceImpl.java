@@ -471,7 +471,7 @@ public class BasePartsServiceImpl implements BasePartsService {
             countSql = countSql + " and bp.category = '" + query.getCategory() + "'";
         }
         //if(StringUtils.isNotEmpty(groupId)){
-        countSql = sql + " and bp.group_id = '" + groupId + "' ";
+        countSql = countSql + " and bp.group_id = '" + groupId + "' ";
         //}
         long totalCount = jdbcTemplate.queryForObject(countSql, long.class);
 
