@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseAqlDef;
 import com.m2micro.m2mfa.base.entity.BaseAqlDesc;
@@ -63,13 +65,8 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
             "LEFT JOIN base_items_target bitt ON bd.category = bitt.id\n" +
             "WHERE\n" +
             "	1 = 1\n" ;
-        if(StringUtils.isNotEmpty(query.getAqlCode())){
-            totalCountsql += "AND bd.aql_code = '"+query.getAqlCode()+"'\n" ;
-        }
-        if(StringUtils.isNotEmpty(query.getAqlName())){
-            totalCountsql += "AND bd.aql_name = '"+query.getAqlName()+"'\n" ;
-        }
 
+        totalCountsql +=sqlPing(query);
         Long totalCount = jdbcTemplate.queryForObject(totalCountsql, Long.class);
 
 
@@ -80,21 +77,42 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
           "LEFT JOIN base_items_target bitt ON bd.category = bitt.id\n" +
           "WHERE\n" +
           "	1 = 1\n" ;
-         if(StringUtils.isNotEmpty(query.getAqlCode())){
-             sql += "AND bd.aql_code = '"+query.getAqlCode()+"'\n" ;
-         }
-        if(StringUtils.isNotEmpty(query.getAqlName())){
-            sql += "AND bd.aql_name = '"+query.getAqlName()+"'\n" ;
-        }
-          sql +="ORDER BY\n" +
-          "	bd.aql_id ASC\n" +
-          "LIMIT "+(query.getPage() - 1) * query.getSize()+",\n" +
-          " "+query.getSize()+"";
+           sql +=sqlPing(query);
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"bd.modified_on":query.getOrder());
+        sql = sql + " order by "+order+" "+direct+",bd.modified_on desc";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseAqlDesc.class);
         List<BaseAqlDesc> baseAqlDescs = jdbcTemplate.query(sql, rm);
         return PageUtil.of(baseAqlDescs,totalCount,query.getSize(),query.getPage());
     }
 
+    /**
+     * 共同的sql
+     * @param query
+     * @return
+     */
+    public String sqlPing(BaseAqlDescQuery query ){
+        String groupId = TokenInfo.getUserGroupId();
+        String sql ="";
+        if(StringUtils.isNotEmpty(query.getAqlCode())){
+            sql += "AND bd.aql_code = '"+query.getAqlCode()+"'\n" ;
+        }
+        if(StringUtils.isNotEmpty(query.getAqlName())){
+            sql += "AND bd.aql_name = '"+query.getAqlName()+"'\n" ;
+        }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            sql += "AND bd.category = '"+query.getCategory()+"'\n" ;
+        }
+        if(query.getEnabled() !=null ){
+            sql += "AND bd.enabled = "+query.getEnabled()+" \n" ;
+        }
+
+        sql +=" and  bd.group_id ='"+groupId+"'";
+        return  sql ;
+    }
 
     @Override
     @Transactional

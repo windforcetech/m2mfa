@@ -82,6 +82,9 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
         if (StringUtils.isNotEmpty(query.getRuleName())) {
             sql +=" and  rule_name LIKE '%"+query.getRuleName()+"%'  ";
         }
+        if (query.getEnabled()!=null  ) {
+            sql +=" and enabled ="+query.getEnabled()+"  ";
+        }
         sql +="and  group_id ='"+groupId+"'";
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
@@ -106,6 +109,9 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
         }
         if (StringUtils.isNotEmpty(query.getRuleName())) {
             countsql +=" and  rule_name LIKE '%"+query.getRuleName()+"%'  ";
+        }
+        if (query.getEnabled()!=null  ) {
+            countsql +=" and enabled ="+query.getEnabled()+"  ";
         }
         countsql +=" and  group_id ='"+groupId+"'";
         return jdbcTemplate.queryForObject(countsql, Integer.class);

@@ -17,4 +17,6 @@ public class BaseQualityItemsQuery extends Query {
     private String itemCode;
     @ApiModelProperty(value = "名称")
     private String itemName;
+    @ApiModelProperty(value = "量具名称")
+    private String gauge;
 }

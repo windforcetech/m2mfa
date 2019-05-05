@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseQualityItems;
@@ -60,16 +62,6 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
 
 
 
-    /*@Override
-    public PageUtil<BaseQualityItems> list(BaseQualityItemsQuery query) {
-        QBaseQualityItems qBaseQualityItems = QBaseQualityItems.baseQualityItems;
-        JPAQuery<BaseQualityItems> jq = queryFactory.selectFrom(qBaseQualityItems);
-
-        jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-        List<BaseQualityItems> list = jq.fetch();
-        long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
-    }*/
 
     @Override
     public PageUtil<BaseQualityItems> list(BaseQualityItemsQuery query) {
@@ -99,28 +91,42 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
                     "LEFT JOIN base_unit bi3 ON bqi.limit_unit = bi3.unit_id\n" +
                     "WHERE\n" +
                     "	1 = 1\n";
+        sql +=sqlPing(query);
 
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"bqi.modified_on":query.getOrder());
+        sql = sql + " order by "+order+" "+direct+",bqi.modified_on desc";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper<BaseQualityItems> rm = BeanPropertyRowMapper.newInstance(BaseQualityItems.class);
+        List<BaseQualityItems> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select count(*) from base_quality_items bqi where 1=1 \n";
+        countSql +=sqlPing(query);
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    /**
+     * 共用的sql
+     * @return
+     */
+    public String sqlPing(BaseQualityItemsQuery query){
+        String groupId = TokenInfo.getUserGroupId();
+        String sql ="";
         if(StringUtils.isNotEmpty(query.getItemCode())){
             sql = sql + " and bqi.item_code like '%"+query.getItemCode()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getItemName())){
             sql = sql + " and bqi.item_name like '%"+query.getItemName()+"%'";
         }
-        sql = sql + " order by bqi.modified_on desc";
-        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-        RowMapper<BaseQualityItems> rm = BeanPropertyRowMapper.newInstance(BaseQualityItems.class);
-        List<BaseQualityItems> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_quality_items bqi where 1=1 \n";
-        if(StringUtils.isNotEmpty(query.getItemCode())){
-            countSql = countSql + " and bqi.item_code like '%"+query.getItemCode()+"%'";
+        if(StringUtils.isNotEmpty(query.getGauge())){
+            sql = sql + " and bqi.gauge =  '"+query.getGauge()+"'";
         }
-        if(StringUtils.isNotEmpty(query.getItemName())){
-            countSql = countSql + " and bqi.item_name like '%"+query.getItemName()+"%'";
-        }
-        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
-    }
 
+        sql +=" and  bqi.group_id ='"+groupId+"'";
+        return  sql ;
+    }
     @Override
     public BaseQualityItemsAddDetails addDetails() {
         BaseQualityItemsAddDetails baseQualityItemsAddDetails = new BaseQualityItemsAddDetails();

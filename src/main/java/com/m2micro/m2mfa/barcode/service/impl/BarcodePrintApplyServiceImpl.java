@@ -307,7 +307,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 
 
   /**
-   * sql 共同条件
+   * sql 共同条件printApplyList
    * @return
    */
   public String sqlPing(PrintApplyQuery query){

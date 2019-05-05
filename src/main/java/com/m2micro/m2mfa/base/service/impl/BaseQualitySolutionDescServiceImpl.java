@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
@@ -87,17 +89,13 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
                 "WHERE\n" +
                 "	bqsd.aql_id = bad.aql_id\n";
 
-        if(StringUtils.isNotEmpty(query.getSolutionCode())){
-            sql = sql + " and bqsd.solution_code like '%"+query.getSolutionCode()+"%'";
-        }
-        if(StringUtils.isNotEmpty(query.getSolutionName())){
-            sql = sql + " and bqsd.solution_name like '%"+query.getSolutionName()+"%'";
-        }
-        if(query.getEnabled()!=null){
-            sql = sql+" and bqsd.enabled = "+query.getEnabled()+"";
-        }
+        sql+=sqlPing(query);
 
-        sql = sql + " order by bqsd.modified_on desc";
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"bqsd.modified_on":query.getOrder());
+        sql = sql + " order by "+order+" "+direct+",bqsd.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseQualitySolutionDesc.class);
         List<BaseQualitySolutionDesc> list = jdbcTemplate.query(sql,rm);
@@ -108,17 +106,34 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
                         "	base_aql_desc bad\n" +
                         "WHERE\n" +
                         "	bqsd.aql_id = bad.aql_id\n";
-        if(StringUtils.isNotEmpty(query.getSolutionCode())){
-            countSql = countSql + " and bqsd.solution_code like '%"+query.getSolutionCode()+"%'";
-        }
-        if(StringUtils.isNotEmpty(query.getSolutionName())){
-            countSql = countSql + " and bqsd.solution_name like '%"+query.getSolutionName()+"%'";
-        }
-        if(query.getEnabled()!=null){
-            countSql = countSql+" and bqsd.enabled = "+query.getEnabled()+"";
-        }
+        countSql+=sqlPing(query);
+
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    /**
+     * sql共同语句
+     * @param query
+     * @return
+     */
+    public String sqlPing(BaseQualitySolutionDescQuery query){
+        String groupId = TokenInfo.getUserGroupId();
+        String sql ="";
+        if(StringUtils.isNotEmpty(query.getSolutionCode())){
+            sql = sql + " and bqsd.solution_code like '%"+query.getSolutionCode()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSolutionName())){
+            sql = sql + " and bqsd.solution_name like '%"+query.getSolutionName()+"%'";
+        }
+        if(query.getEnabled()!=null){
+            sql = sql+" and bqsd.enabled = "+query.getEnabled()+"";
+        }
+        if(StringUtils.isNotEmpty(query.getAqlId())){
+            sql = sql + " and bad.aql_id = '"+query.getAqlId()+"'";
+        }
+        sql +=" and  bqsd.group_id ='"+groupId+"'";
+        return sql ;
     }
 
     @Override
