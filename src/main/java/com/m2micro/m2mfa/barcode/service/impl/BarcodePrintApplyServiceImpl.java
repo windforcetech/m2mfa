@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.RecursiveTask;
 
 /**
  * 标签打印表单 服务实现类
@@ -285,51 +286,89 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "p.name part_name ,\n" +
                 " p.spec  ,\n" +
                 " mo.mo_number,  \n" +
-                " mo.order_seq  \n" +
-                "from barcode_print_apply t ,\n" +
-                "base_parts p,\n" +
-                "base_template t1,\n" +
-                "base_items_target t2,\n" +
-                "base_customer cus,\n" +
-                "mes_mo_schedule schedule,\n" +
-                "base_items_target t3,\n" +
-                " mes_mo_desc mo \n " +
-                "where t1.category=t2.id\n" +
-                "and t1.id= t.template_id\n" +
-                "and t.customer_no=cus.code\n" +
-                "and t.part_id=p.part_id\n" +
-                "and schedule.schedule_id=t.source\n" +
-                "and t.category=t3.id\n" +
-                "and mo.mo_id=schedule.mo_id " +
-                "and t.flag in(0,1)  " +
-                "and t.check_flag=1 ";
-
+                " mo.order_seq ,t.collar_on  ,t.collar_by  \n" +
+                "from ";
         String sql2 = " select\n" +
                 " count(t.id) \n" +
-                "from barcode_print_apply t ,\n" +
-                "base_parts p,\n" +
-                "base_template t1,\n" +
-                "base_items_target t2,\n" +
-                "base_customer cus,\n" +
-                "mes_mo_schedule schedule,\n" +
-                "base_items_target t3\n" +
-                "where t1.category=t2.id\n" +
-                "and t1.id= t.template_id\n" +
-                "and t.customer_no=cus.code\n" +
-                "and t.part_id=p.part_id\n" +
-                "and schedule.schedule_id=t.source\n" +
-                "and t.category=t3.id\n" +
-                "and t.flag in(0,1)  ;";
-
+                "from";
+        sql2+=sqlPing(query);
+        sql+=sqlPing(query);
         Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
-        sql += " order by t.id limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
-
+       //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+       //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"t.modified_on":query.getOrder());
+        sql = sql + " order by "+order+" "+direct+",t.modified_on desc";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         List<PrintApplyObj> templateList = jdbcTemplate.query(sql, rm);
         return PageUtil.of(templateList, count, query.getSize(), query.getPage());
 
     }
 
 
+  /**
+   * sql 共同条件
+   * @return
+   */
+  public String sqlPing(PrintApplyQuery query){
+    String groupId = TokenInfo.getUserGroupId();
+    String sql ="    barcode_print_apply t ,\n" +
+        "base_parts p,\n" +
+        "base_template t1,\n" +
+        "base_items_target t2,\n" +
+        "base_customer cus,\n" +
+        "mes_mo_schedule schedule,\n" +
+        "base_items_target t3,\n" +
+        " mes_mo_desc mo \n " +
+        "where t1.category=t2.id\n" +
+        "and t1.id= t.template_id\n" +
+        "and t.customer_no=cus.code\n" +
+        "and t.part_id=p.part_id\n" +
+        "and schedule.schedule_id=t.source\n" +
+        "and t.category=t3.id\n" +
+        "and mo.mo_id=schedule.mo_id " +
+        "and t.check_flag=1 ";
+
+        if(StringUtils.isNotEmpty(query.getApplyId())){
+          sql +=" and  t.id  LIKE '%"+query.getApplyId()+"%'  ";
+        }
+
+        if(StringUtils.isNotEmpty(query.getPrintCategory())){
+          sql +=" and  t.print_category  LIKE '%"+query.getPrintCategory()+"%'  ";
+        }
+
+        if(StringUtils.isNotEmpty(query.getSource())){
+          sql +=" and  t3.id  =  '"+query.getSource()+"' ";
+        }
+        if(StringUtils.isNotEmpty(query.getSourceType())){
+          sql +=" and  t3.item_name  LIKE '%"+query.getSourceType()+"%'  ";
+        }
+        if(StringUtils.isNotEmpty(query.getTemplateName())){
+          sql +=" and  t1. NAME  LIKE '%"+query.getTemplateName()+"%'  ";
+        }
+        if(StringUtils.isNotEmpty(query.getCustomerName())){
+          sql +=" and  cus. NAME   LIKE '%"+query.getCustomerName()+"%'  ";
+        }
+        if(StringUtils.isNotEmpty(query.getPartName())){
+          sql +=" and  p. NAME    LIKE '%"+query.getPartName()+"%'  ";
+        }
+        if(StringUtils.isNotEmpty(query.getStartDate())){
+          sql +=" and  t.check_On   LIKE '%"+query.getStartDate()+"%'  ";
+        }
+        if(StringUtils.isNotEmpty(query.getEndDate())){
+        sql +=" and  t.collar_on   LIKE '%"+query.getEndDate()+"%'  ";
+        }
+        if(StringUtils.isNotEmpty(query.getFlag())){
+          sql +=  "and t.flag in("+query.getFlag()+")  " ;
+        }else {
+          sql +=  "and t.flag in(0,1)  " ;
+        }
+        if(StringUtils.isNotEmpty(query.getCollarBy())){
+          sql +=" and  t.collar_by   LIKE '"+query.getCollarBy()+"'  ";
+        }
+    sql +=" and t.group_id ='"+groupId+"'";
+         return  sql;
+    }
     @Override
     public boolean exist(String sourceCategory, String sourceNo, String partId) {
         return barcodePrintApplyRepository.countByCategoryAndSourceAndPartId(sourceCategory, sourceNo, partId) > 0;
@@ -339,6 +378,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     //模糊分页查询排产单
     @Override
     public PageUtil<ScheduleObj> list(ScheduleQuery query) {
+      String groupId = TokenInfo.getUserGroupId();
         RowMapper rm = BeanPropertyRowMapper.newInstance(ScheduleObj.class);
         String sql = "SELECT t.schedule_id,t.schedule_no,t.machine_id,t.part_id, t2.part_no,t2.name part_name,t.schedule_qty,t1.name machine_name FROM mes_mo_schedule t" +
                 "     left join base_machine t1" +
@@ -365,9 +405,15 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
             sql += " and t2.part_no like '" + query.getPartNo() + "'";
             sql2 += " and t2.part_no like '" + query.getPartNo() + "'";
         }
+        sql2 +=" and t.group_id ='"+groupId+"'";
         Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
-        sql += " order by t.schedule_no limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
-
+        sql +=" and t.group_id ='"+groupId+"'";
+      //排序方向
+      String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+      //排序字段(驼峰转换)
+      String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"t.modified_on":query.getOrder());
+      sql = sql + " order by "+order+" "+direct+",t.modified_on desc";
+      sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         List<ScheduleObj> templateList = jdbcTemplate.query(sql, rm);
         return PageUtil.of(templateList, count, query.getSize(), query.getPage());
     }

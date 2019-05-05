@@ -12,9 +12,9 @@ import java.util.Date;
 @ApiModel("分页查询打印申请")
 public class PrintApplyQuery extends Query {
 
-    @ApiModelProperty("开始日期")
+    @ApiModelProperty("申请日期")
     private String startDate;
-    @ApiModelProperty("结束日期")
+    @ApiModelProperty("发放日期")
     private String endDate;
 
     @ApiModelProperty("申请单号")
@@ -37,10 +37,8 @@ public class PrintApplyQuery extends Query {
     private String flagType;
     @ApiModelProperty("标签模板")
     private String templateName;
-    @ApiModelProperty("模板id")
-    private String templateId;
-    @ApiModelProperty("版本")
-    private Integer templateVersion;
+
+
     @ApiModelProperty("客户名称")
     private String customerName;
 
@@ -65,5 +63,7 @@ public class PrintApplyQuery extends Query {
     @ApiModelProperty("品名")
     private String partName;
 
+    @ApiModelProperty(value = "领用用户主键")
+    private String collarBy;
 
 }
