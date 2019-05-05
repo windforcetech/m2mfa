@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.controller;
 
 import com.google.common.collect.Lists;
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseStaffshiftQuery;
@@ -48,7 +49,7 @@ import java.util.stream.Stream;
 @RequestMapping("/base/baseStaffshift")
 @Api(description = "员工排班表 前端控制器")
 @Authorize
-public class BaseStaffshiftController {
+public class BaseStaffshiftController implements BaseController<BaseStaffshift, String, BaseStaffshiftQuery> {
     @Autowired
     BaseStaffshiftService baseStaffshiftService;
 
@@ -170,7 +171,7 @@ public class BaseStaffshiftController {
             String[] split = staffShiftObj.getExcludeStaffId().split(",");
             List<String> strings = Arrays.asList(split);
             //stringst.removeAll(strings);
-            stringst= stringst.stream()
+            stringst = stringst.stream()
                     .filter(id -> !strings.contains(id))
                     .collect(Collectors.toList());
         }
@@ -353,5 +354,10 @@ public class BaseStaffshiftController {
         }
         String[] result = {};
         return list.toArray(result);
+    }
+
+    @Override
+    public BaseService<BaseStaffshift, String> getService() {
+        return baseStaffshiftService;
     }
 }

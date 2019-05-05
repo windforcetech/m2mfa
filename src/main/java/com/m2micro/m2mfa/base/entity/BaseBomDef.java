@@ -67,7 +67,7 @@ public class BaseBomDef extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "代替料否")
     private Boolean isSubstitute;
     @ApiModelProperty(value = "是否展开下阶")
-    private Boolean isRank;
+    private String isRank;
     @ApiModelProperty(value = "描述")
     @Size(max = 200, message = "描述不能大于200位", groups = {AddGroup.class, UpdateGroup.class})
     private String description;
@@ -201,11 +201,11 @@ public class BaseBomDef extends BaseEntity implements Serializable {
         isSubstitute = substitute;
     }
 
-    public Boolean getRank() {
+    public String getRank() {
         return isRank;
     }
 
-    public void setRank(Boolean rank) {
+    public void setRank(String rank) {
         isRank = rank;
     }
 
