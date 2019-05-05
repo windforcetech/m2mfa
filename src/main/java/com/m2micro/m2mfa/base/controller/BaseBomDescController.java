@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
 /**
@@ -111,22 +113,26 @@ public class BaseBomDescController {
     @ApiOperation(value = "保存Bom")
     @UserOperationLog("保存Bom")
     @Transactional
-    public ResponseMessage<List<BaseBomDef>> save(@RequestBody BaseBomDesc staffShiftObj) throws ParseException {
+    public ResponseMessage<List<BaseBomDef>> save(@RequestBody BaseBomDesc staffShiftObj) throws ParseException, InterruptedException {
         ValidatorUtil.validateEntity(staffShiftObj, AddGroup.class);
 
         List<BaseBomDef> bomDefObjList = staffShiftObj.getBomDefObjList();
+
+
         List<String> addPartIds = new ArrayList<>();
         bomDefObjList.forEach(x -> {
             addPartIds.add(x.getPartId());
         });
-
-
-        List<String> partIds = new ArrayList<>();
-        boolean b = checkDeadLoop(staffShiftObj, partIds, addPartIds);
+        List<String> bomdescPartIds = new ArrayList<>();
+        boolean b = checkDeadLoop(staffShiftObj, bomdescPartIds, addPartIds);
         if (b) {
-            ResponseMessage.error("物料编号" + partIds.get(0) + "形成死环！");
+            throw new MMException("物料编号" + bomdescPartIds.get(0) + "形成死环！");
         }
 
+        String s = checkLoop(staffShiftObj);
+        if (s != null) {
+            throw new MMException("物料编号" + s + "形成死环！");
+        }
         QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
         BooleanExpression expression = baseBomDesc.category.eq(staffShiftObj.getCategory())
                 .and(baseBomDesc.partId.eq(staffShiftObj.getPartId()))
@@ -147,6 +153,47 @@ public class BaseBomDescController {
         return ResponseMessage.ok(baseBomDefService.saveAll(bomDefObjList));
     }
 
+    private String checkLoop(BaseBomDesc baseBomDescObj) throws InterruptedException {
+        ArrayBlockingQueue<String> searchingIds = new ArrayBlockingQueue<String>(10000);
+        List<String> searchedIds = new ArrayList<>();
+
+        searchingIds.add(baseBomDescObj.getPartId());
+        while (searchingIds.size() > 0) {
+            String partId = searchingIds.take();
+            searchedIds.add((partId));
+
+            QBaseBomDef qBaseBomDef = QBaseBomDef.baseBomDef;
+            BooleanExpression Expression = qBaseBomDef.partId.eq(partId);
+            Iterable<BaseBomDef> bomDefIterable = baseBomDefService.findAll(Expression);
+
+            bomDefIterable.forEach(def -> {
+                BaseBomDesc baseBomDesc = baseBomDescService.findById(def.getBomId()).orElse(null);
+                searchingIds.add(baseBomDesc.getPartId());
+            });
+        }
+
+        List<String> addPartIds = new ArrayList<>();
+        List<BaseBomDef> bomDefObjList = baseBomDescObj.getBomDefObjList();
+        bomDefObjList.forEach(x -> {
+            addPartIds.add(x.getPartId());
+        });
+
+        for (String addpartId : addPartIds) {
+            if (searchedIds.contains(addpartId)) {
+                return addpartId;
+            }
+        }
+        return null;
+
+    }
+
+    //    QBaseBomDesc qBaseBomDesc = QBaseBomDesc.baseBomDesc;
+//    BooleanExpression booleanExpression = qBaseBomDesc.partId.eq(partId);
+//    Iterable<BaseBomDesc> bomDescIterable = baseBomDescService.findAll(booleanExpression);//partId关系，
+//
+//            bomDefIterable.forEach(desc -> {
+//        searchingIds.add(desc.getPartId());
+//    });
     private boolean checkDeadLoop(BaseBomDesc staffShiftObj, List<String> partIds, List<String> addPartIds) {
         QBaseBomDef qBaseBomDef = QBaseBomDef.baseBomDef;
         BooleanExpression booleanExpression = qBaseBomDef.partId.eq(staffShiftObj.getPartId());
@@ -154,7 +201,10 @@ public class BaseBomDescController {
         Iterable<BaseBomDef> bomDefIterable = baseBomDefService.findAll(booleanExpression);
 
         for (BaseBomDef baseBomDef : bomDefIterable) {
-            partIds.add(baseBomDef.getPartId());
+
+            //一个子表只有一个父表
+            BaseBomDesc baseBomDesc = baseBomDescService.findById(baseBomDef.getBomId()).orElse(null);
+            partIds.add(baseBomDesc.getPartId());
             for (String addpartId : addPartIds) {
                 if (partIds.contains(addpartId)) {
                     partIds.clear();
@@ -162,8 +212,7 @@ public class BaseBomDescController {
                     return true;
                 }
             }
-            //一个子表只有一个父表
-            BaseBomDesc baseBomDesc = baseBomDescService.findById(baseBomDef.getBomId()).orElse(null);
+
             return checkDeadLoop(baseBomDesc, partIds, addPartIds);
 
         }
