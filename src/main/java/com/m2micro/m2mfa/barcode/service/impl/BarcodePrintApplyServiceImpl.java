@@ -831,6 +831,8 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 @Override
 @Transactional
 public void  generateLabel(String applyId, Integer num/*份数*/) {
+    //份数默认为1
+    num=1;
     BarcodePrintApply barcodePrintApply = barcodePrintApplyRepository.findById(applyId).orElse(null);
     List<BarcodePrintResources> byApplyId = barcodePrintResourcesRepository.findByApplyId(applyId);
     if (!byApplyId.isEmpty()) {
