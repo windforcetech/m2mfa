@@ -71,7 +71,16 @@ public class BasePartsController {
         return ResponseMessage.ok(page);
     }
 
-
+    /**
+     * 列表
+     */
+    @RequestMapping("/workOrderPartslist")
+    @ApiOperation(value="料件基本资料列表（工单）")
+    @UserOperationLog("料件基本资料列表（工单）")
+    public ResponseMessage<PageUtil<BaseParts>> workOrderPartslist(BasePartsQuery query){
+        PageUtil<BaseParts> page = basePartsService.workOrderPartslist(query);
+        return ResponseMessage.ok(page);
+    }
     /**
      * 列表
      */

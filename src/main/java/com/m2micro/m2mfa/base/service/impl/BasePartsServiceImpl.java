@@ -105,11 +105,8 @@ public class BasePartsServiceImpl implements BasePartsService {
                 "	bp.modified_by modifiedBy,\n" +
                 "	bi.item_name categoryName,\n" +
                 "	bi2.item_name sourceName\n" +
-                "FROM\n";
-        if (query.isIsom()) {
-            sql = sql + "mes_part_route mpr ,  ";
-        }
-        sql += "	base_parts bp\n" +
+                "FROM\n"+
+                "base_parts bp\n" +
                 "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
                 "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
                 "WHERE 1 = 1";
@@ -118,13 +115,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql, rm);
         String countSql = "select count(*) from ";
-        if (query.isIsom()) {
-            countSql = countSql + "mes_part_route mpr ,  ";
-        }
         countSql += "base_parts bp where 1=1 ";
         countSql = addSqlCondition(countSql, query);
         long totalCount = jdbcTemplate.queryForObject(countSql, long.class);
-
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
 
@@ -172,14 +165,14 @@ public class BasePartsServiceImpl implements BasePartsService {
                 "	bp.modified_by modifiedBy,\n" +
                 "	bi.item_name categoryName,\n" +
                 "	bi2.item_name sourceName\n" +
-                "FROM\n"+
+                " FROM\n"+
                 "	base_parts bp\n" +
                 "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
                 "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
                 "WHERE 1 = 1";
 
         sql +=sqlPing(query);
-
+        sql  +="  and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder()) ? "modified_on" : query.getOrder());
         //排序方向
@@ -187,16 +180,88 @@ public class BasePartsServiceImpl implements BasePartsService {
         sql = sql + " order by bp." + order + " " + direct + ",bp.modified_on desc";
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql, rm);
-        String countSql = "select count(*) from   base_parts bp where 1=1  ";
-
+        String countSql = "select count(*) FROM\n"+
+            "	base_parts bp\n" +
+            "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
+            "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
+            "WHERE 1 = 1";
         countSql+=sqlPing(query);
-
+        countSql +=  "  and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
         long totalCount = jdbcTemplate.queryForObject(countSql, long.class);
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
 
     /**
-     * 条码打印模板sql
+     * 工单获取
+     * @param query
+     * @return
+     */
+    @Override
+    public PageUtil<BaseParts> workOrderPartslist(BasePartsQuery query) {
+        String sql = "SELECT\n" +
+            "	bp.part_id partId,\n" +
+            "	bp.part_no partNo,\n" +
+            "	bp.name name,\n" +
+            "	bp.spec spec,\n" +
+            "	bp.version version,\n" +
+            "	bp.grade grade,\n" +
+            "	bp.source source,\n" +
+            "	bp.category category,\n" +
+            "	bp.single single,\n" +
+            "	bp.is_check isCheck,\n" +
+            "	bp.stock_unit stockUnit,\n" +
+            "	bp.safety_stock safetyStock,\n" +
+            "	bp.max_stock maxStock,\n" +
+            "	bp.main_warehouse mainWarehouse,\n" +
+            "	bp.main_storage mainStorage,\n" +
+            "	bp.production_unit productionUnit,\n" +
+            "	bp.production_conversion_rate productionConversionRate,\n" +
+            "	bp.min_production_qty minProductionQty,\n" +
+            "	bp.production_loss_rate productionLossRate,\n" +
+            "	bp.sent_unit sentUnit,\n" +
+            "	bp.sent_conversion_rate sentConversionRate,\n" +
+            "	bp.min_sent_qty minSentQty,\n" +
+            "	bp.is_consume isConsume,\n" +
+            "	bp.validity_days validityDays,\n" +
+            "	bp.main_line_warehouse mainLineWarehouse,\n" +
+            "	bp.main_line_storage mainLineStorage,\n" +
+            "	bp.positive_image_url positiveImageUrl,\n" +
+            "	bp.negative_image negativeImage,\n" +
+            "	bp.enabled enabled,\n" +
+            "	bp.description description,\n" +
+            "	bp.create_on createOn,\n" +
+            "	bp.create_by createBy,\n" +
+            "	bp.modified_on modifiedOn,\n" +
+            "	bp.modified_by modifiedBy,\n" +
+            "	bi.item_name categoryName,\n" +
+            "	bi2.item_name sourceName\n" +
+            "FROM mes_part_route mpr ,\n"+
+            " base_parts bp\n" +
+            "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
+            "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
+            "WHERE 1 = 1";
+
+            sql +=sqlPing(query);
+            sql += "   and  mpr.part_id=bp.part_id";
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder()) ? "modified_on" : query.getOrder());
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect()) ? "desc" : query.getDirect();
+        sql = sql + " order by bp." + order + " " + direct + ",bp.modified_on desc";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
+        List<BaseParts> list = jdbcTemplate.query(sql, rm);
+        String countSql = "select count(*) from   mes_part_route mpr ,\n"+
+            " base_parts bp\n" +
+            "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
+            "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
+            "WHERE 1 = 1";
+        countSql+=sqlPing(query);
+        countSql += "   and  mpr.part_id=bp.part_id";
+        long totalCount = jdbcTemplate.queryForObject(countSql, long.class);
+        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+    }
+    /**
+     * 共用代码sql
      * @param query
      * @return
      */
@@ -267,7 +332,7 @@ public class BasePartsServiceImpl implements BasePartsService {
                 sql = sql + " and bp.category = '" + query.getCategory() + "'";
             }
         }
-        sql = sql + "  and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
+
         return sql;
     }
     @Override
@@ -351,12 +416,7 @@ public class BasePartsServiceImpl implements BasePartsService {
             }).map(e -> e.getPartId()).collect(Collectors.joining(",", "'", "'"));
             sql += " and bp.part_id NOT in(" + collect + ")";
         }
-        if (query.isIsom()) {
-            sql += "   and  mpr.part_id=bp.part_id";
-        }
-        if (query.isIsom()) {
-            sql += "   and  mpr.group_id='" + groupId + "' ";
-        }
+
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder()) ? "modified_on" : query.getOrder());
         //排序方向
