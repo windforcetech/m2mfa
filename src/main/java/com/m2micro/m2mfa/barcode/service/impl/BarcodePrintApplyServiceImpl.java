@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.barcode.service.impl;
 
 import com.google.common.base.CaseFormat;
 import com.m2micro.framework.authorization.TokenInfo;
+import com.m2micro.m2mfa.barcode.constant.BarcodePrintResourcesConstant;
 import org.apache.commons.lang3.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.m2micro.framework.commons.exception.MMException;
@@ -478,12 +479,14 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     @Override
     public BarcodePrintApply add(BarcodePrintApply barcodePrintApply) {
         barcodePrintApply.setId(getId());
-        barcodePrintApply.setFlag(0);
+        barcodePrintApply.setFlag(BarcodePrintResourcesConstant.UNREVIEWED.getKey());
         barcodePrintApply.setEnabled(true);
         barcodePrintApply.setCheckFlag(0);
         barcodePrintApply.setSequence(0);
-        if (barcodePrintApplyRepository.countBySource(barcodePrintApply.getSource()) > 0) {
+        if(!barcodePrintApply.getPrintCategory().equals("replenish")){
+          if (barcodePrintApplyRepository.countBySource(barcodePrintApply.getSource()) > 0) {
             throw new MMException("来源单号已存在，不可重复申请打印。");
+          }
         }
         BarcodePrintApply save = barcodePrintApplyRepository.save(barcodePrintApply);
         return save;
@@ -505,7 +508,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     public void check(String barcodePrintApplyId) {
         Optional<BarcodePrintApply> byId = barcodePrintApplyRepository.findById(barcodePrintApplyId);
         BarcodePrintApply one = byId.get();
-        one.setCheckFlag(1);
+        one.setCheckFlag(BarcodePrintResourcesConstant.AUDIT_PRINT.getKey());
         one.setCheckOn(new Date());
         barcodePrintApplyRepository.save(one);
 
