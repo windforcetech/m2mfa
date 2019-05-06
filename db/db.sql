@@ -4,7 +4,7 @@ CREATE VIEW v_mes_mo_desc AS SELECT
 	bp.`name` partName,
 	bp.spec partSpec,
 	brd.route_name routeName,
-	bpro.process_name inputProcessName,
+	bpro.process_name inputProcess,
 	bpr.process_name outputProcessName,
 	bc.`name` customerName
 FROM

@@ -1,8 +1,6 @@
 package com.m2micro.m2mfa.base.query;
 
 import com.m2micro.framework.commons.util.Query;
-import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -24,10 +22,11 @@ public class BaseRouteQuery  extends Query {
     private String description;
 
     @ApiModelProperty(value = "投入工序名称")
-    private String inputProcessName;
+    private String inputProcess;
 
     @ApiModelProperty(value = "产出工序名称")
-    private String outputProcessName;
+    private String outputProcess;
+
 
     public Boolean getEnabled() {
         return enabled;
@@ -45,20 +44,20 @@ public class BaseRouteQuery  extends Query {
         this.description = description;
     }
 
-    public String getInputProcessName() {
-        return inputProcessName;
+    public String getInputProcess() {
+        return inputProcess;
     }
 
-    public void setInputProcessName(String inputProcessName) {
-        this.inputProcessName = inputProcessName;
+    public void setInputProcess(String inputProcess) {
+        this.inputProcess = inputProcess;
     }
 
-    public String getOutputProcessName() {
-        return outputProcessName;
+    public String getOutputProcess() {
+        return outputProcess;
     }
 
-    public void setOutputProcessName(String outputProcessName) {
-        this.outputProcessName = outputProcessName;
+    public void setOutputProcess(String outputProcess) {
+        this.outputProcess = outputProcess;
     }
 
     public String getRouteNo() {
