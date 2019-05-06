@@ -12,6 +12,9 @@ import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -154,6 +157,16 @@ public class BaseProcessServiceImpl implements BaseProcessService {
         }
 
         jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
+        if (StringUtils.isEmpty(query.getOrder()) || StringUtils.isEmpty(query.getDirect())) {
+            jq.orderBy(qBaseProcess.modifiedOn.desc());
+        } else {
+            PathBuilder<BaseProcess> entityPath = new PathBuilder<>(BaseProcess.class, "baseProcess");
+            Order order = "ASC".equalsIgnoreCase(query.getDirect()) ? Order.ASC : Order.DESC;
+            OrderSpecifier orderSpecifier = new OrderSpecifier(order, entityPath.get(query.getOrder()));
+            jq.orderBy(orderSpecifier);
+        }
+
+
         List<BaseProcess> list = jq.fetch();
         for (BaseProcess p : list) {
             p.setCollectionName(baseItemsTargetService.findById(p.getCollection()).get().getItemName());

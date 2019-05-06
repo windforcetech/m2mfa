@@ -15,6 +15,9 @@ import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.PathBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -70,7 +73,26 @@ public class BaseRouteDescServiceImpl implements BaseRouteDescService {
             condition.and(qBaseRouteDesc.enabled.eq(true));
         }
 
+        if (query.getEnabled() != null) {
+            condition.and(qBaseRouteDesc.enabled.eq(query.getEnabled()));
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            condition.and(qBaseRouteDesc.description.like("%" + query.getDescription() + "%"));
+        }
+
+
         jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
+        if (StringUtils.isEmpty(query.getOrder()) || StringUtils.isEmpty(query.getDirect())) {
+            jq.orderBy(qBaseRouteDesc.modifiedOn.desc());
+        } else {
+            PathBuilder<BaseRouteDesc> entityPath = new PathBuilder<>(BaseRouteDesc.class, "baseRouteDesc");
+            Order order = "ASC".equalsIgnoreCase(query.getDirect()) ? Order.ASC : Order.DESC;
+            OrderSpecifier orderSpecifier = new OrderSpecifier(order, entityPath.get(query.getOrder()));
+            jq.orderBy(orderSpecifier);
+        }
+
+
+
         List<BaseRouteDesc> list = jq.fetch();
         for(BaseRouteDesc baseRouteDesc :list){
         BaseProcess iprocess =   baseProcessService.findById(baseRouteDesc.getInputProcess()).orElse(null);
