@@ -21,6 +21,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.PathBuilder;
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import com.m2micro.m2mfa.base.entity.QBaseStation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -73,6 +75,30 @@ public class BaseStationServiceImpl implements BaseStationService {
         if (StringUtils.isNotEmpty(query.getPostCategory())) {
             condition.and(qBaseStation.postCategory.eq(query.getPostCategory()));
         }
+        if (query.getJobPeoples() != null) {
+            condition.and(qBaseStation.jobPeoples.eq(query.getJobPeoples()));
+        }
+        if (query.getStandardHours() != null) {
+            condition.and(qBaseStation.standardHours.eq(query.getStandardHours()));
+        }
+        if (query.getCoefficient() != null) {
+            condition.and(qBaseStation.coefficient.eq(query.getCoefficient()));
+        }
+        if (query.getControlPeoples() != null) {
+            condition.and(qBaseStation.controlPeoples.eq(query.getControlPeoples()));
+        }
+        if (query.getControlMachines() != null) {
+            condition.and(qBaseStation.controlMachines.eq(query.getControlMachines()));
+        }
+        if (query.getEnabled() != null) {
+            condition.and(qBaseStation.enabled.eq(query.getEnabled()));
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            condition.and(qBaseStation.description.like("%" + query.getDescription() + "%"));
+        }
+
+
+
         jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
 
         if (StringUtils.isEmpty(query.getOrder()) || StringUtils.isEmpty(query.getDirect())) {
