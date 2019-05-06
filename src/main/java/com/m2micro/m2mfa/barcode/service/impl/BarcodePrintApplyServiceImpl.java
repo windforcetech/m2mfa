@@ -55,8 +55,6 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         return barcodePrintApplyRepository;
     }
 
-
-
     public PageUtil<PrintApplyObj> printApplyList1(PrintApplyQuery query) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
         String sql = " select\n" +
@@ -655,179 +653,6 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     }
 
 
-//    // 生成打印标签
-//    @Override
-//    @Transactional
-//    public List<BarcodePrintResources> generateLabel(String applyId, Integer num/*份数*/){
-//        BarcodePrintApply barcodePrintApply = barcodePrintApplyRepository.findById(applyId).orElse(null);
-//        List<BarcodePrintResources> byApplyId = barcodePrintResourcesRepository.findByApplyId(applyId);
-//        if(!byApplyId.isEmpty()){
-//            throw  new MMException(" 标签已打印。");
-//        }
-//        if(barcodePrintApply.getFlag() ==1){
-//            throw  new MMException(" 标签已打印。");
-//        }
-//        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-//        String dateNow = df.format(new Date());
-//        PrintApplyObj printApplyObj = printDetail(applyId);
-//        PackObj packObj = printApplyObj.getPackObj();
-//
-//        Integer allQty = printApplyObj.getQty();
-//        TemplatePrintObj templatePrintObj = printApplyObj.getTemplatePrintObj();
-//        String fileName = templatePrintObj.getFileName();
-//        List<TemplateVarObj> templateVarObjList = templatePrintObj.getTemplateVarObjList();
-//
-//
-//        List<HashMap<String, String>> labelList = new ArrayList<>();
-//        int n = allQty / packObj.getQty().intValue();
-//        if (allQty > n * packObj.getQty().intValue()) {
-//            n++;
-//        }
-//        for (Integer i = 1; i <= n; i++) {
-//            String serialCode = BarcodePrintApply.serialNumber(i);
-//            HashMap<String, String> lable = new HashMap<>();
-//            for (TemplateVarObj varObj : templateVarObjList) {
-//                List<RuleObj> ruleObjList = varObj.getRuleObjList();
-//                Collections.sort(ruleObjList, new
-//
-//                    Comparator<RuleObj>() {
-//
-//                        @Override
-//                    public int compare(RuleObj o1, RuleObj o2) {
-//
-//                        return o1.getPosition() > o2.getPosition() ? 1 : -1;
-//                    }
-//
-//
-//                    });
-//                String value = "";
-//                for (RuleObj rule : ruleObjList) {
-//
-//                    String category = rule.getCategory();
-//                    String str = "";
-//
-//                    /*
-//                    *
-//                    *  {id: "10000310", name: "固定码"}
-//id: "10000310"
-//name: "固定码"
-//1: {id: "10000311", name: "流水码"}
-//id: "10000311"
-//name: "流水码"
-//2: {id: "10000312", name: "日期函数"}
-//id: "10000312"
-//name: "日期函数"
-//3: {id: "10000313", name: "工单号码"}
-//4: {id: "10000314", name: "料件编号"}
-//5: {id: "10000315", name: "净重"}
-//6: {id: "10000316", name: "装箱数量"}
-//7: {id: "10000336", name: "毛重"}
-//8: {id: "10000337", name: "材积"}
-//9: {id: "10000338", name: "料件品名"}
-//10: {id: "10000339", name: "料件规格"}
-//                    *
-//                    *
-//                    * */
-//                    switch (category) {
-//                        //固定码
-//                        case "10000310":
-//                            str = rule.getDefaults();
-//                            break;
-//                        //流水码
-//                        case "10000311":
-//                            str = serialCode;
-//                            break;
-//                        //日期
-//                        case "10000312":
-//                            str = dateNow;
-//                            break;
-//                        case "10000313":
-//                            str = printApplyObj.getMoNumber();
-//                            break;
-//                        case "10000314":
-//                            str = printApplyObj.getPartNo();
-//                            break;
-//                        case "10000315":
-//                            str = "" + printApplyObj.getPackObj().getNw().intValue();
-//                            break;
-//                        case "10000316":
-//                            if (i == n) {
-//                                str = "" + (allQty - (i - 1) * printApplyObj.getPackObj().getQty().intValue());
-//                            } else {
-//                                str = "" + printApplyObj.getPackObj().getQty().intValue();
-//                            }
-//                            break;
-//                        case "10000336":
-//                            str = "" + printApplyObj.getPackObj().getGw().intValue();
-//                            break;
-//                        case "10000337":
-//                            str = "" + printApplyObj.getPackObj().getCuft().intValue();
-//                            break;
-//                        case "10000338":
-//                            str = printApplyObj.getPartName();
-//                            break;
-//                        case "10000339":
-//                            str = printApplyObj.getSpec();
-//                            break;
-//                        default:
-//                            break;
-//                    }
-//                    if (rule.getLength() != null && rule.getLength() != 0) {
-//                        if (str.length() < rule.getLength()) {
-//                            str = addZeroForNum(str, rule.getLength());
-//                        }
-//                        if (str.length() > rule.getLength()) {
-//                            // Integer start = str.length() - rule.getLength();
-//                            str = str.substring(0, rule.getLength());
-//                        }
-//                    }
-//                    value += str;
-//                }
-//                lable.put(varObj.getName(), value);
-//            }
-//            int k = 0;
-//            while (k < num) {
-//                labelList.add(lable);
-//                k++;
-//            }
-//        }
-//
-//        List<BarcodePrintResources> rs = new ArrayList<>();
-//        for (HashMap<String, String> item : labelList) {
-//            BarcodePrintResources one = new BarcodePrintResources();
-//            one.setId(UUIDUtil.getUUID());
-//            one.setApplyId(printApplyObj.getApplyId());
-//            LabelObj lableObj = new LabelObj();
-//            lableObj.setLabelFile(printApplyObj.getTemplatePrintObj().getFileName());
-//            lableObj.setData(item);
-//            String content = JSONObject.toJSONString(lableObj);
-//            one.setContent(content);
-//            one.setFlag(0);
-//            String data=JSONObject.toJSONString(item);
-////            one.setDescription("..");
-//            one.setBarcode(data);
-//            String barcode = one.getBarcode();
-//            JSONObject parse = JSONObject.parseObject(barcode);
-//            Object barCode =  parse.get("BarCode");
-//            if(barCode !=null){
-//                one.setBarcode((String) barCode);
-//            }
-//            rs.add(one);
-//        }
-//     try {
-//         Thread.sleep(3000);
-//     }catch (Exception e){
-//
-//     }
-//
-//
-//        barcodePrintApply.setFlag(1);
-//        barcodePrintApplyRepository.save(barcodePrintApply);
-//        barcodePrintResourcesRepository.saveAll(rs);
-//        return rs;
-//    }
-
-
 @Override
 @Transactional
 public void  generateLabel(String applyId, Integer num/*份数*/) {
@@ -843,16 +668,12 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
     }
     //日期包装
     String dateNow = getString();
-
     PrintApplyObj printApplyObj = printDetail(applyId);
         PackObj packObj = printApplyObj.getPackObj();
-
         Integer allQty = printApplyObj.getQty();
         TemplatePrintObj templatePrintObj = printApplyObj.getTemplatePrintObj();
         String fileName = templatePrintObj.getFileName();
         List<TemplateVarObj> templateVarObjList = templatePrintObj.getTemplateVarObjList();
-
-
         List<HashMap<String, String>> labelList = new ArrayList<>();
         int n = allQty / packObj.getQty().intValue();
         if (allQty > n * packObj.getQty().intValue()) {
@@ -863,21 +684,15 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
             for (TemplateVarObj varObj : templateVarObjList) {
                 List<RuleObj> ruleObjList = varObj.getRuleObjList();
                 Collections.sort(ruleObjList, new
-
                     Comparator<RuleObj>() {
-
                         @Override
                     public int compare(RuleObj o1, RuleObj o2) {
                         return o1.getPosition() > o2.getPosition() ? 1 : -1;
                     }
-
-
                     });
                 String value = "";
                 for (int x =0;x<ruleObjList.size();x++) {
                     RuleObj rule=ruleObjList.get(x);
-
-
                     //生成barcode规则
                     value = getbarcodeLable(dateNow, printApplyObj, allQty, n, i, value, rule);
 
@@ -922,15 +737,6 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
     private String getbarcodeLable(String dateNow, PrintApplyObj printApplyObj, Integer allQty, int n, Integer i, String value, RuleObj rule) {
         String category = rule.getCategory();
         String str = BarcodeConstant.barCodeGeneration(category, dateNow, printApplyObj, allQty, n, i, rule);
-
-//        if (rule.getLength() != null && rule.getLength() != 0) {
-//            if (str.length() < rule.getLength()) {
-//                str = addZeroForNum(str, rule.getLength());
-//            }
-//            if (str.length() > rule.getLength()) {
-//                str = str.substring(0, rule.getLength());
-//            }
-//        }
         value += str;
         return value;
     }

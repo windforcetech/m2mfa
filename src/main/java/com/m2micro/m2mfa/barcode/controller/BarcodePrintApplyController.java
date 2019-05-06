@@ -67,6 +67,17 @@ public class BarcodePrintApplyController {
         return ResponseMessage.ok(barcodePrintApplyService.add(barcodePrintApply));
     }
 
+    /**
+     * 添加打印申请
+     */
+    @PostMapping("/makeupcode")
+    @ApiOperation(value = "补打标签")
+    @UserOperationLog("补打标签")
+    public ResponseMessage<BarcodePrintApply> makeupcode(@RequestBody BarcodePrintApply barcodePrintApply) {
+        ValidatorUtil.validateEntity(barcodePrintApply, AddGroup.class);
+        return ResponseMessage.ok(barcodePrintApplyService.add(barcodePrintApply));
+    }
+
 
     /**
      * 批量审核
