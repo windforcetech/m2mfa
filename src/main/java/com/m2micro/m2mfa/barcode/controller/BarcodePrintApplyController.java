@@ -68,14 +68,27 @@ public class BarcodePrintApplyController {
     }
 
     /**
-     * 添加打印申请
+     * 补打标签
      */
     @PostMapping("/makeupcode")
     @ApiOperation(value = "补打标签")
     @UserOperationLog("补打标签")
     public ResponseMessage<BarcodePrintApply> makeupcode(@RequestBody BarcodePrintApply barcodePrintApply) {
+        barcodePrintApply.setPrintCategory("replenish");
         ValidatorUtil.validateEntity(barcodePrintApply, AddGroup.class);
         return ResponseMessage.ok(barcodePrintApplyService.add(barcodePrintApply));
+    }
+    /**
+     * 查询单个
+     */
+    @RequestMapping("/info/{id}")
+    @ApiOperation(value = "标签打印表单详情")
+    @UserOperationLog("标签打印表单详情")
+    public ResponseMessage<PrintApplyObj> info(@PathVariable("id") String id) {
+        PrintApplyQuery query = new PrintApplyQuery();
+        query.setApplyId(id);
+        PageUtil<PrintApplyObj> page = barcodePrintApplyService.printApplyList(query);
+        return ResponseMessage.ok(page.getData().get(0));
     }
 
 
@@ -99,7 +112,6 @@ public class BarcodePrintApplyController {
       for(String id :ids ){
           barcodePrintResourcesRepository.deleteByApplyId(id);
       }
-
         return ResponseMessage.ok();
     }
 
