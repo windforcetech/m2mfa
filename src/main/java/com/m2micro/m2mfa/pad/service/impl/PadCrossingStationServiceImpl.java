@@ -7,10 +7,8 @@ import com.m2micro.m2mfa.barcode.repository.BarcodePrintApplyRepository;
 import com.m2micro.m2mfa.barcode.repository.BarcodePrintResourcesRepository;
 import com.m2micro.m2mfa.barcode.service.BarcodePrintResourcesService;
 import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
-import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
-import com.m2micro.m2mfa.base.entity.BasePack;
-import com.m2micro.m2mfa.base.entity.BaseProcess;
-import com.m2micro.m2mfa.base.entity.BaseStaff;
+import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.repository.BaseDefectRepository;
 import com.m2micro.m2mfa.base.repository.BasePackRepository;
 import com.m2micro.m2mfa.base.repository.BaseRouteDefRepository;
 import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
@@ -98,6 +96,8 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
     @Autowired
     @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    BaseDefectRepository baseDefectRepository;
 
 
 
@@ -231,6 +231,8 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         }
 
     }
+
+
 
     private void copyData(MesRecordWipRec mesRecordWipRec, MesRecordWipLog log) {
         try {
@@ -462,18 +464,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         }
         //获取排产单id
         String source = barcodePrintApplyRepository.getSource(para.getBarcode());
-        //当前工序当前排产单的不良记录
-        List<MesRecordFail> mesRecordFails = mesRecordFailRepository.getByProcessIdAndScheduleId(source, para.getProcessId());
-        //获取不良记录数
-        Long qty = getQtyForFail(mesRecordFails);
-        if(qty>0){
-            crossingStationModel.setQty(qty);
-            //获取不良记录id
-            List<String> ids = mesRecordFails.stream().map(MesRecordFail::getId).collect(Collectors.toList());
-            crossingStationModel.setIds(ids);
-        }else{
-            crossingStationModel.setQty(0l);
-        }
+        //默认不良为0
+        crossingStationModel.setQty(0l);
+
         //上一工序的相关信息
         //StationRelationModel stationRelationModel = mesRecordWipRecRepository.getStationRelationModel(para.getBarcode());
         StationRelationModel stationRelationModel = getStationRelationModel(para.getBarcode(), source);
@@ -503,8 +496,59 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         return 0l;
     }
 
+    @Override
+    public CrossStationDefectModel getCrossStationDefectModel(CrossStationDefectPara crossStationDefectPara) {
+        ValidatorUtil.validateEntity(crossStationDefectPara,QueryGroup.class);
+        CrossStationDefectModel crossStationDefectModel = new CrossStationDefectModel();
+        //获取所有不良工序
+        List<CrossStationProcess> allDefectProcess = getAllDefectProcess(crossStationDefectPara);
+        crossStationDefectModel.setCrossStationProcesss(allDefectProcess);
+        //获取所有有效的不良现象
+        List<BaseDefect> baseDefects = findAllBaseDefect();
+        crossStationDefectModel.setBaseDefects(baseDefects);
+        return crossStationDefectModel;
+    }
+
+    @Override
+    public List<CrossStationProcess>  getAllDefectProcess(CrossStationDefectPara crossStationDefectPara) {
+        //获取排产单id
+        String source = barcodePrintApplyRepository.getSource(crossStationDefectPara.getBarcode());
+        //获取料件途程id
+        String partRouteId = mesPartRouteRepository.getPartRouteId(source);
+        //获取当前工序的顺序序号
+        MesPartRouteProcess mesPartRouteProcess = mesPartRouteProcessRepository.findByPartrouteidAndProcessid(partRouteId, crossStationDefectPara.getProcessId());
+        if(mesPartRouteProcess==null){
+            throw new MMException("当前工序和条码关联工序不匹配！");
+        }
+        //获取小于当前工序顺序序号的所有工序
+        return getAllCrossStationProcess(partRouteId, mesPartRouteProcess.getSetp());
+    }
+
+    @Override
+    public List<BaseDefect> findAllBaseDefect() {
+        return baseDefectRepository.findAllByEnabled(true);
+    }
 
 
-
+    /**
+     * 获取小于当前工序顺序序号的所有工序
+     * @param partRouteId
+     * @param step
+     * @return
+     */
+    public List<CrossStationProcess> getAllCrossStationProcess(String partRouteId,Integer step){
+        String sql = "SELECT\n" +
+                    "	bp.process_id,\n" +
+                    "	bp.process_name\n" +
+                    "FROM\n" +
+                    "	mes_part_route_process mprp,\n" +
+                    "	base_process bp \n" +
+                    "WHERE\n" +
+                    "	mprp.processid = bp.process_id \n" +
+                    "AND mprp.partrouteid='" +partRouteId+"'\n" +
+                    "AND mprp.setp<='" +step+"'\n";
+        RowMapper<CrossStationProcess> rowMapper = BeanPropertyRowMapper.newInstance(CrossStationProcess.class);
+        return jdbcTemplate.query(sql, rowMapper);
+    }
 
 }

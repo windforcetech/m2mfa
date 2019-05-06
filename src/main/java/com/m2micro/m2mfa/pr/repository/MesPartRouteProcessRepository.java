@@ -56,4 +56,12 @@ public interface MesPartRouteProcessRepository extends BaseRepository<MesPartRou
      * @return
      */
     //MesPartRouteProcess findByPartrouteidAndProcessid(String partrouteid,String nextprocessid);
+
+    /**
+     * 获取工序信息
+     * @param partrouteid
+     * @param processid
+     * @return
+     */
+    MesPartRouteProcess findByPartrouteidAndProcessid(String partrouteid,String processid);
 }
