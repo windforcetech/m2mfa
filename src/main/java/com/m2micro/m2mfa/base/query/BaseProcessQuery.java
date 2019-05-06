@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = "工序基本资料")
-public class BaseProcessQuery  extends Query {
+public class BaseProcessQuery extends Query {
 
 
     @ApiModelProperty(value = "工序代码")
@@ -19,6 +19,27 @@ public class BaseProcessQuery  extends Query {
 
     @ApiModelProperty(value = "采集方式")
     private String collection;
+
+    @ApiModelProperty(value = "有效否")
+    private Boolean enabled;
+    @ApiModelProperty(value = "描述")
+    private String description;
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public BaseProcessQuery() {
     }

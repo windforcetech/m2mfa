@@ -145,6 +145,14 @@ public class BaseProcessServiceImpl implements BaseProcessService {
         if (StringUtils.isNotEmpty(query.getCollection())) {
             condition.and(qBaseProcess.collection.eq(query.getCollection()));
         }
+
+        if (query.getEnabled() != null) {
+            condition.and(qBaseProcess.enabled.eq(query.getEnabled()));
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            condition.and(qBaseProcess.description.like("%" + query.getDescription() + "%"));
+        }
+
         jq.where(condition).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
         List<BaseProcess> list = jq.fetch();
         for (BaseProcess p : list) {
