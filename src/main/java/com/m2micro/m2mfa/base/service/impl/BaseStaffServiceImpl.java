@@ -112,7 +112,6 @@ public class BaseStaffServiceImpl implements BaseStaffService {
                 " sf.is_dimission AS isDimission,\n" +
                 " sf.enabled AS enabled,\n" +
                 " sf.mobile AS mobile,\n" +
-                " sf.staff_name AS staffName,\n" +
                 " sf.telephone AS telephone,\n" +
                 " sf.id_card AS idCard,\n" +
                 " it.item_name AS duty,\n" +
@@ -171,6 +170,20 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         sql = sql+" and sf.group_id = '"+groupId+"'";
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        //特殊排序处理（非主表的字段）
+        switch (order) {
+        	case "name":
+                order="staff_name";
+        		break;
+            case "department":
+                order="department_id";
+                break;
+            case "duty":
+                order="duty_id";
+                break;
+        	default:
+        		break;
+        	}
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         sql = sql + " order by sf."+order+" "+direct+",sf.modified_on desc";

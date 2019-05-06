@@ -98,7 +98,7 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
                     orderSpecifier = qBaseInstruction.instructionName.asc();
                 }
             }
-            if("category".equals(query.getOrder())){
+            if("categoryName".equals(query.getOrder())){
                 if("desc".equalsIgnoreCase(query.getDirect())){
                     orderSpecifier = qBaseInstruction.category.desc();
                 }else{
