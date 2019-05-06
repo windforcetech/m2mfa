@@ -17,7 +17,10 @@ import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -53,6 +56,8 @@ public class BaseBomDescController {
     BasePartsService basePartsService;
     @Autowired
     BaseItemsTargetService baseItemsTargetService;
+    @Autowired
+    JPAQueryFactory queryFactory;
 
     /**
      * 列表
@@ -72,8 +77,8 @@ public class BaseBomDescController {
             }
         }
 
-
         QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
+        JPAQuery<BaseBomDesc> jq = queryFactory.selectFrom(baseBomDesc);
         BooleanBuilder expression = new BooleanBuilder();
         if (StringUtils.isNotEmpty(query.getPartId())) {
             expression.and(baseBomDesc.partId.like("%" + query.getPartId() + "%"));
@@ -81,9 +86,37 @@ public class BaseBomDescController {
         if (StringUtils.isNotEmpty(query.getCategory())) {
             expression.and((baseBomDesc.partId.in(partIds)));
         }
+        OrderSpecifier orderSpecifier = null;
+        if(orderSpecifier==null||"createOn".equals(query.getDirect())){
+            orderSpecifier = baseBomDesc.createOn.desc();
+        }
+        if(StringUtils.isNotEmpty(query.getDirect())){
+            if("partId".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = baseBomDesc.partId.desc();
+                }else{
+                    orderSpecifier = baseBomDesc.partId.asc();
+                }
+            }
+            if("category".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = baseBomDesc.category.desc();
+                }else{
+                    orderSpecifier = baseBomDesc.category.asc();
+                }
+            }
+            if("enabled".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = baseBomDesc.enabled.desc();
+                }else{
+                    orderSpecifier = baseBomDesc.enabled.asc();
+                }
+            }
 
-        List<BaseBomDesc> baseBomDescs = Lists.newArrayList(baseBomDescService.findAll(expression));
-
+        }
+        jq.where(expression).orderBy(orderSpecifier).orderBy(baseBomDesc.createOn.desc());
+        List<BaseBomDesc> baseBomDescs = jq.fetch();
+        //List<BaseBomDesc> baseBomDescs = Lists.newArrayList(baseBomDescService.findAll(expression));
         baseBomDescs.forEach(baseBomDesc1 -> {
             BaseParts baseParts = basePartsService.findById(baseBomDesc1.getPartId()).orElse(null);
             baseBomDesc1.setName(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getName());
