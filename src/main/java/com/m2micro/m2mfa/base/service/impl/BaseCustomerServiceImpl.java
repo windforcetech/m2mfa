@@ -135,6 +135,13 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
         sql = sql+" and (bc.group_id  = '"+groupId+"')";
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        switch (order) {
+            case "category_name":
+                order = "category";
+                break;
+            default:
+                break;
+        }
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         sql = sql + " order by bc."+order+" "+direct+",bc.modified_on desc";
