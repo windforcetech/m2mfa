@@ -70,6 +70,5 @@ public class BasePartsQuery extends Query {
     private String  typesof;
     @ApiModelProperty(value = "是否为工单")
     private boolean  isom;
-    @ApiModelProperty(value = "是否为模板")
-    private Boolean  isTemplate;
+
 }
