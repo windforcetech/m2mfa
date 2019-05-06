@@ -26,8 +26,8 @@ public class BasePartsQuery extends Query {
     private String source;
     @ApiModelProperty(value = "类型")
     private String category;
-//    @ApiModelProperty(value = "单重/净重(单位kg)")
-//    private Double single;
+    @ApiModelProperty(value = "物料等级")
+    private String grade;
     @ApiModelProperty(value = "检验否")
     private Boolean isCheck;
     @ApiModelProperty(value = "库存单位")
