@@ -25,4 +25,10 @@ public class BaseStaffshiftQuery extends Query {
     @ApiModelProperty(value = "班别代码")
     private String shiftId;
 
+    @ApiModelProperty(value = "姓名")
+    private String staffName;
+
+    @ApiModelProperty(value = "工号")
+    private String code;
+
 }

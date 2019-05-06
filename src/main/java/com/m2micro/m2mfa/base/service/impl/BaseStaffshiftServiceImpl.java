@@ -64,6 +64,12 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
         sql +=" AND base_shift.shift_id='"+query.getShiftId()+"'";
         }
         sql +=") as tk  GROUP BY staff_id ) as zh , base_staff where base_staff.staff_id=zh.staff_id and base_staff.group_id='" + groupId + "'";
+        if(StringUtils.isNotEmpty(query.getStaffName())){
+            sql +=" AND base_staff.staff_name LIKE '%"+query.getStaffName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getCode())){
+            sql +=" AND base_staff.`code` LIKE '%"+query.getCode()+"%'";
+        }
         //排序字段
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
         //排序方向

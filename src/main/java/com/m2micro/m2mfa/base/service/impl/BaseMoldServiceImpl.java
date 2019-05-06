@@ -287,6 +287,14 @@ public class BaseMoldServiceImpl implements BaseMoldService {
         sql = sql+" and bm.group_id = '"+groupId+"'";
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        //特殊排序字段处理(非主表)
+        switch (order) {
+        	case "placement_name":
+        	    order = "placement";
+        		break;
+        	default:
+        		break;
+        	}
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         sql = sql + " order by bm."+order+" "+direct+",bm.modified_on desc";
