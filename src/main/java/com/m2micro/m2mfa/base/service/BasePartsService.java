@@ -68,5 +68,12 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
      */
     PageUtil<BaseParts> workOrderPartslist(BasePartsQuery query);
 
+    /**
+     * 过滤指导书的
+     * @param query
+     * @return
+     */
+    PageUtil<BaseParts> guidingbooklist(BasePartsQuery query);
+
     List<BaseParts> findAllByCategory(String category);
 }

@@ -74,6 +74,16 @@ public class BasePartsController {
     /**
      * 列表
      */
+    @RequestMapping("/guidingBooklist")
+    @ApiOperation(value="料件基本资料列表(过滤指导书)")
+    @UserOperationLog("料件基本资料列表(过滤指导书)")
+    public ResponseMessage<PageUtil<BaseParts>> guidingBooklist(BasePartsQuery query){
+        PageUtil<BaseParts> page = basePartsService.guidingbooklist(query);
+        return ResponseMessage.ok(page);
+    }
+    /**
+     * 列表
+     */
     @RequestMapping("/workOrderPartslist")
     @ApiOperation(value="料件基本资料列表（工单）")
     @UserOperationLog("料件基本资料列表（工单）")

@@ -110,15 +110,112 @@ public class BasePartsServiceImpl implements BasePartsService {
                 "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
                 "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
                 "WHERE 1 = 1";
-        sql = addSqlCondition(sql, query);
+        sql +=sqlPing( query);
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder()) ? "modified_on" : query.getOrder());
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect()) ? "desc" : query.getDirect();
+        sql = sql + " order by bp." + order + " " + direct + ",bp.modified_on desc";
         sql = sql + " limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
         List<BaseParts> list = jdbcTemplate.query(sql, rm);
         String countSql = "select count(*) from ";
         countSql += "base_parts bp where 1=1 ";
-        countSql = addSqlCondition(countSql, query);
+        countSql += sqlPing( query);
         long totalCount = jdbcTemplate.queryForObject(countSql, long.class);
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+    }
+
+    /**
+     * 指导书料件获取
+     * @param query
+     * @return
+     */
+    @Override
+    public PageUtil<BaseParts> guidingbooklist(BasePartsQuery query) {
+        String sql = "SELECT\n" +
+            "	bp.part_id partId,\n" +
+            "	bp.part_no partNo,\n" +
+            "	bp.name name,\n" +
+            "	bp.spec spec,\n" +
+            "	bp.version version,\n" +
+            "	bp.grade grade,\n" +
+            "	bp.source source,\n" +
+            "	bp.category category,\n" +
+            "	bp.single single,\n" +
+            "	bp.is_check isCheck,\n" +
+            "	bp.stock_unit stockUnit,\n" +
+            "	bp.safety_stock safetyStock,\n" +
+            "	bp.max_stock maxStock,\n" +
+            "	bp.main_warehouse mainWarehouse,\n" +
+            "	bp.main_storage mainStorage,\n" +
+            "	bp.production_unit productionUnit,\n" +
+            "	bp.production_conversion_rate productionConversionRate,\n" +
+            "	bp.min_production_qty minProductionQty,\n" +
+            "	bp.production_loss_rate productionLossRate,\n" +
+            "	bp.sent_unit sentUnit,\n" +
+            "	bp.sent_conversion_rate sentConversionRate,\n" +
+            "	bp.min_sent_qty minSentQty,\n" +
+            "	bp.is_consume isConsume,\n" +
+            "	bp.validity_days validityDays,\n" +
+            "	bp.main_line_warehouse mainLineWarehouse,\n" +
+            "	bp.main_line_storage mainLineStorage,\n" +
+            "	bp.positive_image_url positiveImageUrl,\n" +
+            "	bp.negative_image negativeImage,\n" +
+            "	bp.enabled enabled,\n" +
+            "	bp.description description,\n" +
+            "	bp.create_on createOn,\n" +
+            "	bp.create_by createBy,\n" +
+            "	bp.modified_on modifiedOn,\n" +
+            "	bp.modified_by modifiedBy,\n" +
+            "	bi.item_name categoryName,\n" +
+            "	bi2.item_name sourceName\n" +
+            "FROM mes_part_route mpr ,\n"+
+            " base_parts bp\n" +
+            "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
+            "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
+            "WHERE 1 = 1";
+
+        sql +=sqlPing(query);
+        sql += "   and  mpr.part_id=bp.part_id";
+
+        sql += getSqlTypes();
+
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder()) ? "modified_on" : query.getOrder());
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect()) ? "desc" : query.getDirect();
+        sql = sql + " order by bp." + order + " " + direct + ",bp.modified_on desc";
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseParts.class);
+        List<BaseParts> list = jdbcTemplate.query(sql, rm);
+        String countSql = "select count(*) from   mes_part_route mpr ,\n"+
+            " base_parts bp\n" +
+            "LEFT JOIN base_items_target bi ON bi.id = bp.category\n" +
+            "LEFT JOIN base_items_target bi2 ON bi2.id = bp.source\n" +
+            "WHERE 1 = 1";
+        countSql+=sqlPing(query);
+        countSql += "   and  mpr.part_id=bp.part_id";
+        countSql += getSqlTypes();
+        long totalCount = jdbcTemplate.queryForObject(countSql, long.class);
+        return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+    }
+
+    /**
+     * 指导书定义sql
+     * @return
+     */
+    private String getSqlTypes() {
+        String sql="";
+        List<String> ids = new ArrayList<>();
+        String collect = "";
+        List<BasePartInstruction> all = basePartInstructionRepository.findAll();
+        collect = all.stream().filter(v -> {
+            boolean flag = !ids.contains(v.getPartId());
+            ids.add(v.getPartId());
+            return flag;
+        }).map(e -> e.getPartId()).collect(Collectors.joining(",", "'", "'"));
+        sql += " and bp.part_id NOT in(" + collect + ")";
+        return sql;
     }
 
     /**
@@ -340,90 +437,7 @@ public class BasePartsServiceImpl implements BasePartsService {
         return basePartsRepository.findAllByCategory(category);
     }
 
-    private String addSqlCondition(String sql, BasePartsQuery query) {
-        if (StringUtils.isNotEmpty(query.getPartNo())) {
-            sql = sql + " and bp.part_no like '%" + query.getPartNo() + "%'";
-        }
-        if (StringUtils.isNotEmpty(query.getName())) {
-            sql = sql + " and bp.name like '%" + query.getName() + "%'";
-        }
-        if (StringUtils.isNotEmpty(query.getVersion())) {
-            sql = sql + " and bp.version like '%" + query.getVersion() + "%'";
-        }
-        if (StringUtils.isNotEmpty(query.getSpec())) {
-            sql = sql + " and bp.spec like '%" + query.getSpec() + "%'";
-        }
-        if (StringUtils.isNotEmpty(query.getSource())) {
-            sql = sql + " and bp.source = '" + query.getSource() + "'";
-        }
-        if (StringUtils.isNotEmpty(query.getGrade())) {
-            sql = sql + " and bp.grade = '" + query.getGrade() + "'";
-        }
-        if (StringUtils.isNotEmpty(query.getCategory())) {
-            sql = sql + " and bp.category = '" + query.getCategory() + "'";
-        }
-        if (query.getIsCheck() != null) {
-            sql = sql + " and bp.is_check = " + query.getIsCheck() + "";
-        }
-        if (StringUtils.isNotEmpty(query.getStockUnit())) {
-            sql = sql + " and bp.stock_unit = '" + query.getStockUnit() + "'";
-        }
-        if (StringUtils.isNotEmpty(query.getMainWarehouse())) {
-            sql = sql + " and bp.main_warehouse like '%" + query.getMainWarehouse() + "%'";
-        }
-        if (StringUtils.isNotEmpty(query.getMainStorage())) {
-            sql = sql + " and bp.main_storage like '%" + query.getMainStorage() + "%'";
-        }
-        if (StringUtils.isNotEmpty(query.getProductionUnit())) {
-            sql = sql + " and bp.production_unit = '" + query.getProductionUnit() + "'";
-        }
-        if (StringUtils.isNotEmpty(query.getSentUnit())) {
-            sql = sql + " and bp.sent_unit = '" + query.getSentUnit() + "'";
-        }
-        if (query.getIsConsume() != null) {
-            sql = sql + " and bp.is_consume = " + query.getIsConsume() + "";
-        }
-        if (StringUtils.isNotEmpty(query.getMainLineWarehouse())) {
-            sql = sql + " and bp.main_line_warehouse = '" + query.getMainLineWarehouse() + "'";
-        }
-        if (StringUtils.isNotEmpty(query.getMainLineStorage())) {
-            sql = sql + " and bp.main_line_storage = '" + query.getMainLineStorage() + "'";
-        }
-        if (StringUtils.isNotEmpty(query.getDescription())) {
-            sql = sql + " and bp.description like '%" + query.getDescription() + "%'";
-        }
 
-        if (query.getEnabled() != null) {
-            sql = sql + " and bp.enabled = " + query.getEnabled() + "";
-        }
-        String groupId = TokenInfo.getUserGroupId();
-        sql = sql + " and bp.group_id = '" + groupId + "'";
-        if (StringUtils.isNotEmpty(query.getCategory())) {
-            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
-            //不等于全部
-            if (!(baseItemsTarget != null && "全部".equals(baseItemsTarget.getItemName()))) {
-                sql = sql + " and bp.category = '" + query.getCategory() + "'";
-            }
-        }
-        List<String> ids = new ArrayList<>();
-        String collect = "";
-        if (StringUtils.isNotEmpty(query.getTypesof())) {
-            List<BasePartInstruction> all = basePartInstructionRepository.findAll();
-            collect = all.stream().filter(v -> {
-                boolean flag = !ids.contains(v.getPartId());
-                ids.add(v.getPartId());
-                return flag;
-            }).map(e -> e.getPartId()).collect(Collectors.joining(",", "'", "'"));
-            sql += " and bp.part_id NOT in(" + collect + ")";
-        }
-
-        //排序字段(驼峰转换)
-        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder()) ? "modified_on" : query.getOrder());
-        //排序方向
-        String direct = StringUtils.isEmpty(query.getDirect()) ? "desc" : query.getDirect();
-        sql = sql + " order by bp." + order + " " + direct + ",bp.modified_on desc";
-        return sql;
-    }
 
     @Override
     public PageUtil<BaseParts> listFilter(BasePartsQuery query) {
