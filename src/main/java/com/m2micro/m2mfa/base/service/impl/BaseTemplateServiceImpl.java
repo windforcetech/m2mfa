@@ -252,13 +252,14 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
     @Override
     public List<BaseTemplate> getByCategoryIdAndNotUsedByPart(String partId, String tagId) {
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseTemplate.class);
-        String sql = "select b.* from base_template b where \n" +
+        String sql = "select b.* ,bt.item_name  categoryName  from  base_items_target bt, base_template b where   bt.id=b.category and   \n" +
             "b.id not in(select a.template_id from base_part_template a where part_id='" + partId + "')\n" +
             "and b.category='" + tagId + "' order by b.name ;";
         List<BaseTemplate> templateList = jdbcTemplate.query(sql, rm);
         List<BaseTemplate> baseTemplates= new ArrayList<>();
         for(BaseTemplate baseTemplate :templateList){
             BaseTemplate baseTemplate1 = getByTemplateId(baseTemplate.getId());
+            baseTemplate1.setCategoryName(baseTemplate.getCategoryName());
             baseTemplates.add(baseTemplate1);
         }
 
