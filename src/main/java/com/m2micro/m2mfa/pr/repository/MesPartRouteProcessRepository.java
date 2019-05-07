@@ -66,20 +66,20 @@ public interface MesPartRouteProcessRepository extends BaseRepository<MesPartRou
     MesPartRouteProcess findByPartrouteidAndProcessid(String partrouteid,String processid);
 
     @Query(value = "SELECT\n" +
-            "	mprp.process_id \n" +
+            "	mprp.processid \n" +
             "FROM\n" +
             "	mes_part_route_process mprp \n" +
             "WHERE\n" +
-            "	mprp.part_route_id = ?1 \n" +
-            "	AND brd.next_process_id = ?2", nativeQuery = true)
+            "	mprp.partrouteid = ?1 \n" +
+            "	AND mprp.nextprocessid = ?2", nativeQuery = true)
     String getBeforeProcessId(String partRouteId,String processId );
 
     @Query(value = "SELECT\n" +
-            "	mprp.next_process_id \n" +
+            "	mprp.nextprocessid \n" +
             "FROM\n" +
             "	mes_part_route_process mprp \n" +
             "WHERE\n" +
-            "	mprp.part_route_id = ?1 \n" +
-            "	AND brd.process_id = ?2", nativeQuery = true)
+            "	mprp.partrouteid = ?1 \n" +
+            "	AND mprp.processid = ?2", nativeQuery = true)
     String getNextProcessId(String partRouteId,String processId );
 }

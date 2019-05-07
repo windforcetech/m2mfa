@@ -161,9 +161,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //获取料件途程id
         String partRouteId = mesPartRouteRepository.getPartRouteId(source);
         //获取上一工序
-        String beforeProcessId = mesPartRouteProcessRepository.getBeforeProcessId(partRouteId, para.getProcessId());
+        String beforeProcessId = baseRouteDefRepository.getBeforeProcessId(partRouteId, para.getProcessId());
         //获取下一工序
-        String nextProcessId = mesPartRouteProcessRepository.getNextProcessId(partRouteId, para.getProcessId());
+        String nextProcessId = baseRouteDefRepository.getNextProcessId(partRouteId, para.getProcessId());
         //进站数（上一次的产出）
         Integer outputQty = mesRecordWipRec.getOutputQty();
         //【产出数量】+【不良数量】 != 进站的数量

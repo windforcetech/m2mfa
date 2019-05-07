@@ -47,7 +47,7 @@ public class MesMoScheduleProcessServiceImpl implements MesMoScheduleProcessServ
         if(mesMoScheduleProcesss!=null&&mesMoScheduleProcesss.size()>0){
            return true;//已结束工序
         }
-        return true;//没有结束工序
+        return false;//没有结束工序
     }
 
     @Override
