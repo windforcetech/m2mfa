@@ -235,6 +235,9 @@ public class BaseMoldServiceImpl implements BaseMoldService {
         if(StringUtils.isNotEmpty(query.getFlag())){
             sql = sql+" and bm.flag = '"+query.getFlag()+"'";
         }
+        if(StringUtils.isNotEmpty(query.getPlacement())){
+            sql = sql+" and bm.placement = '"+query.getPlacement()+"'";
+        }
         if(StringUtils.isNotEmpty(query.getCategoryId())){
             BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategoryId()).orElse(null);
             //不等于全部，全部特殊处理
