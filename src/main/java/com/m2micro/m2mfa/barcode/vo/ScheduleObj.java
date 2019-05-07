@@ -2,9 +2,10 @@ package com.m2micro.m2mfa.barcode.vo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import java.util.List;
-
+@Data
 @ApiModel("排产单")
 public class ScheduleObj {
     @ApiModelProperty("排产单id")
@@ -34,117 +35,10 @@ public class ScheduleObj {
     private String customerCode;
 
     @ApiModelProperty("料件关联模板信息")
-    public List<TemplateObj> getTemplateObjList() {
-        return templateObjList;
-    }
+    private List<TemplateObj> templateObjList;
 
     @ApiModelProperty("项次")
     private Integer orderSeq;
 
-    public Integer getOrderSeq() {
-        return orderSeq;
-    }
 
-    public void setOrderSeq(Integer orderSeq) {
-        this.orderSeq = orderSeq;
-    }
-
-    public String getPartSpec() {
-        return partSpec;
-    }
-
-    public void setPartSpec(String partSpec) {
-        this.partSpec = partSpec;
-    }
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
-
-
-    public void setTemplateObjList(List<TemplateObj> templateObjList) {
-        this.templateObjList = templateObjList;
-    }
-
-
-    private List<TemplateObj> templateObjList;
-
-    public String getScheduleId() {
-        return scheduleId;
-    }
-
-    public void setScheduleId(String scheduleId) {
-        this.scheduleId = scheduleId;
-    }
-
-    public String getScheduleNo() {
-        return scheduleNo;
-    }
-
-    public void setScheduleNo(String scheduleNo) {
-        this.scheduleNo = scheduleNo;
-    }
-
-    public String getMachineId() {
-        return machineId;
-    }
-
-    public void setMachineId(String machineId) {
-        this.machineId = machineId;
-    }
-
-    public String getPartId() {
-        return partId;
-    }
-
-    public void setPartId(String partId) {
-        this.partId = partId;
-    }
-
-    public String getPartNo() {
-        return partNo;
-    }
-
-    public void setPartNo(String partNo) {
-        this.partNo = partNo;
-    }
-
-    public String getPartName() {
-        return partName;
-    }
-
-    public void setPartName(String partName) {
-        this.partName = partName;
-    }
-
-    public Integer getScheduleQty() {
-        return scheduleQty;
-    }
-
-    public void setScheduleQty(Integer scheduleQty) {
-        this.scheduleQty = scheduleQty;
-    }
-
-    public String getMachineName() {
-        return machineName;
-    }
-
-    public void setMachineName(String machineName) {
-        this.machineName = machineName;
-    }
-
-    public String getCustomerCode() {
-        return customerCode;
-    }
-
-    public void setCustomerCode(String customerCode) {
-        this.customerCode = customerCode;
-    }
-
-    public ScheduleObj() {
-    }
 }
