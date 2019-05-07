@@ -52,7 +52,7 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
         //JPAQuery<BaseStaffshift> jq = queryFactory.selectFrom(qBaseStaffshift);
 
         String groupId = TokenInfo.getUserGroupId();
-        String sql = " SELECT zh.* , base_staff.staff_name , base_staff.code   from     (SELECT staff_id, CAST( GROUP_CONCAT( shift_date, ';', id, ';',shift_code ORDER BY shift_date ASC SEPARATOR '|' ) AS CHAR (30000) CHARACTER SET utf8 ) as keyvalue FROM  (SELECT base_staffshift.id,staff_id, shift_date,base_shift.shift_id, base_shift.`name` as shift_name,base_shift.`code` As shift_code  from base_staffshift,base_shift where staff_id in (SELECT staff_id FROM `base_staff` where 1=1 ";
+        String sql = " SELECT zh.* , base_staff.staff_name AS staffName , base_staff.code   from     (SELECT staff_id, CAST( GROUP_CONCAT( shift_date, ';', id, ';',shift_code ORDER BY shift_date ASC SEPARATOR '|' ) AS CHAR (30000) CHARACTER SET utf8 ) as keyvalue FROM  (SELECT base_staffshift.id,staff_id, shift_date,base_shift.shift_id, base_shift.`name` as shift_name,base_shift.`code` As shift_code  from base_staffshift,base_shift where staff_id in (SELECT staff_id FROM `base_staff` where 1=1 ";
         if (StringUtils.isNotEmpty(query.getDepartmentID())){
             sql += "  and department_id='" + query.getDepartmentID() + "'";
         }
