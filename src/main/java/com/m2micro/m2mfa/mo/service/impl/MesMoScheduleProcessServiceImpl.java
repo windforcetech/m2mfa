@@ -10,6 +10,9 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.mo.entity.QMesMoScheduleProcess;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
 import java.util.List;
 /**
  * 生产排程工序 服务实现类
@@ -36,6 +39,23 @@ public class MesMoScheduleProcessServiceImpl implements MesMoScheduleProcessServ
         List<MesMoScheduleProcess> list = jq.fetch();
         long totalCount = jq.fetchCount();
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    @Override
+    public Boolean isEndProcess(String scheduleId, String processId) {
+        List<MesMoScheduleProcess> mesMoScheduleProcesss = mesMoScheduleProcessRepository.findByScheduleIdAndProcessIdAndActualEndTimeIsNotNull(scheduleId,processId);
+        if(mesMoScheduleProcesss!=null&&mesMoScheduleProcesss.size()>0){
+           return true;//已结束工序
+        }
+        return true;//没有结束工序
+    }
+
+    @Override
+    @Transactional
+    public void endProcess(String scheduleId, String processId) {
+        MesMoScheduleProcess mesMoScheduleProcess = mesMoScheduleProcessRepository.findByScheduleIdAndProcessId(scheduleId, processId);
+        mesMoScheduleProcess.setActualEndTime(new Date());
+        save(mesMoScheduleProcess);
     }
 
 }

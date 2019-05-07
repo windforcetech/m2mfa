@@ -15,6 +15,7 @@ import com.m2micro.m2mfa.mo.model.PartsRouteModel;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
@@ -50,6 +51,8 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     MesPartRouteRepository mesPartRouteRepository;
     @Autowired
     MesMoScheduleService mesMoScheduleService;
+    @Autowired
+    MesMoScheduleRepository mesMoScheduleRepository;
 
 
     public MesMoDescRepository getRepository() {
@@ -529,6 +532,28 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         }*/
         PropertyUtil.copy(mesMoDesc,mesMoDescOld);
         return save(mesMoDescOld);
+    }
+
+    @Override
+    @Transactional
+    public void endMoDesc(String moId) {
+        List<Integer> flags = new ArrayList<>();
+        flags.add(MoScheduleStatus.INITIAL.getKey());
+        flags.add(MoScheduleStatus.AUDITED.getKey());
+        flags.add(MoScheduleStatus.PRODUCTION.getKey());
+        flags.add(MoScheduleStatus.FROZEN.getKey());
+        List<MesMoSchedule> mesMoSchedules = mesMoScheduleRepository.findByMoIdAndFlagIn(moId, flags);
+        //工单下所有排产单是否已结束
+        if(mesMoSchedules==null||mesMoSchedules.size()==0){
+            MesMoDesc mesMoDesc = findById(moId).orElse(null);
+            Integer scheduleQty = mesMoDesc.getSchedulQty()==null?0:mesMoDesc.getSchedulQty();
+            //工单的可排数量是否为0
+            if(mesMoDesc.getTargetQty()-scheduleQty==0){
+                //结束工单
+                mesMoDesc.setCloseFlag(MoStatus.CLOSE.getKey());
+                save(mesMoDesc);
+            }
+        }
     }
 
 

@@ -147,4 +147,12 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
                     "	mms.part_id = bpt.part_id \n" +
                     "	AND mms.schedule_id = ?1",nativeQuery = true)
     ScheduleAndPartsModel getStationRelationModel(String scheduleId);
+
+    /**
+     * 获取工单下没结束的排产单
+     * @param moId
+     * @param flags
+     * @return
+     */
+    List<MesMoSchedule> findByMoIdAndFlagIn(String moId,List<Integer> flags);
 }

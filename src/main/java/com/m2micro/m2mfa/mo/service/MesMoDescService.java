@@ -107,4 +107,10 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      */
     MesMoDesc updateEntity(MesMoDesc mesMoDesc);
 
+    /**
+     * 结束工单
+     * @param moId
+     */
+    void endMoDesc(String moId);
+
 }
