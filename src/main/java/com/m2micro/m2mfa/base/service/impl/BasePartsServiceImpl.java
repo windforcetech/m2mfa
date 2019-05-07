@@ -269,7 +269,11 @@ public class BasePartsServiceImpl implements BasePartsService {
                 "WHERE 1 = 1";
 
         sql +=sqlPing(query);
+        String groupId = TokenInfo.getUserGroupId();
         sql  +="  and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
+        sql +="AND (\n" +
+            "	select COUNT(*) from 	mes_mo_schedule mms where mms.group_id = '"+groupId+"' and bp.part_id =mms.part_id\n" +
+            ") > 0";
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder()) ? "modified_on" : query.getOrder());
         //排序方向
@@ -284,6 +288,9 @@ public class BasePartsServiceImpl implements BasePartsService {
             "WHERE 1 = 1";
         countSql+=sqlPing(query);
         countSql +=  "  and (select COUNT(*) from base_pack t3 where  bp.part_no = t3.part_id) >0 ";
+        countSql +="AND (\n" +
+            "	select COUNT(*) from 	mes_mo_schedule mms where mms.group_id = '"+groupId+"' and bp.part_id =mms.part_id\n" +
+            ") > 0";
         long totalCount = jdbcTemplate.queryForObject(countSql, long.class);
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
     }
