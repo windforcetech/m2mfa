@@ -483,6 +483,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         barcodePrintApply.setEnabled(true);
         barcodePrintApply.setCheckFlag(0);
         barcodePrintApply.setSequence(0);
+        //标签补打不进行校验唯一性
         if(!barcodePrintApply.getPrintCategory().equals("replenish")){
           if (barcodePrintApplyRepository.countBySource(barcodePrintApply.getSource()) > 0) {
             throw new MMException("来源单号已存在，不可重复申请打印。");

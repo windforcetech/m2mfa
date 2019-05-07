@@ -61,5 +61,12 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
      */
     PageUtil<BaseParts> barcodePartslist(BasePartsQuery query);
 
+    /**
+     * 工单料件获取
+     * @param query
+     * @return
+     */
+    PageUtil<BaseParts> workOrderPartslist(BasePartsQuery query);
+
     List<BaseParts> findAllByCategory(String category);
 }
