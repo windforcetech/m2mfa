@@ -16,7 +16,7 @@ public class CrossStationDefectPara {
     @ApiModelProperty(value = "工序主键")
     @NotEmpty(message="工序主键不能为空",groups = {QueryGroup.class})
     private String processId;
-    @ApiModelProperty(value = "工位Id")
+    /*@ApiModelProperty(value = "工位Id")
     @NotEmpty(message="工位Id不能为空",groups = {QueryGroup.class})
-    private String stationId;
+    private String stationId;*/
 }
