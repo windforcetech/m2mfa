@@ -126,6 +126,44 @@ public class MesMoDescServiceImpl implements MesMoDescService {
             sql = sql+" and md.plan_input_date <= "+"'"+DateUtil.format(query.getEndTime())+"'" ;
         }
 
+
+
+
+        if(StringUtils.isNotEmpty(query.getPartNo())){
+            sql = sql+" and bp.part_no like '%"+query.getPartNo()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            sql = sql+" and md.category = "+ Integer.valueOf(query.getCategory()) ;
+        }
+        if(query.getTargetQty()!=null){
+            sql = sql+" and md.target_qty = "+ Integer.valueOf(query.getTargetQty()) ;
+        }
+        if (query.getReachDate() != null) {
+            sql = sql+" and md.reach_date >= "+"'"+DateUtil.format(query.getReachDate())+"'" ;
+        }
+        if(query.getMachineQty()!=null){
+            sql = sql+" and md.machine_qty = "+ Integer.valueOf(query.getMachineQty()) ;
+        }
+        if(StringUtils.isNotEmpty(query.getCustomerName())){
+            sql = sql+" and bc.name like '%"+query.getCustomerName()+"%'";
+        }
+        if (query.getEnabled() != null) {
+            sql = sql + " AND md.enabled = " + Boolean.valueOf(query.getEnabled()) + "\n";
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            sql = sql + " AND md.description like '%" + query.getDescription() + "%'\n";
+        }
+        if (StringUtils.isNotEmpty(query.getDistinguish())) {
+            sql = sql + " AND md.distinguish =" + Integer.valueOf(query.getDistinguish());
+        }
+        if (query.getRevsion() != null) {
+            sql = sql + " AND md.revsion = " + query.getRevsion();
+        }
+        if (query.getBomRevsion() != null) {
+            sql = sql + " AND md.bom_revsion = " + Integer.valueOf(query.getBomRevsion()) + "\n";
+        }
+
+
         sql = sql + " order by md.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoDescModel.class);
@@ -155,6 +193,42 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         }
         if (query.getEndTime() != null) {
             countSql = countSql+" and md.plan_input_date <= "+"'"+DateUtil.format(query.getEndTime())+"'" ;
+        }
+
+
+
+        if(StringUtils.isNotEmpty(query.getPartNo())){
+            countSql = countSql+" and bp.part_no like '%"+query.getPartNo()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            countSql = countSql+" and md.category = "+ Integer.valueOf(query.getCategory()) ;
+        }
+        if(query.getTargetQty()!=null){
+            countSql = countSql+" and md.target_qty = "+ Integer.valueOf(query.getTargetQty()) ;
+        }
+        if (query.getReachDate() != null) {
+            countSql = countSql+" and md.reach_date >= "+"'"+DateUtil.format(query.getReachDate())+"'" ;
+        }
+        if(query.getMachineQty()!=null){
+            countSql = countSql+" and md.machine_qty = "+ Integer.valueOf(query.getMachineQty()) ;
+        }
+        if(StringUtils.isNotEmpty(query.getCustomerName())){
+            countSql = countSql+" and bc.name like '%"+query.getCustomerName()+"%'";
+        }
+        if (query.getEnabled() != null) {
+            countSql = countSql + " AND md.enabled = " + Boolean.valueOf(query.getEnabled()) + "\n";
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            countSql = countSql + " AND md.description like '%" + query.getDescription() + "%'\n";
+        }
+        if (StringUtils.isNotEmpty(query.getDistinguish())) {
+            countSql = countSql + " AND md.distinguish =" + Integer.valueOf(query.getDistinguish());
+        }
+        if (query.getRevsion() != null) {
+            countSql = countSql + " AND md.revsion = " + query.getRevsion();
+        }
+        if (query.getBomRevsion() != null) {
+            countSql = countSql + " AND md.bom_revsion = " + Integer.valueOf(query.getBomRevsion()) + "\n";
         }
 
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);

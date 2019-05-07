@@ -15,4 +15,19 @@ import lombok.Data;
 public class MesMoScheduleQuery extends Query {
     @ApiModelProperty(value = "执行状态")
     private String flag;
+
+    @ApiModelProperty(value = "排产单号")
+    private String scheduleNo;
+    @ApiModelProperty(value = "机台名称")
+    private String machineName;
+
+    @ApiModelProperty(value = "有效否")
+    private Boolean enabled;
+    @ApiModelProperty(value = "描述")
+    private String description;
+
+    @ApiModelProperty(value = "目标数量")
+    private Integer   scheduleQty;
+    @ApiModelProperty(value = "完成数量")
+    private Integer   outputQty;
 }
