@@ -76,6 +76,12 @@ public class PrintApplyObj {
     @ApiModelProperty("工单项次")
     private String orderSeq;
 
+
+    @ApiModelProperty("来源类型名称")
+    private String categoryName;
+
+
+
     @ApiModelProperty("打印条码列表")
     private List<PrintResourceObj> printResourceObjList;
 
@@ -313,5 +319,11 @@ public class PrintApplyObj {
         this.partName = partName;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
 
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 }

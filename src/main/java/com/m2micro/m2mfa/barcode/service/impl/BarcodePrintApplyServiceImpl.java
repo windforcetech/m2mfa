@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.RecursiveTask;
+import java.util.stream.Collectors;
 
 /**
  * 标签打印表单 服务实现类
@@ -135,7 +136,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "t.enabled,\n" +
                 "p.part_id,\n" +
                 "p.part_no,\n" +
-                "p.name part_name ,\n" +
+                "p.name part_name , t2.item_name categoryName, \n" +
                 " p.spec  ,\n" +
                 " mo.mo_number,  \n" +
                 " mo.order_seq  ,\n" +
@@ -184,9 +185,17 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
       String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"t.modified_on":query.getOrder());
       sql = sql + " order by "+order+" "+direct+",t.modified_on desc";
       sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-
         List<PrintApplyObj> templateList = jdbcTemplate.query(sql, rm);
-        return PageUtil.of(templateList, count, query.getSize(), query.getPage());
+
+      List<PrintApplyObj> collect = templateList.stream().filter(x -> {
+        if (x.getPrintCategory().equals("print")) {
+          x.setPrintCategory("初次申请");
+        } else {
+          x.setPrintCategory("补打申请");
+        }
+        return true;
+      }).collect(Collectors.toList());
+      return PageUtil.of(collect, count, query.getSize(), query.getPage());
 
     }
 
@@ -479,12 +488,13 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     @Override
     public BarcodePrintApply add(BarcodePrintApply barcodePrintApply) {
         barcodePrintApply.setId(getId());
-        barcodePrintApply.setFlag(BarcodePrintResourcesConstant.UNREVIEWED.getKey());
+      barcodePrintApply.setFlag(1);
         barcodePrintApply.setEnabled(true);
         barcodePrintApply.setCheckFlag(0);
         barcodePrintApply.setSequence(0);
         //标签补打不进行校验唯一性
         if(!barcodePrintApply.getPrintCategory().equals("replenish")){
+          barcodePrintApply.setFlag(0);
           if (barcodePrintApplyRepository.countBySource(barcodePrintApply.getSource()) > 0) {
             throw new MMException("来源单号已存在，不可重复申请打印。");
           }
@@ -722,7 +732,6 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
             one.setFlag(0);
             String data=JSONObject.toJSONString(item);
             one.setBarcode(item.get("barcode"));
-            String barcode = one.getBarcode();
             JSONObject parse = JSONObject.parseObject(data);
             Object barCode =  parse.get("BarCode");
             if(barCode !=null){
