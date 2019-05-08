@@ -212,7 +212,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     }else {
       sql += "and t.flag in(0,1)  ";
     }
-
+     return  sql;
     }
 
 
@@ -739,7 +739,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 
 @Override
 @Transactional
-public void  generateLabel(String applyId, Integer num/*份数*/) {
+public void  generateLabel(String applyId) {
     BarcodePrintApply barcodePrintApply = barcodePrintApplyRepository.findById(applyId).orElse(null);
     List<BarcodePrintResources> byApplyId = barcodePrintResourcesRepository.findByApplyId(applyId);
     if (!byApplyId.isEmpty()) {
@@ -808,11 +808,9 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
                 }
                 lable.put(varObj.getName(), value);
             }
-            int k = 0;
-            while (k < num) {
+
                 labelList.add(lable);
-                k++;
-            }
+
         }
 
         List<BarcodePrintResources> rs = new ArrayList<>();
