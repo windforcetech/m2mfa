@@ -631,7 +631,7 @@ public class BasePartsServiceImpl implements BasePartsService {
 
     @Override
     public PageUtil<BaseParts> findByNotUsedForPack(BasePartsQuery query) {
-        String sql = "SELECT t.part_no,t.name,t.spec,bi.item_name categoryName FROM base_parts t LEFT JOIN base_items_target bi ON bi.id = t.category where t.part_no not in(select distinct part_id from base_pack) AND t.enabled=1 ";
+        String sql = "SELECT t.part_id,t.part_no,t.name,t.spec,bi.item_name categoryName FROM base_parts t LEFT JOIN base_items_target bi ON bi.id = t.category where t.part_no not in(select distinct part_id from base_pack) AND t.enabled=1 ";
         String sqlCount = "Select count(*) FROM base_parts t where t.part_no not in(select distinct part_id from base_pack) AND t.enabled=1 ";
         if (query.getPartNo() != null && query.getPartNo() != "") {
             sql += " and t.part_no like '%" + query.getPartNo() + "%' ";

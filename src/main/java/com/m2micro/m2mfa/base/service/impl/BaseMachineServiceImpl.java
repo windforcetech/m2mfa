@@ -167,6 +167,9 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         if(StringUtils.isNotEmpty(query.getCategoryId())){
             sql = sql + " and bm.category_id = '"+query.getCategoryId()+"'";
         }
+        if(StringUtils.isNotEmpty(query.getPlacement())){
+            sql = sql + " and bm.placement= '"+query.getPlacement()+"'";
+        }
         if(StringUtils.isNotEmpty(query.getUnit())){
             sql = sql + " and bm.unit = '"+query.getUnit()+"'";
         }
