@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.mo.service.impl;
 
+import com.google.common.base.CaseFormat;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.starter.entity.Organization;
@@ -284,7 +285,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
 
 
-        sql = sql + " order by mms.modified_on desc";
+
+
+        if (StringUtils.isEmpty(query.getOrder()) || StringUtils.isEmpty(query.getDirect())) {
+            sql = sql + " order by mms.modified_on desc";
+        } else {
+
+            //排序字段(驼峰转换)
+            String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, query.getOrder());
+
+            sql = sql + " order by mms." + order + "  " + query.getDirect();
+        }
+
+
         sql = sql + " limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(MesMoScheduleModel.class);
         List<MesMoScheduleModel> list = jdbcTemplate.query(sql, rm);

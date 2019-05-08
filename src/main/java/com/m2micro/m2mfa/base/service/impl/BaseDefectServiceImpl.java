@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseDefect;
@@ -64,6 +65,15 @@ public class BaseDefectServiceImpl implements BaseDefectService {
         if(query.getEnabled()!=null && !query.getEnabled()){
             totalCountsql +=  " AND bd.enabled = '"+0+"'\n" ;
         }
+
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            totalCountsql +=  " AND bd.category = '"+query.getCategory()+"'\n" ;
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            totalCountsql = totalCountsql + " AND md.description like '%" + query.getDescription() + "%'\n";
+        }
+
+
          Long totalCount = jdbcTemplate.queryForObject(totalCountsql, Long.class);
 
         String sql = "SELECT\n" +
@@ -91,9 +101,25 @@ public class BaseDefectServiceImpl implements BaseDefectService {
             if(query.getEnabled()!=null && !query.getEnabled()){
                 sql +=  " AND bd.enabled = '"+0+"'\n" ;
             }
-           sql += " ORDER BY\n" +
-            "	bd.ect_id ASC\n" +
-            "LIMIT "+(query.getPage() - 1) * query.getSize()+",\n" +
+            if(StringUtils.isNotEmpty(query.getCategory())){
+                sql +=  " AND bd.category = '"+query.getCategory()+"'\n" ;
+            }
+            if (StringUtils.isNotEmpty(query.getDescription())) {
+                sql = sql + " AND md.description like '%" + query.getDescription() + "%'\n";
+            }
+
+        if (StringUtils.isEmpty(query.getOrder()) || StringUtils.isEmpty(query.getDirect())) {
+            sql = sql + " order by bd.modified_on desc";
+        } else {
+
+            //排序字段(驼峰转换)
+            String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, query.getOrder());
+
+            sql = sql + " order by bd." + order + "  " + query.getDirect();
+        }
+
+
+           sql += " LIMIT "+(query.getPage() - 1) * query.getSize()+",\n" +
             " "+query.getSize()+"";
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseDefect.class);
         List<BaseDefect> baseDefects = jdbcTemplate.query(sql, rm);

@@ -21,6 +21,9 @@ import com.m2micro.m2mfa.pr.service.MesPartRouteService;
 import com.m2micro.m2mfa.pr.service.MesPartRouteStationService;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -94,7 +97,30 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         if(StringUtils.isNotEmpty(query.getControlInformation())){
                 condition.and(qMesPartRoute.controlInformation.eq(query.getControlInformation()));
         }
+
+
+        if (query.getEnabled() != null) {
+            condition.and(qMesPartRoute.enabled.eq(query.getEnabled()));
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            condition.and(qMesPartRoute.description.like("%" + query.getDescription() + "%"));
+        }
+
+
+
         jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
+
+
+        if (StringUtils.isEmpty(query.getOrder()) || StringUtils.isEmpty(query.getDirect())) {
+            jq.orderBy(qMesPartRoute.modifiedOn.desc());
+        } else {
+            PathBuilder<MesPartRoute> entityPath = new PathBuilder<>(MesPartRoute.class, "mespartroute");
+            Order order = "ASC".equalsIgnoreCase(query.getDirect()) ? Order.ASC : Order.DESC;
+            OrderSpecifier orderSpecifier = new OrderSpecifier(order, entityPath.get(query.getOrder()));
+            jq.orderBy(orderSpecifier);
+        }
+
+
         List<MesPartRoute> list = jq.fetch();
         for(MesPartRoute mesPartRoute :list ){
             BaseProcess iprocess =   baseProcessService.findById(mesPartRoute.getInputProcessId()).orElse(null);

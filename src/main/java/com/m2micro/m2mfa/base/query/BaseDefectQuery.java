@@ -15,5 +15,9 @@ public class BaseDefectQuery extends Query {
   @ApiModelProperty(value = "状态")
   private Boolean enabled ;
 
+  private String description;
+
+  private String category;
+
 
 }
