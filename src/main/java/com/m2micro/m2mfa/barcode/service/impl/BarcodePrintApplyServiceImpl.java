@@ -136,7 +136,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
                 "t.enabled,\n" +
                 "p.part_id,\n" +
                 "p.part_no,\n" +
-                "p.name part_name ,\n" +
+                "p.name part_name , t2.item_name categoryName, \n" +
                 " p.spec  ,\n" +
                 " mo.mo_number,  \n" +
                 " mo.order_seq  ,\n" +
@@ -185,10 +185,14 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
       String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"t.modified_on":query.getOrder());
       sql = sql + " order by "+order+" "+direct+",t.modified_on desc";
       sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-
         List<PrintApplyObj> templateList = jdbcTemplate.query(sql, rm);
+
       List<PrintApplyObj> collect = templateList.stream().filter(x -> {
-        x.setFlag(BarcodePrintResourcesConstant.valueOfandKey(x.getFlag()).getValue());
+        if (x.getPrintCategory().equals("print")) {
+          x.setPrintCategory("初次申请");
+        } else {
+          x.setPrintCategory("补打申请");
+        }
         return true;
       }).collect(Collectors.toList());
       return PageUtil.of(collect, count, query.getSize(), query.getPage());
@@ -484,12 +488,13 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     @Override
     public BarcodePrintApply add(BarcodePrintApply barcodePrintApply) {
         barcodePrintApply.setId(getId());
-        barcodePrintApply.setFlag(BarcodePrintResourcesConstant.UNREVIEWED.getKey());
+      barcodePrintApply.setFlag(1);
         barcodePrintApply.setEnabled(true);
         barcodePrintApply.setCheckFlag(0);
         barcodePrintApply.setSequence(0);
         //标签补打不进行校验唯一性
         if(!barcodePrintApply.getPrintCategory().equals("replenish")){
+          barcodePrintApply.setFlag(0);
           if (barcodePrintApplyRepository.countBySource(barcodePrintApply.getSource()) > 0) {
             throw new MMException("来源单号已存在，不可重复申请打印。");
           }
@@ -545,7 +550,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         RowMapper rm111 = BeanPropertyRowMapper.newInstance(PrintResourceObj.class);
         String sql111 = " SELECT t.id,t.apply_id,t.content,t.flag FROM barcode_print_resources t \n" +
             "where t.apply_id='" + printApplyObj.getApplyId() + "'  ";
-        sql111 = sql111 + "    ORDER BY t.barcode  ,t.content limit "+(barcodeQuery.getPage()-1)*barcodeQuery.getSize()+","+barcodeQuery.getSize();
+        sql111 = sql111 + "    ORDER BY  t.content limit "+(barcodeQuery.getPage()-1)*barcodeQuery.getSize()+","+barcodeQuery.getSize();
         List<PrintResourceObj> printResourceObjList = jdbcTemplate.query(sql111, rm111);
         printApplyObj.setPrintResourceObjList(printResourceObjList);
         RowMapper rm11 = BeanPropertyRowMapper.newInstance(PackObj.class);
@@ -663,10 +668,14 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 
 @Override
 @Transactional
-public void  generateLabel(String applyId, Integer num/*份数*/) {
-    //份数默认为1
-    num=1;
+public void  generateLabel(String applyId) {
+
     BarcodePrintApply barcodePrintApply = barcodePrintApplyRepository.findById(applyId).orElse(null);
+    //初次申请，补打印
+    Integer flag=0;
+    if(!barcodePrintApply.getPrintCategory().equals("print")){
+      flag=1;
+    }
     List<BarcodePrintResources> byApplyId = barcodePrintResourcesRepository.findByApplyId(applyId);
     if (!byApplyId.isEmpty()) {
         throw new MMException(" 标签已打印。");
@@ -680,7 +689,6 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
         PackObj packObj = printApplyObj.getPackObj();
         Integer allQty = printApplyObj.getQty();
         TemplatePrintObj templatePrintObj = printApplyObj.getTemplatePrintObj();
-        String fileName = templatePrintObj.getFileName();
         List<TemplateVarObj> templateVarObjList = templatePrintObj.getTemplateVarObjList();
         List<HashMap<String, String>> labelList = new ArrayList<>();
         int n = allQty / packObj.getQty().intValue();
@@ -691,27 +699,16 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
             HashMap<String, String> lable = new HashMap<>();
             for (TemplateVarObj varObj : templateVarObjList) {
                 List<RuleObj> ruleObjList = varObj.getRuleObjList();
-                Collections.sort(ruleObjList, new
-                    Comparator<RuleObj>() {
-                        @Override
-                    public int compare(RuleObj o1, RuleObj o2) {
-                        return o1.getPosition() > o2.getPosition() ? 1 : -1;
-                    }
-                    });
+                Collections.sort(ruleObjList,(x,y)->x.getPosition()> y.getPosition() ? 1 : -1);
                 String value = "";
                 for (int x =0;x<ruleObjList.size();x++) {
                     RuleObj rule=ruleObjList.get(x);
                     //生成barcode规则
                     value = getbarcodeLable(dateNow, printApplyObj, allQty, n, i, value, rule);
-
                 }
                 lable.put(varObj.getName(), value);
             }
-            int k = 0;
-            while (k < num) {
                 labelList.add(lable);
-                k++;
-            }
         }
 
         List<BarcodePrintResources> rs = new ArrayList<>();
@@ -724,10 +721,9 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
             lableObj.setData(item);
             String content = JSONObject.toJSONString(lableObj);
             one.setContent(content);
-            one.setFlag(0);
+            one.setFlag(flag);
             String data=JSONObject.toJSONString(item);
             one.setBarcode(item.get("barcode"));
-            String barcode = one.getBarcode();
             JSONObject parse = JSONObject.parseObject(data);
             Object barCode =  parse.get("BarCode");
             if(barCode !=null){

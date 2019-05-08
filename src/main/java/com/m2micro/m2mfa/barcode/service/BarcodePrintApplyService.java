@@ -46,7 +46,7 @@ public interface BarcodePrintApplyService extends BaseService<BarcodePrintApply,
 
     PageUtil<PrintResourceObj> printApplylist(BarcodeQuery query);
 
-    void generateLabel(String applyId, Integer num/*份数*/) ;
+    void generateLabel(String applyId) ;
 
     void printCheckList(String[] ids,Integer flag);
 
