@@ -23,7 +23,7 @@ public class CodeGeneratorUtil {
     //设置模块名
     private final static String moduleName = "display";
     //设置数据库要生成代码的表名
-    private final static String tableName = "display_column";
+    private final static String tableName = "mes_record_wip_fail";
     //文件覆盖:true 覆盖原有文件 false 不覆盖原有文件
     private final static boolean fileOverride = true;
     //设置数据库url

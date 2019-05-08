@@ -2,10 +2,8 @@ package com.m2micro.m2mfa.pad.service;
 
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.m2mfa.pad.model.CrossingStationModel;
-import com.m2micro.m2mfa.pad.model.CrossingStationPara;
-import com.m2micro.m2mfa.pad.model.OutStationModel;
-import com.m2micro.m2mfa.pad.model.WipRecModel;
+import com.m2micro.m2mfa.base.entity.BaseDefect;
+import com.m2micro.m2mfa.pad.model.*;
 
 import java.util.List;
 
@@ -33,4 +31,23 @@ public interface PadCrossingStationService {
      * @param obj
      */
     void pullOut(OutStationModel obj);
+
+    /**
+     * 获取过站不良输入所需信息
+     * @return
+     */
+    CrossStationDefectModel getCrossStationDefectModel(CrossStationDefectPara crossStationDefectPara);
+
+    /**
+     * 获取过站不良输入所需工序信息
+     * @param crossStationDefectPara
+     * @return
+     */
+    List<CrossStationProcess> getAllDefectProcess(CrossStationDefectPara crossStationDefectPara);
+
+    /**
+     * 获取过站不良输入所需不良现象信息
+     * @return
+     */
+    List<BaseDefect> findAllBaseDefect();
 }

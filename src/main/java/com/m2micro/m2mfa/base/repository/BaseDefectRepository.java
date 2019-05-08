@@ -19,4 +19,6 @@ public interface BaseDefectRepository extends BaseRepository<BaseDefect,String> 
   List<BaseDefect> findByEctCodeAndEctIdNot(String ectCode,String ectId);
 
   List<BaseDefect> findByEctNameAndEctIdNot(String ectCode,String ectId);
+
+  List<BaseDefect> findAllByEnabled(Boolean enabled);
 }
