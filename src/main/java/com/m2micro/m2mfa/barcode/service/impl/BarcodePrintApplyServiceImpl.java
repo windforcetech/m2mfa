@@ -550,7 +550,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         RowMapper rm111 = BeanPropertyRowMapper.newInstance(PrintResourceObj.class);
         String sql111 = " SELECT t.id,t.apply_id,t.content,t.flag FROM barcode_print_resources t \n" +
             "where t.apply_id='" + printApplyObj.getApplyId() + "'  ";
-        sql111 = sql111 + "    ORDER BY t.barcode  ,t.content limit "+(barcodeQuery.getPage()-1)*barcodeQuery.getSize()+","+barcodeQuery.getSize();
+        sql111 = sql111 + "    ORDER BY  t.content limit "+(barcodeQuery.getPage()-1)*barcodeQuery.getSize()+","+barcodeQuery.getSize();
         List<PrintResourceObj> printResourceObjList = jdbcTemplate.query(sql111, rm111);
         printApplyObj.setPrintResourceObjList(printResourceObjList);
         RowMapper rm11 = BeanPropertyRowMapper.newInstance(PackObj.class);
@@ -668,10 +668,14 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
 
 @Override
 @Transactional
-public void  generateLabel(String applyId, Integer num/*份数*/) {
-    //份数默认为1
-    num=1;
+public void  generateLabel(String applyId) {
+
     BarcodePrintApply barcodePrintApply = barcodePrintApplyRepository.findById(applyId).orElse(null);
+    //初次申请，补打印
+    Integer flag=0;
+    if(!barcodePrintApply.getPrintCategory().equals("print")){
+      flag=1;
+    }
     List<BarcodePrintResources> byApplyId = barcodePrintResourcesRepository.findByApplyId(applyId);
     if (!byApplyId.isEmpty()) {
         throw new MMException(" 标签已打印。");
@@ -685,7 +689,6 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
         PackObj packObj = printApplyObj.getPackObj();
         Integer allQty = printApplyObj.getQty();
         TemplatePrintObj templatePrintObj = printApplyObj.getTemplatePrintObj();
-        String fileName = templatePrintObj.getFileName();
         List<TemplateVarObj> templateVarObjList = templatePrintObj.getTemplateVarObjList();
         List<HashMap<String, String>> labelList = new ArrayList<>();
         int n = allQty / packObj.getQty().intValue();
@@ -696,27 +699,16 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
             HashMap<String, String> lable = new HashMap<>();
             for (TemplateVarObj varObj : templateVarObjList) {
                 List<RuleObj> ruleObjList = varObj.getRuleObjList();
-                Collections.sort(ruleObjList, new
-                    Comparator<RuleObj>() {
-                        @Override
-                    public int compare(RuleObj o1, RuleObj o2) {
-                        return o1.getPosition() > o2.getPosition() ? 1 : -1;
-                    }
-                    });
+                Collections.sort(ruleObjList,(x,y)->x.getPosition()> y.getPosition() ? 1 : -1);
                 String value = "";
                 for (int x =0;x<ruleObjList.size();x++) {
                     RuleObj rule=ruleObjList.get(x);
                     //生成barcode规则
                     value = getbarcodeLable(dateNow, printApplyObj, allQty, n, i, value, rule);
-
                 }
                 lable.put(varObj.getName(), value);
             }
-            int k = 0;
-            while (k < num) {
                 labelList.add(lable);
-                k++;
-            }
         }
 
         List<BarcodePrintResources> rs = new ArrayList<>();
@@ -729,7 +721,7 @@ public void  generateLabel(String applyId, Integer num/*份数*/) {
             lableObj.setData(item);
             String content = JSONObject.toJSONString(lableObj);
             one.setContent(content);
-            one.setFlag(0);
+            one.setFlag(flag);
             String data=JSONObject.toJSONString(item);
             one.setBarcode(item.get("barcode"));
             JSONObject parse = JSONObject.parseObject(data);

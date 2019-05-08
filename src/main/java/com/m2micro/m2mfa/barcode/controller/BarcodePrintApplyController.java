@@ -159,8 +159,8 @@ public class BarcodePrintApplyController {
     @PostMapping("/printApplyGenerate")
     @ApiOperation(value = "打印条码生成")
     @UserOperationLog("打印条码生成")
-    public ResponseMessage printApplyGenerate(String applyId, Integer num) {
-      barcodePrintApplyService.generateLabel(applyId, num);
+    public ResponseMessage printApplyGenerate(String applyId) {
+      barcodePrintApplyService.generateLabel(applyId);
         return ResponseMessage.ok();
     }
 
