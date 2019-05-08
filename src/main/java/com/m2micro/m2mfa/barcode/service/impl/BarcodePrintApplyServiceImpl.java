@@ -187,7 +187,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
       sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         List<PrintApplyObj> templateList = jdbcTemplate.query(sql, rm);
 
-      List<PrintApplyObj> collect = templateList.stream().filter(x -> {
+      templateList = templateList.stream().filter(x -> {
         if (x.getPrintCategory().equals("print")) {
           x.setPrintCategory("初次申请");
         } else {
@@ -195,7 +195,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         }
         return true;
       }).collect(Collectors.toList());
-      return PageUtil.of(collect, count, query.getSize(), query.getPage());
+      return PageUtil.of(templateList, count, query.getSize(), query.getPage());
 
     }
 
@@ -309,6 +309,14 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         sql = sql + " order by "+order+" "+direct+",t.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         List<PrintApplyObj> templateList = jdbcTemplate.query(sql, rm);
+         templateList = templateList.stream().filter(x -> {
+          if (x.getPrintCategory().equals("print")) {
+            x.setPrintCategory("初次申请");
+          } else {
+            x.setPrintCategory("补打申请");
+          }
+          return true;
+        }).collect(Collectors.toList());
         return PageUtil.of(templateList, count, query.getSize(), query.getPage());
 
     }

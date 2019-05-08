@@ -55,8 +55,6 @@ public class BaseTemplateController {
     @ApiOperation(value = "标签模板详情")
     @UserOperationLog("标签模板详情")
     public ResponseMessage<BaseTemplate > info(@PathVariable("id") String id) {
-
-
         return ResponseMessage.ok(baseTemplateService.getByTemplateId(id));
     }
 
