@@ -51,6 +51,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -166,6 +167,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         String nextProcessId = baseRouteDefRepository.getNextProcessId(partRouteId, para.getProcessId());
         //进站数（上一次的产出）
         Integer outputQty = mesRecordWipRec.getOutputQty();
+        //获取不良总数
+        ArrayList<CrossStationFail> crossStationFails = para.getCrossStationFails();
+        para.setQty(getQty(crossStationFails));
         //【产出数量】+【不良数量】 != 进站的数量
         if(para.getOutputQty()+para.getQty()!=outputQty){
             throw new MMException("此箱的产出数量加不良数量已超出上站产出数，请核对！");
@@ -212,6 +216,21 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             }
         }
 
+    }
+
+    /**
+     * 获取不良总数
+     * @param crossStationFails
+     * @return
+     */
+    private Long getQty(ArrayList<CrossStationFail> crossStationFails) {
+        Long qty=0l;
+        if(crossStationFails!=null&&crossStationFails.size()>0){
+            for(CrossStationFail crossStationFail:crossStationFails){
+                qty=qty+crossStationFail.getQty();
+            }
+        }
+        return qty;
     }
 
 

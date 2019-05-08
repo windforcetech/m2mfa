@@ -27,10 +27,10 @@ public class OutStationModel {
     @NotNull(message="产出数不能为空",groups = {QueryGroup.class})
     private Integer outputQty;
     @ApiModelProperty(value = "不良数量")
-    @NotNull(message="不良数量不能为空",groups = {QueryGroup.class})
+    //@NotNull(message="不良数量不能为空",groups = {QueryGroup.class})
     private Long qty;
-    @ApiModelProperty(value = "不良数ids")
-    private ArrayList<String> ids;
+    /*@ApiModelProperty(value = "不良数ids")
+    private ArrayList<String> ids;*/
     @ApiModelProperty(value = "不良输入")
     @Valid
     private ArrayList<CrossStationFail> crossStationFails;
