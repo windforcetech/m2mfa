@@ -21,4 +21,24 @@ public enum BarcodePrintResourcesConstant {
   public String getValue() {
     return value;
   }
+
+  public static BarcodePrintResourcesConstant valueOfandKey(String keyvalue){
+    int key  = Integer.parseInt(keyvalue);
+    BarcodePrintResourcesConstant ms = null;
+    switch (key){
+      case 1:
+        ms = BarcodePrintResourcesConstant.AUDIT_PRINT;
+        break;
+      case 2:
+        ms = BarcodePrintResourcesConstant.PRINTED;
+        break;
+      case -1:
+        ms = BarcodePrintResourcesConstant.PRINT_INVALID;
+        break;
+      case 0:
+        ms = BarcodePrintResourcesConstant.UNREVIEWED;
+        break;
+    }
+    return  ms;
+  }
 }
