@@ -556,9 +556,9 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         TemplatePrintObj templatePrintObj = templatePrintObjList.get(0);
         printApplyObj.setTemplatePrintObj(templatePrintObj);
         RowMapper rm111 = BeanPropertyRowMapper.newInstance(PrintResourceObj.class);
-        String sql111 = " SELECT t.id,t.apply_id,t.content,t.flag FROM barcode_print_resources t \n" +
+        String sql111 = " SELECT t.id,t.apply_id,content,t.flag  FROM barcode_print_resources t \n" +
             "where t.apply_id='" + printApplyObj.getApplyId() + "'  ";
-        sql111 = sql111 + "    ORDER BY  t.content limit "+(barcodeQuery.getPage()-1)*barcodeQuery.getSize()+","+barcodeQuery.getSize();
+        sql111 = sql111 + "    ORDER BY  LENGTH(t.content) ASC, content ASC  limit "+(barcodeQuery.getPage()-1)*barcodeQuery.getSize()+","+barcodeQuery.getSize();
         List<PrintResourceObj> printResourceObjList = jdbcTemplate.query(sql111, rm111);
         printApplyObj.setPrintResourceObjList(printResourceObjList);
         RowMapper rm11 = BeanPropertyRowMapper.newInstance(PackObj.class);
