@@ -141,6 +141,9 @@ public class BaseStaffServiceImpl implements BaseStaffService {
         if(StringUtils.isNotEmpty(query.getDutyId())){
             sql = sql+" and sf.duty_id = '"+query.getDutyId()+"'";
         }
+        if(StringUtils.isNotEmpty(query.getGender())){
+            sql = sql+" and sf.gender = '"+query.getGender()+"'";
+        }
         if(StringUtils.isNotEmpty(query.getIdCard())){
             sql = sql+" and sf.id_card like '%"+query.getIdCard()+"%'";
         }
