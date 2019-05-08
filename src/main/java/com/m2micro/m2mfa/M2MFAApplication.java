@@ -4,8 +4,12 @@ import com.spring4all.swagger.EnableSwagger2Doc;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jms.annotation.EnableJms;
+
+import javax.servlet.MultipartConfigElement;
 
 @SpringBootApplication(scanBasePackages = {"com.m2micro.*"})
 @EnableSwagger2Doc
@@ -17,10 +21,10 @@ public class M2MFAApplication {
     public static void main(String[] args) {
         SpringApplication.run(M2MFAApplication.class, args);
     }
-//    @Bean//
-//    MultipartConfigElement multipartConfigElement() {
-//        MultipartConfigFactory factory = new MultipartConfigFactory();
-//        factory.setLocation("/");
-//        return factory.createMultipartConfig();
-//    }
+    @Bean
+    MultipartConfigElement multipartConfigElement() {
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        factory.setLocation("F:\\");
+        return factory.createMultipartConfig();
+    }
 }

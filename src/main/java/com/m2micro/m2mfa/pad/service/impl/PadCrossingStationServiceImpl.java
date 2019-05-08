@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.barcode.repository.BarcodePrintApplyRepository;
 import com.m2micro.m2mfa.barcode.repository.BarcodePrintResourcesRepository;
 import com.m2micro.m2mfa.barcode.service.BarcodePrintResourcesService;
 import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
+import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.repository.BaseDefectRepository;
 import com.m2micro.m2mfa.base.repository.BasePackRepository;
@@ -104,6 +105,8 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
     MesRecordWipFailRepository mesRecordWipFailRepository;
     @Autowired
     MesMoScheduleProcessService mesMoScheduleProcessService;
+    @Autowired
+    ProcessConstant processConstant;
 
 
 
@@ -196,9 +199,16 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         saveMesRecordWipFail(para.getCrossStationFails(),source,para.getProcessId(),para.getStationId());
         //是否结束工序
         Boolean endCrossStationProcess = isEndCrossStationProcess(source, beforeProcessId, para.getProcessId());
+        //是否结束第一个工序
+        Boolean endFirstProcess = isEndFirstProcess(para, source, beforeProcessId);
+
         if(endCrossStationProcess){
-            //结束工序
-            mesMoScheduleProcessService.endProcess(source,para.getProcessId());
+            //上一工序是注塑成型
+            if(isEndFirstProcess(para,source,beforeProcessId)){
+                //结束工序
+                mesMoScheduleProcessService.endProcess(source,para.getProcessId());
+            }
+
         }
         //if(工序是否是产出工序)
         if(isOutputProcess){
@@ -216,6 +226,26 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             }
         }
 
+    }
+
+    /**
+     * 是否结束第一个工序
+     * @param para
+     * @param source
+     * @param beforeProcessId
+     * @return
+     */
+    private Boolean isEndFirstProcess(OutStationModel para, String source, String beforeProcessId) {
+        BaseProcess baseProcess = baseProcessService.findById(beforeProcessId).orElse(null);
+        //上一工序是注塑成型
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            //获取结余量
+            Integer surplusQty = getSurplusQty(para.getProcessId(), source,beforeProcessId);
+            if(surplusQty!=0){
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -272,7 +302,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //上一工序是否结束
         Boolean endProcess = mesMoScheduleProcessService.isEndProcess(scheduleId, beforeProcessId);
         //待进站是否已处理完毕
-        Boolean completedForPullIn = isCompletedForPullIn(processId, scheduleId);
+        Boolean completedForPullIn = isCompletedForPullIn(scheduleId,processId);
         //上一工序已结束并且待进站已处理完毕
         if(endProcess&&completedForPullIn){
             return true;
@@ -548,7 +578,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         scheduleIds.add(source);
         Integer outPutQtys = padBottomDisplayService.getMachineOutputQty(scheduleIds,beforeProcessId);
         //2.当前工序当前排产单的投入数之和
-        Integer allInputQty = mesRecordWipLogRepository.getAllInputQty(source, processId);
+        Integer allInputQty = mesRecordWipRecRepository.getAllInputQty(source);
         allInputQty = allInputQty==null?0:allInputQty;
         //3.结余量：排产单的完成量-投入数之和
         if(outPutQtys<allInputQty){
