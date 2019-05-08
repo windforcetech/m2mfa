@@ -56,6 +56,7 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
     @Autowired
     BaseTemplateVarRepository baseTemplateVarRepository;
 
+
     public BaseTemplateRepository getRepository() {
         return baseTemplateRepository;
     }
@@ -193,12 +194,21 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
             BaseBarcodeRule baseBarcodeRule = baseBarcodeRuleRepository.findById(x.getRuleId()).orElse(null);
             baseBarcodeRule.setBaseBarcodeRuleDefs(baseBarcodeRuleDefRepository.findByBarcodeId(baseBarcodeRule.getId()));
             x.setBaseBarcodeRule(baseBarcodeRule);
+            List<BaseBarcodeRuleDef> baseBarcodeRuleDefs = x.getBaseBarcodeRule().getBaseBarcodeRuleDefs();
+            x.getBaseBarcodeRule().setBaseBarcodeRuleDefs(baseBarcodeRuleDefs.stream().filter(y->{
+            y.setCategoryName( getCategoryName(y.getCategory()));
             return true;
-        }).collect(Collectors.toList());
+          }).collect(Collectors.toList()));
+            return true;
+          }).collect(Collectors.toList());
         baseTemplate.setBaseTemplateVars(collect);
         return baseTemplate;
     }
 
+    public String getCategoryName(String id ){
+      String sql ="select item_name from base_items_target  where id='"+id+"'";
+      return  jdbcTemplate.queryForObject(sql ,String.class);
+    }
     @Transactional
     @Override
     public ResponseMessage deleteByTemplateIds(String[] templateIds) {
