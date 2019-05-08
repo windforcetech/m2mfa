@@ -1,7 +1,6 @@
 package com.m2micro.m2mfa.base.query;
 
 import com.m2micro.framework.commons.util.Query;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
