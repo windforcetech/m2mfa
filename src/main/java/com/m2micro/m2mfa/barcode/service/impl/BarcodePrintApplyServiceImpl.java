@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.RecursiveTask;
-import java.util.stream.Collectors;
 
 /**
  * 标签打印表单 服务实现类
@@ -187,11 +186,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
       sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
 
         List<PrintApplyObj> templateList = jdbcTemplate.query(sql, rm);
-      List<PrintApplyObj> collect = templateList.stream().filter(x -> {
-        x.setFlag(BarcodePrintResourcesConstant.valueOfandKey(x.getFlag()).getValue());
-        return true;
-      }).collect(Collectors.toList());
-      return PageUtil.of(collect, count, query.getSize(), query.getPage());
+        return PageUtil.of(templateList, count, query.getSize(), query.getPage());
 
     }
 
