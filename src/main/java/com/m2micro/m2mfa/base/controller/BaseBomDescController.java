@@ -8,6 +8,7 @@ import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseBomDescQuery;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.base.vo.ShowBom;
@@ -66,57 +67,55 @@ public class BaseBomDescController {
     @ApiOperation(value = "bom列表")
     @UserOperationLog("bom列表")
     public ResponseMessage<PageUtil<BaseBomDesc>> list(BaseBomDescQuery query) {
-        String[] partIds = new String[0];
-        if (StringUtils.isNotEmpty(query.getCategory())) {
-            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategory()).orElse(null);
-            //不等于全部
-            if (!(baseItemsTarget != null && "全部".equals(baseItemsTarget.getItemName()))) {
-                List<BaseParts> allByCategory = basePartsService.findAllByCategory(query.getCategory());
-                partIds = allByCategory.stream().map(x -> x.getPartId()).collect(Collectors.toList()).toArray(new String[0]);
-
-            }
-        }
-
         QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
         JPAQuery<BaseBomDesc> jq = queryFactory.selectFrom(baseBomDesc);
         BooleanBuilder expression = new BooleanBuilder();
+        String[] partIds = new String[0];
+        if (StringUtils.isNotEmpty(query.getPartsCategory())) {
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getPartsCategory()).orElse(null);
+            //不等于全部
+            if (!(baseItemsTarget != null && "全部".equals(baseItemsTarget.getItemName()))) {
+                List<BaseParts> allByCategory = basePartsService.findAllByCategory(query.getPartsCategory());
+                partIds = allByCategory.stream().map(x -> x.getPartNo()).collect(Collectors.toList()).toArray(new String[0]);
+                expression.and((baseBomDesc.partId.in(partIds)));
+            }
+        }
         if (StringUtils.isNotEmpty(query.getPartId())) {
             expression.and(baseBomDesc.partId.like("%" + query.getPartId() + "%"));
         }
+        if (StringUtils.isNotEmpty(query.getDistinguish())) {
+            expression.and((baseBomDesc.distinguish.like("%" + query.getDistinguish() + "%")));
+        }
+        if (query.getVersion()!=null) {
+            expression.and((baseBomDesc.version.eq(query.getVersion())));
+        }
         if (StringUtils.isNotEmpty(query.getCategory())) {
-            expression.and((baseBomDesc.partId.in(partIds)));
+            expression.and((baseBomDesc.category.eq(query.getCategory())));
+        }
+        if (query.getCheckFlag()!=null) {
+            if(query.getCheckFlag()){
+                expression.and((baseBomDesc.checkFlag.isNull()));
+            }else{
+                expression.and((baseBomDesc.checkFlag.eq(true)));
+            }
+        }
+        if (query.getEnabled()!=null) {
+            expression.and((baseBomDesc.enabled.eq(query.getEnabled())));
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            expression.and((baseBomDesc.description.like("%" + query.getDescription() + "%")));
         }
         OrderSpecifier orderSpecifier = null;
         if(orderSpecifier==null||"createOn".equals(query.getDirect())){
             orderSpecifier = baseBomDesc.createOn.desc();
         }
-        if(StringUtils.isNotEmpty(query.getDirect())){
-            if("partId".equals(query.getOrder())){
-                if("desc".equalsIgnoreCase(query.getDirect())){
-                    orderSpecifier = baseBomDesc.partId.desc();
-                }else{
-                    orderSpecifier = baseBomDesc.partId.asc();
-                }
-            }
-            if("category".equals(query.getOrder())){
-                if("desc".equalsIgnoreCase(query.getDirect())){
-                    orderSpecifier = baseBomDesc.category.desc();
-                }else{
-                    orderSpecifier = baseBomDesc.category.asc();
-                }
-            }
-            if("enabled".equals(query.getOrder())){
-                if("desc".equalsIgnoreCase(query.getDirect())){
-                    orderSpecifier = baseBomDesc.enabled.desc();
-                }else{
-                    orderSpecifier = baseBomDesc.enabled.asc();
-                }
-            }
+        orderSpecifier = addOrderCondition(orderSpecifier,query,baseBomDesc);
 
-        }
         jq.where(expression).orderBy(orderSpecifier).orderBy(baseBomDesc.createOn.desc());
         List<BaseBomDesc> baseBomDescs = jq.fetch();
         //List<BaseBomDesc> baseBomDescs = Lists.newArrayList(baseBomDescService.findAll(expression));
+        //查询对应的类型名称
+        List<SelectNode> bomCategory = baseItemsTargetService.getSelectNode("Bom_Category");
         baseBomDescs.forEach(baseBomDesc1 -> {
             BaseParts baseParts = basePartsService.findById(baseBomDesc1.getPartId()).orElse(null);
             baseBomDesc1.setName(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getName());
@@ -133,6 +132,13 @@ public class BaseBomDescController {
             baseBomDesc1.setBomSubstituteList(baseBomSubstituteList);
 
             baseBomDesc1.setBomDefObjList(allByBomId);
+
+            for (SelectNode selectNode : bomCategory) {
+                if(selectNode.getId().equals(baseBomDesc1.getCategory())){
+                    baseBomDesc1.setCategory(selectNode.getName());
+                }
+            }
+
         });
         PageUtil<BaseBomDesc> of = PageUtil.of(baseBomDescs, baseBomDescs.size(), query.getSize(), query.getPage());
         return ResponseMessage.ok(of);
@@ -528,6 +534,55 @@ public class BaseBomDescController {
 
         return showBom;
 
+    }
+
+    private OrderSpecifier addOrderCondition(OrderSpecifier orderSpecifier, BaseBomDescQuery query, QBaseBomDesc baseBomDesc) {
+        if(StringUtils.isNotEmpty(query.getDirect())){
+            if("partId".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = baseBomDesc.partId.desc();
+                }else{
+                    orderSpecifier = baseBomDesc.partId.asc();
+                }
+            }
+            if("category".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = baseBomDesc.category.desc();
+                }else{
+                    orderSpecifier = baseBomDesc.category.asc();
+                }
+            }
+            if("enabled".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = baseBomDesc.enabled.desc();
+                }else{
+                    orderSpecifier = baseBomDesc.enabled.asc();
+                }
+            }
+            if("effectiveDate".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = baseBomDesc.effectiveDate.desc();
+                }else{
+                    orderSpecifier = baseBomDesc.effectiveDate.asc();
+                }
+            }
+            if("invalidDate".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = baseBomDesc.invalidDate.desc();
+                }else{
+                    orderSpecifier = baseBomDesc.invalidDate.asc();
+                }
+            }
+            if("checkFlag".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = baseBomDesc.checkFlag.desc();
+                }else{
+                    orderSpecifier = baseBomDesc.checkFlag.asc();
+                }
+            }
+
+        }
+        return orderSpecifier;
     }
 
 }

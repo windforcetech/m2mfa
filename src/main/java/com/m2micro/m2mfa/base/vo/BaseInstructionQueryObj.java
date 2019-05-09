@@ -20,6 +20,8 @@ public class BaseInstructionQueryObj extends Query {
   private Boolean checkflag;
   @ApiModelProperty(value = "描述")
   private String description;
+  @ApiModelProperty(value = "版本")
+  private Integer revsion;
 
 
 
