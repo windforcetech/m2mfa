@@ -196,7 +196,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //更新mes_record_wip_rec
         updateMesRecordWipRec(para, mesRecordWipRec, nextProcessId, isOutputProcess);
         //保存不良
-        saveMesRecordWipFail(para.getCrossStationFails(),source,para.getProcessId(),para.getStationId());
+        saveMesRecordWipFail(para.getCrossStationFails(),source,para.getProcessId(),para.getStationId(),para.getBarcode());
         //是否结束工序
         Boolean endCrossStationProcess = isEndCrossStationProcess(source, beforeProcessId, para.getProcessId());
         //是否结束第一个工序
@@ -331,7 +331,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
      * @return
      */
     @Transactional
-    public void saveMesRecordWipFail(List<CrossStationFail> crossStationFails,String scheduleId,String processId,String stationId) {
+    public void saveMesRecordWipFail(List<CrossStationFail> crossStationFails,String scheduleId,String processId,String stationId,String barcode) {
         if(crossStationFails==null||crossStationFails.size()==0){
             return;
         }
@@ -339,6 +339,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         for(CrossStationFail crossStationFail:crossStationFails){
             MesRecordWipFail mesRecordWipFail = new MesRecordWipFail();
             mesRecordWipFail.setId(UUIDUtil.getUUID());
+            mesRecordWipFail.setSerialNumber(barcode);
             MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleId).orElse(null);
             mesRecordWipFail.setMoId(mesMoSchedule.getMoId());
             mesRecordWipFail.setScheduleId(mesMoSchedule.getScheduleId());
