@@ -69,6 +69,9 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
         if(StringUtils.isNotEmpty(query.getCategory())){
             condition.and(qBaseInstruction.category.eq(query.getCategory()));
         }
+        if(query.getRevsion()!=null){
+            condition.and(qBaseInstruction.revsion.eq(query.getRevsion()));
+        }
         if(StringUtils.isNotEmpty(query.getDescription())){
             condition.and(qBaseInstruction.description.like("%"+query.getDescription()+"%"));
         }
@@ -98,7 +101,7 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
                     orderSpecifier = qBaseInstruction.instructionName.asc();
                 }
             }
-            if("categoryName".equals(query.getOrder())){
+            if("category".equals(query.getOrder())){
                 if("desc".equalsIgnoreCase(query.getDirect())){
                     orderSpecifier = qBaseInstruction.category.desc();
                 }else{
@@ -110,6 +113,13 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
                     orderSpecifier = qBaseInstruction.enabled.desc();
                 }else{
                     orderSpecifier = qBaseInstruction.enabled.asc();
+                }
+            }
+            if("createOn".equals(query.getOrder())){
+                if("desc".equalsIgnoreCase(query.getDirect())){
+                    orderSpecifier = qBaseInstruction.createOn.desc();
+                }else{
+                    orderSpecifier = qBaseInstruction.createOn.asc();
                 }
             }
 
