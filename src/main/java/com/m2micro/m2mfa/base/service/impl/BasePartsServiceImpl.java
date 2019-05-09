@@ -390,9 +390,9 @@ public class BasePartsServiceImpl implements BasePartsService {
         if (StringUtils.isNotEmpty(query.getGrade())) {
             sql = sql + " and bp.grade = '" + query.getGrade() + "'";
         }
-        if (StringUtils.isNotEmpty(query.getCategory())) {
-            sql = sql + " and bp.category = '" + query.getCategory() + "'";
-        }
+//        if (StringUtils.isNotEmpty(query.getCategory())) {
+//            sql = sql + " and bp.category = '" + query.getCategory() + "'";
+//        }
         if (query.getIsCheck() != null) {
             sql = sql + " and bp.is_check = " + query.getIsCheck() + "";
         }
