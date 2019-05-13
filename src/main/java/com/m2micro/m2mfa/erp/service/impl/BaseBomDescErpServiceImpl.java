@@ -30,8 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BaseBomDescErpServiceImpl implements BaseBomDescErpService {
@@ -51,14 +53,32 @@ public class BaseBomDescErpServiceImpl implements BaseBomDescErpService {
   @Autowired
   BaseBomDefService baseBomDefService;
 
+
+    public long erpBasebomdescCount(String partNo,String  distinguish){
+        String sql ="select count(*) from BMA_FILE  where 1=1 ";
+        if(StringUtils.isNotEmpty(partNo)){
+            sql+=" and  bma01='"+partNo+"' ";
+        }
+
+        if(StringUtils.isNotEmpty(distinguish)){
+            sql+=" and bma06='"+distinguish+"'";
+        }
+        Long aLong = primaryJdbcTemplate.queryForObject(sql, Long.class);
+        return aLong;
+    }
   @Override
   @Transactional
-  public boolean erpBasebomdesc(String partNo,String  distinguish ) {
+  public boolean erpBasebomdesc(String partNo,String  distinguish ,Long x,Long y) {
+      long num =(x*1000);
+      long end =num+1000l;
       String groupId = TokenInfo.getUserGroupId();
-      String sql ="select * from BMA_FILE  where 1=1 ";
-    if(StringUtils.isNotEmpty(partNo)){
-    sql+=" and  bma01='"+partNo+"' ";
-    }
+      String sql ="select * from   (SELECT a.*, ROWNUM rn\n" +
+              "    FROM (SELECT * FROM BMA_FILE) a\n" +
+              "      WHERE ROWNUM <=  "+end+")  \n" +
+              "      where 1=1 ";
+        if(StringUtils.isNotEmpty(partNo)){
+          sql+=" and  bma01='"+partNo+"' ";
+      }
 
     if(StringUtils.isNotEmpty(distinguish)){
       sql+=" and bma06='"+distinguish+"'";
