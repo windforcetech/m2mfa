@@ -22,4 +22,6 @@ public class BaseBarcodeRuleQuery extends Query {
     private String ruleName;
     @ApiModelProperty(value = "是否有效")
     private Boolean enabled;
+    @ApiModelProperty(value = "描述")
+    private String description;
 }

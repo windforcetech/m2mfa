@@ -82,6 +82,9 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
         if (StringUtils.isNotEmpty(query.getRuleName())) {
             sql +=" and  rule_name LIKE '%"+query.getRuleName()+"%'  ";
         }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            sql +=" and  description  LIKE '%"+query.getDescription()+"%'  ";
+        }
         if (query.getEnabled()!=null  ) {
             sql +=" and enabled ="+query.getEnabled()+"  ";
         }

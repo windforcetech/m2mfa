@@ -136,7 +136,33 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         if(StringUtils.isNotEmpty(query.getGauge())){
             sql = sql + " and bqi.gauge =  '"+query.getGauge()+"'";
         }
+        if(query.getEnabled()!=null){
+            sql = sql + " and bqi.enabled =  '"+query.getEnabled()+"'";
+        }
 
+        if(StringUtils.isNotEmpty(query.getCategoryName())){
+            sql = sql + " and bi2.id=  '"+query.getCategoryName()+"'";
+        }
+
+        if(StringUtils.isNotEmpty(query.getCentralLimit())){
+            sql = sql + " and  bqi.central_limit =  like '%"+query.getCentralLimit()+"%'";
+        }
+
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql = sql + " and  bqi.description =  like '%"+query.getDescription()+"%'";
+        }
+
+        if(StringUtils.isNotEmpty(query.getLimitUnitName())){
+            sql = sql + " and  bi3.unit  =  like '%"+query.getLimitUnitName()+"%'";
+        }
+
+        if(StringUtils.isNotEmpty(query.getLowerLimit())){
+            sql = sql + " and  	bqi.lower_limit    =  like '%"+query.getLowerLimit()+"%'";
+        }
+
+        if(StringUtils.isNotEmpty(query.getUpperLimit())){
+            sql = sql + " and  	bqi.upper_limit    =  like '%"+query.getUpperLimit()+"%'";
+        }
         sql +=" and  bqi.group_id ='"+groupId+"'";
         return  sql ;
     }

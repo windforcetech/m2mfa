@@ -16,5 +16,7 @@ public class BaseAqlDescQuery extends Query {
   private String category;
   @ApiModelProperty(value = "有效否")
   private Boolean  enabled;
+  @ApiModelProperty(value = "描述")
+  private String  description;
 
 }

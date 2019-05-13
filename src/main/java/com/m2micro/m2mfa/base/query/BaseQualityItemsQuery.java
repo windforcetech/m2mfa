@@ -19,4 +19,18 @@ public class BaseQualityItemsQuery extends Query {
     private String itemName;
     @ApiModelProperty(value = "量具名称")
     private String gauge;
+    @ApiModelProperty(value = "是否有效")
+    private Boolean enabled;
+    @ApiModelProperty(value = "类型")
+    private String categoryName;
+    @ApiModelProperty(value = "上限")
+    private String upperLimit;
+    @ApiModelProperty(value = "下限")
+    private String centralLimit;
+    @ApiModelProperty(value = "标准")
+    private String lowerLimit;
+    @ApiModelProperty(value = "名称")
+    private String limitUnitName;
+    @ApiModelProperty(value = "描述")
+    private String description;
 }

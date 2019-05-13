@@ -98,10 +98,10 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
         String groupId = TokenInfo.getUserGroupId();
         String sql ="";
         if(StringUtils.isNotEmpty(query.getAqlCode())){
-            sql += "AND bd.aql_code = '"+query.getAqlCode()+"'\n" ;
+            sql += "AND bd.aql_code like '%"+query.getAqlCode()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getAqlName())){
-            sql += "AND bd.aql_name = '"+query.getAqlName()+"'\n" ;
+            sql += "AND bd.aql_name like '%"+query.getAqlName()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getCategory())){
             sql += "AND bd.category = '"+query.getCategory()+"'\n" ;
@@ -109,7 +109,9 @@ public class BaseAqlDescServiceImpl implements BaseAqlDescService {
         if(query.getEnabled() !=null ){
             sql += "AND bd.enabled = "+query.getEnabled()+" \n" ;
         }
-
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql += "AND bd.description like '%"+query.getDescription()+"%'";
+        }
         sql +=" and  bd.group_id ='"+groupId+"'";
         return  sql ;
     }

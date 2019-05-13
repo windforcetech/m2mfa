@@ -98,7 +98,7 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
         if (query.getEnabled() !=null) {
             sql +=" and  enabled = '"+query.getEnabled()+"'  ";
         }
-        sql +=" and  group_id ='"+groupId+"'";
+        sql +=" and  bt.group_id ='"+groupId+"'";
         return sql;
     }
 
@@ -108,7 +108,12 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         //排序字段(驼峰转换)
-        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"bt.modified_on":query.getOrder());
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        if(order.equals("category_name")){
+            order="bit.item_name";
+        }else {
+            order="bt."+order;
+        }
         sql = sql + " order by "+order+" "+direct+",bt.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseTemplate.class);
