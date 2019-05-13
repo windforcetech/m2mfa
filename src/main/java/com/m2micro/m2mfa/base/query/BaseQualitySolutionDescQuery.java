@@ -22,5 +22,7 @@ public class BaseQualitySolutionDescQuery extends Query {
     private Boolean enabled;
     @ApiModelProperty(value = "抽检方案")
     private String aqlId;
+    @ApiModelProperty(value = "描述")
+    private String description;
 
 }

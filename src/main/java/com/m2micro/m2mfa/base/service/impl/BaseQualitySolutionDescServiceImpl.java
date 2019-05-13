@@ -132,6 +132,10 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
         if(StringUtils.isNotEmpty(query.getAqlId())){
             sql = sql + " and bad.aql_id = '"+query.getAqlId()+"'";
         }
+
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql = sql + " and bqsd.description like '%"+query.getDescription()+"%'";
+        }
         sql +=" and  bqsd.group_id ='"+groupId+"'";
         return sql ;
     }
