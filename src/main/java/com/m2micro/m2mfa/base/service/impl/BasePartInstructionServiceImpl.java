@@ -111,17 +111,27 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
         //特殊排序字段处理(非主表)
         switch (order) {
             case "part_no":
-                order = "part_id";
+                order = "bpi.part_id";
                 break;
             case "instruction_code":
-                order = "instruction_id";
+                order = "bpi.instruction_id";
+                break;
+            case "part_name":
+                order = "bp.`name`";
+                break;
+            case "process_name":
+                order = "bps.process_id";
+                break;
+            case "station_name":
+                order = "mps.station_id";
                 break;
             default:
+                order = "bpi."+order;
                 break;
         }
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
-        sql = sql + " order by bpi."+order+" "+direct+",bpi.modified_on desc";
+        sql = sql + " order by "+order+" "+direct+",bpi.modified_on desc";
         sql+="  limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BasePartInstructionModel> rowMapper = BeanPropertyRowMapper.newInstance(BasePartInstructionModel.class);
         List<BasePartInstructionModel>basePartInstructionModels= jdbcTemplate.query(sql,rowMapper);
