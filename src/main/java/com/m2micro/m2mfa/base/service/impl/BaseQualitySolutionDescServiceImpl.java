@@ -95,7 +95,7 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"bqsd.modified_on":query.getOrder());
-        if(order.equals("aqlId")){
+        if(order.equals("aql_id")){
             order=  "bad."+order;
         }
         sql = sql + " order by bad."+order+" "+direct+",bqsd.modified_on desc";

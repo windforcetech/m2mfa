@@ -97,14 +97,14 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"bqi.modified_on":query.getOrder());
-        if(order.equals("gaugeName")||order.equals("categoryName")|| order.equals("limitUnitName")){
-            if(order.equals("gaugeName")){
+        if(order.equals("gauge_name")||order.equals("category_name")|| order.equals("limit_unit_name")){
+            if(order.equals("gauge_name")){
                 order=  "	bi1.item_name ";
             }
-            if(order.equals("categoryName")){
+            if(order.equals("category_name")){
                 order=  "	bi2.item_name ";
             }
-            if(order.equals("limitUnitName")){
+            if(order.equals("limit_unit_name")){
                 order=  "	bi3.unit ";
             }
         }else {
