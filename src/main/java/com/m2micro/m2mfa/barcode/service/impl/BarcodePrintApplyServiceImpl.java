@@ -215,7 +215,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     }
 
     if(StringUtils.isNotEmpty(query.getApplyId())){
-      sql +=  " and  t.id = '"+query.getApplyId()+"' ";
+      sql +=  " and  t.id  LIKE '%"+query.getApplyId()+"%'  ";
     }
     if(StringUtils.isNotEmpty(query.getCategory())){
       sql +=  " and  t.category = '"+query.getCategory()+"' ";
@@ -227,31 +227,31 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
       sql +=  " and  t3.id = '"+query.getSource()+"' ";
     }
     if(StringUtils.isNotEmpty(query.getScheduleNo())){
-      sql +=  " and  schedule.schedule_no = '"+query.getScheduleNo()+"' ";
+      sql +=  " and  schedule.schedule_no  LIKE '%"+query.getScheduleNo()+"%'  ";
     }
     if(StringUtils.isNotEmpty(query.getFlagType())){
-      sql +=  " and  t2.item_name  = '"+query.getFlagType()+"' ";
+      sql +=  " and  t2.item_name  LIKE '%"+query.getFlagType()+"%'  ";
     }
     if(StringUtils.isNotEmpty(query.getTemplateName())){
-      sql +=  " and  t1.name  = '"+query.getTemplateName()+"' ";
+      sql +=  " and  t1.name  LIKE '%"+query.getTemplateName()+"%'  ";
     }
     if(StringUtils.isNotEmpty(query.getCustomerName())){
-      sql +=  " and  cus.name  = '"+query.getCustomerName()+"' ";
+      sql +=  " and  cus.name  LIKE '%"+query.getCustomerName()+"%'  ";
     }
     if(StringUtils.isNotEmpty(query.getCustomerCode())){
-      sql +=  " and  cus.code  = '"+query.getCustomerCode()+"' ";
+      sql +=  " and  cus.code  LIKE '%"+query.getCustomerCode()+"%'  ";
     }
     if(StringUtils.isNotEmpty(query.getPartName())){
-      sql +=  " and  p.name  = '"+query.getPartName()+"' ";
+      sql +=  " and  p.name   LIKE '%"+query.getPartName()+"%'  ";
     }
     if(StringUtils.isNotEmpty(query.getPartNo())){
-      sql +=  " and  p.part_no = '"+query.getPartNo()+"' ";
+      sql +=  " and  p.part_no  LIKE '%"+query.getPartNo()+"%'  ";
     }
     if(StringUtils.isNotEmpty(query.getSpec())){
       sql +=  " and   p.spec = '"+query.getSpec()+"' ";
     }
     if(query.getEnabled()!=null){
-      sql +=  " and   t.enabled = '"+query.getEnabled()+"' ";
+      sql +=  " and   t.enabled = "+query.getEnabled()+" ";
     }
     if(StringUtils.isNotEmpty(query.getCheckFlag())){
       sql +=  " and   t.check_flag = "+query.getCheckFlag()+" ";
@@ -383,6 +383,10 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     if(StringUtils.isNotEmpty(query.getCollarBy())){
       sql +=" and  t.collar_by   LIKE '"+query.getCollarBy()+"'  ";
     }
+    if( query.getEnabled()!=null){
+      sql +=" and  t.enabled  = "+query.getEnabled()+" ";
+    }
+
     sql +=" and t.group_id ='"+groupId+"'";
     return  sql;
   }
@@ -466,7 +470,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         "        left join base_customer cus" +
         "        on cus.customer_id=mo.customer_id" +
         "        where" +
-        "        t.flag in(0,1) and" +
+        "        t.flag in("+ MoScheduleStatus.INITIAL.getKey()+","+MoScheduleStatus.AUDITED.getKey()+","+MoScheduleStatus.PRODUCTION.getKey()+") and" +
         "        t.enabled=1 and " +
         " t.schedule_id='" + scheduleId + "' ;";
     List<ScheduleObj> scheduleObjList = jdbcTemplate.query(sql, rm);

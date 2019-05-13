@@ -100,17 +100,18 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
         }
 
         if (StringUtils.isNotEmpty(query.getDescription() ) ) {
-            sql += "and b.valid  =   '" + query.getValid() + "'\n";
+            sql += "and b.description like  '%" + query.getDescription() + "%'\n";
         }
         if (query.getValid()!=null ) {
-            sql += "and b.description like  '%" + query.getDescription() + "%'\n";
+            sql += "and a.valid  =   " + query.getValid() + "\n";
+
         }
 
         if (StringUtils.isNotEmpty(query.getTemplateVersion() ) ) {
             sql += "and c.version  =  '" + query.getTemplateVersion() + "'\n";
         }
         if (StringUtils.isNotEmpty(query.getCategory() ) ) {
-            sql += "and d.item_name  =  '" + query.getCategory() + "'\n";
+            sql += "and d.id  =  '" + query.getCategory() + "'\n";
         }
         sql +="  and a.group_id ='"+groupId+"'";
         return sql;

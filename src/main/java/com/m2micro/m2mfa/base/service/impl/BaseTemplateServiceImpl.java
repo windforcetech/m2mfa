@@ -76,7 +76,7 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
      * @return
      */
     private Integer getTemplatesCount(BaseTemplateQuery query, String groupId) {
-        String countSql ="select count(*) from base_template where 1=1";
+        String countSql ="select count(*) from base_template bt where 1=1";
         countSql += sqlPing(query, groupId);
         return jdbcTemplate.queryForObject(countSql, Integer.class);
     }
@@ -96,7 +96,7 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
             sql +=" and  version = '"+query.getVersion()+"'  ";
         }
         if (query.getEnabled() !=null) {
-            sql +=" and  enabled = '"+query.getEnabled()+"'  ";
+            sql +=" and  bt.enabled = "+query.getEnabled()+"  ";
         }
         sql +=" and  bt.group_id ='"+groupId+"'";
         return sql;
