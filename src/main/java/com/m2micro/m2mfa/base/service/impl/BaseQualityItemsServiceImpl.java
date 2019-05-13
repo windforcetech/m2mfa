@@ -84,13 +84,7 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
                     "	bi1.item_name gaugeName,\n" +
                     "	bi2.item_name categoryName,\n" +
                     "	bi3.unit limitUnitName\n" +
-                    "FROM\n" +
-                    "	base_quality_items bqi\n" +
-                    "LEFT JOIN base_items_target bi1 ON bqi.gauge = bi1.id\n" +
-                    "LEFT JOIN base_items_target bi2 ON bqi.category = bi2.id\n" +
-                    "LEFT JOIN base_unit bi3 ON bqi.limit_unit = bi3.unit_id\n" +
-                    "WHERE\n" +
-                    "	1 = 1\n";
+                    "FROM\n" ;
         sql +=sqlPing(query);
 
         //排序方向
@@ -114,7 +108,7 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BaseQualityItems> rm = BeanPropertyRowMapper.newInstance(BaseQualityItems.class);
         List<BaseQualityItems> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_quality_items bqi where 1=1 \n";
+        String countSql = "select count(*) from";
         countSql +=sqlPing(query);
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
@@ -126,7 +120,12 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
      */
     public String sqlPing(BaseQualityItemsQuery query){
         String groupId = TokenInfo.getUserGroupId();
-        String sql ="";
+        String sql =   " 	base_quality_items bqi\n" +
+            "LEFT JOIN base_items_target bi1 ON bqi.gauge = bi1.id\n" +
+            "LEFT JOIN base_items_target bi2 ON bqi.category = bi2.id\n" +
+            "LEFT JOIN base_unit bi3 ON bqi.limit_unit = bi3.unit_id\n" +
+            "WHERE\n" +
+            "	1 = 1\n";
         if(StringUtils.isNotEmpty(query.getItemCode())){
             sql = sql + " and bqi.item_code like '%"+query.getItemCode()+"%'";
         }
@@ -137,7 +136,7 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
             sql = sql + " and bqi.gauge =  '"+query.getGauge()+"'";
         }
         if(query.getEnabled()!=null){
-            sql = sql + " and bqi.enabled =  '"+query.getEnabled()+"'";
+            sql = sql + " and bqi.enabled =  "+query.getEnabled()+"";
         }
 
         if(StringUtils.isNotEmpty(query.getCategoryName())){
@@ -149,11 +148,11 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         }
 
         if(StringUtils.isNotEmpty(query.getDescription())){
-            sql = sql + " and  bqi.description =  like '%"+query.getDescription()+"%'";
+            sql = sql + " and  bqi.description   like '%"+query.getDescription()+"%'";
         }
 
         if(StringUtils.isNotEmpty(query.getLimitUnitName())){
-            sql = sql + " and  bi3.unit  like '%"+query.getLimitUnitName()+"%'";
+            sql = sql + " and  bi3.unit_id  =  '"+query.getLimitUnitName()+"'";
         }
 
         if(StringUtils.isNotEmpty(query.getLowerLimit())){
