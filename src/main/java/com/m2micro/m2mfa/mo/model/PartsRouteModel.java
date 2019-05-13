@@ -29,7 +29,7 @@ public class PartsRouteModel {
     private String outputProcessName;
     @ApiModelProperty(value = "特性码")
     private String distinguish;
-    @ApiModelProperty(value = "bom版本")
+    @ApiModelProperty(value = "bom版")
     private Integer bomRevsion;
 
 }
