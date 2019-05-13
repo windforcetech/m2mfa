@@ -25,10 +25,13 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
@@ -59,6 +62,8 @@ public class BaseBomDescController {
     BaseItemsTargetService baseItemsTargetService;
     @Autowired
     JPAQueryFactory queryFactory;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /**
      * 列表
@@ -113,10 +118,13 @@ public class BaseBomDescController {
 
         jq.where(expression).orderBy(orderSpecifier).orderBy(baseBomDesc.createOn.desc());
         List<BaseBomDesc> baseBomDescs = jq.fetch();
+        Session session = entityManager.unwrap(org.hibernate.Session.class);
         //List<BaseBomDesc> baseBomDescs = Lists.newArrayList(baseBomDescService.findAll(expression));
         //查询对应的类型名称
         List<SelectNode> bomCategory = baseItemsTargetService.getSelectNode("Bom_Category");
         baseBomDescs.forEach(baseBomDesc1 -> {
+            //将对象设置为游离态(防止自动更新数据库字段值)
+            session.evict(baseBomDesc1);
             BaseParts baseParts = basePartsService.findById(baseBomDesc1.getPartId()).orElse(null);
             baseBomDesc1.setName(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getName());
             baseBomDesc1.setSpec(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getSpec());
