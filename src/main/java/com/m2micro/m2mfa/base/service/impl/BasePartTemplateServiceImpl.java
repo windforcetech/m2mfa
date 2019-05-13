@@ -52,7 +52,7 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
 
     @Override
     public PageUtil<BasePartTemplateObj> list(BasePartTemplateQuery query) {
-        String groupId = TokenInfo.getUserGroupId();
+
 
 
         String sqlCount = "SELECT count(*) \n" +
@@ -69,22 +69,10 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
                 "where a.part_id=b.part_id\n" +
                 "and a.template_id=c.id\n" +
                 "and c.category=d.id\n";
-        if (query.getPartNo() != null && query.getPartNo() != "") {
-            sql += "and b.part_no like '%" + query.getPartNo() + "%'\n";
-            sqlCount += "and b.part_no like '%" + query.getPartNo() + "%'\n";
-        }
-        if (query.getTemplateName() != null && query.getTemplateName() != "") {
-            sql += "and c.name like '%" + query.getTemplateName() + "%'\n";
-            sqlCount += "and c.name like '%" + query.getTemplateName() + "%'\n";
-        }
-
-        if (query.getPartName() != null && query.getPartName() != "") {
-            sql += "and b.name '%" + query.getPartName() + "%'\n";
-            sqlCount += "and b.name like '%" + query.getPartName() + "%'\n";
-        }
-
+        sqlCount+=sqlPing(query);
+        sql +=sqlPing(query);
         Long totalCount = jdbcTemplate.queryForObject(sqlCount, Long.class);
-        sql +="and a.group_id ='"+groupId+"'";
+
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         //排序字段(驼峰转换)
@@ -95,6 +83,37 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
         List<BasePartTemplateObj> list = jdbcTemplate.query(sql, rowMapper);
 
         return PageUtil.of(list, totalCount, query.getSize(), query.getPage());
+    }
+
+    public String sqlPing(BasePartTemplateQuery query){
+        String groupId = TokenInfo.getUserGroupId();
+        String sql ="";
+        if (StringUtils.isNotEmpty(query.getPartNo() )) {
+            sql += "and b.part_no like '%" + query.getPartNo() + "%'\n";
+        }
+        if (StringUtils.isNotEmpty(query.getTemplateName() ) ) {
+            sql += "and c.name like '%" + query.getTemplateName() + "%'\n";
+        }
+
+        if (StringUtils.isNotEmpty(query.getPartName() ) ) {
+            sql += "and b.name like  '%" + query.getPartName() + "%'\n";
+        }
+
+        if (StringUtils.isNotEmpty(query.getDescription() ) ) {
+            sql += "and b.valid  =   '" + query.getValid() + "'\n";
+        }
+        if (query.getValid()!=null ) {
+            sql += "and b.description like  '%" + query.getDescription() + "%'\n";
+        }
+
+        if (StringUtils.isNotEmpty(query.getTemplateVersion() ) ) {
+            sql += "and c.version  =  '" + query.getTemplateVersion() + "'\n";
+        }
+        if (StringUtils.isNotEmpty(query.getCategory() ) ) {
+            sql += "and d.item_name  =  '" + query.getCategory() + "'\n";
+        }
+        sql +="  and a.group_id ='"+groupId+"'";
+        return sql;
     }
 
     @Override
