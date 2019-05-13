@@ -48,7 +48,7 @@ public class PrintApplyQuery extends Query {
     private String partNo;
 
     @ApiModelProperty("状态")
-    private String flag;
+    private String flg;
 
 
     @ApiModelProperty("审核")

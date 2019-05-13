@@ -34,16 +34,31 @@ public class BaseStaffErpServiceImpl implements BaseStaffErpService {
   @Autowired
   BaseStaffService baseStaffService;
 
-
-  @Override
-  public boolean erpBasestaff(String code) {
-
-    String sql ="select * from GEN_FILE WHERE  1=1 ";
+  public  long  erpBasestaffCount(String code){
+    String sql ="select count(*) from GEN_FILE  where 1=1 ";
     if(StringUtils.isNotEmpty(code)){
       String[] split = code.split(",");
       String join = Arrays.stream(split).collect(Collectors.joining("','","'","'"));
       sql+=" and gen01 in("+join+")";
     }
+    Long aLong = primaryJdbcTemplate.queryForObject(sql, Long.class);
+    return aLong;
+  }
+
+  @Override
+  public boolean erpBasestaff(String code,Long x,Long y){
+    long num =(x*1000);
+    long end =num+1000l;
+    String sql ="select * from  (SELECT a.*, ROWNUM rn\n" +
+            "    FROM (SELECT * FROM GEN_FILE) a\n" +
+            "      WHERE ROWNUM <=  "+end+")  \n" +
+            "      where 1=1 ";
+    if(StringUtils.isNotEmpty(code)){
+      String[] split = code.split(",");
+      String join = Arrays.stream(split).collect(Collectors.joining("','","'","'"));
+      sql+=" and gen01 in("+join+")";
+    }
+    sql+="  and rn > "+num +"";
     RowMapper rm = BeanPropertyRowMapper.newInstance(GenFile.class);
     List<GenFile> list = primaryJdbcTemplate.query(sql, rm);
     List<BaseStaff> baseStaffs = new ArrayList<>();
@@ -72,4 +87,6 @@ public class BaseStaffErpServiceImpl implements BaseStaffErpService {
     baseStaffService.saveAll(baseStaffs);
     return true;
   }
+
+
 }

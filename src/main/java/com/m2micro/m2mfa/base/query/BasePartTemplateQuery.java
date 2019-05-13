@@ -14,6 +14,13 @@ public class BasePartTemplateQuery extends Query {
   private String templateName;
   @ApiModelProperty(value = "品名")
   private String partName;
-
+  @ApiModelProperty(value = "类型")
+  private String category;
+  @ApiModelProperty(value = "版本")
+  private String templateVersion;
+  @ApiModelProperty(value = "描述")
+  private String description;
+  @ApiModelProperty(value = "是否有效")
+  private Boolean valid;
 
 }

@@ -30,8 +30,23 @@ public class BasePartsErpContoller {
   @ApiOperation(value="料件erp")
   @UserOperationLog("料件erp")
   public ResponseMessage erpParts(String partNos){
-    basePartsErpService.erpParts(partNos);
+      Long aLong = basePartsErpService.erpPartsCount(partNos);
+      Long chun = chun(aLong);
+      for(long i=0;i<chun;i++){
+          basePartsErpService.erpParts(partNos,i,1000L);
+      }
+      basePartsErpService.erpParts(partNos,(chun),(aLong-(chun*1000)));
+
     return ResponseMessage.ok();
   }
+
+  public  static  Long chun(Long countlong){
+      Long num=1l;
+      if(countlong>1000){
+          num= countlong/ 1000 ;
+      }
+      return num;
+  }
+
 
 }
