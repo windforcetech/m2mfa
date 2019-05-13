@@ -208,8 +208,8 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
    * @return
    */
   private String getSql(PrintApplyQuery query, String groupId, String sql) {
-    if(StringUtils.isNotEmpty(query.getFlag())){
-      sql +=  "and t.flag in("+query.getFlag()+")  ";
+    if(StringUtils.isNotEmpty(query.getFlg())){
+      sql +=  "and t.flag in("+query.getFlg()+")  ";
     }else {
       sql += "and t.flag in(0,1)  ";
     }
@@ -221,7 +221,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
       sql +=  " and  t.category = '"+query.getCategory()+"' ";
     }
     if(StringUtils.isNotEmpty(query.getSourceType())){
-      sql +=  " and  t3.item_name = '"+query.getSourceType()+"' ";
+      sql +=  " and  t3.id = '"+query.getSourceType()+"' ";
     }
     if(StringUtils.isNotEmpty(query.getSource())){
       sql +=  " and  t3.id = '"+query.getSource()+"' ";
@@ -358,7 +358,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
       sql +=" and  t3.id  =  '"+query.getSource()+"' ";
     }
     if(StringUtils.isNotEmpty(query.getSourceType())){
-      sql +=" and  t3.item_name  LIKE '%"+query.getSourceType()+"%'  ";
+      sql +=" and  t3.id  LIKE '"+query.getSourceType()+"'  ";
     }
     if(StringUtils.isNotEmpty(query.getTemplateName())){
       sql +=" and  t1. NAME  LIKE '%"+query.getTemplateName()+"%'  ";
@@ -375,8 +375,8 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     if(StringUtils.isNotEmpty(query.getEndDate())){
       sql +=" and  t.collar_on   LIKE '%"+query.getEndDate()+"%'  ";
     }
-    if(StringUtils.isNotEmpty(query.getFlag())){
-      sql +=  "and t.flag in("+query.getFlag()+")  " ;
+    if(StringUtils.isNotEmpty(query.getFlg())){
+      sql +=  "and t.flag in("+query.getFlg()+")  " ;
     }else {
       sql +=  "and t.flag in(0,1)  " ;
     }
