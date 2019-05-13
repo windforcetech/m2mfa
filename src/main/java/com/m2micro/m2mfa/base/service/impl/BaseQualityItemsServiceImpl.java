@@ -145,7 +145,7 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         }
 
         if(StringUtils.isNotEmpty(query.getCentralLimit())){
-            sql = sql + " and  bqi.central_limit =  like '%"+query.getCentralLimit()+"%'";
+            sql = sql + " and  bqi.central_limit =   "+query.getCentralLimit()+" ";
         }
 
         if(StringUtils.isNotEmpty(query.getDescription())){
@@ -153,15 +153,15 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         }
 
         if(StringUtils.isNotEmpty(query.getLimitUnitName())){
-            sql = sql + " and  bi3.unit  =  like '%"+query.getLimitUnitName()+"%'";
+            sql = sql + " and  bi3.unit  like '%"+query.getLimitUnitName()+"%'";
         }
 
         if(StringUtils.isNotEmpty(query.getLowerLimit())){
-            sql = sql + " and  	bqi.lower_limit    =  like '%"+query.getLowerLimit()+"%'";
+            sql = sql + " and  	bqi.lower_limit  =  "+query.getLowerLimit()+"";
         }
 
         if(StringUtils.isNotEmpty(query.getUpperLimit())){
-            sql = sql + " and  	bqi.upper_limit    =  like '%"+query.getUpperLimit()+"%'";
+            sql = sql + " and  	bqi.upper_limit  = "+query.getUpperLimit()+"";
         }
         sql +=" and  bqi.group_id ='"+groupId+"'";
         return  sql ;
