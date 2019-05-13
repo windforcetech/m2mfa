@@ -30,9 +30,22 @@ public class BaseStaffErpContoller {
   @ApiOperation(value="人员erp")
   @UserOperationLog("人员erp")
   public ResponseMessage erpBasestaff(String code ){
-    baseStaffErpService.erpBasestaff(code);
+    Long aLong = baseStaffErpService.erpBasestaffCount(code);
+    Long chun = chun(aLong);
+    for(long i=0;i<chun;i++){
+      baseStaffErpService.erpBasestaff(code,i,1000L);
+    }
+    baseStaffErpService.erpBasestaff(code,(chun),(aLong-(chun*1000)));
     return ResponseMessage.ok();
   }
 
+
+  public  static  Long chun(Long countlong){
+    Long num=1l;
+    if(countlong>1000){
+      num= countlong/ 1000 ;
+    }
+    return num;
+  }
 
 }

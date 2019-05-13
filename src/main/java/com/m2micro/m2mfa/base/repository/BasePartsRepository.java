@@ -33,4 +33,6 @@ public interface BasePartsRepository extends BaseRepository<BaseParts, String> {
     List<BaseParts> findByPartNoAndGroupId(String partNo,String groupId);
 
     List<BaseParts> findAllByCategory(String category);
+
+    List<BaseParts>findByPartNo(String partNo);
 }

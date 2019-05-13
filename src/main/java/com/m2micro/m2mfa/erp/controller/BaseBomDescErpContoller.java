@@ -32,8 +32,21 @@ public class BaseBomDescErpContoller {
   @ApiOperation(value="料件物料清单erp")
   @UserOperationLog("料件物料清单erp")
   public ResponseMessage erpBasebomdesc(String partNo,String  distinguish ){
-    baseBomDescErpService.erpBasebomdesc(partNo,distinguish);
+    Long aLong = baseBomDescErpService.erpBasebomdescCount(partNo,distinguish);
+    Long chun = chun(aLong);
+    for(long i=0;i<chun;i++){
+      baseBomDescErpService.erpBasebomdesc(partNo,distinguish,i,1000L);
+    }
+    baseBomDescErpService.erpBasebomdesc(partNo,distinguish,(chun),(aLong-(chun*1000)));
+
+
     return ResponseMessage.ok();
   }
-
+  public  static  Long chun(Long countlong){
+    Long num=1l;
+    if(countlong>1000){
+      num= countlong/ 1000 ;
+    }
+    return num;
+  }
 }

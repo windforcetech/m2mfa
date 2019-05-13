@@ -77,32 +77,34 @@ public class BaseTemplateServiceImpl implements BaseTemplateService {
      */
     private Integer getTemplatesCount(BaseTemplateQuery query, String groupId) {
         String countSql ="select count(*) from base_template where 1=1";
+        countSql += sqlPing(query, groupId);
+        return jdbcTemplate.queryForObject(countSql, Integer.class);
+    }
+
+    private String sqlPing(BaseTemplateQuery query, String groupId) {
+        String sql ="";
         if (StringUtils.isNotEmpty(query.getName())) {
-            countSql +=" and  name  LIKE '%"+query.getName()+"%'  ";
+            sql +=" and  name  LIKE '%"+query.getName()+"%'  ";
         }
         if (StringUtils.isNotEmpty(query.getNumber())) {
-            countSql +=" and  number  LIKE '%"+query.getNumber()+"%'  ";
+            sql +=" and  number  LIKE '%"+query.getNumber()+"%'  ";
         }
         if (StringUtils.isNotEmpty(query.getCategory())) {
-            countSql +=" and  category = '"+query.getCategory()+"'  ";
+            sql +=" and  category = '"+query.getCategory()+"'  ";
         }
-        countSql +=" and  group_id ='"+groupId+"'";
-        return jdbcTemplate.queryForObject(countSql, Integer.class);
+        if (StringUtils.isNotEmpty(query.getVersion())) {
+            sql +=" and  version = '"+query.getVersion()+"'  ";
+        }
+        if (query.getEnabled() !=null) {
+            sql +=" and  enabled = '"+query.getEnabled()+"'  ";
+        }
+        sql +=" and  group_id ='"+groupId+"'";
+        return sql;
     }
 
     private List<BaseTemplate> getTemplates(BaseTemplateQuery query, String groupId) {
         String sql ="select bt.*, bit.item_name categoryName   from   base_template bt LEFT JOIN base_items_target bit ON bt.category = bit.id   where 1=1";
-        if (StringUtils.isNotEmpty(query.getName())) {
-            sql +=" and  bt.name LIKE '%"+query.getName()+"%'  ";
-        }
-        if (StringUtils.isNotEmpty(query.getNumber())) {
-            sql +=" and  bt.number LIKE '%"+query.getNumber()+"%'  ";
-        }
-        if (StringUtils.isNotEmpty(query.getCategory())) {
-            sql +=" and  bt.category = '"+query.getCategory()+"'  ";
-        }
-
-        sql +=" and  bt.group_id ='"+groupId+"'";
+        sql += sqlPing(query,groupId);
         //排序方向
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         //排序字段(驼峰转换)
