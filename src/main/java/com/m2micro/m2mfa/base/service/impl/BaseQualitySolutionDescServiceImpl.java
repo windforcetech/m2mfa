@@ -95,7 +95,10 @@ public class BaseQualitySolutionDescServiceImpl implements BaseQualitySolutionDe
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"bqsd.modified_on":query.getOrder());
-        sql = sql + " order by "+order+" "+direct+",bqsd.modified_on desc";
+        if(order.equals("aqlId")){
+            order=  "bad."+order;
+        }
+        sql = sql + " order by bad."+order+" "+direct+",bqsd.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseQualitySolutionDesc.class);
         List<BaseQualitySolutionDesc> list = jdbcTemplate.query(sql,rm);

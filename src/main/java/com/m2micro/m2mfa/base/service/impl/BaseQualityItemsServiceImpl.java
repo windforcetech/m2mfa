@@ -97,7 +97,20 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
         String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"bqi.modified_on":query.getOrder());
-        sql = sql + " order by bqi."+order+" "+direct+",bqi.modified_on desc";
+        if(order.equals("gaugeName")||order.equals("categoryName")|| order.equals("limitUnitName")){
+            if(order.equals("gaugeName")){
+                order=  "	bi1.item_name ";
+            }
+            if(order.equals("categoryName")){
+                order=  "	bi2.item_name ";
+            }
+            if(order.equals("limitUnitName")){
+                order=  "	bi3.unit ";
+            }
+        }else {
+            order=  "bqi."+order;
+        }
+        sql = sql + " order by "+order+" "+direct+",bqi.modified_on desc";
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BaseQualityItems> rm = BeanPropertyRowMapper.newInstance(BaseQualityItems.class);
         List<BaseQualityItems> list = jdbcTemplate.query(sql,rm);
