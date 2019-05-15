@@ -67,5 +67,7 @@ public class BasePartsQuery extends Query {
     @ApiModelProperty(value = "有效否")
     private Boolean enabled;
 
+    @ApiModelProperty(value = "是否排除在BomDesc表中已经存在的，Bom表专用，其他查询忽视")
+    private Boolean excludeExistInBomDesc;
 
 }

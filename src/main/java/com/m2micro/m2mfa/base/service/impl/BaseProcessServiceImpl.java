@@ -96,6 +96,8 @@ public class BaseProcessServiceImpl implements BaseProcessService {
 
         if (StringUtils.isNotEmpty(baseProcessRepository.selectprocessCode(baseProcess.getProcessCode()))) {
             baseProcessStationService.deleteprocessId(baseProcess.getProcessId());
+            baseProcess.setGroupId(TokenInfo.getUserGroupId());
+
             this.updateById(baseProcess.getProcessId(), baseProcess);
             basePageElemenService.updateById(basePageElemen.getElemenId(), basePageElemen);
             for (BaseProcessStation baseProcessStation : baseProcessStations) {

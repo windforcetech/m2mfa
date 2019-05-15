@@ -41,7 +41,7 @@ public class BaseBomDef extends BaseEntity implements Serializable {
     private String bomId;
     @ApiModelProperty(value = "组合项次")
     private Integer sequence;
-    @ApiModelProperty(value = "元件料件编号")
+    @ApiModelProperty(value = "元件料件编号id")
     @Size(max = 50, message = "元件料件编号不能大于50位", groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message = "元件料件编号不能为空", groups = {AddGroup.class, UpdateGroup.class})
     private String partId;
@@ -81,6 +81,18 @@ public class BaseBomDef extends BaseEntity implements Serializable {
     @Transient
     private String name;
 
+
+    @ApiModelProperty(value = "料件编号")
+    @Transient
+    private String partNo;
+
+    public String getPartNo() {
+        return partNo;
+    }
+
+    public void setPartNo(String partNo) {
+        this.partNo = partNo;
+    }
     public String getName() {
         return name;
     }

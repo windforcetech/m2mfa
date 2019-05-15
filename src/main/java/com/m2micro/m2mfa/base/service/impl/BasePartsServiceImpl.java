@@ -4,33 +4,27 @@ import com.google.common.base.CaseFormat;
 import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BasePartsQuery;
 import com.m2micro.m2mfa.base.repository.*;
-import com.m2micro.m2mfa.base.service.BasePackService;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
-import com.m2micro.m2mfa.mo.service.MesMoDescService;
-import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-
 /**
  * 料件基本资料 服务实现类
  *
@@ -436,6 +430,20 @@ public class BasePartsServiceImpl implements BasePartsService {
                 sql = sql + " and bp.category = '" + query.getCategory() + "'";
             }
         }
+
+
+        if (query.getExcludeExistInBomDesc() != null && query.getExcludeExistInBomDesc()) {
+
+            String[] strings = baseBomDescRepository.findAllByEnabled(true).stream()
+                    .map(baseBomDesc -> baseBomDesc.getPartId())
+                    .collect(Collectors.toList()).toArray(new String[0]);
+            String join = String.join("','", strings);
+            join = "'" + join + "'";
+            sql = sql + " and bp.part_id not in  (" + join + ") ";
+        }
+
+
+
 
         return sql;
     }

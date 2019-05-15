@@ -54,10 +54,10 @@ public class BaseDefectServiceImpl implements BaseDefectService {
             "WHERE\n" +
             "	1 = 1\n" ;
         if(StringUtils.isNotEmpty(query.getEctCode())){
-            totalCountsql +=  " AND bd.ect_code = '"+query.getEctCode()+"'\n" ;
+            totalCountsql +=  " AND bd.ect_code like '%"+query.getEctCode()+"%'\n" ;
         }
         if(StringUtils.isNotEmpty(query.getEctName())){
-            totalCountsql +=  " AND bd.ect_name = '"+query.getEctName()+"'\n" ;
+            totalCountsql +=  " AND bd.ect_name like '%"+query.getEctName()+"%'\n" ;
         }
         if(query.getEnabled()!=null && query.getEnabled()){
             totalCountsql +=  " AND bd.enabled = '"+1+"'\n" ;
@@ -90,10 +90,10 @@ public class BaseDefectServiceImpl implements BaseDefectService {
             "WHERE\n" +
             "	1 = 1\n" ;
             if(StringUtils.isNotEmpty(query.getEctCode())){
-                sql +=  " AND bd.ect_code = '"+query.getEctCode()+"'\n" ;
+                sql +=  " AND bd.ect_code like '%"+query.getEctCode()+"%'\n" ;
              }
             if(StringUtils.isNotEmpty(query.getEctName())){
-                sql +=  " AND bd.ect_name = '"+query.getEctName()+"'\n" ;
+                sql +=  " AND bd.ect_name like '%"+query.getEctName()+"%'\n" ;
             }
             if(query.getEnabled()!=null && query.getEnabled()){
             sql +=  " AND bd.enabled = '"+1+"'\n" ;
