@@ -745,7 +745,8 @@ public class MesMoDescServiceImpl implements MesMoDescService {
      * @param moId
      * @param mesMoBoms
      */
-    private void saveMesBom(String moId, List<MesMoBom> mesMoBoms) {
+    @Transactional
+    public void saveMesBom(String moId, List<MesMoBom> mesMoBoms) {
         //保存工单料件信息
         mesMoBoms.stream().forEach(mesMoBom -> {
             mesMoBom.setId(UUIDUtil.getUUID());

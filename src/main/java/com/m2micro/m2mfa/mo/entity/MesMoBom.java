@@ -26,9 +26,9 @@ public class MesMoBom extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @ApiModelProperty(value = "id")
+    @Id
     private String id;
     @ApiModelProperty(value = "工单id")
-    @Id
     @NotEmpty(message="工单id不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String moId;
     @ApiModelProperty(value = "料件id")
@@ -50,7 +50,6 @@ public class MesMoBom extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "规格")
     private String partSpec;
     @ApiModelProperty(value = "单位")
-    @NotEmpty(message="单位不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private String unit;
     @ApiModelProperty(value = "用量")
     @NotNull(message="用量不能为空",groups = {AddGroup.class, UpdateGroup.class})
