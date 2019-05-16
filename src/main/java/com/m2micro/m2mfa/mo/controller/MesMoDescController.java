@@ -2,8 +2,7 @@ package com.m2micro.m2mfa.mo.controller;
 
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
-import com.m2micro.m2mfa.mo.model.MesMoDescModel;
-import com.m2micro.m2mfa.mo.model.PartsRouteModel;
+import com.m2micro.m2mfa.mo.model.*;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.framework.commons.exception.MMException;
@@ -43,7 +42,6 @@ public class MesMoDescController {
     @RequestMapping("/list")
     @ApiOperation(value="工单主档列表")
     @UserOperationLog("工单主档列表")
-    //@SysDebugLog("工单主档列表")
     public ResponseMessage<PageUtil<MesMoDescModel>> list(MesMoDescQuery query){
         PageUtil<MesMoDescModel> page = mesMoDescService.list(query);
         return ResponseMessage.ok(page);
@@ -55,8 +53,7 @@ public class MesMoDescController {
     @RequestMapping("/info/{id}")
     @ApiOperation(value="工单主档详情")
     @UserOperationLog("工单主档详情")
-    //@SysDebugLog("工单主档详情")
-    public ResponseMessage<MesMoDescModel> info(@PathVariable("id") String id){
+    public ResponseMessage<MesMoDescBomModel> info(@PathVariable("id") String id){
         return ResponseMessage.ok(mesMoDescService.info(id));
     }
 
@@ -66,16 +63,9 @@ public class MesMoDescController {
     @RequestMapping("/save")
     @ApiOperation(value="保存工单主档")
     @UserOperationLog("保存工单主档")
-    public ResponseMessage<MesMoDesc> save(@RequestBody MesMoDesc mesMoDesc){
-        ValidatorUtil.validateEntity(mesMoDesc, AddGroup.class);
-        mesMoDesc.setMoId(UUIDUtil.getUUID());
-        mesMoDesc.setMoNumber(mesMoDesc.getMoNumber().trim());
-        List<MesMoDesc> list = mesMoDescService.findByMoNumberAndMoIdNot(mesMoDesc.getMoNumber(),"");
-        if(list!=null&&list.size()>0){
-            throw new MMException("工单号码不唯一！");
-        }
-        mesMoDesc.setCloseFlag(MoStatus.INITIAL.getKey());
-        return ResponseMessage.ok(mesMoDescService.save(mesMoDesc));
+    public ResponseMessage save(@RequestBody MesMoDescAllModel mesMoDescAllModel){
+        mesMoDescService.saveEntity(mesMoDescAllModel);
+        return ResponseMessage.ok();
     }
 
     /**
@@ -84,8 +74,9 @@ public class MesMoDescController {
     @RequestMapping("/update")
     @ApiOperation(value="更新工单主档")
     @UserOperationLog("更新工单主档")
-    public ResponseMessage<MesMoDesc> update(@RequestBody MesMoDesc mesMoDesc){
-        return ResponseMessage.ok(mesMoDescService.updateEntity(mesMoDesc));
+    public ResponseMessage update(@RequestBody MesMoDescAllModel mesMoDescAllModel){
+        mesMoDescService.updateEntity(mesMoDescAllModel);
+        return ResponseMessage.ok();
     }
 
     /**
@@ -160,7 +151,7 @@ public class MesMoDescController {
     @RequestMapping("/addDetails")
     @ApiOperation(value="工单添加基本信息")
     @UserOperationLog("工单物料添加基本信息")
-    public ResponseMessage<PartsRouteModel> addDetails(@ApiParam(required = true,value = "料件ID") @RequestParam(required=true )String partId){
+    public ResponseMessage<BomAndPartInfoModel> addDetails(@ApiParam(required = true,value = "料件ID") @RequestParam(required=true )String partId){
         return ResponseMessage.ok(mesMoDescService.addDetails(partId));
     }
 

@@ -1,21 +1,28 @@
 package com.m2micro.m2mfa.mo.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.m2mfa.base.entity.BaseBomDef;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
+import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
+import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
+import com.m2micro.m2mfa.mo.entity.MesMoBom;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
-import com.m2micro.m2mfa.mo.model.MesMoDescModel;
-import com.m2micro.m2mfa.mo.model.PartsRouteModel;
+import com.m2micro.m2mfa.mo.model.*;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
+import com.m2micro.m2mfa.mo.repository.MesMoBomRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoDescRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
+import com.m2micro.m2mfa.mo.service.MesMoBomService;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
@@ -30,7 +37,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 /**
  * 工单主档 服务实现类
@@ -53,6 +62,10 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     MesMoScheduleService mesMoScheduleService;
     @Autowired
     MesMoScheduleRepository mesMoScheduleRepository;
+    @Autowired
+    MesMoBomService mesMoBomService;
+    @Autowired
+    MesMoBomRepository mesMoBomRepository;
 
 
     public MesMoDescRepository getRepository() {
@@ -184,6 +197,9 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                 throw new MMException("用户工单【" + mesMoDesc.getMoNumber() + "】当前状态【" + MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue() + "】,不允许删除！");
         }
         deleteByIds(ids);
+        List<String> list = Arrays.asList(ids);
+        //删除原有工单料件
+        mesMoBomRepository.deleteAllByMoIdIn(list);
     }
 
     @Override
@@ -343,10 +359,55 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     }
 
     @Override
-    public MesMoDescModel info(String id) {
+    public MesMoDescBomModel info(String id) {
         if(StringUtils.isEmpty(id)){
             throw new MMException("不存在记录！");
         }
+        MesMoDescBomModel mesMoDescBomModel = new MesMoDescBomModel();
+        mesMoDescBomModel.setMesMoDescModel(getMesMoDescModel(id));
+        //获取工单料件资料
+        //List<MesMoBom> mesMoBoms = mesMoBomRepository.findByMoId(id);
+        List<MesMoBom> mesMoBoms = getMesMoBoms(id);
+        mesMoDescBomModel.setMesMoBoms(mesMoBoms);
+        return mesMoDescBomModel;
+    }
+
+
+    private List<MesMoBom> getMesMoBoms(String moId){
+        String sql = "SELECT\n" +
+                "	mmb.id id,\n" +
+                "	mmb.mo_id moId,\n" +
+                "	mmb.part_id partId,\n" +
+                "	bp.part_no partNo,\n" +
+                "	mmb.sent_part_id sentPartId,\n" +
+                "	bp2.part_no sentPartNo,\n" +
+                "	bp.name partName,\n" +
+                "	bp.spec partSpec,\n" +
+                "	mmb.qpa qpa,\n" +
+                "	mmb.cardinal cardinal,\n" +
+                "	mmb.should_qty shouldQty,\n" +
+                "	mmb.already_qty alreadyQty,\n" +
+                "	mmb.lack_qty lackQty,\n" +
+                "	mmb.return_qty returnQty,\n" +
+                "	mmb.returned_qty returnedQty,\n" +
+                "	mmb.exceed_qty exceedQty,\n" +
+                "	mmb.is_substitute isSubstitute,\n" +
+                "	mmb.enabled enabled,\n" +
+                "	mmb.description description,\n" +
+                "	IFNULL( bp.min_sent_qty, 1 ) minSentQty \n" +
+                "FROM\n" +
+                "	mes_mo_bom mmb,\n" +
+                "	base_parts bp,\n" +
+                "	base_parts bp2 \n" +
+                "WHERE\n" +
+                "	mmb.part_id = bp.part_id \n" +
+                "	AND mmb.sent_part_id = bp2.part_id\n" +
+                "	AND mmb.mo_id='"+ moId +"'";
+        RowMapper<MesMoBom> rm = BeanPropertyRowMapper.newInstance(MesMoBom.class);
+        return jdbcTemplate.query(sql, rm);
+    }
+
+    private MesMoDescModel getMesMoDescModel(String id) {
         String sql = "SELECT\n" +
                         "	md.mo_id moId,\n" +
                         "	md.mo_number moNumber,\n" +
@@ -410,7 +471,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         return list.get(0);
     }
 
-    @Override
+    /*@Override
     public PartsRouteModel addDetails(String partId) {
         String sql = "SELECT\n" +
                     "	bp.part_id partId,\n" +
@@ -438,6 +499,105 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         List<PartsRouteModel> list = jdbcTemplate.query(sql, rm);
         if(list==null||(list!=null&&list.size()!=1)){
             throw new MMException("料件相关数据不存在！");
+        }
+        return list.get(0);
+    }*/
+    @Override
+    public BomAndPartInfoModel addDetails(String partId) {
+        BomAndPartInfoModel bomAndPartInfoModel = new BomAndPartInfoModel();
+        bomAndPartInfoModel.setPartsRouteModel(getPartsRouteModel(partId));
+        List<MesMoBom> list = new ArrayList<>();
+        getAllBomDefByPartId(partId,list);
+        list.stream().forEach(mesMoBom -> {
+            mesMoBom.setShouldQty(new BigDecimal(0));
+            mesMoBom.setAlreadyQty(new BigDecimal(0));
+            mesMoBom.setLackQty(new BigDecimal(0));
+            mesMoBom.setReturnQty(new BigDecimal(0));
+            mesMoBom.setReturnedQty(new BigDecimal(0));
+            mesMoBom.setExceedQty(new BigDecimal(0));
+            mesMoBom.setGroupId(TokenInfo.getUserGroupId());
+        });
+        bomAndPartInfoModel.setMesMoBoms(list);
+        return bomAndPartInfoModel;
+    }
+
+
+
+
+    private List<MesMoBom> getAllBomDefByPartId(String partId,List<MesMoBom> list){
+        //获取下一级
+        List<MesMoBom> mesMoBoms = getBomDefByPartId(partId);
+        if(mesMoBoms!=null&&mesMoBoms.size()>0){
+            list.addAll(mesMoBoms);
+            for(MesMoBom baseBomDef:mesMoBoms){
+                getAllBomDefByPartId(baseBomDef.getPartId(),list);
+            }
+        }
+        return list;
+    }
+
+    private List<MesMoBom> getBomDefByPartId(String partId){
+        String sql = "SELECT\n" +
+                "	bbdf.part_id partId,\n" +
+                "	bp.part_no partNo,\n" +
+                "	bbdf.part_id sentPartId,\n" +
+                "	bp.part_no sentPartNo,\n" +
+                "	bp.`name` partName,\n" +
+                "	bp.spec partSpec,\n" +
+                "	bbdf.cardinal cardinal,\n" +
+                "	bbdf.qpa qpa,\n" +
+                "	bp.sent_unit unit,\n" +
+                "	bbdf.is_substitute isSubstitute,\n" +
+                "	IFNULL( bp.min_sent_qty, 1 ) minSentQty\n" +
+                "FROM\n" +
+                "	base_bom_desc bbd,\n" +
+                "	base_bom_def bbdf,\n" +
+                "	base_parts bp \n" +
+                "WHERE\n" +
+                "	bbd.bom_id = bbdf.bom_id \n" +
+                "	AND bp.part_id = bbdf.part_id \n" +
+                "	AND bbd.enabled = 1 \n" +
+                "	AND bbd.part_id ='"+ partId +"'";
+        RowMapper<MesMoBom> rm = BeanPropertyRowMapper.newInstance(MesMoBom.class);
+        return jdbcTemplate.query(sql, rm);
+    }
+
+    /**
+     * 获取料件相关联的信息
+     * @param partId
+     * @return
+     */
+    private PartsRouteModel getPartsRouteModel(String partId) {
+        String sql = "SELECT\n" +
+                "	bp.part_id partId,\n" +
+                "	bp.part_no partNo,\n" +
+                "	bp.name name,\n" +
+                "	bp.spec spec,\n" +
+                "	mpr.route_id routeId,\n" +
+                "	brd.route_name routeName,\n" +
+                "	mpr.input_process_id inputProcessId,\n" +
+                "	bpr.process_name inputProcessName,\n" +
+                "	mpr.output_process_id outputProcessId,\n" +
+                "	bpr1.process_name outputProcessName,\n" +
+                "	bbd.distinguish distinguish,\n" +
+                "	bbd.version bomRevsion\n" +
+                "FROM\n" +
+                "	base_parts bp\n" +
+                "	LEFT JOIN mes_part_route mpr ON mpr.part_id = bp.part_id\n" +
+                "	LEFT JOIN base_route_desc brd ON brd.route_id = mpr.route_id\n" +
+                "	LEFT JOIN base_process bpr ON bpr.process_id = mpr.input_process_id\n" +
+                "	LEFT JOIN base_process bpr1 ON bpr1.process_id = mpr.output_process_id\n" +
+                "	LEFT JOIN base_bom_desc bbd ON (bbd.part_id = bp.part_id and bbd.enabled = 1)\n" +
+                "WHERE\n"+
+                "   bp.part_id='"+ partId +"'";
+
+        RowMapper rm = BeanPropertyRowMapper.newInstance(PartsRouteModel.class);
+        List<PartsRouteModel> list = jdbcTemplate.query(sql, rm);
+        if(list==null||list.size()==0){
+            throw new MMException("料件相关数据不存在或异常！");
+        }
+        if(list.size()!=1){
+            throw new MMException("料件不允许绑定多次bom信息！");
         }
         return list.get(0);
     }
@@ -515,8 +675,14 @@ public class MesMoDescServiceImpl implements MesMoDescService {
 
     @Override
     @Transactional
-    public MesMoDesc updateEntity(MesMoDesc mesMoDesc) {
-        ValidatorUtil.validateEntity(mesMoDesc, UpdateGroup.class);
+    public void updateEntity(MesMoDescAllModel mesMoDescAllModel) {
+        MesMoDesc mesMoDesc = mesMoDescAllModel.getMesMoDesc();
+        List<MesMoBom> mesMoBoms = mesMoDescAllModel.getMesMoBoms();
+        if(mesMoBoms==null||mesMoBoms.size()==0){
+            throw new MMException("请将料件做bom关联！");
+        }
+        ValidatorUtil.validateEntity(mesMoDesc, AddGroup.class);
+        ValidatorUtil.validateEntity(mesMoBoms, AddGroup.class);
 
         mesMoDesc.setMoNumber(mesMoDesc.getMoNumber().trim());
         MesMoDesc mesMoDescOld = findById(mesMoDesc.getMoId()).orElse(null);
@@ -527,11 +693,13 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if(list!=null&&list.size()>0){
             throw new MMException("工单号码不唯一！");
         }
-        /*if(mesMoDescOld.getTargetQty()>mesMoDesc.getTargetQty()){
-            throw new MMException("工单目标量不能低于原有目标量！");
-        }*/
         PropertyUtil.copy(mesMoDesc,mesMoDescOld);
-        return save(mesMoDescOld);
+        save(mesMoDescOld);
+        //删除原有工单料件
+        mesMoBomRepository.deleteAllByMoId(mesMoDesc.getMoId());
+        //保存新的工单料件
+        saveMesBom(mesMoDesc.getMoId(), mesMoBoms);
+
     }
 
     @Override
@@ -554,6 +722,53 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                 save(mesMoDesc);
             }
         }
+    }
+
+    @Override
+    @Transactional
+    public void saveEntity(MesMoDescAllModel mesMoDescAllModel) {
+        MesMoDesc mesMoDesc = mesMoDescAllModel.getMesMoDesc();
+        List<MesMoBom> mesMoBoms = mesMoDescAllModel.getMesMoBoms();
+        if(mesMoBoms==null||mesMoBoms.size()==0){
+            throw new MMException("请将料件做bom关联！");
+        }
+        ValidatorUtil.validateEntity(mesMoDesc, AddGroup.class);
+        ValidatorUtil.validateEntity(mesMoBoms, AddGroup.class);
+        //保存工单信息
+        saveMoDesc(mesMoDesc);
+        //保存工单料件
+        saveMesBom(mesMoDesc.getMoId(), mesMoBoms);
+    }
+
+    /**
+     * 保存工单料件
+     * @param moId
+     * @param mesMoBoms
+     */
+    private void saveMesBom(String moId, List<MesMoBom> mesMoBoms) {
+        //保存工单料件信息
+        mesMoBoms.stream().forEach(mesMoBom -> {
+            mesMoBom.setId(UUIDUtil.getUUID());
+            mesMoBom.setMoId(moId);
+            mesMoBom.setEnabled(true);
+        });
+        mesMoBomService.saveAll(mesMoBoms);
+    }
+
+    /**
+     * 保存工单信息
+     * @param mesMoDesc
+     */
+    private void saveMoDesc(MesMoDesc mesMoDesc) {
+        //保存工单信息
+        mesMoDesc.setMoId(UUIDUtil.getUUID());
+        mesMoDesc.setMoNumber(mesMoDesc.getMoNumber().trim());
+        List<MesMoDesc> list = findByMoNumberAndMoIdNot(mesMoDesc.getMoNumber(),"");
+        if(list!=null&&list.size()>0){
+            throw new MMException("工单号码不唯一！");
+        }
+        mesMoDesc.setCloseFlag(MoStatus.INITIAL.getKey());
+        save(mesMoDesc);
     }
 
 

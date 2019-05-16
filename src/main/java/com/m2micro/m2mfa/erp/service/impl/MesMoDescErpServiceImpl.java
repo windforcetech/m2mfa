@@ -176,7 +176,7 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     mesMoBom.setReturnedQty(new BigDecimal(0));
     mesMoBom.setExceedQty(new BigDecimal(0));
     try {
-      mesMoBom.setSubstitute(sfaFile.getSfa03().equals(sfaFile.getSfa27() ) ? true :false);
+      mesMoBom.setIsSubstitute(sfaFile.getSfa03().equals(sfaFile.getSfa27() ) ? true :false);
     }catch (Exception e){
       return null;
     }
