@@ -37,10 +37,11 @@ public class BaseBomDesc extends BaseEntity implements Serializable {
     @Id
     @NotEmpty(message = "主键不能为空", groups = {UpdateGroup.class})
     private String bomId;
-    @ApiModelProperty(value = "料件编号")
+    @ApiModelProperty(value = "料件编号id")
     @Size(max = 50, message = "料件编号不能大于50位", groups = {AddGroup.class, UpdateGroup.class})
     @NotEmpty(message = "料件编号不能为空", groups = {AddGroup.class, UpdateGroup.class})
     private String partId;
+
     @ApiModelProperty(value = "版本号")
     private Integer version;
     @ApiModelProperty(value = "特性码")
@@ -90,6 +91,18 @@ public class BaseBomDesc extends BaseEntity implements Serializable {
     @Transient
     @ApiModelProperty(value = "生产单位")
     private String productionUnit;
+
+    @ApiModelProperty(value = "料件编号")
+    @Transient
+    private String partNo;
+
+    public String getPartNo() {
+        return partNo;
+    }
+
+    public void setPartNo(String partNo) {
+        this.partNo = partNo;
+    }
 
     public String getProductionUnit() {
         return productionUnit;

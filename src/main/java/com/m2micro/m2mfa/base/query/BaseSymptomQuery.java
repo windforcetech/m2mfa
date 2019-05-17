@@ -18,4 +18,10 @@ public class BaseSymptomQuery extends Query {
     private String symptomCode;
     @ApiModelProperty(value = "不良原因名称")
     private String symptomName;
+
+    private Boolean enabled;
+    private String description;
+
+    @ApiModelProperty(value = "类型")
+    private String category;
 }

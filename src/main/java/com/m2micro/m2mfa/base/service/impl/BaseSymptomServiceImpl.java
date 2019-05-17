@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.m2mfa.base.entity.BaseSymptom;
@@ -89,7 +90,38 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
         if(StringUtils.isNotEmpty(query.getSymptomName())){
             sql = sql + " and bs.symptom_name like '%"+query.getSymptomName()+"%'";
         }
-        sql = sql + " order by bs.modified_on desc";
+
+        if(query.getEnabled()!=null && query.getEnabled()){
+            sql +=  " AND bs.enabled = '"+1+"'\n" ;
+        }
+        if(query.getEnabled()!=null && !query.getEnabled()){
+            sql +=  " AND bs.enabled = '"+0+"'\n" ;
+        }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            sql +=  " AND bs.category = '"+query.getCategory()+"'\n" ;
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            sql = sql + " AND bs.description like '%" + query.getDescription() + "%'\n";
+        }
+
+
+
+
+
+
+        if (StringUtils.isEmpty(query.getOrder()) || StringUtils.isEmpty(query.getDirect())) {
+            sql = sql + " order by bs.modified_on desc";
+        } else {
+
+            //排序字段(驼峰转换)
+            String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, query.getOrder());
+
+            sql = sql + " order by bs." + order + "  " + query.getDirect();
+        }
+
+
+
+
         sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
         RowMapper<BaseSymptom> rm = BeanPropertyRowMapper.newInstance(BaseSymptom.class);
         List<BaseSymptom> list = jdbcTemplate.query(sql,rm);
@@ -100,6 +132,23 @@ public class BaseSymptomServiceImpl implements BaseSymptomService {
         if(StringUtils.isNotEmpty(query.getSymptomName())){
             countSql = countSql + " and bs.symptom_name like '%"+query.getSymptomName()+"%'";
         }
+
+
+        if(query.getEnabled()!=null && query.getEnabled()){
+            countSql +=  " AND bs.enabled = '"+1+"'\n" ;
+        }
+        if(query.getEnabled()!=null && !query.getEnabled()){
+            countSql +=  " AND bs.enabled = '"+0+"'\n" ;
+        }
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            countSql +=  " AND bs.category = '"+query.getCategory()+"'\n" ;
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            countSql = countSql + " AND bs.description like '%" + query.getDescription() + "%'\n";
+        }
+
+
+
         long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
         return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
     }

@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseDefect;
@@ -53,10 +54,10 @@ public class BaseDefectServiceImpl implements BaseDefectService {
             "WHERE\n" +
             "	1 = 1\n" ;
         if(StringUtils.isNotEmpty(query.getEctCode())){
-            totalCountsql +=  " AND bd.ect_code = '"+query.getEctCode()+"'\n" ;
+            totalCountsql +=  " AND bd.ect_code like '%"+query.getEctCode()+"%'\n" ;
         }
         if(StringUtils.isNotEmpty(query.getEctName())){
-            totalCountsql +=  " AND bd.ect_name = '"+query.getEctName()+"'\n" ;
+            totalCountsql +=  " AND bd.ect_name like '%"+query.getEctName()+"%'\n" ;
         }
         if(query.getEnabled()!=null && query.getEnabled()){
             totalCountsql +=  " AND bd.enabled = '"+1+"'\n" ;
@@ -64,6 +65,15 @@ public class BaseDefectServiceImpl implements BaseDefectService {
         if(query.getEnabled()!=null && !query.getEnabled()){
             totalCountsql +=  " AND bd.enabled = '"+0+"'\n" ;
         }
+
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            totalCountsql +=  " AND bd.category = '"+query.getCategory()+"'\n" ;
+        }
+        if (StringUtils.isNotEmpty(query.getDescription())) {
+            totalCountsql = totalCountsql + " AND bd.description like '%" + query.getDescription() + "%'\n";
+        }
+
+
          Long totalCount = jdbcTemplate.queryForObject(totalCountsql, Long.class);
 
         String sql = "SELECT\n" +
@@ -80,10 +90,10 @@ public class BaseDefectServiceImpl implements BaseDefectService {
             "WHERE\n" +
             "	1 = 1\n" ;
             if(StringUtils.isNotEmpty(query.getEctCode())){
-                sql +=  " AND bd.ect_code = '"+query.getEctCode()+"'\n" ;
+                sql +=  " AND bd.ect_code like '%"+query.getEctCode()+"%'\n" ;
              }
             if(StringUtils.isNotEmpty(query.getEctName())){
-                sql +=  " AND bd.ect_name = '"+query.getEctName()+"'\n" ;
+                sql +=  " AND bd.ect_name like '%"+query.getEctName()+"%'\n" ;
             }
             if(query.getEnabled()!=null && query.getEnabled()){
             sql +=  " AND bd.enabled = '"+1+"'\n" ;
@@ -91,9 +101,25 @@ public class BaseDefectServiceImpl implements BaseDefectService {
             if(query.getEnabled()!=null && !query.getEnabled()){
                 sql +=  " AND bd.enabled = '"+0+"'\n" ;
             }
-           sql += " ORDER BY\n" +
-            "	bd.ect_id ASC\n" +
-            "LIMIT "+(query.getPage() - 1) * query.getSize()+",\n" +
+            if(StringUtils.isNotEmpty(query.getCategory())){
+                sql +=  " AND bd.category = '"+query.getCategory()+"'\n" ;
+            }
+            if (StringUtils.isNotEmpty(query.getDescription())) {
+                sql = sql + " AND bd.description like '%" + query.getDescription() + "%'\n";
+            }
+
+        if (StringUtils.isEmpty(query.getOrder()) || StringUtils.isEmpty(query.getDirect())) {
+            sql = sql + " order by bd.modified_on desc";
+        } else {
+
+            //排序字段(驼峰转换)
+            String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, query.getOrder());
+
+            sql = sql + " order by bd." + order + "  " + query.getDirect();
+        }
+
+
+           sql += " LIMIT "+(query.getPage() - 1) * query.getSize()+",\n" +
             " "+query.getSize()+"";
         RowMapper rm = BeanPropertyRowMapper.newInstance(BaseDefect.class);
         List<BaseDefect> baseDefects = jdbcTemplate.query(sql, rm);
