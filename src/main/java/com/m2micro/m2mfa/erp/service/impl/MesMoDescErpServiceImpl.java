@@ -52,7 +52,6 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
   MesMoBomService mesMoBomService;
 
   @Override
-  @Transactional
   public ResponseMessage erpMesMoDesc(String moNumber) {
     String sql ="select * from SFB_FILE  where 1=1 ";
     if(StringUtils.isNotEmpty(moNumber)){
@@ -108,6 +107,7 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
       moDesc.setPartId(baseParts.getPartId());
       moDesc.setPartNo(baseParts.getPartNo());
       moDesc.setPartName(baseParts.getName());
+      moDesc.setGroupId(TokenInfo.getUserGroupId());
       try {
         MesPartRoute mesPartRoute = mesPartRouteRepository.findByPartId(baseParts.getPartId()).get(0);
         moDesc.setRouteId(mesPartRoute.getRouteId());
@@ -160,7 +160,7 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     mesMoBom.setMoId(moid);
     mesMoBom.setPartId(sfaFile.getSfa03());
     mesMoBom.setSentPartId(sfaFile.getSfa27());
-
+    mesMoBom.setGroupId(TokenInfo.getUserGroupId());
     try {
       mesMoBom.setPartName(basePartsRepository.findByPartNoAndGroupId(sfaFile.getSfa03(),groupId).get(0).getName());
     }catch (Exception e){

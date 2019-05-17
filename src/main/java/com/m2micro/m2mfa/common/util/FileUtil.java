@@ -1,10 +1,7 @@
 package com.m2micro.m2mfa.common.util;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 
 public class FileUtil {
   /**
@@ -24,6 +21,31 @@ public class FileUtil {
     while (read > 0) {
       response.getOutputStream().write(buffer, 0, read);
       read = bufferedInputStream.read(buffer);
+    }
+
+  }
+
+  public static void WriteStringToFile(String content) {
+    FileOutputStream fos = null;
+    try {
+      //true不覆盖已有内容
+      fos = new FileOutputStream("D:\\sql.txt", true);
+      //写入
+      fos.write(content.getBytes());
+      // 写入一个换行
+      fos.write("\r\n".getBytes());
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }finally{
+      if(fos != null){
+        try {
+          fos.flush();
+          fos.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
     }
 
   }

@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.erp.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
@@ -71,6 +72,7 @@ public class BaseStaffErpServiceImpl implements BaseStaffErpService {
       baseStaff.setDutyId(genFile.getGen04());
       baseStaff.setEmail(genFile.getGen05());
       baseStaff.setTelephone(genFile.getGen05());
+      baseStaff.setGroupId(TokenInfo.getUserGroupId());
       baseStaff.setEnabled(true);
       List<BaseStaff> byCodeAndStaffIdNot = baseStaffService.findByCodeAndStaffIdNot(baseStaff.getCode(), "");
       if (byCodeAndStaffIdNot != null && byCodeAndStaffIdNot.size() > 0) {
