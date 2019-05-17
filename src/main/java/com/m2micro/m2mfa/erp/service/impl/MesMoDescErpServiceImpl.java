@@ -4,6 +4,7 @@ import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.m2mfa.base.repository.BaseItemsTargetRepository;
 import com.m2micro.m2mfa.base.repository.BasePartsRepository;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
@@ -50,6 +51,8 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
   BasePartsRepository basePartsRepository;
   @Autowired
   MesMoBomService mesMoBomService;
+  @Autowired
+  BaseItemsTargetRepository baseItemsTargetRepository;
 
   @Override
   public ResponseMessage erpMesMoDesc(String moNumber) {
@@ -97,11 +100,12 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
 
 
   private MesMoDesc getMesMoDesc(SfbFile sfbFile, String moid,List<String> oerrArrys) {
-    String groupId = TokenInfo.getUserGroupId();
+    //String groupId = TokenInfo.getUserGroupId();
+    String groupId="ae11b859-5607-4a70-82c0-b01ea81253d3";
     MesMoDesc moDesc= new MesMoDesc();
     moDesc.setMoId(moid);
     moDesc.setMoNumber(sfbFile.getSfb01());
-    moDesc.setCategory(sfbFile.getSfb02());
+    moDesc.setCategory(baseItemsTargetRepository.findByItemValueAndItemId(sfbFile.getSfb02(),"10000046").get(0).getItemName());
     try {
       BaseParts baseParts = basePartsRepository.findByPartNoAndGroupId(sfbFile.getSfb05(),groupId).get(0);
       moDesc.setPartId(baseParts.getPartId());
