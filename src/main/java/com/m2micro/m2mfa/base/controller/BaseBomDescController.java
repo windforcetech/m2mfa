@@ -68,7 +68,7 @@ public class BaseBomDescController {
     @UserOperationLog("bom列表")
     public ResponseMessage<PageUtil<BaseBomDesc>> list(BaseBomDescQuery query) {
         QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
-        JPAQuery<BaseBomDesc> jq = queryFactory.selectFrom(baseBomDesc);
+        JPAQuery<BaseBomDesc> jq =  queryFactory.selectFrom(baseBomDesc);
         BooleanBuilder expression = new BooleanBuilder();
         String[] partIds = new String[0];
         if (StringUtils.isNotEmpty(query.getPartsCategory())) {
