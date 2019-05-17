@@ -49,7 +49,7 @@ public class MesMoDesc extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "目标量")
     @NotNull(message="目标量不能为空",groups = {AddGroup.class, UpdateGroup.class})
     private Integer targetQty;
-    @Max(value = 32,message = "工单版本不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+    //@Max(value = 32,message = "工单版本不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "工单版本")
     private Integer revsion;
     @ApiModelProperty(value = "特性码")
