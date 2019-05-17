@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service;
 
+import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseTemplate;
 import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -26,9 +27,9 @@ public interface BaseTemplateService extends BaseService<BaseTemplate, String> {
 
     BaseTemplateObj addOrUpdate(BaseTemplateObj baseTemplateObj);
 
-    BaseTemplateObj getByTemplateId(String templateId);
+    BaseTemplate  getByTemplateId(String templateId);
 
-    void deleteByTemplateIds(String[] templateIds);
+    ResponseMessage deleteByTemplateIds(String[] templateIds);
 
     /*
      *通过标签类型筛选模板
@@ -38,7 +39,7 @@ public interface BaseTemplateService extends BaseService<BaseTemplate, String> {
     /*
      * 过滤未被关联使用的模板通过标签
      * */
-    List<BaseTemplateObj> getByCategoryIdAndNotUsedByPart(String partId, String tagId);
+    List<BaseTemplate> getByCategoryIdAndNotUsedByPart(String partId, String tagId);
 
 
     BaseTemplateObj getBaseTemplateObjByPartId(String partId);

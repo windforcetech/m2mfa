@@ -7,10 +7,9 @@ import com.m2micro.m2mfa.barcode.repository.BarcodePrintApplyRepository;
 import com.m2micro.m2mfa.barcode.repository.BarcodePrintResourcesRepository;
 import com.m2micro.m2mfa.barcode.service.BarcodePrintResourcesService;
 import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
-import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
-import com.m2micro.m2mfa.base.entity.BasePack;
-import com.m2micro.m2mfa.base.entity.BaseProcess;
-import com.m2micro.m2mfa.base.entity.BaseStaff;
+import com.m2micro.m2mfa.base.constant.ProcessConstant;
+import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.repository.BaseDefectRepository;
 import com.m2micro.m2mfa.base.repository.BasePackRepository;
 import com.m2micro.m2mfa.base.repository.BaseRouteDefRepository;
 import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
@@ -19,11 +18,13 @@ import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.QueryGroup;
+import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.model.ScheduleAndPartsModel;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleProcessService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pad.constant.StationConstant;
 import com.m2micro.m2mfa.pad.model.*;
@@ -34,10 +35,9 @@ import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.entity.MesPartRouteProcess;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteProcessRepository;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
-import com.m2micro.m2mfa.record.entity.MesRecordFail;
-import com.m2micro.m2mfa.record.entity.MesRecordWipLog;
-import com.m2micro.m2mfa.record.entity.MesRecordWipRec;
+import com.m2micro.m2mfa.record.entity.*;
 import com.m2micro.m2mfa.record.repository.MesRecordFailRepository;
+import com.m2micro.m2mfa.record.repository.MesRecordWipFailRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordWipLogRepository;
 import com.m2micro.m2mfa.record.repository.MesRecordWipRecRepository;
 import com.m2micro.m2mfa.record.service.MesRecordWipRecService;
@@ -52,6 +52,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.Valid;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -98,6 +99,14 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
     @Autowired
     @Qualifier("secondaryJdbcTemplate")
     JdbcTemplate jdbcTemplate;
+    @Autowired
+    BaseDefectRepository baseDefectRepository;
+    @Autowired
+    MesRecordWipFailRepository mesRecordWipFailRepository;
+    @Autowired
+    MesMoScheduleProcessService mesMoScheduleProcessService;
+    @Autowired
+    ProcessConstant processConstant;
 
 
 
@@ -152,57 +161,208 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         MesRecordWipRec mesRecordWipRec = mesRecordWipRecRepository.findBySerialNumber(para.getBarcode());
         //获取排产单id
         String source = barcodePrintApplyRepository.getSource(para.getBarcode());
+        MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(source).orElse(null);
         //获取料件途程id
         String partRouteId = mesPartRouteRepository.getPartRouteId(source);
         //获取上一工序
-        //MesPartRouteProcess mesPartRouteProcess = mesPartRouteProcessRepository.findByPartrouteidAndNextprocessid(partRouteId, para.getProcessId());
+        String beforeProcessId = baseRouteDefRepository.getBeforeProcessId(partRouteId, para.getProcessId());
         //获取下一工序
-        //MesPartRouteProcess nextProcessid = mesPartRouteProcessRepository.findByPartrouteidAndProcessid(partRouteId, para.getProcessId());
         String nextProcessId = baseRouteDefRepository.getNextProcessId(partRouteId, para.getProcessId());
-
-        //String collection = getCollection(mesPartRouteProcess.getProcessid());
-        //上一工序是否是机台自动扫描工序，是 算结余量
-        /*if(BaseItemsTargetConstant.AUTO.equalsIgnoreCase(getCollection(mesPartRouteProcess.getProcessid()))){
-            //获取结余量
-            Integer surplusQty = getSurplusQty(para.getProcessId(), source);
-            //获取包装数
-            BasePack basePack = basePackRepository.getBasePackByScheduleId(source);
-            //获取包装数和结余量中的最小值
-        }else {
-            //进站数（上一次的产出）
-            Integer outputQty = mesRecordWipRec.getOutputQty();
-            //【产出数量】+【不良数量】 != 进站的数量
-            if(para.getOutputQty()+para.getQty()!=outputQty){
-                throw new MMException("此箱的产出数量加不良数量已超出上站产出数，请核对！");
-            }
-        }*/
         //进站数（上一次的产出）
         Integer outputQty = mesRecordWipRec.getOutputQty();
+        //获取不良总数
+        ArrayList<CrossStationFail> crossStationFails = para.getCrossStationFails();
+        para.setQty(getQty(crossStationFails));
         //【产出数量】+【不良数量】 != 进站的数量
         if(para.getOutputQty()+para.getQty()!=outputQty){
             throw new MMException("此箱的产出数量加不良数量已超出上站产出数，请核对！");
         }
-        /*1) Mes_Record_Wip_Log 新增一条记录  insert into mes_record_wip_log select * from mes_record_wip_rec where serialnumber = '" + SerialNumber + "' 。
-        2)更新已处理的不良记录状态为1.
-        3)更新  mes_record_wip_rec 。更新已处理的不良记录状态为1.
-        if(工序是否是产出工序)
-            更新工单（mes_mo_desc）的产出数（OutputQty）。*/
-        //拷贝上一次数据到历史记录
-        MesRecordWipLog mesRecordWipRecLog = new MesRecordWipLog();
-        copyData(mesRecordWipRec, mesRecordWipRecLog);
-        mesRecordWipRecLog.setId(UUIDUtil.getUUID());
-        mesRecordWipLogRepository.save(mesRecordWipRecLog);
-        //更新已处理的不良记录状态为1.
-        if(para.getIds()!=null&&para.getIds().size()>0){
-            List<MesRecordFail> mesRecordFails = mesRecordFailRepository.findAllById(para.getIds());
-            mesRecordFails.stream().forEach(mesRecordFail -> mesRecordFail.setRepairFlag(1));
-            mesRecordFailRepository.saveAll(mesRecordFails);
-        }
+        /*
+        1) 保存上一次在制信息到日志
+        2）更新mes_record_wip_rec在制信息
+        3）保存不良
+        4）是否结束工序
+        5）更新工单（mes_mo_desc）的产出数（当前产出工序是产出工序）
+        6）保存最后一次在制信息到日志（当前产出工序是产出工序）
+        7）是否结束排产单
+        8）是否结束工单
+        */
+        //保存上一次在制信息到日志
+        copyDataToLog(mesRecordWipRec);
         //获取产出工序
         MesPartRoute mesPartRoute = mesPartRouteRepository.findById(partRouteId).orElse(null);
         //工序是否是产出工序
         Boolean isOutputProcess = isOutputProcess(para.getProcessId(), mesPartRoute.getOutputProcessId());
-        //更新  mes_record_wip_rec
+        //更新mes_record_wip_rec
+        updateMesRecordWipRec(para, mesRecordWipRec, nextProcessId, isOutputProcess);
+        //保存不良
+        saveMesRecordWipFail(para.getCrossStationFails(),source,para.getProcessId(),para.getStationId(),para.getBarcode());
+        //是否结束工序
+        Boolean endCrossStationProcess = isEndCrossStationProcess(source, beforeProcessId, para.getProcessId());
+        //是否结束第一个工序
+        Boolean endFirstProcess = isEndFirstProcess(para, source, beforeProcessId);
+
+        if(endCrossStationProcess){
+            //上一工序是注塑成型
+            if(isEndFirstProcess(para,source,beforeProcessId)){
+                //结束工序
+                mesMoScheduleProcessService.endProcess(source,para.getProcessId());
+            }
+
+        }
+        //if(工序是否是产出工序)
+        if(isOutputProcess){
+            //更新工单（mes_mo_desc）的产出数（OutputQty
+            updateMoDescForOutputQty(mesRecordWipRec, source,mesMoSchedule.getMoId());
+            //将当前工序放入日志，因为是最后一道工序
+            copyDataToLog(mesRecordWipRec);
+            //产出工序已结束
+            if(endCrossStationProcess){
+                //结束排产单
+                endSchedule(source, mesMoSchedule.getScheduleQty());
+                //结束工单操作：工单下所有排产单已结束且工单的可排数量为0就结束排产单，否则不做任何操作
+                mesMoDescService.endMoDesc(mesMoSchedule.getMoId());
+
+            }
+        }
+
+    }
+
+    /**
+     * 是否结束第一个工序
+     * @param para
+     * @param source
+     * @param beforeProcessId
+     * @return
+     */
+    private Boolean isEndFirstProcess(OutStationModel para, String source, String beforeProcessId) {
+        BaseProcess baseProcess = baseProcessService.findById(beforeProcessId).orElse(null);
+        //上一工序是注塑成型
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            //获取结余量
+            Integer surplusQty = getSurplusQty(para.getProcessId(), source,beforeProcessId);
+            if(surplusQty!=0){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 获取不良总数
+     * @param crossStationFails
+     * @return
+     */
+    private Long getQty(ArrayList<CrossStationFail> crossStationFails) {
+        Long qty=0l;
+        if(crossStationFails!=null&&crossStationFails.size()>0){
+            for(CrossStationFail crossStationFail:crossStationFails){
+                qty=qty+crossStationFail.getQty();
+            }
+        }
+        return qty;
+    }
+
+
+    /**
+     * 结束排产单
+     * @param source
+     *          排产单id
+     * @param scheduleQty
+     */
+    private void endSchedule(String source, Integer scheduleQty) {
+        Integer outPutQtys = padBottomDisplayService.getOutPutQtys(source);
+        if(outPutQtys.compareTo(scheduleQty)>0){
+            //已超量
+            mesMoScheduleRepository.setFlagFor(MoScheduleStatus.EXCEEDED.getKey(),source);
+        }else {
+            //已完成
+            mesMoScheduleRepository.setFlagFor(MoScheduleStatus.CLOSE.getKey(),source);
+        }
+    }
+
+    private void updateMoDescForOutputQty(MesRecordWipRec mesRecordWipRec, String source,String moId) {
+        MesMoDesc mesMoDesc = mesMoDescService.findById(moId).orElse(null);
+        Integer moQty = mesMoDesc.getOutputQty()==null?0:mesMoDesc.getOutputQty();
+        mesMoDesc.setOutputQty(moQty+mesRecordWipRec.getOutputQty());
+        mesMoDescService.save(mesMoDesc);
+    }
+
+    /**
+     * 是否结束过站的工序
+     * @param scheduleId
+     *          排产单
+     * @param beforeProcessId
+     *          上一工序
+     * @param processId
+     *          当前工序
+     * @return
+     */
+    private Boolean isEndCrossStationProcess(String scheduleId,String beforeProcessId,String processId){
+        //上一工序是否结束
+        Boolean endProcess = mesMoScheduleProcessService.isEndProcess(scheduleId, beforeProcessId);
+        //待进站是否已处理完毕
+        Boolean completedForPullIn = isCompletedForPullIn(scheduleId,processId);
+        //上一工序已结束并且待进站已处理完毕
+        if(endProcess&&completedForPullIn){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 待进站是否已处理完
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+    private Boolean isCompletedForPullIn(String scheduleId,String processId){
+        //待进站是否已处理完毕
+        List<MesRecordWipRec> mesRecordWipRecs = mesRecordWipRecRepository.findByNextProcessIdAndScheduleId(processId,scheduleId);
+        if(mesRecordWipRecs!=null&&mesRecordWipRecs.size()>0){
+            return false;//还未处理完
+        }
+        return true;
+    }
+
+
+    /**
+     * 保存到在制不良记录表
+     * @return
+     */
+    @Transactional
+    public void saveMesRecordWipFail(List<CrossStationFail> crossStationFails,String scheduleId,String processId,String stationId,String barcode) {
+        if(crossStationFails==null||crossStationFails.size()==0){
+            return;
+        }
+        List<MesRecordWipFail> mesRecordWipFails = new ArrayList<>();
+        for(CrossStationFail crossStationFail:crossStationFails){
+            MesRecordWipFail mesRecordWipFail = new MesRecordWipFail();
+            mesRecordWipFail.setId(UUIDUtil.getUUID());
+            mesRecordWipFail.setSerialNumber(barcode);
+            MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(scheduleId).orElse(null);
+            mesRecordWipFail.setMoId(mesMoSchedule.getMoId());
+            mesRecordWipFail.setScheduleId(mesMoSchedule.getScheduleId());
+            mesRecordWipFail.setPartId(mesMoSchedule.getPartId());
+            mesRecordWipFail.setTargetProcessId(crossStationFail.getProcessId());
+            mesRecordWipFail.setNowProcessId(processId);
+            mesRecordWipFail.setNowStationId(stationId);
+            mesRecordWipFail.setStaffId(PadStaffUtil.getStaff().getStaffId());
+            mesRecordWipFail.setDefectCode(crossStationFail.getDefectCode());
+            mesRecordWipFail.setFailQty(crossStationFail.getQty()==null?null:crossStationFail.getQty().intValue());
+            mesRecordWipFails.add(mesRecordWipFail);
+        }
+        mesRecordWipFailRepository.saveAll(mesRecordWipFails);
+    }
+
+    private void copyDataToLog(MesRecordWipRec mesRecordWipRec) {
+        MesRecordWipLog mesRecordWipRecLog = new MesRecordWipLog();
+        copyData(mesRecordWipRec, mesRecordWipRecLog);
+        mesRecordWipRecLog.setId(UUIDUtil.getUUID());
+        mesRecordWipLogRepository.save(mesRecordWipRecLog);
+    }
+
+    private void updateMesRecordWipRec(OutStationModel para, MesRecordWipRec mesRecordWipRec, String nextProcessId, Boolean isOutputProcess) {
         mesRecordWipRec.setInputQty(mesRecordWipRec.getOutputQty());
         mesRecordWipRec.setOutputQty(para.getOutputQty());
         mesRecordWipRec.setOutTime(new Date());
@@ -216,21 +376,8 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         }
         mesRecordWipRec.setStaffId(PadStaffUtil.getStaff().getStaffId());
         mesRecordWipRecRepository.save(mesRecordWipRec);
-        //if(工序是否是产出工序)
-        if(isOutputProcess){
-            //更新工单（mes_mo_desc）的产出数（OutputQty
-            MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(source).orElse(null);
-            MesMoDesc mesMoDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
-            Integer moQty = mesMoDesc.getOutputQty()==null?0:mesMoDesc.getOutputQty();
-            mesMoDesc.setOutputQty(moQty+mesRecordWipRec.getOutputQty());
-            //将当前工序放入日志，因为是最后一道工序
-            MesRecordWipLog log = new MesRecordWipLog();
-            copyData(mesRecordWipRec, log);
-            log.setId(UUIDUtil.getUUID());
-            mesRecordWipLogRepository.save(log);
-        }
-
     }
+
 
     private void copyData(MesRecordWipRec mesRecordWipRec, MesRecordWipLog log) {
         try {
@@ -432,7 +579,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         scheduleIds.add(source);
         Integer outPutQtys = padBottomDisplayService.getMachineOutputQty(scheduleIds,beforeProcessId);
         //2.当前工序当前排产单的投入数之和
-        Integer allInputQty = mesRecordWipLogRepository.getAllInputQty(source, processId);
+        Integer allInputQty = mesRecordWipRecRepository.getAllInputQty(source);
         allInputQty = allInputQty==null?0:allInputQty;
         //3.结余量：排产单的完成量-投入数之和
         if(outPutQtys<allInputQty){
@@ -462,18 +609,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         }
         //获取排产单id
         String source = barcodePrintApplyRepository.getSource(para.getBarcode());
-        //当前工序当前排产单的不良记录
-        List<MesRecordFail> mesRecordFails = mesRecordFailRepository.getByProcessIdAndScheduleId(source, para.getProcessId());
-        //获取不良记录数
-        Long qty = getQtyForFail(mesRecordFails);
-        if(qty>0){
-            crossingStationModel.setQty(qty);
-            //获取不良记录id
-            List<String> ids = mesRecordFails.stream().map(MesRecordFail::getId).collect(Collectors.toList());
-            crossingStationModel.setIds(ids);
-        }else{
-            crossingStationModel.setQty(0l);
-        }
+        //默认不良为0
+        crossingStationModel.setQty(0l);
+
         //上一工序的相关信息
         //StationRelationModel stationRelationModel = mesRecordWipRecRepository.getStationRelationModel(para.getBarcode());
         StationRelationModel stationRelationModel = getStationRelationModel(para.getBarcode(), source);
@@ -503,8 +641,59 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         return 0l;
     }
 
+    @Override
+    public CrossStationDefectModel getCrossStationDefectModel(CrossStationDefectPara crossStationDefectPara) {
+        ValidatorUtil.validateEntity(crossStationDefectPara,QueryGroup.class);
+        CrossStationDefectModel crossStationDefectModel = new CrossStationDefectModel();
+        //获取所有不良工序
+        List<CrossStationProcess> allDefectProcess = getAllDefectProcess(crossStationDefectPara);
+        crossStationDefectModel.setCrossStationProcesss(allDefectProcess);
+        //获取所有有效的不良现象
+        List<BaseDefect> baseDefects = findAllBaseDefect();
+        crossStationDefectModel.setBaseDefects(baseDefects);
+        return crossStationDefectModel;
+    }
+
+    @Override
+    public List<CrossStationProcess>  getAllDefectProcess(CrossStationDefectPara crossStationDefectPara) {
+        //获取排产单id
+        String source = barcodePrintApplyRepository.getSource(crossStationDefectPara.getBarcode());
+        //获取料件途程id
+        String partRouteId = mesPartRouteRepository.getPartRouteId(source);
+        //获取当前工序的顺序序号
+        MesPartRouteProcess mesPartRouteProcess = mesPartRouteProcessRepository.findByPartrouteidAndProcessid(partRouteId, crossStationDefectPara.getProcessId());
+        if(mesPartRouteProcess==null){
+            throw new MMException("当前工序和条码关联工序不匹配！");
+        }
+        //获取小于当前工序顺序序号的所有工序
+        return getAllCrossStationProcess(partRouteId, mesPartRouteProcess.getSetp());
+    }
+
+    @Override
+    public List<BaseDefect> findAllBaseDefect() {
+        return baseDefectRepository.findAllByEnabled(true);
+    }
 
 
-
+    /**
+     * 获取小于当前工序顺序序号的所有工序
+     * @param partRouteId
+     * @param step
+     * @return
+     */
+    public List<CrossStationProcess> getAllCrossStationProcess(String partRouteId,Integer step){
+        String sql = "SELECT\n" +
+                    "	bp.process_id,\n" +
+                    "	bp.process_name\n" +
+                    "FROM\n" +
+                    "	mes_part_route_process mprp,\n" +
+                    "	base_process bp \n" +
+                    "WHERE\n" +
+                    "	mprp.processid = bp.process_id \n" +
+                    "AND mprp.partrouteid='" +partRouteId+"'\n" +
+                    "AND mprp.setp<='" +step+"'\n";
+        RowMapper<CrossStationProcess> rowMapper = BeanPropertyRowMapper.newInstance(CrossStationProcess.class);
+        return jdbcTemplate.query(sql, rowMapper);
+    }
 
 }

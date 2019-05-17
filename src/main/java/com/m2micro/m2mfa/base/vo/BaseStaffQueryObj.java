@@ -30,7 +30,30 @@ public class BaseStaffQueryObj extends Query {
     @ApiModelProperty(value = "所属部门Id")
     private String departmentId;
 
+    @ApiModelProperty(value = "性别")
+    private String gender;
+
+    @ApiModelProperty(value = "职位id")
+    private String dutyId;
+
+    @ApiModelProperty(value = "身份证号码")
+    private String idCard;
+
+    @ApiModelProperty(value = "电子邮箱")
+    private String email;
+
+    @ApiModelProperty(value = "手机")
+    private String mobile;
+
+    @ApiModelProperty(value = "电话号码")
+    private String telephone;
+
+    @ApiModelProperty(value = "离职")
+    private Boolean isDimission;
+
+    @ApiModelProperty(value = "卡号")
+    private String icCard;
 
     @ApiModelProperty(value = "是否有效 ")
-    private boolean enabled;
+    private Boolean enabled;
 }

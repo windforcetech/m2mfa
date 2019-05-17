@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.base.entity.BaseBomDesc;
 import com.m2micro.m2mfa.base.entity.BaseShift;
@@ -43,6 +44,6 @@ public class BaseBomDescServiceImpl implements BaseBomDescService {
 
     @Override
     public List<BaseBomDesc> findAllByPartId(String partid) {
-        return baseBomDescRepository.findAllByPartId(partid);
+        return baseBomDescRepository.findAllByPartIdAndGroupId(partid, TokenInfo.getUserGroupId());
     }
 }

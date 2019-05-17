@@ -20,7 +20,7 @@ public interface BaseMachineRepository extends BaseRepository<BaseMachine,String
      * @param code
      * @return
      */
-    List<BaseMachine> findAllByCode(String code);
+    List<BaseMachine> findAllByCodeAndGroupId(String code,String groupId);
 
     /**
      * 校验code
@@ -28,11 +28,11 @@ public interface BaseMachineRepository extends BaseRepository<BaseMachine,String
      * @param machineId
      * @return
      */
-    List<BaseMachine> findByCodeAndMachineIdNot(String code ,String machineId);
+    List<BaseMachine> findByCodeAndGroupIdAndMachineIdNot(String code,String groupId,String machineId);
 
     @Query(value = "SELECT bm.* FROM base_machine bm WHERE bm.id = ?1",nativeQuery = true)
     BaseMachine findByOrgId(String orgId);
 
-    @Query(value = "SELECT bm.* FROM base_machine bm WHERE bm.id = ?1",nativeQuery = true)
-    List<BaseMachine> findByOrgIds(String orgId);
+    @Query(value = "SELECT bm.* FROM base_machine bm WHERE bm.id = ?1 AND bm.group_id = ?2",nativeQuery = true)
+    List<BaseMachine> findByOrgIds(String orgId,String groupId);
 }

@@ -3,10 +3,13 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
@@ -44,6 +47,9 @@ public class BaseTemplateVar extends BaseEntity implements Serializable {
     private Boolean enabled;
     @ApiModelProperty(value = "描述")
     private String description;
+    @Transient
+    @ApiModelProperty(value = "规则")
+    private BaseBarcodeRule baseBarcodeRule;
 
     public String getId() {
         return id;
@@ -109,6 +115,11 @@ public class BaseTemplateVar extends BaseEntity implements Serializable {
         this.description = description;
     }
 
+    public BaseBarcodeRule getBaseBarcodeRule() {
+        return baseBarcodeRule;
+    }
 
-
+    public void setBaseBarcodeRule(BaseBarcodeRule baseBarcodeRule) {
+        this.baseBarcodeRule = baseBarcodeRule;
+    }
 }

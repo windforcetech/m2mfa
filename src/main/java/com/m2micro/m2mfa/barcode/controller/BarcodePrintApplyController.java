@@ -1,33 +1,25 @@
 package com.m2micro.m2mfa.barcode.controller;
 
 import com.m2micro.framework.authorization.Authorize;
-import com.m2micro.m2mfa.barcode.entity.BarcodePrintResources;
+import com.m2micro.framework.commons.annotation.UserOperationLog;
+import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
+import com.m2micro.m2mfa.barcode.query.BarcodeQuery;
 import com.m2micro.m2mfa.barcode.query.PrintApplyQuery;
 import com.m2micro.m2mfa.barcode.query.ScheduleQuery;
+import com.m2micro.m2mfa.barcode.repository.BarcodePrintResourcesRepository;
 import com.m2micro.m2mfa.barcode.service.BarcodePrintApplyService;
-import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.barcode.vo.CheckObj;
 import com.m2micro.m2mfa.barcode.vo.PrintApplyObj;
+import com.m2micro.m2mfa.barcode.vo.PrintResourceObj;
 import com.m2micro.m2mfa.barcode.vo.ScheduleObj;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
-import com.m2micro.framework.commons.annotation.UserOperationLog;
-import com.m2micro.m2mfa.common.util.PropertyUtil;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.framework.commons.util.Query;
-import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
-import com.m2micro.m2mfa.common.util.UUIDUtil;
 import io.swagger.annotations.ApiOperation;
-import com.m2micro.m2mfa.barcode.entity.BarcodePrintApply;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashMap;
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 标签打印表单 前端控制器
@@ -40,71 +32,11 @@ import java.util.List;
 @Api(value = "标签打印表单 前端控制器", description = "打印申请接口")
 @Authorize
 public class BarcodePrintApplyController {
+
     @Autowired
     BarcodePrintApplyService barcodePrintApplyService;
-
-//    /**
-//     * 列表
-//     */
-//    @RequestMapping("/list")
-//    @ApiOperation(value = "标签打印表单列表")
-//    @UserOperationLog("标签打印表单列表")
-//    public ResponseMessage<PageUtil<BarcodePrintApply>> list(Query query) {
-//        PageUtil<BarcodePrintApply> page = barcodePrintApplyService.list(query);
-//        return ResponseMessage.ok(page);
-//    }
-//
-//    /**
-//     * 详情
-//     */
-//    @RequestMapping("/info/{id}")
-//    @ApiOperation(value = "标签打印表单详情")
-//    @UserOperationLog("标签打印表单详情")
-//    public ResponseMessage<BarcodePrintApply> info(@PathVariable("id") String id) {
-//        BarcodePrintApply barcodePrintApply = barcodePrintApplyService.findById(id).orElse(null);
-//        return ResponseMessage.ok(barcodePrintApply);
-//    }
-//
-//    /**
-//     * 保存
-//     */
-//    @RequestMapping("/save")
-//    @ApiOperation(value = "保存标签打印表单")
-//    @UserOperationLog("保存标签打印表单")
-//    public ResponseMessage<BarcodePrintApply> save(@RequestBody BarcodePrintApply barcodePrintApply) {
-//        ValidatorUtil.validateEntity(barcodePrintApply, AddGroup.class);
-//        barcodePrintApply.setId(UUIDUtil.getUUID());
-////        barcodePrintApplyService.exist(barcodePrintApply)
-//        return ResponseMessage.ok(barcodePrintApplyService.save(barcodePrintApply));
-//    }
-//
-//    /**
-//     * 更新
-//     */
-//    @RequestMapping("/update")
-//    @ApiOperation(value = "更新标签打印表单")
-//    @UserOperationLog("更新标签打印表单")
-//    public ResponseMessage<BarcodePrintApply> update(@RequestBody BarcodePrintApply barcodePrintApply) {
-//        ValidatorUtil.validateEntity(barcodePrintApply, UpdateGroup.class);
-//        BarcodePrintApply barcodePrintApplyOld = barcodePrintApplyService.findById(barcodePrintApply.getId()).orElse(null);
-//        if (barcodePrintApplyOld == null) {
-//            throw new MMException("数据库不存在该记录");
-//        }
-//        PropertyUtil.copy(barcodePrintApply, barcodePrintApplyOld);
-//        return ResponseMessage.ok(barcodePrintApplyService.save(barcodePrintApplyOld));
-//    }
-//
-//    /**
-//     * 删除
-//     */
-//    @RequestMapping("/delete")
-//    @ApiOperation(value = "删除标签打印表单")
-//    @UserOperationLog("删除标签打印表单")
-//    public ResponseMessage delete(@RequestBody String[] ids) {
-//        barcodePrintApplyService.deleteByIds(ids);
-//        return ResponseMessage.ok();
-//    }
-
+    @Autowired
+    BarcodePrintResourcesRepository barcodePrintResourcesRepository;
 
     @GetMapping("/Schedulelist")
     @ApiOperation(value = "模糊分页查询排产单")
@@ -136,6 +68,31 @@ public class BarcodePrintApplyController {
     }
 
     /**
+     * 补打标签
+     */
+    @PostMapping("/makeupcode")
+    @ApiOperation(value = "补打标签")
+    @UserOperationLog("补打标签")
+    public ResponseMessage<BarcodePrintApply> makeupcode(@RequestBody BarcodePrintApply barcodePrintApply) {
+        barcodePrintApply.setPrintCategory("replenish");
+        ValidatorUtil.validateEntity(barcodePrintApply, AddGroup.class);
+        return ResponseMessage.ok(barcodePrintApplyService.add(barcodePrintApply));
+    }
+    /**
+     * 查询单个
+     */
+    @RequestMapping("/info/{id}")
+    @ApiOperation(value = "标签打印表单详情")
+    @UserOperationLog("标签打印表单详情")
+    public ResponseMessage<PrintApplyObj> info(@PathVariable("id") String id) {
+        PrintApplyQuery query = new PrintApplyQuery();
+        query.setApplyId(id);
+        PageUtil<PrintApplyObj> page = barcodePrintApplyService.printApplyList(query);
+        return ResponseMessage.ok(page.getData().get(0));
+    }
+
+
+    /**
      * 批量审核
      */
     @PostMapping("/checkList")
@@ -146,18 +103,22 @@ public class BarcodePrintApplyController {
         return ResponseMessage.ok();
     }
 
+
     @PostMapping("/deleteList")
     @ApiOperation(value = "批量删除打印申请")
     @UserOperationLog("批量删除打印申请")
     public ResponseMessage deleteList(@RequestBody String[] ids) {
         barcodePrintApplyService.deleteByIds(ids);
+      for(String id :ids ){
+          barcodePrintResourcesRepository.deleteByApplyId(id);
+      }
         return ResponseMessage.ok();
     }
 
     /**
      * 列表
      */
-    @GetMapping("/printApplyList")
+    @RequestMapping("/printApplyList")
     @ApiOperation(value = "标签打印表单列表")
     @UserOperationLog("标签打印表单列表")
     public ResponseMessage<PageUtil<PrintApplyObj>> printApplyList(PrintApplyQuery query) {
@@ -177,28 +138,30 @@ public class BarcodePrintApplyController {
     }
 
 
-    @GetMapping("/printApplyDetail/{id}")
+    @RequestMapping("/printApplyDetail")
     @ApiOperation(value = "获取打印申请详情")
     @UserOperationLog("获取打印申请详情")
-    public ResponseMessage<PrintApplyObj> printApplyDetail(@PathVariable("id") String applyId) {
-        PrintApplyObj printApplyObj = barcodePrintApplyService.printDetail(applyId);
+    public ResponseMessage< PageUtil<PrintResourceObj>> list(BarcodeQuery query) {
+        PageUtil<PrintResourceObj>  printApplyObj = barcodePrintApplyService.printApplylist(query);
         return ResponseMessage.ok(printApplyObj);
     }
 
-//    @PostMapping("/printApplyGenerate")
-//    @ApiOperation(value = "打印条码生成")
-//    @UserOperationLog("打印条码生成")
-//    public ResponseMessage<List<HashMap<String, String>>> printApplyGenerate(String applyId, Integer num) {
-//        List<HashMap<String, String>> labels = barcodePrintApplyService.generateLabel(applyId, num);
-//        return ResponseMessage.ok(labels);
-//    }
+
+    @PostMapping("/getPrintApplyObj")
+    @ApiOperation(value = "获取打印主档")
+    @UserOperationLog("获取打印主档")
+    public ResponseMessage< PrintApplyObj> getPrintApplyObj(String applyId) {
+        PrintApplyObj printApplyObj = barcodePrintApplyService.getPrintApplyObj(applyId);
+        return ResponseMessage.ok(printApplyObj);
+    }
+
 
     @PostMapping("/printApplyGenerate")
     @ApiOperation(value = "打印条码生成")
     @UserOperationLog("打印条码生成")
-    public ResponseMessage<List<BarcodePrintResources>> printApplyGenerate(String applyId, Integer num) {
-        List<BarcodePrintResources> labels = barcodePrintApplyService.generateLabel(applyId, num);
-        return ResponseMessage.ok(labels);
+    public ResponseMessage printApplyGenerate(String applyId) {
+      barcodePrintApplyService.generateLabel(applyId);
+        return ResponseMessage.ok();
     }
 
 
@@ -212,5 +175,6 @@ public class BarcodePrintApplyController {
         barcodePrintApplyService.printCheckList(checkObj.getIds(),checkObj.getFlag());
         return ResponseMessage.ok();
     }
+
 
 }

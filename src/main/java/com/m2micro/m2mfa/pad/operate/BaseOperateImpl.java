@@ -33,14 +33,8 @@ import com.m2micro.m2mfa.pad.service.PadDispatchService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
-import com.m2micro.m2mfa.record.entity.MesRecordFail;
-import com.m2micro.m2mfa.record.entity.MesRecordMold;
-import com.m2micro.m2mfa.record.entity.MesRecordStaff;
-import com.m2micro.m2mfa.record.entity.MesRecordWork;
-import com.m2micro.m2mfa.record.repository.MesRecordFailRepository;
-import com.m2micro.m2mfa.record.repository.MesRecordMoldRepository;
-import com.m2micro.m2mfa.record.repository.MesRecordStaffRepository;
-import com.m2micro.m2mfa.record.repository.MesRecordWorkRepository;
+import com.m2micro.m2mfa.record.entity.*;
+import com.m2micro.m2mfa.record.repository.*;
 import com.m2micro.m2mfa.record.service.MesRecordFailService;
 import com.m2micro.m2mfa.record.service.MesRecordStaffService;
 import com.m2micro.m2mfa.record.service.MesRecordWorkService;
@@ -117,6 +111,8 @@ public class BaseOperateImpl implements BaseOperate {
     ProcessConstant processConstant;
     @Autowired
     MesPartRouteRepository mesPartRouteRepository;
+    @Autowired
+    MesRecordWipFailRepository mesRecordWipFailRepository;
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return mesMoScheduleRepository.findById(scheduleId).orElse(null);
@@ -224,7 +220,7 @@ public class BaseOperateImpl implements BaseOperate {
 
 
 /**
-     * 根据提报异常标志设置其他按钮是否置灰
+     * 根据一般作业站设置其他按钮是否置灰
      * @param operationInfo
      */
     private void setOtherByProcess(OperationInfo operationInfo,BaseProcess baseProcess) {
@@ -739,13 +735,13 @@ public class BaseOperateImpl implements BaseOperate {
             endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
             endStationTime(obj.getScheduleId(),obj.getProcessId());
             //排产单状态“已超量”
-            updateSchedulFlag(obj.getScheduleId());
+            //updateSchedulFlag(obj.getScheduleId());
         }
         if(num==0){
             endProcessEndTime(obj.getScheduleId(),obj.getProcessId());
             endStationTime(obj.getScheduleId(),obj.getProcessId());
             //排产单状态“已完成”
-            scheduleclose(obj.getScheduleId());
+            //scheduleclose(obj.getScheduleId());
         }
         return finishHomeworkModel;
     }
@@ -773,6 +769,7 @@ public class BaseOperateImpl implements BaseOperate {
 
 
 @Override
+@Transactional
     public Object defectiveProducts(Padbad padbad) {
         saveMesRocerdRail(padbad);
         return null;
@@ -783,8 +780,34 @@ public class BaseOperateImpl implements BaseOperate {
     protected void saveMesRocerdRail(Padbad padbad) {
         for(MesRecordFail mesRecordFail1 :  padbad.getMesRecordFails()){
             saveMesRecordFail(mesRecordFail1);
+            //保存到在制不良记录表方便后续统计
+            saveMesRecordWipFail(mesRecordFail1);
         }
    }
+
+    /**
+     * 保存到在制不良记录表方便后续统计
+     * @param mesRecordFail1
+     * @return
+     */
+    @Transactional
+    public MesRecordWipFail saveMesRecordWipFail(MesRecordFail mesRecordFail1) {
+        MesRecordWipFail mesRecordWipFail = new MesRecordWipFail();
+        mesRecordWipFail.setId(UUIDUtil.getUUID());
+        MesRecordWork mesRecordWork = mesRecordWorkService.findById(mesRecordFail1.getRwId()).orElse(null);
+        MesMoSchedule mesMoSchedule = mesMoScheduleService.findById(mesRecordWork.getScheduleId()).orElse(null);
+        mesRecordWipFail.setMoId(mesMoSchedule.getMoId());
+        mesRecordWipFail.setScheduleId(mesMoSchedule.getScheduleId());
+        mesRecordWipFail.setPartId(mesMoSchedule.getPartId());
+        mesRecordWipFail.setTargetProcessId(mesRecordWork.getProcessId());
+        mesRecordWipFail.setTargetStationId(mesRecordWork.getStationId());
+        mesRecordWipFail.setNowProcessId(mesRecordWork.getProcessId());
+        mesRecordWipFail.setNowStationId(mesRecordWork.getStationId());
+        mesRecordWipFail.setStaffId(PadStaffUtil.getStaff().getStaffId());
+        mesRecordWipFail.setDefectCode(mesRecordFail1.getDefectCode());
+        mesRecordWipFail.setFailQty(mesRecordFail1.getQty()==null?null:mesRecordFail1.getQty().intValue());
+        return mesRecordWipFailRepository.save(mesRecordWipFail);
+    }
 
 
 @Transactional
@@ -1191,12 +1214,12 @@ public class BaseOperateImpl implements BaseOperate {
     }
 
     /**
-     *  获取当前排产单当前工位的不良数量及报废数量
+     *  获取当前排产单当前工位的不良数量及报废数量（整改前）
      * @param scheduleId
      * @param stationId
      * @return
      */
-    protected MoDescInfoModel getMoDescForStationFail(String scheduleId,String stationId) {
+    /*protected MoDescInfoModel getMoDescForStationFail(String scheduleId,String stationId) {
         String sql = "SELECT\n" +
                 "	sum(IFNULL(mrf.qty,0)) qty,\n" +
                 "	sum(IFNULL(mrf.scrap_qty,0)) scrapQty\n" +
@@ -1207,6 +1230,31 @@ public class BaseOperateImpl implements BaseOperate {
                 "	mrw.rwid = mrf.rw_id\n" +
                 "AND mrw.schedule_id='" + scheduleId + "'\n" +
                 "AND mrw.station_id='" + stationId + "'";
+        RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
+        MoDescInfoModel moDescInfoModel = jdbcTemplate.queryForObject(sql, rowMapper);
+        if(moDescInfoModel.getQty()==null){
+            moDescInfoModel.setQty(0l);
+        }
+        if(moDescInfoModel.getScrapQty()==null){
+            moDescInfoModel.setScrapQty(0);
+        }
+        return moDescInfoModel;
+    }*/
+
+    /**
+     *  获取当前排产单当前工位的不良数量及报废数量（整改后）
+     * @param scheduleId
+     * @param stationId
+     * @return
+     */
+    protected MoDescInfoModel getMoDescForStationFail(String scheduleId,String stationId) {
+        String sql = "SELECT\n" +
+                "	sum( IFNULL( fail_qty, 0 ) ) qty,\n" +
+                "	sum( IFNULL( scrap_qty, 0 ) ) scrapQty \n" +
+                "FROM\n" +
+                "mes_record_wip_fail WHERE \n" +
+                "schedule_id='" + scheduleId + "'\n" +
+                "AND target_station_id='" + stationId + "'";
         RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
         MoDescInfoModel moDescInfoModel = jdbcTemplate.queryForObject(sql, rowMapper);
         if(moDescInfoModel.getQty()==null){

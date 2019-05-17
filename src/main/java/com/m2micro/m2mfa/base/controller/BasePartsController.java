@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseUnit;
 import com.m2micro.m2mfa.base.node.SelectNode;
@@ -58,6 +59,38 @@ public class BasePartsController {
         return ResponseMessage.ok(page);
     }
 
+
+    /**
+     * 列表
+     */
+    @RequestMapping("/barcodePartslist")
+    @ApiOperation(value="料件基本资料列表（过滤编码打印）")
+    @UserOperationLog("料件基本资料列表（过滤编码打印）")
+    public ResponseMessage<PageUtil<BaseParts>> barcodePartslist(BasePartsQuery query){
+            PageUtil<BaseParts> page = basePartsService.barcodePartslist(query);
+        return ResponseMessage.ok(page);
+    }
+
+    /**
+     * 列表
+     */
+    @RequestMapping("/guidingBooklist")
+    @ApiOperation(value="料件基本资料列表(过滤指导书)")
+    @UserOperationLog("料件基本资料列表(过滤指导书)")
+    public ResponseMessage<PageUtil<BaseParts>> guidingBooklist(BasePartsQuery query){
+        PageUtil<BaseParts> page = basePartsService.guidingbooklist(query);
+        return ResponseMessage.ok(page);
+    }
+    /**
+     * 列表
+     */
+    @RequestMapping("/workOrderPartslist")
+    @ApiOperation(value="料件基本资料列表（工单）")
+    @UserOperationLog("料件基本资料列表（工单）")
+    public ResponseMessage<PageUtil<BaseParts>> workOrderPartslist(BasePartsQuery query){
+        PageUtil<BaseParts> page = basePartsService.workOrderPartslist(query);
+        return ResponseMessage.ok(page);
+    }
     /**
      * 列表
      */
@@ -92,6 +125,8 @@ public class BasePartsController {
     @ApiOperation(value="保存料件基本资料")
     @UserOperationLog("保存料件基本资料")
     public ResponseMessage<BaseParts> save(@RequestBody BaseParts baseParts){
+        //设置groupId
+        baseParts.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseParts, AddGroup.class);
         baseParts.setPartId(UUIDUtil.getUUID());
         //校验编号唯一性
@@ -109,6 +144,8 @@ public class BasePartsController {
     @ApiOperation(value="更新料件基本资料")
     @UserOperationLog("更新料件基本资料")
     public ResponseMessage<BaseParts> update(@RequestBody BaseParts baseParts){
+        //设置groupId
+        baseParts.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseParts, UpdateGroup.class);
         BaseParts basePartsOld = basePartsService.findById(baseParts.getPartId()).orElse(null);
         if(basePartsOld==null){

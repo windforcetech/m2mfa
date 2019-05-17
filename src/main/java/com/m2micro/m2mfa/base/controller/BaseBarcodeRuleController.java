@@ -42,11 +42,11 @@ public class BaseBarcodeRuleController {
     /**
      * 列表
      */
-    @RequestMapping(value = "/list",method = RequestMethod.POST)
+    @RequestMapping(value = "/list")
     @ApiOperation(value="条形码主表定义列表")
     @UserOperationLog("条形码主表定义列表")
     public ResponseMessage<PageUtil<BaseBarcodeRule>> list(BaseBarcodeRuleQuery query){
-        PageUtil<BaseBarcodeRule> page = baseBarcodeRuleService.list(query);
+         PageUtil<BaseBarcodeRule> page = baseBarcodeRuleService.list(query);
         return ResponseMessage.ok(page);
     }
 
@@ -61,34 +61,6 @@ public class BaseBarcodeRuleController {
         return ResponseMessage.ok(baseBarcodeRuleObj);
     }
 
-//    /**
-//     * 保存
-//     */
-//    @RequestMapping("/save")
-//    @ApiOperation(value="保存条形码主表定义")
-//    @UserOperationLog("保存条形码主表定义")
-//    public ResponseMessage<BaseBarcodeRule> save(@RequestBody BaseBarcodeRule baseBarcodeRule){
-//        ValidatorUtil.validateEntity(baseBarcodeRule, AddGroup.class);
-//        baseBarcodeRule.setId(UUIDUtil.getUUID());
-//        return ResponseMessage.ok(baseBarcodeRuleService.save(baseBarcodeRule));
-//    }
-
-//    /**
-//     * 更新
-//     */
-//    @RequestMapping("/update")
-//    @ApiOperation(value="更新条形码主表定义")
-//    @UserOperationLog("更新条形码主表定义")
-//    public ResponseMessage<BaseBarcodeRule> update(@RequestBody BaseBarcodeRule baseBarcodeRule){
-//        ValidatorUtil.validateEntity(baseBarcodeRule, UpdateGroup.class);
-//        BaseBarcodeRule baseBarcodeRuleOld = baseBarcodeRuleService.findById(baseBarcodeRule.getId()).orElse(null);
-//        if(baseBarcodeRuleOld==null){
-//            throw new MMException("数据库不存在该记录");
-//        }
-//        PropertyUtil.copy(baseBarcodeRule,baseBarcodeRuleOld);
-//        return ResponseMessage.ok(baseBarcodeRuleService.save(baseBarcodeRuleOld));
-//    }
-
     /**
      * 删除
      */
@@ -96,8 +68,8 @@ public class BaseBarcodeRuleController {
     @ApiOperation(value="批量删除条形码规则")
     @UserOperationLog("批量删除条形码主表")
     public ResponseMessage delete(@RequestBody List<String> ids){
-        baseBarcodeRuleService.deleteByIdIn(ids);
-        return ResponseMessage.ok();
+
+        return  baseBarcodeRuleService.deleteByIdIn(ids);
     }
 
     /**

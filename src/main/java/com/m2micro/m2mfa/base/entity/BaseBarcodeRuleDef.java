@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
@@ -30,6 +31,10 @@ public class BaseBarcodeRuleDef extends BaseEntity implements Serializable {
     private String name;
     @ApiModelProperty(value = "类型")
     private String category;
+    @Transient
+    @ApiModelProperty(value = "类型名称")
+    private String categoryName;
+
     @ApiModelProperty(value = "位置")
     private Integer position;
     @ApiModelProperty(value = "默认值")
@@ -151,6 +156,11 @@ public class BaseBarcodeRuleDef extends BaseEntity implements Serializable {
         this.barcodeId = barcodeId;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
 
-
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 }

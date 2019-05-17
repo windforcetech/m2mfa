@@ -24,7 +24,7 @@ import static com.m2micro.m2mfa.mo.constant.MoScheduleStatus.AUDITED;
  */
 @Repository
 public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,String> {
-    @Query(value="select  ifnull( SUM(mprs.standard_hours),0)  from mes_mo_desc mmd,mes_part_route_station mprs where mmd.route_id=mprs.part_route_id and mmd.mo_id=?1",nativeQuery=true)
+    @Query(value="select  ifnull( SUM(mprs.standard_hours),0)  from mes_mo_desc mmd,mes_part_route mpr,mes_part_route_station mprs where mmd.part_id=mpr.part_id and mpr.part_route_id=mprs.part_route_id and mmd.mo_id=?1",nativeQuery=true)
     BigDecimal getScheduleTime(String moId);
 
     /**
@@ -76,7 +76,7 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      *          机台id
      * @return
      */
-    Integer countByMachineId(String machineId);
+    Integer countByMachineIdAndGroupId(String machineId,String groupId);
 
     /**
      * 获取排产编号，如果为空表示数据库一次也没有生成
@@ -147,4 +147,12 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
                     "	mms.part_id = bpt.part_id \n" +
                     "	AND mms.schedule_id = ?1",nativeQuery = true)
     ScheduleAndPartsModel getStationRelationModel(String scheduleId);
+
+    /**
+     * 获取工单下没结束的排产单
+     * @param moId
+     * @param flags
+     * @return
+     */
+    List<MesMoSchedule> findByMoIdAndFlagIn(String moId,List<Integer> flags);
 }

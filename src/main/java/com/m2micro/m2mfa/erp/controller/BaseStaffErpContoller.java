@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * 人员erp 前端控制器
  * @author chenshuhong
@@ -23,6 +25,8 @@ public class BaseStaffErpContoller {
 
   @Autowired
   private BaseStaffErpService baseStaffErpService;
+
+  ReentrantLock lock = new ReentrantLock();
   /**
    * 列表
    */
@@ -30,9 +34,24 @@ public class BaseStaffErpContoller {
   @ApiOperation(value="人员erp")
   @UserOperationLog("人员erp")
   public ResponseMessage erpBasestaff(String code ){
-    baseStaffErpService.erpBasestaff(code);
+    lock.lock();
+    Long aLong = baseStaffErpService.erpBasestaffCount(code);
+    Long chun = chun(aLong);
+    for(long i=0;i<chun;i++){
+      baseStaffErpService.erpBasestaff(code,i,1000L);
+    }
+    baseStaffErpService.erpBasestaff(code,(chun),(aLong-(chun*1000)));
+    lock.unlock();
     return ResponseMessage.ok();
   }
 
+
+  public  static  Long chun(Long countlong){
+    Long num=1l;
+    if(countlong>1000){
+      num= countlong/ 1000 ;
+    }
+    return num;
+  }
 
 }

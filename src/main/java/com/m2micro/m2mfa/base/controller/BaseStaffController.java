@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
@@ -55,20 +56,13 @@ public class BaseStaffController {
     @RequestMapping(value = "/list", method = RequestMethod.POST)
     @ApiOperation(value = "员工（职员）表列表")
     @UserOperationLog("员工（职员）表列表")
-    public ResponseMessage<PageUtil<BaseStaffDetailObj>> list(@RequestBody BaseStaffQueryObj baseStaffQueryObj) {
-        BaseStaffQuery query = new BaseStaffQuery();
-        query.setCode(baseStaffQueryObj.getCode());
-        query.setName(baseStaffQueryObj.getName());
-        if (StringUtils.isNotEmpty(baseStaffQueryObj.getDepartmentId())) {
-            List<String> departmentIds = baseStaffService.getAllIDsOfDepartmentTree(baseStaffQueryObj.getDepartmentId());
+    public ResponseMessage<PageUtil<BaseStaffDetailObj>> list(@RequestBody BaseStaffQuery query) {
+        if (StringUtils.isNotEmpty(query.getDepartmentId())) {
+            List<String> departmentIds = baseStaffService.getAllIDsOfDepartmentTree(query.getDepartmentId());
             //   List<String> obtainpost = organizationService.obtainpost(baseStaffQueryObj.getDepartmentId());
             query.setDepartmentIds(departmentIds);
         }
-        query.setSize(baseStaffQueryObj.getSize());
-        query.setPage(baseStaffQueryObj.getPage());
-        query.setEnabled(baseStaffQueryObj.isEnabled());
         PageUtil<BaseStaffDetailObj> page = baseStaffService.list(query);
-
         return ResponseMessage.ok(page);
     }
 
@@ -90,6 +84,7 @@ public class BaseStaffController {
     @ApiOperation(value = "添加员工（职员）表")
     @UserOperationLog("添加员工（职员）表")
     public ResponseMessage<BaseStaff> save(@RequestBody BaseStaff baseStaff) {
+        baseStaff.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseStaff, AddGroup.class);
         baseStaff.setStaffId(UUIDUtil.getUUID());
         baseStaff.setDeletionStateCode(false);
@@ -128,7 +123,7 @@ public class BaseStaffController {
                 iUserService.updateUser(mm);
                 userId = mm.getId();
             } else {
-                ResponseMessage responseMessage = iUserService.saveUser(user);
+                ResponseMessage responseMessage = iUserService.saveUser(user, TokenInfo.getUserGroupId());
                 userId = user.getId();
                 if (responseMessage.getStatus() != 200) {
                     return responseMessage;
@@ -148,6 +143,7 @@ public class BaseStaffController {
     @ApiOperation(value = "更新员工（职员）表")
     @UserOperationLog("更新员工（职员）表")
     public ResponseMessage<BaseStaff> update(@RequestBody BaseStaff baseStaff) {
+        baseStaff.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseStaff, UpdateGroup.class);
         BaseStaff baseStaffOld = baseStaffService.findById(baseStaff.getStaffId()).orElse(null);
         if (baseStaffOld == null) {
@@ -216,4 +212,5 @@ public class BaseStaffController {
 
         return ResponseMessage.ok(page);
     }
+
 }

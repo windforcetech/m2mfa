@@ -1,8 +1,10 @@
 package com.m2micro.m2mfa.erp.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.m2mfa.base.repository.BaseItemsTargetRepository;
 import com.m2micro.m2mfa.base.repository.BasePartsRepository;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
@@ -49,15 +51,16 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
   BasePartsRepository basePartsRepository;
   @Autowired
   MesMoBomService mesMoBomService;
+  @Autowired
+  BaseItemsTargetRepository baseItemsTargetRepository;
 
   @Override
-  @Transactional
   public ResponseMessage erpMesMoDesc(String moNumber) {
     String sql ="select * from SFB_FILE  where 1=1 ";
     if(StringUtils.isNotEmpty(moNumber)){
       String[] split = moNumber.split(",");
       String join = Arrays.stream(split).collect(Collectors.joining("','","'","'"));
-          sql +="  and sfb01 in("+moNumber+") ";
+          sql +="  and sfb01 in("+join+") ";
     }
     RowMapper rm = BeanPropertyRowMapper.newInstance(SfbFile.class);
     List<SfbFile> list = primaryJdbcTemplate.query(sql, rm);
@@ -97,14 +100,33 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
 
 
   private MesMoDesc getMesMoDesc(SfbFile sfbFile, String moid,List<String> oerrArrys) {
+    //String groupId = TokenInfo.getUserGroupId();
+    String groupId="ae11b859-5607-4a70-82c0-b01ea81253d3";
     MesMoDesc moDesc= new MesMoDesc();
     moDesc.setMoId(moid);
     moDesc.setMoNumber(sfbFile.getSfb01());
-    moDesc.setCategory(sfbFile.getSfb02());
-    BaseParts baseParts = basePartsRepository.findByPartNo(sfbFile.getSfb05()).get(0);
-    moDesc.setPartId(baseParts.getPartId());
-    moDesc.setPartNo(baseParts.getPartNo());
-    moDesc.setPartName(baseParts.getName());
+    moDesc.setCategory(baseItemsTargetRepository.findByItemValueAndItemId(sfbFile.getSfb02(),"10000046").get(0).getItemName());
+    try {
+      BaseParts baseParts = basePartsRepository.findByPartNoAndGroupId(sfbFile.getSfb05(),groupId).get(0);
+      moDesc.setPartId(baseParts.getPartId());
+      moDesc.setPartNo(baseParts.getPartNo());
+      moDesc.setPartName(baseParts.getName());
+      moDesc.setGroupId(TokenInfo.getUserGroupId());
+      try {
+        MesPartRoute mesPartRoute = mesPartRouteRepository.findByPartId(baseParts.getPartId()).get(0);
+        moDesc.setRouteId(mesPartRoute.getRouteId());
+        moDesc.setOutputProcessId(mesPartRoute.getOutputProcessId());
+        moDesc.setInputProcessId(mesPartRoute.getInputProcessId());
+      }catch (Exception e){
+        oerrArrys.add(baseParts.getName());
+        System.out.println("该料件为绑定途程");
+        return  null;
+
+      }
+    }catch (Exception e){
+      return  null;
+    }
+
     moDesc.setTargetQty(sfbFile.getSfb08());
     moDesc.setRevsion(sfbFile.getSfb07());
     moDesc.setDistinguish(sfbFile.getSfb95());
@@ -112,18 +134,6 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     moDesc.setBomRevsion(0);
     moDesc.setPlanInputDate(sfbFile.getSfb13());
     moDesc.setPlanCloseDate(sfbFile.getSfb15());
-    try {
-      MesPartRoute mesPartRoute = mesPartRouteRepository.findByPartId(baseParts.getPartId()).get(0);
-      moDesc.setRouteId(mesPartRoute.getRouteId());
-      moDesc.setOutputProcessId(mesPartRoute.getOutputProcessId());
-      moDesc.setInputProcessId(mesPartRoute.getInputProcessId());
-    }catch (Exception e){
-      oerrArrys.add(baseParts.getName());
-      System.out.println("该料件为绑定途程");
-      return  null;
-
-    }
-
     moDesc.setReachDate(sfbFile.getSfb20());
     moDesc.setMachineQty(1);
     moDesc.setOrderId(sfbFile.getSfb22());
@@ -147,15 +157,16 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
 
 
   private MesMoBom getMesMoBom(List<SfaFile> sfaFiles, int i, String moid) {
+    String groupId = TokenInfo.getUserGroupId();
     SfaFile sfaFile = sfaFiles.get(i);
     MesMoBom mesMoBom = new MesMoBom();
     mesMoBom.setId(UUIDUtil.getUUID());
     mesMoBom.setMoId(moid);
     mesMoBom.setPartId(sfaFile.getSfa03());
     mesMoBom.setSentPartId(sfaFile.getSfa27());
-
+    mesMoBom.setGroupId(TokenInfo.getUserGroupId());
     try {
-      mesMoBom.setPartName(basePartsRepository.findByPartNo(sfaFile.getSfa03()).get(0).getName());
+      mesMoBom.setPartName(basePartsRepository.findByPartNoAndGroupId(sfaFile.getSfa03(),groupId).get(0).getName());
     }catch (Exception e){
       return null;
     }
@@ -169,7 +180,7 @@ public class MesMoDescErpServiceImpl implements MesMoDescErpService {
     mesMoBom.setReturnedQty(new BigDecimal(0));
     mesMoBom.setExceedQty(new BigDecimal(0));
     try {
-      mesMoBom.setSubstitute(sfaFile.getSfa03().equals(sfaFile.getSfa27() ) ? true :false);
+      mesMoBom.setIsSubstitute(sfaFile.getSfa03().equals(sfaFile.getSfa27() ) ? true :false);
     }catch (Exception e){
       return null;
     }

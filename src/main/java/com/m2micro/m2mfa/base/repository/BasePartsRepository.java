@@ -9,24 +9,30 @@ import java.util.List;
 
 /**
  * 料件基本资料 Repository 接口
+ *
  * @author liaotao
  * @since 2018-11-26
  */
 @Repository
-public interface BasePartsRepository extends BaseRepository<BaseParts,String> {
+public interface BasePartsRepository extends BaseRepository<BaseParts, String> {
 
     /**
      * 校验partNo料件编号
+     *
      * @param partNo
      * @param partId
      * @return
      */
-    List<BaseParts> findByPartNoAndPartIdNot(String partNo,String partId);
+    List<BaseParts> findByPartNoAndGroupIdAndPartIdNot(String partNo, String groupId, String partId);
 
-    @Query(value = "select * from base_parts  where  part_no=?1 and enabled=1 ",nativeQuery=true)
-    BaseParts selectpartNo(String partNo);
-    int countByPartNo(String partNo);
+    @Query(value = "select * from base_parts  where  part_no=?1 and enabled=1 and group_id=?2", nativeQuery = true)
+    BaseParts selectpartNoAndGroupId(String partNo, String groupId);
 
-    List<BaseParts> findByPartNo(String partNo);
+    int countByPartNoAndGroupId(String partNo,String groupId);
 
+    List<BaseParts> findByPartNoAndGroupId(String partNo,String groupId);
+
+    List<BaseParts> findAllByCategory(String category);
+
+    List<BaseParts>findByPartNo(String partNo);
 }

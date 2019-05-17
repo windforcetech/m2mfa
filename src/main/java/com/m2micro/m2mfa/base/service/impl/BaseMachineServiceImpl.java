@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseCustomer;
@@ -87,6 +89,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
 
     @Override
     public PageUtil<BaseMachine> list(BaseMachineQuery query) {
+        String groupId = TokenInfo.getUserGroupId();
         String sql = "SELECT\n" +
                     "	bm.machine_id machineId,\n" +
                     "	bm.code code,\n" +
@@ -125,10 +128,27 @@ public class BaseMachineServiceImpl implements BaseMachineService {
                     "LEFT JOIN base_items_target bi2 ON bi2.id = bm.placement\n" +
                     "LEFT JOIN organization o ON (\n" +
                     "	bm.department_id = o.uuid\n" +
-                    "	AND o.typesof = '部门'\n" +
+                    "	AND o.typesof = '部门' and o.group_id = '" +groupId+"' "+
                     ")\n"+
                     "WHERE 1 = 1 ";
+        sql = addSqlCondition(sql,query,groupId);
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
+        List<BaseMachine> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select " +
+                          " count(bm.machine_id) " +
+                          " from base_machine bm " +
+                          " LEFT JOIN organization o ON (\n" +
+                          "	bm.department_id = o.uuid\n" +
+                          "	AND o.typesof = '部门' and o.group_id = '" +groupId+"' "+
+                          " )\n"+
+                          " where 1=1 \n";
+        countSql = addSqlCondition(countSql,query,groupId);
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
 
+    private String addSqlCondition(String sql, BaseMachineQuery query, String groupId) {
         if(StringUtils.isNotEmpty(query.getCode())){
             sql = sql + " and bm.code like '%"+query.getCode()+"%'";
         }
@@ -141,41 +161,57 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         if(StringUtils.isNotEmpty(query.getDepartmentId())){
             sql = sql + " and bm.department_id = '"+query.getDepartmentId()+"'";
         }
+        if(StringUtils.isNotEmpty(query.getAssdtId())){
+            sql = sql + " and bm.assdt_id like '%"+query.getAssdtId()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getCategoryId())){
+            sql = sql + " and bm.category_id = '"+query.getCategoryId()+"'";
+        }
         if(StringUtils.isNotEmpty(query.getPlacement())){
             sql = sql + " and bm.placement= '"+query.getPlacement()+"'";
         }
-        sql = sql + " order by bm.modified_on desc";
-        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMachine.class);
-        List<BaseMachine> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_machine bm where 1=1 \n";
-        if(StringUtils.isNotEmpty(query.getCode())){
-            countSql = countSql + " and bm.code like '%"+query.getCode()+"%'";
+        if(StringUtils.isNotEmpty(query.getUnit())){
+            sql = sql + " and bm.unit = '"+query.getUnit()+"'";
         }
-        if(StringUtils.isNotEmpty(query.getName())){
-            countSql = countSql + " and bm.name like '%"+query.getName()+"%'";
+        if(StringUtils.isNotEmpty(query.getMaintenanceStaff())){
+            sql = sql + " and bm.maintenance_staff = '"+query.getMaintenanceStaff()+"'";
         }
-        if(StringUtils.isNotEmpty(query.getFlag())){
-            countSql = countSql + " and bm.flag = '"+query.getFlag()+"'";
+        if(StringUtils.isNotEmpty(query.getTechnicalStaff())){
+            sql = sql + " and bm.technical_staff = '"+query.getTechnicalStaff()+"'";
         }
-        if(StringUtils.isNotEmpty(query.getDepartmentId())){
-            countSql = countSql + " and bm.department_id = '"+query.getDepartmentId()+"'";
+        if(StringUtils.isNotEmpty(query.getManagerStaff())){
+            sql = sql + " and bm.manager_staff = '"+query.getManagerStaff()+"'";
         }
-        if(StringUtils.isNotEmpty(query.getPlacement())){
-            countSql = countSql + " and bm.placement= '"+query.getPlacement()+"'";
+        if(query.getEnabled()!=null){
+            sql = sql + " and bm.enabled = "+query.getEnabled()+"";
         }
-        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql = sql + " and bm.description like '%"+query.getDescription()+"%'";
+        }
+        sql = sql+" and bm.group_id = '"+groupId+"' ";
+        //排序字段
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        switch (order) {
+            case "flag_name":
+                order = "flag";
+                break;
+            default:
+                break;
+        }
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by bm."+order+" "+direct+",bm.modified_on desc ";
+        return sql;
     }
 
     @Override
     public List<BaseMachine> findAllByCode(String code) {
-        return baseMachineRepository.findAllByCode(code);
+        return baseMachineRepository.findAllByCodeAndGroupId(code,TokenInfo.getUserGroupId());
     }
 
     @Override
     public List<BaseMachine> findByCodeAndMachineIdNot(String code, String machineId) {
-        return baseMachineRepository.findByCodeAndMachineIdNot(code,machineId);
+        return baseMachineRepository.findByCodeAndGroupIdAndMachineIdNot(code,TokenInfo.getUserGroupId(),machineId);
     }
 
     @Override
@@ -248,6 +284,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     @Override
     @Transactional
     public BaseMachine saveEntity(BaseMachine baseMachine) {
+        baseMachine.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseMachine, AddGroup.class);
         baseMachine.setMachineId(UUIDUtil.getUUID());
         //校验code唯一性
@@ -268,19 +305,22 @@ public class BaseMachineServiceImpl implements BaseMachineService {
 
     @Override
     public List<SelectNode> getNames(String machineId) {
+        String groupId = TokenInfo.getUserGroupId();
         String sql = "SELECT\n" +
                     "	DISTINCT p.uuid id,\n" +
                     "	p.propertyty_name name\n" +
-                    "FROM\n" +
+                    " FROM\n" +
                     "	org_device_node odn,\n" +
                     "	propertyty p\n" +
-                    "WHERE\n" +
+                    " WHERE\n" +
                     "	odn.org_id = p.uuid\n" +
-                    "AND p.uuid NOT IN (\n" +
+                    " AND p.group_id = '"+groupId+"' "+
+                    " AND p.uuid NOT IN (\n" +
                     "	SELECT\n" +
                     "		bm.id\n" +
                     "	FROM\n" +
                     "		base_machine bm\n" +
+                    "   WHERE bm.group_id = '"+groupId+"' "+
                     ")";
         RowMapper rm = BeanPropertyRowMapper.newInstance(SelectNode.class);
         List<SelectNode> list = jdbcTemplate.query(sql, rm);
@@ -294,7 +334,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
 
     @Override
     public boolean isMachineandDepartment(String uuid) {
-        List<BaseMachine> baseMachines = baseMachineRepository.findByOrgIds(uuid);
+        List<BaseMachine> baseMachines = baseMachineRepository.findByOrgIds(uuid,TokenInfo.getUserGroupId());
         if(baseMachines.isEmpty()){
             return true;
         }
@@ -310,7 +350,7 @@ public class BaseMachineServiceImpl implements BaseMachineService {
         List<BaseMachine> disableDelete = new ArrayList<>();
         for (String id:ids){
             BaseMachine baseMachine = findById(id).orElse(null);
-            Integer count = mesMoScheduleRepository.countByMachineId(id);
+            Integer count = mesMoScheduleRepository.countByMachineIdAndGroupId(id,TokenInfo.getUserGroupId());
             if(count>0){
                 disableDelete.add(baseMachine);
                 continue;

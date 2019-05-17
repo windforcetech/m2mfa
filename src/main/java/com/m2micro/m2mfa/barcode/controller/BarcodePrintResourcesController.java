@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.barcode.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.m2mfa.barcode.service.BarcodePrintResourcesService;
 import com.m2micro.framework.commons.exception.MMException;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value="标签打印记录 前端控制器")
 @Authorize
 public class BarcodePrintResourcesController {
+
     @Autowired
     BarcodePrintResourcesService barcodePrintResourcesService;
 
@@ -44,6 +46,7 @@ public class BarcodePrintResourcesController {
         return ResponseMessage.ok(page);
     }
 
+
     /**
      * 详情
      */
@@ -54,6 +57,7 @@ public class BarcodePrintResourcesController {
         BarcodePrintResources barcodePrintResources = barcodePrintResourcesService.findById(id).orElse(null);
         return ResponseMessage.ok(barcodePrintResources);
     }
+
 
     /**
      * 保存
@@ -66,6 +70,8 @@ public class BarcodePrintResourcesController {
         barcodePrintResources.setId(UUIDUtil.getUUID());
         return ResponseMessage.ok(barcodePrintResourcesService.save(barcodePrintResources));
     }
+
+
 
     /**
      * 更新
@@ -83,6 +89,7 @@ public class BarcodePrintResourcesController {
         return ResponseMessage.ok(barcodePrintResourcesService.save(barcodePrintResourcesOld));
     }
 
+
     /**
      * 删除
      */
@@ -93,5 +100,6 @@ public class BarcodePrintResourcesController {
         barcodePrintResourcesService.deleteByIds(ids);
         return ResponseMessage.ok();
     }
+
 
 }

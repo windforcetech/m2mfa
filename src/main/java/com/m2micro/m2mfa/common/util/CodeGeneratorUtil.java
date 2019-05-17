@@ -17,17 +17,17 @@ import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
  */
 public class CodeGeneratorUtil {
     //设置作者
-    private final static String author = "chenshuhong";
+    private final static String author = "liaotao";
     //设置包名
     private final static String packageName = "com.m2micro.m2mfa";
     //设置模块名
-    private final static String moduleName = "produce";
+    private final static String moduleName = "display";
     //设置数据库要生成代码的表名
-    private final static String tableName = "mes_produce_question";
+    private final static String tableName = "mes_record_wip_fail";
     //文件覆盖:true 覆盖原有文件 false 不覆盖原有文件
     private final static boolean fileOverride = true;
     //设置数据库url
-    private final static String url = "jdbc:mysql://192.168.1.132:3306/factory_application?useUnicode=true&useSSL=false&characterEncoding=utf8";
+    private final static String url = "jdbc:mysql://192.168.1.132:3306/saas?useUnicode=true&useSSL=false&characterEncoding=utf8";
     //设置数据库驱动
     private final static String driverName = "com.mysql.jdbc.Driver";
     //设置数据库用户名

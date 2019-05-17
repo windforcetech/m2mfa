@@ -3,7 +3,7 @@ spring:
     secondary:
       jdbc-url: jdbc:mysql://192.168.2.24:3306/mes?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
       username: root
-      password:
+      password: ABCabc@123
       driverClassName: com.mysql.jdbc.Driver
       druid:
         max-active: 10
@@ -11,10 +11,10 @@ spring:
         max-wait: 60000
         initial-size: 5
     primary:
-      jdbc-url: jdbc:oracle:thin:@192.168.2.17:1521:XE
-      username: chenshuhong
-      password: chenshuhong
-      driver-class-name: oracle.jdbc.OracleDriver
+        jdbc-url: jdbc:oracle:thin:@10.9.7.217:1521:topprod
+        username: HWSZW
+        password: HWSZW
+        driver-class-name: oracle.jdbc.OracleDriver
   cache:
     type: redis
   redis:

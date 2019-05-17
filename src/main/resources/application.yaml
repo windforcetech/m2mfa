@@ -7,7 +7,7 @@ server:
 
 spring:
   profiles:
-    active: docker
+    active: dev
   jpa:
     hibernate:
       ddl-auto: update
@@ -43,7 +43,7 @@ m2mfa:
 file:
   baseDir:
 labServer:
-  url: http://192.168.2.16:9666/api/
+  url: http://192.168.1.32:61080/api/
 
 
 

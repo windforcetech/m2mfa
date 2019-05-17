@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.query;
 import com.m2micro.framework.commons.util.Query;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 
 /**
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @Date: 2018/12/3 16:38
  * @Description:
  */
+@Data
 @ApiModel(description = "机台查询参数")
 public class BaseMachineQuery extends Query {
 
@@ -19,48 +21,26 @@ public class BaseMachineQuery extends Query {
     private String name;
     @ApiModelProperty("状态")
     private String flag;
-    @ApiModelProperty("资产部门")
+    @ApiModelProperty("归属部门")
     private String departmentId;
     @ApiModelProperty("摆放位置")
     private String placement;
+    @ApiModelProperty("固资编号")
+    private String assdtId;
+    @ApiModelProperty("设备类型")
+    private String categoryId;
+    @ApiModelProperty("单位")
+    private String unit;
+    @ApiModelProperty("对应维修人员")
+    private String maintenanceStaff;
+    @ApiModelProperty("对应技术人员")
+    private String technicalStaff;
+    @ApiModelProperty("对应管理人员")
+    private String managerStaff;
+    @ApiModelProperty("有效否")
+    private Boolean enabled;
+    @ApiModelProperty("description")
+    private String description;
 
-    public String getCode() {
-        return code;
-    }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getFlag() {
-        return flag;
-    }
-
-    public void setFlag(String flag) {
-        this.flag = flag;
-    }
-
-    public String getDepartmentId() {
-        return departmentId;
-    }
-
-    public void setDepartmentId(String departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    public String getPlacement() {
-        return placement;
-    }
-
-    public void setPlacement(String placement) {
-        this.placement = placement;
-    }
 }

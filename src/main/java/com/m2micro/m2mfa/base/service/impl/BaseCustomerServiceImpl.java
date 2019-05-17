@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -65,6 +67,7 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
 
     @Override
     public PageUtil<BaseCustomer> list(BaseCustomerQuery query) {
+        String groupId = TokenInfo.getUserGroupId();
         String sql = "SELECT\n" +
                     "	bc.customer_id customerId,\n" +
                     "	bc.code code,\n" +
@@ -88,29 +91,61 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
                     "LEFT JOIN base_items_target bi ON bi.id = bc.category\n" +
                     "WHERE\n" +
                     "	1 = 1";
+        sql = addSqlCondition(sql,query,groupId);
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseCustomer.class);
+        List<BaseCustomer> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select count(bc.customer_id) from base_customer bc where 1=1 \n";
+        countSql = addSqlCondition(countSql,query,groupId);
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
 
+    private String addSqlCondition(String sql, BaseCustomerQuery query, String groupId) {
         if(StringUtils.isNotEmpty(query.getCode())){
             sql = sql+" and bc.code like '%"+query.getCode()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getName())){
             sql = sql+" and (bc.name like '%"+query.getName()+"%'"+" or bc.fullname like '%"+query.getName()+"%')";
         }
-        /*if(StringUtils.isNotEmpty(query.getFullname())){
-            sql = sql+" and bc.fullname like '%"+query.getFullname()+"%'";
-        }*/
-        sql = sql + " order by bc.modified_on desc";
-        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseCustomer.class);
-        List<BaseCustomer> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_customer bc where 1=1 \n";
-        if(StringUtils.isNotEmpty(query.getCode())){
-            countSql = countSql+" and bc.code like '%"+query.getCode()+"%'";
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            sql = sql+" and bc.category = '"+query.getCategory()+"' ";
         }
-        if(StringUtils.isNotEmpty(query.getName())){
-            countSql = countSql+" and (bc.name like '%"+query.getName()+"%'"+" or bc.fullname like '%"+query.getName()+"%')";
+        if(query.getEnabled()!=null){
+            sql = sql+" and bc.enabled = "+query.getEnabled()+" ";
         }
-        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        if(StringUtils.isNotEmpty(query.getAbbreviation())){
+            sql = sql+" and bc.abbreviation like '%"+query.getAbbreviation()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getArea())){
+            sql = sql+" and bc.area like '%"+query.getArea()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getTelephone())){
+            sql = sql+" and bc.telephone like '%"+query.getTelephone()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getFax())){
+            sql = sql+" and bc.fax like '%"+query.getFax()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getWeb())){
+            sql = sql+" and bc.web like '%"+query.getWeb()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql = sql+" and bc.description like '%"+query.getDescription()+"%'";
+        }
+        sql = sql+" and (bc.group_id  = '"+groupId+"')";
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        switch (order) {
+            case "category_name":
+                order = "category";
+                break;
+            default:
+                break;
+        }
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by bc."+order+" "+direct+",bc.modified_on desc";
+        return sql;
     }
 
     @Override
@@ -128,7 +163,7 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
             if(bc==null){
                 throw new MMException("数据库不存在数据！");
             }
-            List<MesMoDesc> list = mesMoDescRepository.findByCustomerId(bc.getCustomerId());
+            List<MesMoDesc> list = mesMoDescRepository.findByCustomerIdAndGroupId(bc.getCustomerId(),TokenInfo.getUserGroupId());
             if(list!=null&&list.size()>0){
                 throw new MMException("编号【"+bc.getCode()+"】已产生业务,不允许删除！");
             }
@@ -152,7 +187,7 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
         List<BaseCustomer> disableDelete = new ArrayList<>();
         for(String id:ids){
             BaseCustomer baseCustomer = findById(id).orElse(null);
-            Integer count = mesMoDescRepository.countByCustomerId(id);
+            Integer count = mesMoDescRepository.countByCustomerIdAndGroupId(id,TokenInfo.getUserGroupId());
             if(count>0){
                 disableDelete.add(baseCustomer);
                 continue;

@@ -17,4 +17,19 @@ public interface MesMoScheduleProcessService extends BaseService<MesMoSchedulePr
      * @return  分页信息
      */
     PageUtil<MesMoScheduleProcess> list(Query query);
+
+    /**
+     * 判断当前排产单的工序是否结束
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+    Boolean isEndProcess(String scheduleId,String processId);
+
+    /**
+     * 结束工序
+     * @param scheduleId
+     * @param processId
+     */
+    void endProcess(String scheduleId,String processId);
 }

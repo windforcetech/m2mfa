@@ -4,10 +4,8 @@ package com.m2micro.m2mfa.pad.controller;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.m2mfa.pad.model.CrossingStationModel;
-import com.m2micro.m2mfa.pad.model.CrossingStationPara;
-import com.m2micro.m2mfa.pad.model.OutStationModel;
-import com.m2micro.m2mfa.pad.model.WipRecModel;
+import com.m2micro.m2mfa.base.entity.BaseDefect;
+import com.m2micro.m2mfa.pad.model.*;
 import com.m2micro.m2mfa.pad.service.PadCrossingStationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,6 +48,28 @@ public class PadCrossingStationController {
         ResponseMessage<Object> ok = ResponseMessage.ok();
         ok.setMessage("出站成功！");
         return ok;
+    }
+
+
+    @RequestMapping("/getCrossStationDefectModel")
+    @ApiOperation(value="pad 不良输入（不良输入）")
+    @UserOperationLog("pad 不良输入（不良输入）")
+    public ResponseMessage<CrossStationDefectModel> getCrossStationDefectModel(CrossStationDefectPara crossStationDefectPara){
+        return ResponseMessage.ok(padCrossingStationService.getCrossStationDefectModel(crossStationDefectPara));
+    }
+
+    @RequestMapping("/getAllDefectProcess")
+    @ApiOperation(value="pad 不良工序（不良工序）")
+    @UserOperationLog("pad 不良工序（不良工序）")
+    public ResponseMessage<List<CrossStationProcess>> getAllDefectProcess(CrossStationDefectPara crossStationDefectPara){
+        return ResponseMessage.ok(padCrossingStationService.getAllDefectProcess(crossStationDefectPara));
+    }
+
+    @RequestMapping("/findAllBaseDefect")
+    @ApiOperation(value="pad 不良现象（不良现象）")
+    @UserOperationLog("pad 不良现象（不良现象）")
+    public ResponseMessage<List<BaseDefect>> findAllBaseDefect(){
+        return ResponseMessage.ok(padCrossingStationService.findAllBaseDefect());
     }
 
 }

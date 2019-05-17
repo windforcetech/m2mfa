@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.query;
 import com.m2micro.framework.commons.util.Query;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import java.util.List;
 
@@ -13,28 +14,21 @@ import java.util.List;
  * @Description:
  */
 @ApiModel(description = "员工排班查询参数")
+@Data
 public class BaseStaffshiftQuery extends Query {
     @ApiModelProperty(value = "部门id")
     private String departmentID;
 
-
     @ApiModelProperty(value = "员工主键")
     private String staffId;
 
-    public String getStaffId() {
-        return staffId;
-    }
+    @ApiModelProperty(value = "班别代码")
+    private String shiftId;
 
-    public void setStaffId(String staffId) {
-        this.staffId = staffId;
-    }
+    @ApiModelProperty(value = "姓名")
+    private String staffName;
 
-    public String getDepartmentID() {
-        return departmentID;
-    }
+    @ApiModelProperty(value = "工号")
+    private String code;
 
-
-    public void setDepartmentID(String departmentID) {
-        this.departmentID = departmentID;
-    }
 }

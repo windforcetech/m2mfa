@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseProcessQuery;
 import com.m2micro.m2mfa.base.service.BaseItemsTargetService;

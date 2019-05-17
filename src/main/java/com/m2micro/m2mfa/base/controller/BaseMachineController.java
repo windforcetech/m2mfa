@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.base.controller;
 
 import com.m2micro.framework.authorization.Authorize;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseUnit;
@@ -87,6 +88,7 @@ public class BaseMachineController {
     @ApiOperation(value="更新机台主档")
     @UserOperationLog("更新机台主档")
     public ResponseMessage<BaseMachine> update(@RequestBody BaseMachine baseMachine){
+        baseMachine.setGroupId(TokenInfo.getUserGroupId());
         ValidatorUtil.validateEntity(baseMachine, UpdateGroup.class);
         BaseMachine baseMachineOld = baseMachineService.findById(baseMachine.getMachineId()).orElse(null);
         if(baseMachineOld==null){

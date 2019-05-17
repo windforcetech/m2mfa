@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.m2mfa.base.entity.BaseShift;
 import com.m2micro.m2mfa.base.entity.BaseStaffshift;
 import com.m2micro.m2mfa.base.node.SelectNode;
@@ -49,11 +51,30 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
         //QBaseStaffshift qBaseStaffshift = QBaseStaffshift.baseStaffshift;
         //JPAQuery<BaseStaffshift> jq = queryFactory.selectFrom(qBaseStaffshift);
 
-
-        String sql = " SELECT zh.* , base_staff.staff_name , base_staff.code   from     (SELECT staff_id, CAST( GROUP_CONCAT( shift_date, ';', id, ';',shift_code ORDER BY shift_date ASC SEPARATOR '|' ) AS CHAR (30000) CHARACTER SET utf8 ) as keyvalue FROM  (SELECT base_staffshift.id,staff_id, shift_date,base_shift.shift_id, base_shift.`name` as shift_name,base_shift.`code` As shift_code  from base_staffshift,base_shift where staff_id in (SELECT staff_id FROM `base_staff` where 1=1 ";
-        if (StringUtils.isNotEmpty(query.getDepartmentID()))
+        String groupId = TokenInfo.getUserGroupId();
+        String sql = " SELECT zh.* , base_staff.staff_name AS staffName , base_staff.code   from     (SELECT staff_id, CAST( GROUP_CONCAT( shift_date, ';', id, ';',shift_code ORDER BY shift_date ASC SEPARATOR '|' ) AS CHAR (30000) CHARACTER SET utf8 ) as keyvalue FROM  (SELECT base_staffshift.id,staff_id, shift_date,base_shift.shift_id, base_shift.`name` as shift_name,base_shift.`code` As shift_code  from base_staffshift,base_shift where staff_id in (SELECT staff_id FROM `base_staff` where 1=1 ";
+        if (StringUtils.isNotEmpty(query.getDepartmentID())){
             sql += "  and department_id='" + query.getDepartmentID() + "'";
-        sql += ") AND shift_date >= '" + DateUtil.format(query.getStartTime()) + "' AND shift_date <= '" + DateUtil.format(query.getEndTime()) + "' and base_shift.shift_id =base_staffshift.shift_id) as tk  GROUP BY staff_id ) as zh , base_staff where base_staff.staff_id=zh.staff_id;";
+        }
+        if (StringUtils.isNotEmpty(query.getStaffId())){
+            sql += " and staff_id='" + query.getStaffId() + "'";
+        }
+        sql += "AND group_id='" + groupId + "') AND shift_date >= '" + DateUtil.format(query.getStartTime()) + "' AND shift_date <= '" + DateUtil.format(query.getEndTime()) + "' and base_shift.shift_id =base_staffshift.shift_id and base_shift.group_id='" + groupId + "' and base_staffshift.group_id='" + groupId + "'";
+        if(StringUtils.isNotEmpty(query.getShiftId())){
+        sql +=" AND base_shift.shift_id='"+query.getShiftId()+"'";
+        }
+        sql +=") as tk  GROUP BY staff_id ) as zh , base_staff where base_staff.staff_id=zh.staff_id and base_staff.group_id='" + groupId + "'";
+        if(StringUtils.isNotEmpty(query.getStaffName())){
+            sql +=" AND base_staff.staff_name LIKE '%"+query.getStaffName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getCode())){
+            sql +=" AND base_staff.`code` LIKE '%"+query.getCode()+"%'";
+        }
+        //排序字段
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by base_staff."+order+" "+direct+",base_staff.modified_on desc ";
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
 
 
@@ -143,18 +164,17 @@ public class BaseStaffshiftServiceImpl implements BaseStaffshiftService {
 
     @Override
     public String[] findCanDelete(String[] ids) {
+        String groupId = TokenInfo.getUserGroupId();
         // String sql = "SELECT b.id, b.staff_id, b.shift_id, b.shift_date, m.plan_start_time, m.plan_end_time FROM base_staffshift b, mes_mo_schedule_staff m WHERE b.shift_date BETWEEN m.plan_start_time AND m.plan_end_time AND m.shift_id = b.shift_id AND m.staff_id = b.staff_id AND b.id IN (:ids)";
-        String sql = "SELECT b.id FROM base_staffshift b, mes_mo_schedule_staff m, mes_mo_schedule mms WHERE  b.shift_date BETWEEN mms.plan_start_time AND mms.plan_end_time AND m.shift_id = b.shift_id AND m.staff_id = b.staff_id AND mms.schedule_id = m.schedule_id AND b.id IN (:ids) GROUP BY id";
+        String sql = "SELECT b.id FROM base_staffshift b, mes_mo_schedule_staff m, mes_mo_schedule mms WHERE  b.shift_date BETWEEN mms.plan_start_time AND mms.plan_end_time AND m.shift_id = b.shift_id AND m.staff_id = b.staff_id AND mms.schedule_id = m.schedule_id AND b.id IN (:ids) ";
         HashMap<String, Object> args = new HashMap<>();
 //        ArrayList<String> mids = new ArrayList<>();
 //        for (String one : ids) {
 //            mids.add(one);
 //        }
 //        args.put("ids", mids);
-
         args.put("ids", Arrays.asList(ids));
-
-
+        sql +=" AND b.group_id='"+groupId+"' AND m.group_id='"+groupId+"' AND mms.group_id='"+groupId+"' GROUP BY id";
         NamedParameterJdbcTemplate givenParamJdbcTemp = new NamedParameterJdbcTemplate(jdbcTemplate);
         List<Map<String, Object>> list = givenParamJdbcTemp.queryForList(sql, args);
         String[] ids1 = list.stream()

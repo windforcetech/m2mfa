@@ -53,4 +53,27 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
 
 
     PageUtil<BaseParts> findByNotUsedForPack(BasePartsQuery query);
+
+    /**
+     * 标签模板料件获取
+     * @param query
+     * @return
+     */
+    PageUtil<BaseParts> barcodePartslist(BasePartsQuery query);
+
+    /**
+     * 工单料件获取
+     * @param query
+     * @return
+     */
+    PageUtil<BaseParts> workOrderPartslist(BasePartsQuery query);
+
+    /**
+     * 过滤指导书的
+     * @param query
+     * @return
+     */
+    PageUtil<BaseParts> guidingbooklist(BasePartsQuery query);
+
+    List<BaseParts> findAllByCategory(String category);
 }

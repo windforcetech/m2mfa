@@ -18,4 +18,12 @@ public interface BaseBomSubstituteRepository extends BaseRepository<BaseBomSubst
 
      void deleteAllByBomIdIsIn(List<String> ids);
      List<BaseBomSubstitute> findAllByBomId(String bomid);
+
+     /**
+      * 获取料件物料清单取替代关联
+      * @param partId
+      *             料件id
+      * @return
+      */
+     List<BaseBomSubstitute> findByPartIdAndGroupId(String partId,String groupId);
 }

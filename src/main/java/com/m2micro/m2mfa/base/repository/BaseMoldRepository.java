@@ -27,12 +27,12 @@ public interface BaseMoldRepository extends BaseRepository<BaseMold,String> {
      * @param moldId
      * @return
      */
-    List<BaseMold> findByCodeAndMoldIdNot(String code, String moldId);
+    List<BaseMold> findByCodeAndGroupIdAndMoldIdNot(String code, String groupId, String moldId);
 
     /**
      * 获取有效模具
      * @param enabled
      * @return
      */
-    List<BaseMold> findByEnabled(boolean enabled);
+    List<BaseMold> findByEnabledAndGroupId(boolean enabled,String groupId);
 }

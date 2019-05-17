@@ -1,9 +1,11 @@
 package com.m2micro.m2mfa.mo.model;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
+@ApiModel(description="料件综合信息")
 public class PartsRouteModel {
     @ApiModelProperty(value = "料件ID")
     private String partId;
@@ -25,5 +27,9 @@ public class PartsRouteModel {
     private String outputProcessId;
     @ApiModelProperty(value = "产出工序名称")
     private String outputProcessName;
+    @ApiModelProperty(value = "特性码")
+    private String distinguish;
+    @ApiModelProperty(value = "bom版")
+    private Integer bomRevsion;
 
 }

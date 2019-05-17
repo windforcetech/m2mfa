@@ -44,7 +44,7 @@ public class PrintApplyObj {
     @ApiModelProperty("申请时间")
     private Date checkOn;
     @ApiModelProperty("状态")
-    private String flg;
+    private String flag;
     @ApiModelProperty("描述")
     private String description;
 
@@ -75,6 +75,12 @@ public class PrintApplyObj {
 
     @ApiModelProperty("工单项次")
     private String orderSeq;
+
+
+    @ApiModelProperty("来源类型名称")
+    private String categoryName;
+
+
 
     @ApiModelProperty("打印条码列表")
     private List<PrintResourceObj> printResourceObjList;
@@ -249,12 +255,20 @@ public class PrintApplyObj {
         this.checkOn = checkOn;
     }
 
+    public String getFlag() {
+        return flag;
+    }
+
+    public void setFlag(String flag) {
+        this.flag = flag;
+    }
+
     public String getFlg() {
-        return flg;
+        return flag;
     }
 
     public void setFlg(String flg) {
-        this.flg = flg;
+        this.flag = flg;
     }
 
     public String getDescription() {
@@ -305,5 +319,11 @@ public class PrintApplyObj {
         this.partName = partName;
     }
 
+    public String getCategoryName() {
+        return categoryName;
+    }
 
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
 }

@@ -18,4 +18,6 @@ public interface BaseItemsRepository extends BaseRepository<BaseItems,String> {
 
     List<BaseItems> findAllByItemCode(String itemCode);
 
+
+
 }

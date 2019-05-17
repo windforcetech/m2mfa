@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.query;
 import com.m2micro.framework.commons.util.Query;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import java.util.List;
 
@@ -12,15 +13,49 @@ import java.util.List;
  * @Date: 2018/12/17 10:58
  * @Description:
  */
-@ApiModel(description="工位基本档查询参数")
+@ApiModel(description="职员基本档查询参数")
+@Data
 public class BaseStaffQuery extends Query {
     @ApiModelProperty(value = "编号")
     private String code;
+
     @ApiModelProperty(value = "名称")
     private String name;
 
+    @ApiModelProperty(value = "性别")
+    private String gender;
+
+    @ApiModelProperty(value = "所属部门Id")
+    private String departmentId;
+
+    @ApiModelProperty(value = "职位id")
+    private String dutyId;
+
+    @ApiModelProperty(value = "身份证号码")
+    private String idCard;
+
+    @ApiModelProperty(value = "电子邮箱")
+    private String email;
+
+    @ApiModelProperty(value = "手机")
+    private String mobile;
+
+    @ApiModelProperty(value = "电话号码")
+    private String telephone;
+
+    @ApiModelProperty(value = "离职")
+    private Boolean isDimission;
+
+    @ApiModelProperty(value = "卡号")
+    private String icCard;
+
     @ApiModelProperty(value = "是否有效 ")
-    private boolean enabled;
+    private Boolean enabled;
+
+    @ApiModelProperty(value = "部门ids")
+    private List<String> departmentIds;
+
+
 //    @ApiModelProperty(value = "岗位ids")
 //    public List<String> getDutyIds() {
 //        return dutyIds;
@@ -33,38 +68,5 @@ public class BaseStaffQuery extends Query {
 //    @ApiModelProperty(value = "岗位类型")
 //    private List<String> dutyIds;
 
-    @ApiModelProperty(value = "部门ids")
-    private List<String> departmentIds;
 
-    public List<String> getDepartmentIds() {
-        return departmentIds;
-    }
-
-    public void setDepartmentIds(List<String> departmentIds) {
-        this.departmentIds = departmentIds;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 }

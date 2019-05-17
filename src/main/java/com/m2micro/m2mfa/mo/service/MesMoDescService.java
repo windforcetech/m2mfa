@@ -5,8 +5,7 @@ import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
-import com.m2micro.m2mfa.mo.model.MesMoDescModel;
-import com.m2micro.m2mfa.mo.model.PartsRouteModel;
+import com.m2micro.m2mfa.mo.model.*;
 import com.m2micro.m2mfa.mo.query.MesMoDescQuery;
 import com.m2micro.m2mfa.mo.query.ModescandpartsQuery;
 import com.m2micro.m2mfa.pr.vo.MesPartvo;
@@ -84,14 +83,14 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      * @param id
      *      工单id
      */
-    MesMoDescModel info(String id);
+    MesMoDescBomModel info(String id);
 
     /**
      * 根据料件获取基本信息
      * @param partId
      * @return
      */
-    PartsRouteModel addDetails(String partId);
+    BomAndPartInfoModel addDetails(String partId);
 
     /**
      * 获取添加的基本信息
@@ -105,6 +104,18 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      * @param mesMoDesc
      * @return
      */
-    MesMoDesc updateEntity(MesMoDesc mesMoDesc);
+    void updateEntity(MesMoDescAllModel mesMoDesc);
+
+    /**
+     * 结束工单
+     * @param moId
+     */
+    void endMoDesc(String moId);
+
+    /**
+     * 保存
+     * @param mesMoDesc
+     */
+    void saveEntity(MesMoDescAllModel mesMoDesc);
 
 }

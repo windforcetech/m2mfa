@@ -431,12 +431,12 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
 
 
     /**
-     * 获取不良数
+     * 获取不良数（整改前）
      * @param scheduleIds
      * @param stationId
      * @return
      */
-    private Integer getFailQty(List<String> scheduleIds,String stationId) {
+   /* private Integer getFailQty(List<String> scheduleIds,String stationId) {
         String para = String.join("','",scheduleIds);
         String sql = "SELECT\n" +
                 "	sum(IFNULL(mrf.qty,0))\n" +
@@ -449,6 +449,27 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
                 "'" + para +"'\n" +
                 ")\n"+
                 "AND mrw.station_id='" + stationId + "'\n";
+        return jdbcTemplate.queryForObject(sql ,Integer.class);
+    }*/
+
+
+    /**
+     * 获取不良数（整改后）
+     * @param scheduleIds
+     * @param stationId
+     * @return
+     */
+    private Integer getFailQty(List<String> scheduleIds,String stationId) {
+        String para = String.join("','",scheduleIds);
+        String sql = "SELECT\n" +
+                "	sum(IFNULL(fail_qty,0))\n" +
+                "FROM\n" +
+                "	mes_record_wip_fail\n" +
+                "WHERE\n" +
+                "schedule_id IN (\n" +
+                "'" + para +"'\n" +
+                ")\n"+
+                "AND target_station_id='" + stationId + "'\n";
         return jdbcTemplate.queryForObject(sql ,Integer.class);
     }
 

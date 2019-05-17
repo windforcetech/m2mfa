@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseMoldQuery;
@@ -153,6 +155,7 @@ public class BaseMoldServiceImpl implements BaseMoldService {
 
     @Override
     public PageUtil<BaseMold> list(BaseMoldQuery query) {
+        String groupId = TokenInfo.getUserGroupId();
         String sql = "SELECT\n" +
                         "   bm.mold_id moldId,\n" +
                         "	bm.code code,\n" +
@@ -207,7 +210,19 @@ public class BaseMoldServiceImpl implements BaseMoldService {
                     "LEFT JOIN base_items_target bi ON  bi.id = bm.category_id\n" +
                     "LEFT JOIN base_items_target bi2 ON bi2.id = bm.flag\n" +
                     "LEFT JOIN base_items_target bi3 ON bi3.id = bm.placement\n" +
-                    "LEFT JOIN base_customer bc ON bm.customer_id = bc.customer_id where 1=1 ";
+                    "LEFT JOIN base_customer bc ON (bm.customer_id = bc.customer_id AND bc.group_id = '"+groupId+"')\n" +
+                    "where 1=1 ";
+        sql = addSqlCondition(sql,query,groupId);
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMold.class);
+        List<BaseMold> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select count(*) from base_mold bm where 1=1 \n";
+        countSql = addSqlCondition(countSql, query,groupId);
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    private String addSqlCondition(String sql, BaseMoldQuery query,String groupId) {
         if(StringUtils.isNotEmpty(query.getCode())){
             sql = sql+" and bm.code like '%"+query.getCode()+"%'";
         }
@@ -220,6 +235,9 @@ public class BaseMoldServiceImpl implements BaseMoldService {
         if(StringUtils.isNotEmpty(query.getFlag())){
             sql = sql+" and bm.flag = '"+query.getFlag()+"'";
         }
+        if(StringUtils.isNotEmpty(query.getPlacement())){
+            sql = sql+" and bm.placement = '"+query.getPlacement()+"'";
+        }
         if(StringUtils.isNotEmpty(query.getCategoryId())){
             BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategoryId()).orElse(null);
             //不等于全部，全部特殊处理
@@ -227,32 +245,63 @@ public class BaseMoldServiceImpl implements BaseMoldService {
                 sql = sql+" and bm.category_id = '"+query.getCategoryId()+"'";
             }
         }
-        sql = sql + " order by bm.modified_on desc";
-        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-        RowMapper rm = BeanPropertyRowMapper.newInstance(BaseMold.class);
-        List<BaseMold> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_mold bm where 1=1 \n";
-        if(StringUtils.isNotEmpty(query.getCode())){
-            countSql = countSql+" and bm.code like '%"+query.getCode()+"%'";
+        if(StringUtils.isNotEmpty(query.getAssdtId())){
+            sql = sql+" and bm.assdt_id like '%"+query.getAssdtId()+"%'";
         }
-        if(StringUtils.isNotEmpty(query.getName())){
-            countSql = countSql+" and bm.name like '%"+query.getName()+"%'";
+        if(StringUtils.isNotEmpty(query.getTypeId())){
+            sql = sql+" and bm.type_id = '"+query.getTypeId()+"'";
         }
-        if(StringUtils.isNotEmpty(query.getCustomerId())){
-            countSql = countSql+" and bm.customer_id = '"+query.getCustomerId()+"'";
+        if(StringUtils.isNotEmpty(query.getDepartmentId())){
+            sql = sql+" and bm.department_id = '"+query.getDepartmentId()+"'";
         }
-        if(StringUtils.isNotEmpty(query.getFlag())){
-            countSql = countSql+" and bm.flag = '"+query.getFlag()+"'";
+        if(StringUtils.isNotEmpty(query.getMaintenanceStaff())){
+            sql = sql+" and bm.maintenance_staff = '"+query.getMaintenanceStaff()+"'";
         }
-        if(StringUtils.isNotEmpty(query.getCategoryId())){
-            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getCategoryId()).orElse(null);
-            //不等于全部，全部特殊处理
-            if(!(baseItemsTarget!=null&&"全部".equals(baseItemsTarget.getItemName()))){
-                countSql = countSql+" and bm.category_id = '"+query.getCategoryId()+"'";
-            }
+        if(StringUtils.isNotEmpty(query.getTechnicalStaff())){
+            sql = sql+" and bm.technical_staff = '"+query.getTechnicalStaff()+"'";
         }
-        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+        if(StringUtils.isNotEmpty(query.getManagerStaff())){
+            sql = sql+" and bm.manager_staff = '"+query.getManagerStaff()+"'";
+        }
+        if(query.getStripp()!=null){
+            sql = sql+" and bm.stripp = "+query.getStripp()+" ";
+        }
+        if(query.getUsemandrel()!=null){
+            sql = sql+" and bm.usemandrel = "+query.getUsemandrel()+" ";
+        }
+        if(StringUtils.isNotEmpty(query.getCavityRemark())){
+            sql = sql+" and bm.cavity_remark like '%"+query.getCavityRemark()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getSupplierId())){
+            sql = sql+" and bm.supplier_id like '%"+query.getSupplierId()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getMoldStructure())){
+            sql = sql+" and bm.mold_structure = '"+query.getMoldStructure()+"'";
+        }
+        if(StringUtils.isNotEmpty(query.getMaterial())){
+            sql = sql+" and bm.material = '"+query.getMaterial()+"'";
+        }
+        if(query.getEnabled()!=null){
+            sql = sql+" and bm.enabled = "+query.getEnabled()+" ";
+        }
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql = sql+" and bm.description like '%"+query.getDescription()+"%'";
+        }
+        sql = sql+" and bm.group_id = '"+groupId+"'";
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        //特殊排序字段处理(非主表)
+        switch (order) {
+        	case "placement_name":
+        	    order = "placement";
+        		break;
+        	default:
+        		break;
+        	}
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        sql = sql + " order by bm."+order+" "+direct+",bm.modified_on desc";
+        return sql;
     }
 
     @Override
@@ -262,7 +311,7 @@ public class BaseMoldServiceImpl implements BaseMoldService {
 
     @Override
     public List<BaseMold> findByCodeAndMoldIdNot(String code, String moldId) {
-        return baseMoldRepository.findByCodeAndMoldIdNot(code,moldId);
+        return baseMoldRepository.findByCodeAndGroupIdAndMoldIdNot(code,TokenInfo.getUserGroupId(),moldId);
     }
 
     @Override
@@ -272,7 +321,7 @@ public class BaseMoldServiceImpl implements BaseMoldService {
         List<BaseMold> disableDelete = new ArrayList<>();
         for (String id:ids){
             BaseMold baseMold = baseMoldRepository.findById(id).orElse(null);
-            List<MesMoScheduleProcess> list = mesMoScheduleProcessRepository.findByMoldId(id);
+            List<MesMoScheduleProcess> list = mesMoScheduleProcessRepository.findByMoldIdAndGroupId(id,TokenInfo.getUserGroupId());
             if(list!=null&&list.size()>0){
                 disableDelete.add(baseMold);
                 continue;
@@ -293,7 +342,7 @@ public class BaseMoldServiceImpl implements BaseMoldService {
 
     @Override
     public List<BaseMold> findbyisMold() {
-        return baseMoldRepository.findByEnabled(true);
+        return baseMoldRepository.findByEnabledAndGroupId(true,TokenInfo.getUserGroupId());
     }
 
 }

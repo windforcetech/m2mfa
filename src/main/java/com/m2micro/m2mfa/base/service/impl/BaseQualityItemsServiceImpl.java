@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.google.common.base.CaseFormat;
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.base.entity.BaseQualityItems;
@@ -60,16 +62,6 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
 
 
 
-    /*@Override
-    public PageUtil<BaseQualityItems> list(BaseQualityItemsQuery query) {
-        QBaseQualityItems qBaseQualityItems = QBaseQualityItems.baseQualityItems;
-        JPAQuery<BaseQualityItems> jq = queryFactory.selectFrom(qBaseQualityItems);
-
-        jq.offset((query.getPage() - 1) * query.getSize()).limit(query.getSize());
-        List<BaseQualityItems> list = jq.fetch();
-        long totalCount = jq.fetchCount();
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
-    }*/
 
     @Override
     public PageUtil<BaseQualityItems> list(BaseQualityItemsQuery query) {
@@ -92,35 +84,87 @@ public class BaseQualityItemsServiceImpl implements BaseQualityItemsService {
                     "	bi1.item_name gaugeName,\n" +
                     "	bi2.item_name categoryName,\n" +
                     "	bi3.unit limitUnitName\n" +
-                    "FROM\n" +
-                    "	base_quality_items bqi\n" +
-                    "LEFT JOIN base_items_target bi1 ON bqi.gauge = bi1.id\n" +
-                    "LEFT JOIN base_items_target bi2 ON bqi.category = bi2.id\n" +
-                    "LEFT JOIN base_unit bi3 ON bqi.limit_unit = bi3.unit_id\n" +
-                    "WHERE\n" +
-                    "	1 = 1\n";
+                    "FROM\n" ;
+        sql +=sqlPing(query);
 
+        //排序方向
+        String direct = StringUtils.isEmpty(query.getDirect())?"desc":query.getDirect();
+        //排序字段(驼峰转换)
+        String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
+        if(order.equals("gauge_name")||order.equals("category_name")|| order.equals("limit_unit_name")){
+            if(order.equals("gauge_name")){
+                order=  "	bi1.item_name ";
+            }
+            if(order.equals("category_name")){
+                order=  "	bi2.item_name ";
+            }
+            if(order.equals("limit_unit_name")){
+                order=  "	bi3.unit ";
+            }
+        }else {
+            order=  "bqi."+order;
+        }
+        sql = sql + " order by "+order+" "+direct+",bqi.modified_on desc";
+        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
+        RowMapper<BaseQualityItems> rm = BeanPropertyRowMapper.newInstance(BaseQualityItems.class);
+        List<BaseQualityItems> list = jdbcTemplate.query(sql,rm);
+        String countSql = "select count(*) from";
+        countSql +=sqlPing(query);
+        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
+        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
+    }
+
+    /**
+     * 共用的sql
+     * @return
+     */
+    public String sqlPing(BaseQualityItemsQuery query){
+        String groupId = TokenInfo.getUserGroupId();
+        String sql =   " 	base_quality_items bqi\n" +
+            "LEFT JOIN base_items_target bi1 ON bqi.gauge = bi1.id\n" +
+            "LEFT JOIN base_items_target bi2 ON bqi.category = bi2.id\n" +
+            "LEFT JOIN base_unit bi3 ON bqi.limit_unit = bi3.unit_id\n" +
+            "WHERE\n" +
+            "	1 = 1\n";
         if(StringUtils.isNotEmpty(query.getItemCode())){
             sql = sql + " and bqi.item_code like '%"+query.getItemCode()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getItemName())){
             sql = sql + " and bqi.item_name like '%"+query.getItemName()+"%'";
         }
-        sql = sql + " order by bqi.modified_on desc";
-        sql = sql + " limit "+(query.getPage()-1)*query.getSize()+","+query.getSize();
-        RowMapper<BaseQualityItems> rm = BeanPropertyRowMapper.newInstance(BaseQualityItems.class);
-        List<BaseQualityItems> list = jdbcTemplate.query(sql,rm);
-        String countSql = "select count(*) from base_quality_items bqi where 1=1 \n";
-        if(StringUtils.isNotEmpty(query.getItemCode())){
-            countSql = countSql + " and bqi.item_code like '%"+query.getItemCode()+"%'";
+        if(StringUtils.isNotEmpty(query.getGauge())){
+            sql = sql + " and bqi.gauge =  '"+query.getGauge()+"'";
         }
-        if(StringUtils.isNotEmpty(query.getItemName())){
-            countSql = countSql + " and bqi.item_name like '%"+query.getItemName()+"%'";
+        if(query.getEnabled()!=null){
+            sql = sql + " and bqi.enabled =  "+query.getEnabled()+"";
         }
-        long totalCount = jdbcTemplate.queryForObject(countSql,long.class);
-        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
-    }
 
+        if(StringUtils.isNotEmpty(query.getCategoryName())){
+            sql = sql + " and bi2.id=  '"+query.getCategoryName()+"'";
+        }
+
+        if(StringUtils.isNotEmpty(query.getCentralLimit())){
+            sql = sql + " and  bqi.central_limit =   "+query.getCentralLimit()+" ";
+        }
+
+        if(StringUtils.isNotEmpty(query.getDescription())){
+            sql = sql + " and  bqi.description   like '%"+query.getDescription()+"%'";
+        }
+
+        if(StringUtils.isNotEmpty(query.getLimitUnitName())){
+            sql = sql + " and  bi3.unit_id  =  '"+query.getLimitUnitName()+"'";
+        }
+
+        if(StringUtils.isNotEmpty(query.getLowerLimit())){
+            sql = sql + " and  	bqi.lower_limit  =  "+query.getLowerLimit()+"";
+        }
+
+        if(StringUtils.isNotEmpty(query.getUpperLimit())){
+            sql = sql + " and  	bqi.upper_limit  = "+query.getUpperLimit()+"";
+        }
+        sql +=" and  bqi.group_id ='"+groupId+"'";
+        return  sql ;
+    }
     @Override
     public BaseQualityItemsAddDetails addDetails() {
         BaseQualityItemsAddDetails baseQualityItemsAddDetails = new BaseQualityItemsAddDetails();
