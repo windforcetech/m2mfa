@@ -16,6 +16,50 @@ public class BaseRouteQuery  extends Query {
     @ApiModelProperty(value = "请求类型 ")
     private String type;
 
+    @ApiModelProperty(value = "有效否")
+    private Boolean enabled;
+    @ApiModelProperty(value = "描述")
+    private String description;
+
+    @ApiModelProperty(value = "投入工序名称")
+    private String inputProcess;
+
+    @ApiModelProperty(value = "产出工序名称")
+    private String outputProcess;
+
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getInputProcess() {
+        return inputProcess;
+    }
+
+    public void setInputProcess(String inputProcess) {
+        this.inputProcess = inputProcess;
+    }
+
+    public String getOutputProcess() {
+        return outputProcess;
+    }
+
+    public void setOutputProcess(String outputProcess) {
+        this.outputProcess = outputProcess;
+    }
+
     public String getRouteNo() {
         return routeNo;
     }

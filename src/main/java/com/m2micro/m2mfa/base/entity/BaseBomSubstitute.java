@@ -39,9 +39,9 @@ public class BaseBomSubstitute extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "主档主键")
     @NotEmpty(message = "主档主键不能为空", groups = {UpdateGroup.class})
     private String bomId;
-    @ApiModelProperty(value = "料件编号")
+    @ApiModelProperty(value = "料件编号id")
     private String partId;
-    @ApiModelProperty(value = "替代料件编号")
+    @ApiModelProperty(value = "替代料件编号id")
     private String subPartId;
     @Size(max = 50, message = "类型不能大于50位", groups = {AddGroup.class, UpdateGroup.class})
     @ApiModelProperty(value = "替代类型")
@@ -61,6 +61,32 @@ public class BaseBomSubstitute extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "描述")
     @Size(max = 200, message = "描述不能大于200位", groups = {AddGroup.class, UpdateGroup.class})
     private String description;
+
+
+    @ApiModelProperty(value = "料件编号")
+    @Transient
+    private String partNo;
+
+
+    @ApiModelProperty(value = "替代料件编号")
+    @Transient
+    private String subPartNo;
+
+
+    public String getPartNo() {
+        return partNo;
+    }
+
+    public void setPartNo(String partNo) {
+        this.partNo = partNo;
+    }
+    public String getSubPartNo() {
+        return subPartNo;
+    }
+
+    public void setSubPartNo(String subPartNo) {
+        this.subPartNo = partNo;
+    }
 
     public String getId() {
         return id;

@@ -93,6 +93,10 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     public MesPartRoute() {
     }
 
+    public MesPartRoute(String partNo) {
+
+    }
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }

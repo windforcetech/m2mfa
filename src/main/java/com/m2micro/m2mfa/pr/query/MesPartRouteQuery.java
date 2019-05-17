@@ -15,6 +15,27 @@ public class MesPartRouteQuery extends Query {
 
     @ApiModelProperty(value = "管制方式")
     private String controlInformation;
+    @ApiModelProperty(value = "有效否")
+    private Integer enabled;
+
+    @ApiModelProperty(value = "描述")
+    private String description;
+
+    public Integer getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Integer enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public MesPartRouteQuery() {
     }

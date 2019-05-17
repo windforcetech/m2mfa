@@ -73,7 +73,7 @@ public class BaseBomDescController {
     @UserOperationLog("bom列表")
     public ResponseMessage<PageUtil<BaseBomDesc>> list(BaseBomDescQuery query) {
         QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
-        JPAQuery<BaseBomDesc> jq = queryFactory.selectFrom(baseBomDesc);
+        JPAQuery<BaseBomDesc> jq =  queryFactory.selectFrom(baseBomDesc);
         BooleanBuilder expression = new BooleanBuilder();
         String[] partIds = new String[0];
         if (StringUtils.isNotEmpty(query.getPartsCategory())) {
@@ -129,17 +129,29 @@ public class BaseBomDescController {
             baseBomDesc1.setName(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getName());
             baseBomDesc1.setSpec(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getSpec());
             baseBomDesc1.setProductionUnit(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getProductionUnit());
+            baseBomDesc1.setPartNo(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getPartNo());
 
             List<BaseBomDef> allByBomId = baseBomDefService.findAllByBomId(baseBomDesc1.getBomId());
             allByBomId.forEach(baseBomDef -> {
                 BaseParts baseParts1 = basePartsService.findById(baseBomDef.getPartId()).orElse(null);
                 baseBomDef.setName(baseParts1 == null ? "空指针错误(物料不存在)" : baseParts1.getName());
+                baseBomDef.setPartNo(baseParts1 == null ? "空指针错误(物料不存在)" : baseParts1.getPartNo());
             });
+            baseBomDesc1.setBomDefObjList(allByBomId);
 
             List<BaseBomSubstitute> baseBomSubstituteList = baseBomSubstituteService.findAllByBomId(baseBomDesc1.getBomId());
+            baseBomSubstituteList.forEach(baseBomSubstitute -> {
+                BaseParts baseParts1 = basePartsService.findById(baseBomSubstitute.getPartId()).orElse(null);
+                baseBomSubstitute.setPartNo(baseParts1 == null ? "空指针错误(物料不存在)" : baseParts1.getPartNo());
+
+                BaseParts baseParts2 = basePartsService.findById(baseBomSubstitute.getSubPartId()).orElse(null);
+                baseBomSubstitute.setSubPartNo(baseParts2 == null ? "空指针错误(物料不存在)" : baseParts2.getPartNo());
+
+            });
+
             baseBomDesc1.setBomSubstituteList(baseBomSubstituteList);
 
-            baseBomDesc1.setBomDefObjList(allByBomId);
+
 
             for (SelectNode selectNode : bomCategory) {
                 if(selectNode.getId().equals(baseBomDesc1.getCategory())){
@@ -512,9 +524,9 @@ public class BaseBomDescController {
 
     public ShowBom descToShowBomObj(BaseBomDesc baseBomDesc) {
         ShowBom showBom = new ShowBom();
-        showBom.setPartId(baseBomDesc.getPartId());
         showBom.setDistinguish(baseBomDesc.getDistinguish());
         BaseParts baseParts = basePartsService.findById(baseBomDesc.getPartId()).orElse(null);
+        showBom.setPartId(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getPartNo());
         showBom.setName(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getName());
         showBom.setSpec(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getSpec());
         showBom.setEffectiveDate(baseBomDesc.getEffectiveDate());
@@ -529,9 +541,9 @@ public class BaseBomDescController {
 
     public ShowBom defToShowBomObj(BaseBomDef baseBomDef) {
         ShowBom showBom = new ShowBom();
-        showBom.setPartId(baseBomDef.getPartId());
         showBom.setDistinguish(baseBomDef.getDistinguish());
         BaseParts baseParts = basePartsService.findById(baseBomDef.getPartId()).orElse(null);
+        showBom.setPartId(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getPartNo());
         showBom.setName(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getName());
         showBom.setSpec(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getSpec());
         showBom.setEffectiveDate(baseBomDef.getEffectiveDate());
