@@ -3,6 +3,9 @@ package com.m2micro.m2mfa.base.repository;
 import com.m2micro.m2mfa.base.entity.BaseUnit;
 import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
 /**
  *  Repository 接口
  * @author liaotao
@@ -10,5 +13,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface BaseUnitRepository extends BaseRepository<BaseUnit,String> {
-
+List<BaseUnit>findByUnit(String unit);
 }

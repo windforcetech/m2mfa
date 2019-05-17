@@ -1,11 +1,13 @@
 package com.m2micro.m2mfa.erp.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.entity.BaseParts;
 import com.m2micro.m2mfa.base.repository.BasePartsRepository;
 import com.m2micro.m2mfa.base.repository.BaseUnitRepository;
 import com.m2micro.m2mfa.base.service.BasePartsService;
 import com.m2micro.m2mfa.base.service.BaseUnitService;
+import com.m2micro.m2mfa.common.util.FileUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.erp.entity.ImaFile;
 import com.m2micro.m2mfa.erp.service.BasePartsErpService;
@@ -38,15 +40,15 @@ public class BasePartsErpServiceImpl implements BasePartsErpService {
   JdbcTemplate secondaryJdbcTemplate;
   @Autowired
   BaseUnitRepository baseUnitRepository;
+
   @Override
-  @Transactional
   public boolean erpParts(String partNos,Long x,Long y) {
     List<BaseParts> listparts = new ArrayList<>();
     try {
       long num = (x * 1000);
       long end = num + 1000l;
 
-      System.out.println("开始" + num + "结束" + end);
+    //  FileUtil.WriteStringToFile("开始" + num + "结束" + end + " 当前线程：" +Thread.currentThread().getId());
       String sql = "select * from (SELECT a.*, ROWNUM rn\n" +
               "    FROM (SELECT * FROM IMA_FILE) a\n" +
               "      WHERE ROWNUM <=  " + end + ")  \n" +
@@ -60,6 +62,7 @@ public class BasePartsErpServiceImpl implements BasePartsErpService {
       sql += "  and rn > " + num + "";
 
       RowMapper rm = BeanPropertyRowMapper.newInstance(ImaFile.class);
+     // FileUtil.WriteStringToFile("打印出来的sql +"+sql);
       List<ImaFile> list = primaryJdbcTemplate.query(sql, rm);
 
       for (ImaFile imaFile : list) {
@@ -97,7 +100,7 @@ public class BasePartsErpServiceImpl implements BasePartsErpService {
         baseParts.setProductionConversionRate(imaFile.getIma55Fac());
         baseParts.setMinProductionQty(imaFile.getIma561());
         baseParts.setProductionLossRate(imaFile.getIma562());
-
+        baseParts.setGroupId(TokenInfo.getUserGroupId());
         baseParts.setSentConversionRate(imaFile.getIma63Fac());
         baseParts.setMinSentQty(imaFile.getIma641());
         baseParts.setIsConsume(imaFile.getIma70() == "1" ? true : false);
@@ -142,6 +145,8 @@ public class BasePartsErpServiceImpl implements BasePartsErpService {
 
   }
 
+
+  @Override
   public Long erpPartsCount(String partNos){
     String sql ="select count(*) from IMA_FILE  where 1=1 ";
     if(StringUtils.isNotEmpty(partNos)){
@@ -152,6 +157,6 @@ public class BasePartsErpServiceImpl implements BasePartsErpService {
     Long aLong = primaryJdbcTemplate.queryForObject(sql, Long.class);
     return aLong;
   }
+
+
 }
-
-
