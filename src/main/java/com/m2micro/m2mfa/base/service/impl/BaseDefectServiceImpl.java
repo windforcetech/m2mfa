@@ -70,7 +70,7 @@ public class BaseDefectServiceImpl implements BaseDefectService {
             totalCountsql +=  " AND bd.category = '"+query.getCategory()+"'\n" ;
         }
         if (StringUtils.isNotEmpty(query.getDescription())) {
-            totalCountsql = totalCountsql + " AND md.description like '%" + query.getDescription() + "%'\n";
+            totalCountsql = totalCountsql + " AND bd.description like '%" + query.getDescription() + "%'\n";
         }
 
 
@@ -105,7 +105,7 @@ public class BaseDefectServiceImpl implements BaseDefectService {
                 sql +=  " AND bd.category = '"+query.getCategory()+"'\n" ;
             }
             if (StringUtils.isNotEmpty(query.getDescription())) {
-                sql = sql + " AND md.description like '%" + query.getDescription() + "%'\n";
+                sql = sql + " AND bd.description like '%" + query.getDescription() + "%'\n";
             }
 
         if (StringUtils.isEmpty(query.getOrder()) || StringUtils.isEmpty(query.getDirect())) {

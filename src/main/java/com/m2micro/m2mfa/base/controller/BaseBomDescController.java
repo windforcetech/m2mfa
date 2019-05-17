@@ -516,9 +516,9 @@ public class BaseBomDescController {
 
     public ShowBom descToShowBomObj(BaseBomDesc baseBomDesc) {
         ShowBom showBom = new ShowBom();
-        showBom.setPartId(baseBomDesc.getPartId());
         showBom.setDistinguish(baseBomDesc.getDistinguish());
         BaseParts baseParts = basePartsService.findById(baseBomDesc.getPartId()).orElse(null);
+        showBom.setPartId(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getPartNo());
         showBom.setName(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getName());
         showBom.setSpec(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getSpec());
         showBom.setEffectiveDate(baseBomDesc.getEffectiveDate());
@@ -533,9 +533,9 @@ public class BaseBomDescController {
 
     public ShowBom defToShowBomObj(BaseBomDef baseBomDef) {
         ShowBom showBom = new ShowBom();
-        showBom.setPartId(baseBomDef.getPartId());
         showBom.setDistinguish(baseBomDef.getDistinguish());
         BaseParts baseParts = basePartsService.findById(baseBomDef.getPartId()).orElse(null);
+        showBom.setPartId(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getPartNo());
         showBom.setName(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getName());
         showBom.setSpec(baseParts == null ? "空指针错误(物料不存在)" : baseParts.getSpec());
         showBom.setEffectiveDate(baseBomDef.getEffectiveDate());
