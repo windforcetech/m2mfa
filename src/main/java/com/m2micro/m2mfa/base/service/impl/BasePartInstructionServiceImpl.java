@@ -82,6 +82,12 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
             if(StringUtils.isNotEmpty(query.getDescription())){
                 sql+=" and bpi.description like '%"+query.getDescription()+"%' \n";
             }
+            if(StringUtils.isNotEmpty(query.getInvalidDate())){
+                sql+=" and bpi.invalid_date <= '"+query.getInvalidDate()+"' \n";
+            }
+            if(StringUtils.isNotEmpty(query.getEffectiveDate())){
+                sql+=" and bpi.effective_date >= '"+query.getEffectiveDate()+"' \n";
+            }
 
         String Countsql ="select COUNT(*) from base_part_instruction bpis where bpis.id in( SELECT\n" +
             "distinct bpi.id\n" +
@@ -105,6 +111,12 @@ public class BasePartInstructionServiceImpl implements BasePartInstructionServic
         }
         if(StringUtils.isNotEmpty(query.getDescription())){
             Countsql+=" and bpi.description like '%"+query.getDescription()+"%' \n";
+        }
+        if(StringUtils.isNotEmpty(query.getInvalidDate())){
+            Countsql+=" and bpi.invalid_date <= '"+query.getInvalidDate()+"' \n";
+        }
+        if(StringUtils.isNotEmpty(query.getEffectiveDate())){
+            Countsql+=" and bpi.effective_date >= '"+query.getEffectiveDate()+"' \n";
         }
         //排序字段(驼峰转换)
         String order = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, StringUtils.isEmpty(query.getOrder())?"modified_on":query.getOrder());
