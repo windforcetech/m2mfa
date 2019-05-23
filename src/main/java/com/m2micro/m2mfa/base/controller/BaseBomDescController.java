@@ -36,7 +36,6 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
 /**
@@ -81,12 +80,16 @@ public class BaseBomDescController {
             //不等于全部
             if (!(baseItemsTarget != null && "全部".equals(baseItemsTarget.getItemName()))) {
                 List<BaseParts> allByCategory = basePartsService.findAllByCategory(query.getPartsCategory());
-                partIds = allByCategory.stream().map(x -> x.getPartNo()).collect(Collectors.toList()).toArray(new String[0]);
+                partIds = allByCategory.stream().map(x -> x.getPartId()).collect(Collectors.toList()).toArray(new String[0]);
                 expression.and((baseBomDesc.partId.in(partIds)));
             }
         }
-        if (StringUtils.isNotEmpty(query.getPartId())) {
-            expression.and(baseBomDesc.partId.like("%" + query.getPartId() + "%"));
+        if (StringUtils.isNotEmpty(query.getPartNo())) {
+
+            List<BaseParts> allByCategory = basePartsService.findAllByPartNoLike("%" +query.getPartNo()+ "%");
+            partIds = allByCategory.stream().map(x -> x.getPartId()).collect(Collectors.toList()).toArray(new String[0]);
+            expression.and((baseBomDesc.partId.in(partIds)));
+
         }
         if (StringUtils.isNotEmpty(query.getDistinguish())) {
             expression.and((baseBomDesc.distinguish.like("%" + query.getDistinguish() + "%")));
@@ -247,11 +250,11 @@ public class BaseBomDescController {
     }
 
     //    QBaseBomDesc qBaseBomDesc = QBaseBomDesc.baseBomDesc;
-//    BooleanExpression booleanExpression = qBaseBomDesc.partId.eq(partId);
+//    BooleanExpression booleanExpression = qBaseBomDesc.partNo.eq(partNo);
 //    Iterable<BaseBomDesc> bomDescIterable = baseBomDescService.findAll(booleanExpression);//partId关系，
 //
 //            bomDefIterable.forEach(desc -> {
-//        searchingIds.add(desc.getPartId());
+//        searchingIds.add(desc.getPartNo());
 //    });
     private boolean checkDeadLoop(BaseBomDesc staffShiftObj, List<String> partIds, List<String> addPartIds) {
         QBaseBomDef qBaseBomDef = QBaseBomDef.baseBomDef;
@@ -558,7 +561,7 @@ public class BaseBomDescController {
 
     private OrderSpecifier addOrderCondition(OrderSpecifier orderSpecifier, BaseBomDescQuery query, QBaseBomDesc baseBomDesc) {
         if(StringUtils.isNotEmpty(query.getDirect())){
-            if("partId".equals(query.getOrder())){
+            if("partNo".equals(query.getOrder())){
                 if("desc".equalsIgnoreCase(query.getDirect())){
                     orderSpecifier = baseBomDesc.partId.desc();
                 }else{

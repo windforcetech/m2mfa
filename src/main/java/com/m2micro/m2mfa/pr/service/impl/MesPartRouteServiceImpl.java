@@ -93,9 +93,9 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
 //        if(StringUtils.isNotEmpty(query.getPartNo())){
 //            BaseParts baseParts  =basePartsService.selectpartNo(query.getPartNo());
 //            if(baseParts !=null){
-//                condition.and(qMesPartRoute.partId.eq(baseParts.getPartId()));
+//                condition.and(qMesPartRoute.partNo.eq(baseParts.getPartNo()));
 //            }else {
-//                condition.and(qMesPartRoute.partId.eq(query.getPartNo()));
+//                condition.and(qMesPartRoute.partNo.eq(query.getPartNo()));
 //            }
 //        }
 //        if(StringUtils.isNotEmpty(query.getTouteName())){
@@ -145,7 +145,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
 //            BaseProcess iprocess =   baseProcessService.findById(mesPartRoute.getInputProcessId()).orElse(null);
 //            BaseProcess oprocess =   baseProcessService.findById(mesPartRoute.getOutputProcessId()).orElse(null);
 //            BaseRouteDesc baseRouteDesc =baseRouteDescService.findById(mesPartRoute.getRouteId()).orElse(null);
-//            BaseParts baseParts = basePartsService.findById(mesPartRoute.getPartId()).orElse(null);
+//            BaseParts baseParts = basePartsService.findById(mesPartRoute.getPartNo()).orElse(null);
 //            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(mesPartRoute.getControlInformation()).orElse(null);
 //            if(iprocess !=null){
 //                mesPartRoute.setInputProcessIdName(iprocess.getProcessName());
