@@ -137,7 +137,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         "t.enabled,\n" +
         "p.part_id,\n" +
         "p.part_no,\n" +
-        "p.name part_name , t2.item_name categoryName, \n" +
+        "p.name part_name , t.item_name categoryName, \n" +
         " p.spec  ,\n" +
         " mo.mo_number,  \n" +
         " mo.order_seq  ,\n" +
