@@ -401,7 +401,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
   public PageUtil<ScheduleObj> list(ScheduleQuery query) {
     String groupId = TokenInfo.getUserGroupId();
     RowMapper rm = BeanPropertyRowMapper.newInstance(ScheduleObj.class);
-    String sql = "SELECT t.schedule_id,t.schedule_no,t.machine_id,t.part_id, t2.part_no,t2.name part_name,t.schedule_qty,t1.name machine_name FROM";
+    String sql = "SELECT t.schedule_id,t.schedule_no,t.machine_id,t.part_id, t2.part_no,t2.name part_name,t.schedule_qty,(select bm.name from base_machine bm  where bm.machine_id=t.machine_id)  machine_name FROM";
     sql +=sqlPing();
 
     String sql2 = "SELECT count(*) FROM ";
@@ -433,8 +433,6 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
    */
   public String sqlPing(){
     String sql =" mes_mo_schedule t" +
-        "     left join base_machine t1" +
-        "        on t1.id=t.machine_id" +
         "        left join base_parts t2" +
         "        on t2.part_id=t.part_id" +
         "        where" +
