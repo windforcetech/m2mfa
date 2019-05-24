@@ -137,7 +137,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         "t.enabled,\n" +
         "p.part_id,\n" +
         "p.part_no,\n" +
-        "p.name part_name , t.item_name categoryName, \n" +
+        "p.name part_name , t2.item_name categoryName, \n" +
         " p.spec  ,\n" +
         " mo.mo_number,  \n" +
         " mo.order_seq  ,\n" +
@@ -294,7 +294,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         "p.part_no,\n" +
         "p.name part_name ,\n" +
         " p.spec  ,\n" +
-        " mo.mo_number,  \n" +
+        " mo.mo_number, (select bit.item_name from base_items_target bit where  bit.id=t.category)   categoryName, \n" +
         " mo.order_seq ,t.collar_on  ,t.collar_by  \n" +
         "from ";
     String sql2 = " select\n" +
