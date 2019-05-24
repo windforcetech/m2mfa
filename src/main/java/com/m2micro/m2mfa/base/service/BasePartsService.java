@@ -76,4 +76,7 @@ public interface BasePartsService extends BaseService<BaseParts,String> {
     PageUtil<BaseParts> guidingbooklist(BasePartsQuery query);
 
     List<BaseParts> findAllByCategory(String category);
+
+
+    List<BaseParts> findAllByPartNoLike(String partNo);
 }

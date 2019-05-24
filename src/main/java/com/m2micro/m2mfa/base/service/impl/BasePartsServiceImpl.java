@@ -452,6 +452,11 @@ public class BasePartsServiceImpl implements BasePartsService {
         return basePartsRepository.findAllByCategory(category);
     }
 
+    @Override
+    public List<BaseParts> findAllByPartNoLike(String partNo) {
+
+        return basePartsRepository.findAllByPartNoLike(partNo);
+    }
 
 
     @Override
