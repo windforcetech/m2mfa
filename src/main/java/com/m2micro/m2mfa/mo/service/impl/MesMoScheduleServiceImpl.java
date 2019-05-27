@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 生产排程表表头 服务实现类
@@ -81,8 +82,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private BaseStaffService baseStaffService;
     @Autowired
     private MesMoScheduleStaffService mesMoScheduleStaffService;
-    @Autowired
-    private BasePackService basePackService;
+
     @Autowired
     private BaseMoldService baseMoldService;
     @Autowired
@@ -172,15 +172,27 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     @Transactional
     @Override
     public void peopleDistributionsave(List<MesMoScheduleStaff> mesMoScheduleStaffs, List<MesMoScheduleStation> mesMoScheduleStations) {
+        //获取当前排产单
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(mesMoScheduleStaffs.get(0).getScheduleId()).orElse(null);
         Set<MesRecordStaff> mesRecordStaffSet = new HashSet<>();
         for (MesMoScheduleStaff mesMoScheduleStaff : mesMoScheduleStaffs) {
             List<MesRecordStaff> mesRecordStaffs = mesRecordStaffRepository.findStaffId(mesMoScheduleStaff.getStaffId());
             String recrdstaffId = "";
             if (!mesRecordStaffs.isEmpty()) {
+                List<String> collect = mesRecordStaffs.stream().map(x -> x.getRwId()).collect(Collectors.toList());
+                List<MesRecordWork> byRwidIn = mesRecordWorkRepository.findByRwidIn(collect);
                 for (MesRecordStaff mesRecordStaff : mesRecordStaffs) {
                     //判断当前员工的工位是不是原有工位不进行任何处理
-                    MesRecordWork mesRecordWork = mesRecordWorkRepository.findById(mesRecordStaff.getRwId()).orElse(null);
-                    if (mesRecordStaff.getStaffId().equals(mesMoScheduleStaff.getStaffId()) && mesRecordStaff.getScheduleId().equals(mesMoScheduleStaff.getScheduleId()) && mesRecordWork.getStationId().equals(mesMoScheduleStaff.getStationId())) {
+                 //   MesRecordWork mesRecordWork = mesRecordWorkRepository.findById(mesRecordStaff.getRwId()).orElse(null);
+                    for(MesRecordWork mesRecordWork :byRwidIn){
+                        if (mesRecordStaff.getStaffId().equals(mesMoScheduleStaff.getStaffId()) && mesRecordStaff.getScheduleId().equals(mesMoScheduleStaff.getScheduleId()) && mesRecordWork.getStationId().equals(mesMoScheduleStaff.getStationId())) {
+                            recrdstaffId = mesRecordStaff.getId();
+                            continue;
+                        }
+                    }
+
+                    //如果是未执行，或者待产状态不进行检验
+                    if(mesMoSchedule.getFlag().equals(MoScheduleStatus.AUDITED.getKey()) || mesMoSchedule.getFlag().equals(MoScheduleStatus.INITIAL.getKey())){
                         recrdstaffId = mesRecordStaff.getId();
                         continue;
                     }
