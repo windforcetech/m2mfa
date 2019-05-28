@@ -129,7 +129,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         }
 
         //不良数量,报废数量（不良数量是每个工位的和）
-        MoDescInfoModel moDescForStationFail = getMoDescForStationFail(scheduleId, stationId);
+        MoDescInfoModel moDescForStationFail = getMoDescForProcessFail(scheduleId, processId);
         stationInfoModel.setQty(moDescForStationFail.getQty());
         stationInfoModel.setScrapQty(moDescForStationFail.getScrapQty());
         //获取工位完成量（已排除不良）
@@ -242,7 +242,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         List scheduleIds = new ArrayList();
         scheduleIds.add(scheduleId);
         //获取不良数量(产出工位的不良)
-        Integer failQty = getFailQty(scheduleIds, stationId);
+        Integer failQty = getFailQty(scheduleIds, outputProcessId);
         failQty = failQty==null?0:failQty;
         if(failQty>completedQty.intValue()){
             throw new MMException("不良数量大于完工数量");
@@ -309,7 +309,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
             completedQty = completedQty.add(getCompletedQty(iotMachineOutput, scheduleIdForcompleted, stationId));
         }
         //获取不良数量(产出工位的不良)
-        Integer failQty = getFailQty(scheduleIds, stationId);
+        Integer failQty = getFailQty(scheduleIds, outputProcessId);
         failQty = failQty==null?0:failQty;
         if(failQty>completedQty.intValue()){
             throw new MMException("不良数量大于完工数量");
@@ -456,10 +456,10 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     /**
      * 获取不良数（整改后）
      * @param scheduleIds
-     * @param stationId
+     * @param processId
      * @return
      */
-    private Integer getFailQty(List<String> scheduleIds,String stationId) {
+    private Integer getFailQty(List<String> scheduleIds,String processId) {
         String para = String.join("','",scheduleIds);
         String sql = "SELECT\n" +
                 "	sum(IFNULL(fail_qty,0))\n" +
@@ -469,7 +469,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
                 "schedule_id IN (\n" +
                 "'" + para +"'\n" +
                 ")\n"+
-                "AND target_station_id='" + stationId + "'\n";
+                "AND target_process_id='" + processId + "'\n";
         return jdbcTemplate.queryForObject(sql ,Integer.class);
     }
 
