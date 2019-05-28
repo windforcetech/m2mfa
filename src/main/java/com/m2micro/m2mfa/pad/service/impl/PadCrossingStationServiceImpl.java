@@ -605,6 +605,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //下一工序与本作业工序是否符合
         if(!para.getProcessId().equalsIgnoreCase(mesRecordWipRec.getWipNextProcess())){
             BaseProcess baseProcess = baseProcessService.findById(mesRecordWipRec.getWipNextProcess()).orElse(null);
+            if(baseProcess==null){
+                throw new MMException("工艺流程出错,没有下一个工序！");
+            }
             throw new MMException("工艺流程出错：该序号下一工序"+baseProcess.getProcessName());
         }
         //获取排产单id
