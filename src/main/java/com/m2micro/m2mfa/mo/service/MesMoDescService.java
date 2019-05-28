@@ -36,6 +36,7 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      */
     List<MesMoDesc> findByMoNumberAndMoIdNot(String moNumber, String moId);
 
+    List<MesMoDesc> findByPartId(String partId);
     /**
      * 删除所有
      * @param ids

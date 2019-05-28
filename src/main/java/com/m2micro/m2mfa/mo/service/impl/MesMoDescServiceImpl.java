@@ -266,6 +266,12 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     }
 
     @Override
+    public List<MesMoDesc> findByPartId(String partId) {
+
+        return mesMoDescRepository.findByPartId(partId);
+    }
+
+    @Override
     @Transactional
     public void deleteAll(String[] ids) {
         //工单的状态【Close_Flag】在（初始=0，已审待排=1）允许删除。否则提示用户工单的当前状态，不允许删除。
