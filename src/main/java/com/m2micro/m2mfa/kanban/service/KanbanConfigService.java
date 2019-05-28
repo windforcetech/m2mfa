@@ -37,5 +37,5 @@ public interface KanbanConfigService {
    * 更新
    * @param baseLedConfig
    */
-  void update( BaseLedConfig baseLedConfig);
+  void renew( BaseLedConfig baseLedConfig);
 }
