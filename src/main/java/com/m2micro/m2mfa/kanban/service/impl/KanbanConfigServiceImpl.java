@@ -74,6 +74,12 @@ public class KanbanConfigServiceImpl implements KanbanConfigService {
       return true;
     }).collect(Collectors.toList());
     baseLedConfig.setBaseMachineLists(collect);
+    String macheineids="";
+    for(BaseMachineList baseMachineList: byConfigId){
+      macheineids+=baseMachineList.getMachineId()+",";
+    }
+    String substring = macheineids.substring(0, macheineids.length() - 1);
+    baseLedConfig.setMachineList(substring);
     return baseLedConfig;
   }
 
