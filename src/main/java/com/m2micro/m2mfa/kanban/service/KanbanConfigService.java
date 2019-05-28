@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.kanban.service;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.kanban.entity.BaseLedConfig;
+import org.springframework.web.bind.annotation.RequestBody;
 
 public interface KanbanConfigService {
   /**
@@ -31,4 +32,10 @@ public interface KanbanConfigService {
    * @return
    */
   PageUtil<BaseLedConfig> list(Query query);
+
+  /**
+   * 更新
+   * @param baseLedConfig
+   */
+  void update( BaseLedConfig baseLedConfig);
 }

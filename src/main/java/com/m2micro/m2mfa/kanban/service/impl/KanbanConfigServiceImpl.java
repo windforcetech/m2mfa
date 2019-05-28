@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.base.service.BaseMachineService;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.kanban.entity.BaseLedConfig;
 import com.m2micro.m2mfa.kanban.entity.BaseMachineList;
 import com.m2micro.m2mfa.kanban.entity.QBaseLedConfig;
@@ -74,6 +75,12 @@ public class KanbanConfigServiceImpl implements KanbanConfigService {
       return true;
     }).collect(Collectors.toList());
     baseLedConfig.setBaseMachineLists(collect);
+    String macheineids="";
+    for(BaseMachineList baseMachineList: byConfigId){
+      macheineids+=baseMachineList.getMachineId()+",";
+    }
+    String substring = macheineids.substring(0, macheineids.length() - 1);
+    baseLedConfig.setMachineList(substring);
     return baseLedConfig;
   }
 
@@ -91,5 +98,33 @@ public class KanbanConfigServiceImpl implements KanbanConfigService {
     }).collect(Collectors.toList());
     long totalCount = jq.fetchCount();
     return PageUtil.of(collect,totalCount,query.getSize(),query.getPage());
+  }
+
+  @Override
+  public void update(BaseLedConfig baseLedConfig) {
+    ValidatorUtil.validateEntity(baseLedConfig, UpdateGroup.class);
+    BaseLedConfig baseLedConfigOld = findById(baseLedConfig.getConfigId());
+    if(baseLedConfigOld==null){
+      throw new MMException("数据库不存在该记录");
+    }
+    String [] ids=new String[]{baseLedConfig.getConfigId()};
+    baseMachineListRepository.deleteByConfigIdIn(ids);
+    ValidatorUtil.validateEntity(baseLedConfig, AddGroup.class);
+    baseLedConfig.setConfigId(baseLedConfig.getConfigId());
+    String[] machineIds = baseLedConfig.getMachineList().split(",");
+    for(String macheineid :  machineIds){
+      BaseMachine baseMachine = baseMachineService.findById(macheineid).orElse(null);
+      if(baseMachine==null){
+        throw  new MMException("机台编码有误！！！");
+      }
+      BaseMachineList baseMachineList = new BaseMachineList();
+      baseMachineList.setMachineListId(UUIDUtil.getUUID());
+      baseMachineList.setConfigId(baseLedConfig.getConfigId());
+      baseMachineList.setMachineId(macheineid);
+      baseMachineListRepository.save(baseMachineList);
+    }
+    baseLedConfig.setMachineList("");
+    baseLedConfigRepository.save(baseLedConfig);
+
   }
 }
