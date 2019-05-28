@@ -48,9 +48,9 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
         "	bit.item_name  machine_status ,\n" +
         "	mmd.mo_number,\n" +
         "	mmd.target_qty,\n" +
-        "	mmd.schedul_qty,\n" +
+        " IFNULL(mmd.output_qty,0) output_qty ,\n" +
         "	(\n" +
-        "		mmd.schedul_qty / mmd.target_qty * 100\n" +
+        "	  IFNULL(mmd.output_qty,0)  / mmd.target_qty * 100\n" +
         "	) rate\n" +
         "FROM  \n" ;
     sql +=  sqlPing(baseLedConfig);
