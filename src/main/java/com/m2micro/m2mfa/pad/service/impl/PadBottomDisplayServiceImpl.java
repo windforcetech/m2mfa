@@ -133,7 +133,9 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         stationInfoModel.setQty(moDescForStationFail.getQty());
         stationInfoModel.setScrapQty(moDescForStationFail.getScrapQty());
         //获取工位完成量（已排除不良）
-        Integer completedQty = getOutputQtyForStation(scheduleId, stationId, processId, mesMoSchedule.getMachineId(), moDescForStationFail);
+        //Integer completedQty = getOutputQtyForStation(scheduleId, stationId, processId, mesMoSchedule.getMachineId(), moDescForStationFail);
+        //获取工序完成量（已排除不良）
+        Integer completedQty = getOutputQtyForProcess(scheduleId, baseProcess);
         stationInfoModel.setCompletedQty(completedQty);
         /*Integer completedQty = getOutputQtyForProcess(scheduleId, baseProcess);
         stationInfoModel.setCompletedQty(completedQty);*/
