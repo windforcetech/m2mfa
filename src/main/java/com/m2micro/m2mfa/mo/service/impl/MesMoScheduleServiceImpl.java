@@ -552,7 +552,10 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             //工艺结束
             mesMoScheduleProcessRepository.setEndAll(new Date(), mesMoSchedule.getScheduleId());
             //获取未完成的排产单产量
-            Integer uncompletedQty = getUncompletedQty(mesMoSchedule.getScheduleId());
+            Integer outPutQtys = padBottomDisplayService.getOutPutQtys(mesMoSchedule.getScheduleId());
+            Integer uncompletedQty = mesMoSchedule.getScheduleQty()-outPutQtys;
+            //Integer uncompletedQty = getUncompletedQty(mesMoSchedule.getScheduleId());
+
             MesMoDesc mesMoDesc = mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
             //获取工单已排的数量
             Integer schedulQty = mesMoDesc.getSchedulQty() == null ? 0 : mesMoDesc.getSchedulQty();

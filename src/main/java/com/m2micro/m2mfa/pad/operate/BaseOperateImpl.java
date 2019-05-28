@@ -819,7 +819,7 @@ public class BaseOperateImpl implements BaseOperate {
         MesRecordWork mesRecordWork = mesRecordWorkService.findById(mesRecordFail1.getRwId()).orElse(null);
         //完工数量
        //Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesRecordWork.getMachineId()), mesRecordWork.getScheduleId(), mesRecordWork.getScheduleId()).intValue();
-        MoDescInfoModel moDescForStationFail = getMoDescForStationFail(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
+        MoDescInfoModel moDescForStationFail = getMoDescForProcessFail(mesRecordWork.getScheduleId(), mesRecordWork.getProcessId());
         Integer completedQty = padBottomDisplayService.getOutputQtyForStation(mesRecordWork.getScheduleId(), mesRecordWork.getStationId(), mesRecordWork.getProcessId(), mesRecordWork.getMachineId(), moDescForStationFail);
         if(mesRecordFail1.getQty()>completedQty){
             throw new MMException("不良负数量不可大于完工数量");
@@ -1207,7 +1207,7 @@ public class BaseOperateImpl implements BaseOperate {
         Integer scheduleQty = mesMoSchedule.getScheduleQty();
         BigDecimal qty = new BigDecimal(scheduleQty);
         BigDecimal completedQty = getCompletedQty(iotMachineOutput,mesRecordWork.getScheduleId(),mesRecordWork.getStationId());
-        MoDescInfoModel moDescForStationFail = getMoDescForStationFail(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
+        MoDescInfoModel moDescForStationFail = getMoDescForProcessFail(mesRecordWork.getScheduleId(), mesRecordWork.getProcessId());
         BigDecimal fail = new BigDecimal(moDescForStationFail.getQty());
         BigDecimal output = completedQty.subtract(fail);
         return output.compareTo(qty);
@@ -1242,7 +1242,7 @@ public class BaseOperateImpl implements BaseOperate {
     }*/
 
     /**
-     *  获取当前排产单当前工位的不良数量及报废数量（整改后）
+     *  获取当前排产单当前工位的不良数量及报废数量（整改后，已经没用了）
      * @param scheduleId
      * @param stationId
      * @return
@@ -1255,6 +1255,31 @@ public class BaseOperateImpl implements BaseOperate {
                 "mes_record_wip_fail WHERE \n" +
                 "schedule_id='" + scheduleId + "'\n" +
                 "AND target_station_id='" + stationId + "'";
+        RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
+        MoDescInfoModel moDescInfoModel = jdbcTemplate.queryForObject(sql, rowMapper);
+        if(moDescInfoModel.getQty()==null){
+            moDescInfoModel.setQty(0l);
+        }
+        if(moDescInfoModel.getScrapQty()==null){
+            moDescInfoModel.setScrapQty(0);
+        }
+        return moDescInfoModel;
+    }
+
+    /**
+     *  获取当前排产单当前工序的不良数量及报废数量（整改后）
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+    protected MoDescInfoModel getMoDescForProcessFail(String scheduleId,String processId) {
+        String sql = "SELECT\n" +
+                "	sum( IFNULL( fail_qty, 0 ) ) qty,\n" +
+                "	sum( IFNULL( scrap_qty, 0 ) ) scrapQty \n" +
+                "FROM\n" +
+                "mes_record_wip_fail WHERE \n" +
+                "schedule_id='" + scheduleId + "'\n" +
+                "AND target_process_id='" + processId + "'";
         RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
         MoDescInfoModel moDescInfoModel = jdbcTemplate.queryForObject(sql, rowMapper);
         if(moDescInfoModel.getQty()==null){
