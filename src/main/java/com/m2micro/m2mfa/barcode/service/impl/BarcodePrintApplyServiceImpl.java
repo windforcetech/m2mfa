@@ -154,7 +154,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         "and t1.id= t.template_id\n" +
         "and t.customer_no=cus.code\n" +
         "and t.part_id=p.part_id\n" +
-      //  "and schedule.schedule_id=t.source\n" +
+         "and schedule.schedule_id=t.source\n" +
         "and t.category=t3.id\n" +
         "and mo.mo_id=schedule.mo_id " ;
 
@@ -173,7 +173,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         "and t1.id= t.template_id\n" +
         "and t.customer_no=cus.code\n" +
         "and t.part_id=p.part_id\n" +
-       // "and schedule.schedule_id=t.source\n" +
+        "and schedule.schedule_id=t.source\n" +
         "and t.category=t3.id\n" ;
 
     sql2 = getSql(query, groupId, sql2);
@@ -341,7 +341,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         "and t1.id= t.template_id\n" +
         "and t.customer_no=cus.code\n" +
         "and t.part_id=p.part_id\n" +
-       // "and schedule.schedule_id=t.source\n" +
+        "and schedule.schedule_id=t.source\n" +
         "and t.category=t3.id\n" +
         "and mo.mo_id=schedule.mo_id " +
         "and t.check_flag=1 ";
@@ -633,7 +633,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         "and t1.id= t.template_id\n" +
         "and t.customer_no=cus.code\n" +
         "and t.part_id=p.part_id\n" +
-       // "and schedule.schedule_id=t.source\n" +
+        "and schedule.schedule_id=t.source\n" +
         "and t.category=t3.id\n" +
         "and mo.mo_id=schedule.mo_id " +
         "and t.id='" + applyId + "' ;";
