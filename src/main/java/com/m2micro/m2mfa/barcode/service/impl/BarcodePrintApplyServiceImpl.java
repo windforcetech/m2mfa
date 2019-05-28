@@ -58,59 +58,6 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
     return barcodePrintApplyRepository;
   }
 
-  public PageUtil<PrintApplyObj> printApplyList1(PrintApplyQuery query) {
-    RowMapper rm = BeanPropertyRowMapper.newInstance(PrintApplyObj.class);
-    String sql = " select\n" +
-        " t2.item_name flag_type,\n" +
-        " t1.name template_name,\n" +
-        " t1.version template_version,\n" +
-        " cus.code customer_code,\n" +
-        " cus.name customer_name,\n" +
-        " t.id apply_id,\n" +
-        " t.sequence sequence,\n" +
-        " t.category,\n" +
-        " t.source,\n" +
-        " t.print_category,\n" +
-        " t.qty,\n" +
-        " t.check_On,\n" +
-        " t.flag,\n" +
-        " t.description,\n" +
-        " t.check_flag,\n" +
-        " t.enabled,\n" +
-        " p.part_id,\n" +
-        " p.name part_no\n" +
-        " from barcode_print_apply t ,\n" +
-        " base_parts p,\n" +
-        " base_template t1,\n" +
-        " base_items_target t2,\n" +
-        " base_customer cus\n" +
-        " where t1.category=t2.id\n" +
-        " and t1.id= t.template_id " +
-        " and t.customer_no=cus.code\n" +
-        " and t.part_id=p.part_id\n" +
-        " and t.flag=0  ";
-
-    String sql2 = " select\n" +
-        " count(t.id) \n" +
-        " from barcode_print_apply t ,\n" +
-        " base_parts p,\n" +
-        " base_template t1,\n" +
-        " base_items_target t2,\n" +
-        " base_customer cus\n" +
-        " where t1.category=t2.id\n" +
-        " and t1.id= t.template_id " +
-        " and t.customer_no=cus.code\n" +
-        " and t.part_id=p.part_id\n" +
-        " and t.flag=0 ;";
-
-    Integer count = jdbcTemplate.queryForObject(sql2, Integer.class);
-    sql += " order by t.id limit " + (query.getPage() - 1) * query.getSize() + "," + query.getSize() + " ;";
-
-    List<PrintApplyObj> templateList = jdbcTemplate.query(sql, rm);
-    return PageUtil.of(templateList, count, query.getSize(), query.getPage());
-
-  }
-
 
   @Override
   public PageUtil<PrintApplyObj> printApplyList(PrintApplyQuery query) {
@@ -154,7 +101,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         "and t1.id= t.template_id\n" +
         "and t.customer_no=cus.code\n" +
         "and t.part_id=p.part_id\n" +
-         "and schedule.schedule_id=t.source\n" +
+        "and schedule.schedule_id=t.source\n" +
         "and t.category=t3.id\n" +
         "and mo.mo_id=schedule.mo_id " ;
 

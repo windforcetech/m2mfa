@@ -76,14 +76,7 @@ public class KanbanConfigController {
   @ApiOperation(value="更新")
   @UserOperationLog("更新")
   public ResponseMessage<BaseLedConfig> update(@RequestBody BaseLedConfig baseLedConfig){
-    ValidatorUtil.validateEntity(baseLedConfig, UpdateGroup.class);
-    BaseLedConfig baseLedConfigOld = kanbanConfigService.findById(baseLedConfig.getConfigId());
-    if(baseLedConfigOld==null){
-      throw new MMException("数据库不存在该记录");
-    }
-    String [] ids=new String[]{baseLedConfig.getConfigId()};
-    kanbanConfigService.deleteByIds(ids);
-    kanbanConfigService.save(baseLedConfig);
+    kanbanConfigService.update(baseLedConfig);
     return ResponseMessage.ok();
   }
 }
