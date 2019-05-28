@@ -108,7 +108,7 @@ public class KanbanConfigServiceImpl implements KanbanConfigService {
       throw new MMException("数据库不存在该记录");
     }
     String [] ids=new String[]{baseLedConfig.getConfigId()};
-    baseMachineListRepository.deleteByConfigIdIn(ids);
+    deleteByIds(ids);
     ValidatorUtil.validateEntity(baseLedConfig, AddGroup.class);
     baseLedConfig.setConfigId(baseLedConfig.getConfigId());
     String[] machineIds = baseLedConfig.getMachineList().split(",");
