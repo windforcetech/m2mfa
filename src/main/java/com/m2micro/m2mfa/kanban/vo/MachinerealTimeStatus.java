@@ -14,7 +14,7 @@ public class MachinerealTimeStatus {
   @ApiModelProperty(value = "目标量")
   private String targetQty ;
   @ApiModelProperty(value = "完成量")
-  private String schedulQty ;
+  private String outputQty ;
   @ApiModelProperty(value = "完成率")
   private String rate ;
 }
