@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/kanban/machinerealTimeStatus")
 @Api(value="看板配置项")
-@Authorize
 public class MachinerealTimeStatusController {
 
 
