@@ -177,6 +177,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         if(para.getOutputQty()+para.getQty()!=outputQty){
             throw new MMException("此箱的产出数量加不良数量已超出上站产出数，请核对！");
         }
+        if(para.getOutputQty()<0){
+            throw new MMException("产出数不能小于0，请核对！");
+        }
         /*
         1) 保存上一次在制信息到日志
         2）更新mes_record_wip_rec在制信息
@@ -187,14 +190,20 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         7）是否结束排产单
         8）是否结束工单
         */
-        //保存上一次在制信息到日志
-        copyDataToLog(mesRecordWipRec);
+
         //获取产出工序
         MesPartRoute mesPartRoute = mesPartRouteRepository.findById(partRouteId).orElse(null);
         //工序是否是产出工序
         Boolean isOutputProcess = isOutputProcess(para.getProcessId(), mesPartRoute.getOutputProcessId());
+        //如果是注塑成型，保存上一次（第一次）在制信息到日志
+        Boolean firstProcess = isFirstProcess(beforeProcessId);
+        if(firstProcess){
+            copyDataToLog(mesRecordWipRec);
+        }
         //更新mes_record_wip_rec
         updateMesRecordWipRec(para, mesRecordWipRec, nextProcessId, isOutputProcess);
+        //保存当前在制信息到日志
+        copyDataToLog(mesRecordWipRec);
         //保存不良
         saveMesRecordWipFail(para.getCrossStationFails(),source,para.getProcessId(),para.getStationId(),para.getBarcode());
         //是否结束工序
@@ -215,7 +224,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             //更新工单（mes_mo_desc）的产出数（OutputQty
             updateMoDescForOutputQty(mesRecordWipRec, source,mesMoSchedule.getMoId());
             //将当前工序放入日志，因为是最后一道工序
-            copyDataToLog(mesRecordWipRec);
+            //copyDataToLog(mesRecordWipRec);
             //产出工序已结束
             if(endCrossStationProcess){
                 //结束排产单
@@ -226,6 +235,14 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             }
         }
 
+    }
+
+    private Boolean isFirstProcess(String processId){
+        BaseProcess baseProcess = baseProcessService.findById(processId).orElse(null);
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -257,6 +274,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         Long qty=0l;
         if(crossStationFails!=null&&crossStationFails.size()>0){
             for(CrossStationFail crossStationFail:crossStationFails){
+                if(crossStationFail.getQty()<0){
+                    throw new MMException("不良数不能小于0，请核对！");
+                }
                 qty=qty+crossStationFail.getQty();
             }
         }
