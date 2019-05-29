@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.kanban.vo;
 
+import com.m2micro.m2mfa.kanban.entity.BaseLedConfig;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -16,6 +17,8 @@ public class MachinerealTimeData {
   Integer machinereaMalfunction;
   @ApiModelProperty(value = "停机设备")
   Integer machinereaDowntime;
+  @ApiModelProperty(value = "配置信息")
+  BaseLedConfig baseLedConfig;
   @ApiModelProperty(value = "机台详情")
   List<MachinerealTimeStatus> machinerealTimeStatuses;
 }
