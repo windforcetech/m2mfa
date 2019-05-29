@@ -101,15 +101,7 @@ public class KanbanConfigServiceImpl implements KanbanConfigService {
   }
 
   @Override
-  public void update(BaseLedConfig baseLedConfig) {
-    ValidatorUtil.validateEntity(baseLedConfig, UpdateGroup.class);
-    BaseLedConfig baseLedConfigOld = findById(baseLedConfig.getConfigId());
-    if(baseLedConfigOld==null){
-      throw new MMException("数据库不存在该记录");
-    }
-    String [] ids=new String[]{baseLedConfig.getConfigId()};
-    baseMachineListRepository.deleteByConfigIdIn(ids);
-    ValidatorUtil.validateEntity(baseLedConfig, AddGroup.class);
+  public void renew(BaseLedConfig baseLedConfig) {
     baseLedConfig.setConfigId(baseLedConfig.getConfigId());
     String[] machineIds = baseLedConfig.getMachineList().split(",");
     for(String macheineid :  machineIds){
