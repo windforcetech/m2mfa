@@ -358,7 +358,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
      * @param scheduleIds
      * @return
      */
-    private MoDescInfoModel getMoDescForFail(List<String> scheduleIds) {
+    /*private MoDescInfoModel getMoDescForFail(List<String> scheduleIds) {
 
         String para = String.join("','",scheduleIds);
         String sql = "SELECT\n" +
@@ -370,6 +370,30 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
                 "WHERE\n" +
                 "	mrw.rwid = mrf.rw_id\n" +
                 "AND mrw.schedule_id IN (\n" +
+                "'" + para +"'\n" +
+                ")";
+        RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
+        List<MoDescInfoModel> moDescInfoModels = jdbcTemplate.query(sql, rowMapper);
+        MoDescInfoModel moDescInfoModel = moDescInfoModels.get(0);
+        if(moDescInfoModel.getQty()==null){
+            moDescInfoModel.setQty(0l);
+        }
+        if(moDescInfoModel.getScrapQty()==null){
+            moDescInfoModel.setScrapQty(0);
+        }
+        return moDescInfoModel;
+    }*/
+
+
+    private MoDescInfoModel getMoDescForFail(List<String> scheduleIds) {
+
+        String para = String.join("','",scheduleIds);
+        String sql = "SELECT\n" +
+                "	sum( IFNULL( fail_qty, 0 ) ) qty,\n" +
+                "	sum(IFNULL(scrap_qty,0)) scrapQty\n" +
+                "FROM\n" +
+                "	mes_record_wip_fail \n" +
+                "where schedule_id IN (\n" +
                 "'" + para +"'\n" +
                 ")";
         RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);

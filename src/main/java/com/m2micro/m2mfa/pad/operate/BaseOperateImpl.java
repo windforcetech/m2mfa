@@ -825,8 +825,10 @@ public class BaseOperateImpl implements BaseOperate {
             throw new MMException("不良负数量不可大于完工数量");
         }
 
-        long badsum = getBadsum(mesRecordFail1);
-        //不良数量为负
+        //long badsum = getBadsum(mesRecordFail1);
+        long badsum = moDescForStationFail.getQty();
+
+    //不良数量为负
         if(mesRecordFail1.getQty() <0){
             long qtynum= Math.abs(mesRecordFail1.getQty());
             if (qtynum > badsum) {
@@ -855,6 +857,7 @@ public class BaseOperateImpl implements BaseOperate {
             }
             return num;
         }
+
 
 
     @Override

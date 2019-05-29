@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.pad.service;
 
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.mo.model.OperationInfo;
 import com.m2micro.m2mfa.pad.model.*;
 
@@ -43,7 +44,7 @@ public interface PadDispatchService {
      * @param obj
      * @return
      */
-    Object defectiveProducts (Padbad obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException;
+    Object defectiveProducts (Padbad obj) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, MMException;
     /**
      * 提报异常
      * @param obj
