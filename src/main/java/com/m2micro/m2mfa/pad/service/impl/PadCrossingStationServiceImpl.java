@@ -178,7 +178,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             throw new MMException("此箱的产出数量加不良数量已超出上站产出数，请核对！");
         }
         if(para.getOutputQty()<0){
-            throw new MMException("产出数不能小于0，请核对！");
+            throw new MMException("不良数量不能大于产出数量！");
         }
         /*
         1) 保存上一次在制信息到日志
