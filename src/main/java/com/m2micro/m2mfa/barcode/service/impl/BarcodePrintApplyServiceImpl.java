@@ -567,7 +567,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
         "p.name part_name,\n" +
         " p.spec,  \n" +
         " mo.mo_number,  \n" +
-        " mo.order_seq  \n" +
+        " mo.order_seq , schedule.schedule_no  orderNumber \n" +
         "from barcode_print_apply t ,\n" +
         "base_parts p,\n" +
         "base_template t1,\n" +

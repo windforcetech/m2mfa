@@ -80,6 +80,8 @@ public class PrintApplyObj {
     @ApiModelProperty("来源类型名称")
     private String categoryName;
 
+    @ApiModelProperty("排单号码")
+    private String  orderNumber;
 
 
     @ApiModelProperty("打印条码列表")
@@ -95,6 +97,14 @@ public class PrintApplyObj {
 
     public String getMoNumber() {
         return moNumber;
+    }
+
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
     }
 
     public void setMoNumber(String moNumber) {
