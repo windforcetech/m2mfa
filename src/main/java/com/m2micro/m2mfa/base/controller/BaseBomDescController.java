@@ -123,7 +123,7 @@ public class BaseBomDescController {
         }
         orderSpecifier = addOrderCondition(orderSpecifier, query, baseBomDesc);
 
-        jq.where(expression).orderBy(orderSpecifier).orderBy(baseBomDesc.createOn.desc());
+        jq.where(expression).offset((query.getPage() - 1) * query.getSize()).limit(query.getSize()).orderBy(orderSpecifier).orderBy(baseBomDesc.createOn.desc());
         List<BaseBomDesc> baseBomDescs = jq.fetch();
         Session session = entityManager.unwrap(org.hibernate.Session.class);
         //List<BaseBomDesc> baseBomDescs = Lists.newArrayList(baseBomDescService.findAll(expression));
@@ -166,7 +166,7 @@ public class BaseBomDescController {
             }
 
         });
-        PageUtil<BaseBomDesc> of = PageUtil.of(baseBomDescs, baseBomDescs.size(), query.getSize(), query.getPage());
+        PageUtil<BaseBomDesc> of = PageUtil.of(baseBomDescs, jq.fetchCount(), query.getSize(), query.getPage());
         return ResponseMessage.ok(of);
     }
 
