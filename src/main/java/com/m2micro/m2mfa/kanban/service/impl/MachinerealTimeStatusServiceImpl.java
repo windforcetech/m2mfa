@@ -63,6 +63,7 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
     machinerealTimeData.setMachinerealMaintenance(getMachinerealMaintenance(baseLedConfig));
     machinerealTimeData.setMachinereaMalfunction(getMachinereaMalfunction(baseLedConfig));
     machinerealTimeData.setMachinereaDowntime(getMachinereaDowntime(baseLedConfig));
+    machinerealTimeData.setBaseLedConfig(baseLedConfig);
     return machinerealTimeData;
   }
 
