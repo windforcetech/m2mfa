@@ -16,4 +16,6 @@ public interface BaseLedConfigRepository extends BaseRepository<BaseLedConfig,St
 
   void deleteByConfigIdIn(String[] ids);
 
+  List<BaseLedConfig>findByElemen(String elemen );
+
 }

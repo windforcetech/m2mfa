@@ -9,5 +9,5 @@ public interface MachinerealTimeStatusService {
    * 机台实时状态
    * @return
    */
-  List<MachinerealTimeData> MachinerealTimeStatusShow();
+  List<MachinerealTimeData> MachinerealTimeStatusShow( String  elemen);
 }
