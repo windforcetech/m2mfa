@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.kanban.vo.MachinerealTimeData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,12 +26,12 @@ public class MachinerealTimeStatusController {
   /**
    * 机台实时数据显示
    */
-  @PostMapping("/MachinerealTimeStatusShow")
+  @PostMapping("/MachinerealTimeStatusShow/{elemen}")
   @ApiOperation(value="机台实时数据显示")
   @UserOperationLog("机台实时数据显示")
-  public ResponseMessage<List<MachinerealTimeData>> MachinerealTimeStatusShow(){
+  public ResponseMessage<List<MachinerealTimeData>> MachinerealTimeStatusShow(@PathVariable("elemen")  String  elemen){
 
-    return  ResponseMessage.ok(machinerealTimeStatusService.MachinerealTimeStatusShow());
+    return  ResponseMessage.ok(machinerealTimeStatusService.MachinerealTimeStatusShow(elemen));
   }
 
 }

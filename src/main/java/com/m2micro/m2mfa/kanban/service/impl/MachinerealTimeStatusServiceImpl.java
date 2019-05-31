@@ -1,7 +1,9 @@
 package com.m2micro.m2mfa.kanban.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.m2mfa.kanban.constant.MachineConstant;
 import com.m2micro.m2mfa.kanban.entity.BaseLedConfig;
+import com.m2micro.m2mfa.kanban.repository.BaseLedConfigRepository;
 import com.m2micro.m2mfa.kanban.service.BaseLedConfigService;
 import com.m2micro.m2mfa.kanban.service.KanbanConfigService;
 import com.m2micro.m2mfa.kanban.service.MachinerealTimeStatusService;
@@ -24,15 +26,16 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
   @Autowired
   KanbanConfigService kanbanConfigService;
   @Autowired
-  BaseLedConfigService baseLedConfigService ;
+  BaseLedConfigRepository baseLedConfigRepository ;
 
   @Autowired
   @Qualifier("secondaryJdbcTemplate")
   private JdbcTemplate jdbcTemplate;
 
   @Override
-  public List<MachinerealTimeData> MachinerealTimeStatusShow() {
-    List<BaseLedConfig> all = baseLedConfigService.findAll();
+  public List<MachinerealTimeData> MachinerealTimeStatusShow(String elemen) {
+
+    List<BaseLedConfig> all = baseLedConfigRepository.findByElemen(elemen);
     List<MachinerealTimeData>  machinerealTimeDatas = new ArrayList<>();
     for(BaseLedConfig  baseLedConfig :all){
       MachinerealTimeData machinerealTimeData = getMachinerealTimeData(baseLedConfig.getConfigId());

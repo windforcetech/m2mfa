@@ -37,6 +37,9 @@ public class KanbanConfigServiceImpl implements KanbanConfigService {
   @Transactional
   @Override
   public void save(BaseLedConfig baseLedConfig) {
+    if(baseLedConfigRepository.findByElemen(baseLedConfig.getElemen())!=null){
+      throw  new MMException("看板ip不一致！！！");
+    }
     ValidatorUtil.validateEntity(baseLedConfig, AddGroup.class);
     String configid = UUIDUtil.getUUID();
     baseLedConfig.setConfigId(configid);
