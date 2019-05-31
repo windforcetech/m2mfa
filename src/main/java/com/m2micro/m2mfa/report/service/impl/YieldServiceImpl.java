@@ -111,6 +111,7 @@ public class YieldServiceImpl implements YieldService {
     return collect ;
   }
 
+
   @Override
   public void excelOutData(YieldQuery yieldQuery)throws Exception {
     List<Yield> yields = YieldShow(yieldQuery);
@@ -119,9 +120,12 @@ public class YieldServiceImpl implements YieldService {
     Sheet sheet1 = book.createSheet("产量报表");
     List<Integer> integers = GroupBy(yieldQuery);
     Integer y=1;
+    System.out.println("xxxxx"+integers.size());
     for( int x =0; x<integers.size();x++){
       Integer i = integers.get(x);
       int v=y+i;
+        v = v - 1;
+      System.out.println("y==="+y+"v===="+v+"x==="+x);
       sheet1.addMergedRegion(new CellRangeAddress(y,v,0,0));
       sheet1.addMergedRegion(new CellRangeAddress(y,v,1,1));
       sheet1.addMergedRegion(new CellRangeAddress(y,v,2,2));
@@ -131,6 +135,7 @@ public class YieldServiceImpl implements YieldService {
       sheet1.addMergedRegion(new CellRangeAddress(y,v,6,6));
       sheet1.addMergedRegion(new CellRangeAddress(y,v,7,7));
       y+=i;
+
     }
 
     Row row =sheet1.createRow(0);
@@ -153,6 +158,7 @@ public class YieldServiceImpl implements YieldService {
       getRow(row,yields.get(i),i+1,book);
     }
   }
+
 
   private void getRow( Row row,Yield yield,Integer id,Workbook book) {
     HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
@@ -197,6 +203,7 @@ public class YieldServiceImpl implements YieldService {
     }
   }
 
+
   /**
    * 设置文字居中
    * @param book
@@ -213,6 +220,8 @@ public class YieldServiceImpl implements YieldService {
     style2.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
     return style2;
   }
+
+
   /**
    * 第一行标题
    * @param row
@@ -260,6 +269,7 @@ public class YieldServiceImpl implements YieldService {
     }
 
   }
+
 
   /**
    * 时间端获取
@@ -343,5 +353,6 @@ public class YieldServiceImpl implements YieldService {
     List<Integer> lists = jdbcTemplate.queryForList(sql, Integer.class);
     return lists ;
   }
+
 
 }

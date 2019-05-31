@@ -67,7 +67,7 @@ public class YieldController {
     Sheet sheet1 =(Sheet) book.createSheet("分表1");
     //合并单元格
     sheet1.addMergedRegion(new CellRangeAddress(0,3,1,1));
-
+    sheet1.addMergedRegion(new CellRangeAddress(4,6,1,1));
     //设置缺省列高
     sheet1.setDefaultRowHeightInPoints(20);
     //设置缺省列宽
@@ -79,11 +79,11 @@ public class YieldController {
       Cell cell = row.createCell(0);
       cell.setCellStyle(style2);
       // 写入相关数据到设置的行列中去。
-      cell.setCellValue("相关数据");
+      cell.setCellValue("相关数据"+i);
       Cell cell1 = row.createCell(1);
       cell1.setCellStyle(style2);
-      // 写入相关数据到设置的行列中去。
-      cell1.setCellValue("相关数据");
+
+      cell1.setCellValue("相关数据"+i);
     }
 
     // 保存到计算机相应路径
