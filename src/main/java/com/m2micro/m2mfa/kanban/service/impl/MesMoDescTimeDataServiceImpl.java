@@ -5,6 +5,7 @@ import com.m2micro.m2mfa.kanban.vo.MesMoDescAndProcess;
 import com.m2micro.m2mfa.kanban.vo.MesMoDescTime;
 import com.m2micro.m2mfa.kanban.vo.MesMoDescTimeData;
 import com.m2micro.m2mfa.kanban.vo.ProcessData;
+import com.m2micro.m2mfa.mo.constant.MoStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -35,6 +36,8 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
       mesMoDescTimeData.setMoNumber(x.getMoNumber());
       mesMoDescTimeData.setCustomerName(x.getCustomerName());
       mesMoDescTimeData.setPartName(x.getPartName());
+      mesMoDescTimeData.setPartNo(x.getPartNo());
+      mesMoDescTimeData.setCloseFlag(MoStatus.valueOf(Integer.parseInt(x.getCloseFlag())).getValue());
       mesMoDescTimeData.setReachDate(x.getReachDate());
       mesMoDescTimeData.setMesMoDescTargetQty(x.getMesMoDescTargetQty());
       mesMoDescTimeData.setMesMoDescOutputQty(x.getMesMoDescOutputQty());
@@ -79,7 +82,9 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
         "  bc.`name` customer_name,\n" +
         "	#vmpi.schedule_no,\n" +
         "	bp.`name` part_name,\n" +
+        "	bp.part_no part_no,\n" +
         "	mmd.reach_date,\n" +
+        "	mmd.close_flag,\n" +
         "	mmd.target_qty  mes_mo_desc_target_qty,\n" +
         "  IFNULL(mmd.output_qty,0)  mes_mo_desc_output_qty,\n" +
         "	vmpi.output_qty  process_output_qty,\n" +
@@ -88,7 +93,7 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
         "	v_mes_process_info vmpi\n" +
         "LEFT JOIN mes_mo_desc mmd on mmd.mo_id=vmpi.mo_id\n" +
         "LEFT JOIN base_customer  bc on bc.customer_id=mmd.customer_id\n" +
-        "LEFT JOIN base_parts bp   on bp.part_id=mmd.part_id\n" +
+        "LEFT JOIN base_parts bp   on bp.part_id=mmd.part_id  where   mmd.close_flag="+ MoStatus.PRODUCTION.getKey() +"  \n" +
         "ORDER BY\n" +
         "	vmpi.mo_number , vmpi.process_id";
     RowMapper<MesMoDescAndProcess> rowMapper = BeanPropertyRowMapper.newInstance(MesMoDescAndProcess.class);

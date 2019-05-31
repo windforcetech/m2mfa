@@ -11,6 +11,8 @@ public class MesMoDescAndProcess {
   private String customerName ;
   @ApiModelProperty(value = "料件名称")
   private String partName ;
+  @ApiModelProperty(value = "料件编号")
+  private String partNo ;
   @ApiModelProperty(value = "达交时间")
   private String reachDate ;
   @ApiModelProperty(value = "工单数量")
@@ -21,5 +23,6 @@ public class MesMoDescAndProcess {
   private String processName ;
   @ApiModelProperty(value = "工序产量 ")
   private Long  processOutputQty ;
-
+  @ApiModelProperty(value = "状态")
+  private String closeFlag ;
 }

@@ -12,4 +12,10 @@ public interface YieldService {
    * @return
    */
   List<Yield> YieldShow(YieldQuery yieldQuery);
+
+  /**
+   * excel导出生产报表
+   * @param yieldQuery
+   */
+  void excelOutData(YieldQuery yieldQuery)throws Exception;
 }
