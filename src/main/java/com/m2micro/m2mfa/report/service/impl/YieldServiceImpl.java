@@ -117,7 +117,22 @@ public class YieldServiceImpl implements YieldService {
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("产量报表");
-    sheet1.addMergedRegion(new CellRangeAddress(0,3,1,1));
+    List<Integer> integers = GroupBy(yieldQuery);
+    Integer y=1;
+    for( int x =0; x<integers.size();x++){
+      Integer i = integers.get(x);
+      int v=y+i;
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,0,0));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,1,1));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,2,2));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,3,3));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,4,4));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,5,5));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,6,6));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,7,7));
+      y+=i;
+    }
+
     Row row =sheet1.createRow(0);
     addRowOne(row,book);
     addRowData(sheet1,yields,book);
@@ -288,5 +303,45 @@ public class YieldServiceImpl implements YieldService {
     return sql;
   }
 
+
+  /**
+   * 获取每组几条数据进行导出
+   * @param yieldQuery
+   * @return
+   */
+  public List<Integer> GroupBy(YieldQuery yieldQuery) {
+    String sql ="SELECT  count(*)"+
+        "FROM\n" +
+        "	mes_mo_desc mmd\n" +
+        "LEFT JOIN base_parts bpi ON bpi.part_id = mmd.part_id\n" +
+        "LEFT JOIN mes_part_route mpr ON mpr.part_id = mmd.part_id\n" +
+        "LEFT JOIN mes_part_route_process mprp ON mpr.part_route_id = mprp.partrouteid\n" +
+        "LEFT JOIN base_process  bp  on bp.process_id=mprp.processid\n" +
+        "where 1=1\n" ;
+
+    if (StringUtils.isNotEmpty(yieldQuery.getMoNumber())) {
+      sql += " and mmd.mo_number  LIKE '%"+yieldQuery.getMoNumber()+"%'\n" ;
+    }
+    if (StringUtils.isNotEmpty(yieldQuery.getProcessName())) {
+      sql +=" and bp.process_name LIKE '%"+yieldQuery.getProcessName()+"%'\n" ;
+    }
+    if (StringUtils.isNotEmpty(yieldQuery.getPartNo())) {
+      sql +=" and bpi.part_no LIKE '%"+yieldQuery.getPartNo()+"%'\n" ;
+    }
+    if (StringUtils.isNotEmpty(yieldQuery.getCategory())) {
+      sql += " and bpi.category='"+yieldQuery.getCategory()+"'\n" ;
+    }
+
+    if (yieldQuery.getProduceTime()!=null) {
+      sql += " and mmd.create_on='"+DateUtil.format(yieldQuery.getProduceTime())+"'\n" ;
+    }
+    if (StringUtils.isNotEmpty(yieldQuery.getTimecondition())) {
+      sql = getTimeCondition(yieldQuery.getTimecondition(), sql);
+    }
+    sql += " GROUP BY\n" +
+        "	mmd.mo_number";
+    List<Integer> lists = jdbcTemplate.queryForList(sql, Integer.class);
+    return lists ;
+  }
 
 }

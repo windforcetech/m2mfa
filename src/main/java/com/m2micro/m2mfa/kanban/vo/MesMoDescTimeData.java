@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.kanban.vo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -24,5 +25,5 @@ public class MesMoDescTimeData {
   @ApiModelProperty(value = "工序数据")
   private String  closeFlag ;
   @ApiModelProperty(value = "工序数据")
-  private Set<ProcessData> processDatas ;
+  private Set<Map<String,String> >processDatas ;
 }

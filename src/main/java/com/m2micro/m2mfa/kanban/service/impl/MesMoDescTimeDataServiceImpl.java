@@ -13,10 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
@@ -55,7 +52,16 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
           processDatas.add(processData);
         }
       }
-      x.setProcessDatas(processDatas);
+      Set<Map<String,String>>maps= new HashSet<>();
+      List <ProcessData> list = new ArrayList<>(processDatas);
+      for(int v =0; v<list.size();v++){
+        ProcessData  processData =list.get(v);
+        Map<String,String>map = new HashMap<>();
+        map.put("processName",processData.getProcessName());
+        map.put("pocessOutputQty"+v,String.valueOf(processData.getProcessOutputQty()));
+        maps.add(map);
+      }
+      x.setProcessDatas(maps);
     }
     mesMoDescTime.setMesMoDescTimeDatas(mesMoDescTimeDatas);
     mesMoDescTime.setProcessnames(processnames);
