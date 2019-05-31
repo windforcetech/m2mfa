@@ -175,7 +175,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         para.setQty(getQty(crossStationFails));
         //【产出数量】+【不良数量】 != 进站的数量
         if(para.getOutputQty()+para.getQty()!=outputQty){
-            throw new MMException("此箱的产出数量加不良数量已超出上站产出数，请核对！");
+            throw new MMException("不良数量加产出数不等于进站数，请核对！");
         }
         if(para.getOutputQty()<0){
             throw new MMException("不良数量不能大于产出数量！");
@@ -235,6 +235,13 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             }
         }
 
+    }
+
+    private void updateInlineTimeAndNowProcessId(MesRecordWipRec mesRecordWipRec) {
+        MesRecordWipLog mesRecordWipRecLog = new MesRecordWipLog();
+        copyData(mesRecordWipRec, mesRecordWipRecLog);
+        mesRecordWipRecLog.setOutlineTime(new Date());
+        mesRecordWipLogRepository.save(mesRecordWipRecLog);
     }
 
     private Boolean isFirstProcess(String processId){
@@ -385,8 +392,11 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
     private void updateMesRecordWipRec(OutStationModel para, MesRecordWipRec mesRecordWipRec, String nextProcessId, Boolean isOutputProcess) {
         mesRecordWipRec.setInputQty(mesRecordWipRec.getOutputQty());
         mesRecordWipRec.setOutputQty(para.getOutputQty());
-        mesRecordWipRec.setOutTime(new Date());
+        Date date = new Date();
+        mesRecordWipRec.setOutTime(date);
+        mesRecordWipRec.setOutlineTime(date);
         mesRecordWipRec.setWipNowProcess(para.getProcessId());
+        mesRecordWipRec.setProcessId(para.getProcessId());
         if(isOutputProcess){
             mesRecordWipRec.setWipNextProcess("");
             mesRecordWipRec.setNextProcessId("");
@@ -476,7 +486,8 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         Date date = new Date();
         mesRecordWipRec.setInTime(date);
         mesRecordWipRec.setInlineTime(date);
-        //mesRecordWipRec.setOutTime(date);
+        mesRecordWipRec.setOutTime(date);
+        mesRecordWipRec.setOutlineTime(date);
         //职员（预留）
 
         //途程
@@ -648,6 +659,17 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             Integer surplusQty = getSurplusQty(para.getProcessId(), source,mesRecordWipRec.getWipNowProcess());
             crossingStationModel.setSurplusQty(surplusQty);
         }
+
+        //更新进站工序和进站时间
+        //MesRecordWipLog mesRecordWipRecLog = new MesRecordWipLog();
+        //copyData(mesRecordWipRec, mesRecordWipRecLog);
+        //mesRecordWipRec.setWipNowProcess(para.getProcessId());
+       // mesRecordWipRec.setProcessId(para.getProcessId());
+        Date date = new Date();
+        mesRecordWipRec.setInlineTime(date);
+        mesRecordWipRec.setInTime(date);
+        mesRecordWipRecRepository.save(mesRecordWipRec);
+
         return ResponseMessage.ok(crossingStationModel);
     }
 
