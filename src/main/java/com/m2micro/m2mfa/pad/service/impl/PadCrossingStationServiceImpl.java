@@ -196,10 +196,10 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //工序是否是产出工序
         Boolean isOutputProcess = isOutputProcess(para.getProcessId(), mesPartRoute.getOutputProcessId());
         //如果是注塑成型，保存上一次（第一次）在制信息到日志
-        Boolean firstProcess = isFirstProcess(beforeProcessId);
+        /*Boolean firstProcess = isFirstProcess(beforeProcessId);
         if(firstProcess){
             copyDataToLog(mesRecordWipRec);
-        }
+        }*/
         //更新mes_record_wip_rec
         updateMesRecordWipRec(para, mesRecordWipRec, nextProcessId, isOutputProcess);
         //保存当前在制信息到日志
@@ -497,10 +497,16 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         mesRecordWipRec.setNextProcessId(para.getProcessId());
         mesRecordWipRecRepository.save(mesRecordWipRec);
 
+        //如果是注塑成型，保存上一次（第一次）在制信息到日志
+        Boolean firstProcess = isFirstProcess(beforeProcessId);
+        if(firstProcess){
+            copyDataToLog(mesRecordWipRec);
+        }
+
         CrossingStationModel crossingStationModel = new CrossingStationModel();
         //上一工序是否是机台自动扫描工序，是 算结余量
         if(BaseItemsTargetConstant.AUTO.equalsIgnoreCase(getCollection(beforeProcessId))){
-            crossingStationModel.setSurplusQty(surplusQty);
+            crossingStationModel.setSurplusQty(getSurplusQty(para.getProcessId(), source,beforeProcessId));
         }
         //返回不良数0、及排产单信息
         crossingStationModel.setBarcode(para.getBarcode());
@@ -509,7 +515,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
 
         //上一工序的相关信息
         //StationRelationModel stationRelationModel = mesRecordWipRecRepository.getStationRelationModel(para.getBarcode());
-        StationRelationModel stationRelationModel = getStationRelationModel(para.getBarcode(), source);
+        StationRelationModel stationRelationModel = getStationRelationModel(para.getBarcode(), source,beforeProcessId);
         crossingStationModel.setStationRelationModel(stationRelationModel);
         return ResponseMessage.ok(crossingStationModel);
     }
@@ -520,12 +526,13 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
      * @param scheduleId
      * @return
      */
-    private StationRelationModel getStationRelationModel(String barcode,String scheduleId){
+    private StationRelationModel getStationRelationModel(String barcode,String scheduleId,String beforeProcessId){
         //获取排产单信息
         ScheduleAndPartsModel scheduleAndPartsModel = getScheduleAndPartsModel(scheduleId);
         //获取在制表信息
         MesRecordWipRec mesRecordWipRec = mesRecordWipRecRepository.findBySerialNumber(barcode);
-        return getStationRelationModel(mesRecordWipRec,scheduleAndPartsModel);
+        //在制信息表此时有两种：未进站（上一个工序是真实的上一个工序），进站未出站（上一个工序为当前工序），不管哪种都更改为上一工序
+        return getStationRelationModel(mesRecordWipRec,scheduleAndPartsModel,beforeProcessId);
     }
 
     /**
@@ -534,7 +541,7 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
      * @param scheduleAndPartsModel
      * @return
      */
-    private StationRelationModel getStationRelationModel(MesRecordWipRec mesRecordWipRec,ScheduleAndPartsModel scheduleAndPartsModel){
+    private StationRelationModel getStationRelationModel(MesRecordWipRec mesRecordWipRec,ScheduleAndPartsModel scheduleAndPartsModel,String beforeProcessId){
         StationRelationModel stationRelationModel = new StationRelationModel();
         //获取排产单信息
         try {
@@ -543,10 +550,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             e.printStackTrace();
         }
         //设置在制表信息
-        //当前工序
-        String wipNowProcess = mesRecordWipRec.getWipNowProcess();
-        if(StringUtils.isNotEmpty(wipNowProcess)){
-            BaseProcess baseProcess = baseProcessService.findById(wipNowProcess).orElse(null);
+        //上一工序
+        if(StringUtils.isNotEmpty(beforeProcessId)){
+            BaseProcess baseProcess = baseProcessService.findById(beforeProcessId).orElse(null);
             stationRelationModel.setWipNowProcessName(baseProcess.getProcessName());
         }
         //职员
@@ -630,9 +636,9 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         CrossingStationModel crossingStationModel = new CrossingStationModel();
         crossingStationModel.setBarcode(para.getBarcode());
         //判断是否已使用
-        if(para.getProcessId().equalsIgnoreCase(mesRecordWipRec.getWipNowProcess())){
+        /*if(para.getProcessId().equalsIgnoreCase(mesRecordWipRec.getWipNowProcess())){
             throw new MMException("序号【"+para.getBarcode()+"】已扫描过站，不能重复扫描。");
-        }
+        }*/
         //下一工序与本作业工序是否符合
         if(!para.getProcessId().equalsIgnoreCase(mesRecordWipRec.getWipNextProcess())){
             BaseProcess baseProcess = baseProcessService.findById(mesRecordWipRec.getWipNextProcess()).orElse(null);
@@ -646,17 +652,27 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //默认不良为0
         crossingStationModel.setQty(0l);
 
+        //获取上一个工序
+        String beforeProcessId = mesRecordWipRec.getWipNowProcess();
+        //如果相等表示已进站未出站
+        if(mesRecordWipRec.getWipNowProcess().equals(mesRecordWipRec.getWipNextProcess())){
+            //获取料件途程id
+            String partRouteId = mesPartRouteRepository.getPartRouteId(source);
+            //获取上一工序
+            beforeProcessId = baseRouteDefRepository.getBeforeProcessId(partRouteId, mesRecordWipRec.getWipNowProcess());
+        }
+
         //上一工序的相关信息
         //StationRelationModel stationRelationModel = mesRecordWipRecRepository.getStationRelationModel(para.getBarcode());
-        StationRelationModel stationRelationModel = getStationRelationModel(para.getBarcode(), source);
+        StationRelationModel stationRelationModel = getStationRelationModel(para.getBarcode(), source,beforeProcessId);
         crossingStationModel.setStationRelationModel(stationRelationModel);
         //默认为上一次的产出量
         crossingStationModel.setOutputQty(stationRelationModel.getOutputQty());
 
         //上一工序是否是机台自动扫描工序，是 算结余量
-        if(BaseItemsTargetConstant.AUTO.equalsIgnoreCase(getCollection(mesRecordWipRec.getWipNowProcess()))){
+        if(BaseItemsTargetConstant.AUTO.equalsIgnoreCase(getCollection(beforeProcessId))){
             //获取结余量
-            Integer surplusQty = getSurplusQty(para.getProcessId(), source,mesRecordWipRec.getWipNowProcess());
+            Integer surplusQty = getSurplusQty(para.getProcessId(), source,beforeProcessId);
             crossingStationModel.setSurplusQty(surplusQty);
         }
 
@@ -666,6 +682,8 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         //mesRecordWipRec.setWipNowProcess(para.getProcessId());
        // mesRecordWipRec.setProcessId(para.getProcessId());
         Date date = new Date();
+        mesRecordWipRec.setWipNowProcess(para.getProcessId());
+        mesRecordWipRec.setProcessId(para.getProcessId());
         mesRecordWipRec.setInlineTime(date);
         mesRecordWipRec.setInTime(date);
         mesRecordWipRecRepository.save(mesRecordWipRec);
