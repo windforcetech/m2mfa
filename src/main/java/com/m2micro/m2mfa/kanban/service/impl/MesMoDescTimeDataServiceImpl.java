@@ -50,18 +50,10 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
           processData.setProcessName(y.getProcessName());
           processData.setProcessOutputQty(getProcessOutputQty(x.getMoNumber(),y.getProcessName()));
           processDatas.add(processData);
+
         }
       }
-      Set<Map<String,String>>maps= new HashSet<>();
-      List <ProcessData> list = new ArrayList<>(processDatas);
-      for(int v =0; v<list.size();v++){
-        ProcessData  processData =list.get(v);
-        Map<String,String>map = new HashMap<>();
-        map.put("processName",processData.getProcessName());
-        map.put("pocessOutputQty"+v,String.valueOf(processData.getProcessOutputQty()));
-        maps.add(map);
-      }
-      x.setProcessDatas(maps);
+     x.setProcessDatas(processDatas);
     }
     mesMoDescTime.setMesMoDescTimeDatas(mesMoDescTimeDatas);
     mesMoDescTime.setProcessnames(processnames);

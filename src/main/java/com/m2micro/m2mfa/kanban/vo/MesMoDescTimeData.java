@@ -25,5 +25,5 @@ public class MesMoDescTimeData {
   @ApiModelProperty(value = "工序数据")
   private String  closeFlag ;
   @ApiModelProperty(value = "工序数据")
-  private Set<Map<String,String> >processDatas ;
+  private Set<ProcessData >processDatas ;
 }

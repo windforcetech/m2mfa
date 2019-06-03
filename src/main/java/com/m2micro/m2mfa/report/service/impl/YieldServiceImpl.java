@@ -1,6 +1,7 @@
 package com.m2micro.m2mfa.report.service.impl;
 
 import com.m2micro.m2mfa.common.util.DateUtil;
+import com.m2micro.m2mfa.common.util.FileUtil;
 import com.m2micro.m2mfa.kanban.vo.MachinerealTimeStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.report.query.YieldQuery;
@@ -21,7 +22,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -113,7 +121,8 @@ public class YieldServiceImpl implements YieldService {
 
 
   @Override
-  public void excelOutData(YieldQuery yieldQuery)throws Exception {
+  public void excelOutData(YieldQuery yieldQuery, HttpServletResponse response)throws Exception {
+
     List<Yield> yields = YieldShow(yieldQuery);
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
@@ -137,13 +146,20 @@ public class YieldServiceImpl implements YieldService {
       y+=i;
 
     }
-
+    /**
+     * 文件下载
+     * @param fileName
+     * @param filepath
+     * @param response
+     * @throws IOException
+     */
     Row row =sheet1.createRow(0);
     addRowOne(row,book);
     addRowData(sheet1,yields,book);
-    // 保存到计算机相应路径
-    book.write( new FileOutputStream("D://a.xls"));
+    book.close();
+    FileUtil.excelDownloadFlie(response, book);
   }
+
 
 
   /**

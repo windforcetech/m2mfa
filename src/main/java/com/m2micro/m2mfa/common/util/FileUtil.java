@@ -1,7 +1,11 @@
 package com.m2micro.m2mfa.common.util;
 
+import org.apache.poi.ss.usermodel.Workbook;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class FileUtil {
   /**
@@ -48,5 +52,32 @@ public class FileUtil {
       }
     }
 
+  }
+
+  /**
+   * excel下载文件
+   * @param response
+   * @param book
+   */
+  public static void excelDownloadFlie(HttpServletResponse response, Workbook book) {
+    response.reset(); // 清除buffer缓存
+    Date date =new Date();
+    SimpleDateFormat sdf =new SimpleDateFormat("yyyyMMddHHmmss");
+    String time =sdf.format(date);
+    response.setHeader("Content-Disposition", "attachment;filename=yield" + time +".xlsx");
+    response.setContentType("application/vnd.ms-excel;charset=UTF-8");
+    response.setHeader("Pragma", "no-cache");
+    response.setHeader("Cache-Control", "no-cache");
+    response.setDateHeader("Expires", 0);
+    OutputStream output;
+    try {
+      output = response.getOutputStream();
+      BufferedOutputStream bufferedOutPut = new BufferedOutputStream(output);
+      bufferedOutPut.flush();
+      book.write(bufferedOutPut);
+      bufferedOutPut.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }
