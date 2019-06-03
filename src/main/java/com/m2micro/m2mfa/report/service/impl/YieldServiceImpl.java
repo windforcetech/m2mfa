@@ -1,9 +1,15 @@
 package com.m2micro.m2mfa.report.service.impl;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
+import com.m2micro.m2mfa.common.util.ChinaFontProvide;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.FileUtil;
+import com.m2micro.m2mfa.common.util.POIReadExcelToHtml;
 import com.m2micro.m2mfa.kanban.vo.MachinerealTimeStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
+import com.m2micro.m2mfa.report.controller.YieldController;
 import com.m2micro.m2mfa.report.query.YieldQuery;
 import com.m2micro.m2mfa.report.service.YieldService;
 import com.m2micro.m2mfa.report.vo.Yield;
@@ -24,10 +30,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -146,13 +149,6 @@ public class YieldServiceImpl implements YieldService {
       y+=i;
 
     }
-    /**
-     * 文件下载
-     * @param fileName
-     * @param filepath
-     * @param response
-     * @throws IOException
-     */
     Row row =sheet1.createRow(0);
     addRowOne(row,book);
     addRowData(sheet1,yields,book);
@@ -160,6 +156,52 @@ public class YieldServiceImpl implements YieldService {
     FileUtil.excelDownloadFlie(response, book);
   }
 
+  @Override
+  public void pdfOutData(YieldQuery yieldQuery, HttpServletResponse response) throws Exception {
+    List<Yield> yields = YieldShow(yieldQuery);
+    Workbook book = new HSSFWorkbook();
+    // 在对应的Excel中建立一个分表
+    Sheet sheet1 = book.createSheet("产量报表");
+    List<Integer> integers = GroupBy(yieldQuery);
+    Integer y=1;
+    System.out.println("xxxxx"+integers.size());
+    for( int x =0; x<integers.size();x++){
+      Integer i = integers.get(x);
+      int v=y+i;
+      v = v - 1;
+      System.out.println("y==="+y+"v===="+v+"x==="+x);
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,0,0));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,1,1));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,2,2));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,3,3));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,4,4));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,5,5));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,6,6));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,7,7));
+      y+=i;
+
+    }
+    Row row =sheet1.createRow(0);
+    addRowOne(row,book);
+    addRowData(sheet1,yields,book);
+    // 保存到计算机相应路径
+    String fileSeperator = File.separator;
+    book.write( new FileOutputStream(fileSeperator+"yield.xls"));
+    book.close();
+    String html =  POIReadExcelToHtml.readExcelToHtml(fileSeperator+"yield.xls", true);
+    try {
+      Document document = new Document();
+      PdfWriter mPdfWriter = PdfWriter.getInstance(document, new FileOutputStream(new File(fileSeperator+"yield.pdf")));
+      document.open();
+      ByteArrayInputStream bin = new ByteArrayInputStream(html.getBytes());
+      XMLWorkerHelper.getInstance().parseXHtml(mPdfWriter, document, bin, null, new ChinaFontProvide());
+      System.out.println("生成完毕"+fileSeperator);
+      document.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    FileUtil.download(fileSeperator+"yield.pdf",response,false,"yield.pdf");
+  }
 
 
   /**

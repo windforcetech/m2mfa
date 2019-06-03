@@ -1,15 +1,14 @@
 package com.m2micro.m2mfa.report.controller;
 
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.FontProvider;
+import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
+import com.m2micro.m2mfa.common.util.ChinaFontProvide;
 import com.m2micro.m2mfa.common.util.PDFKit;
+import com.m2micro.m2mfa.common.util.POIReadExcelToHtml;
 import com.m2micro.m2mfa.report.query.YieldQuery;
 import com.m2micro.m2mfa.report.service.YieldService;
 import com.m2micro.m2mfa.report.vo.Yield;
@@ -69,8 +68,18 @@ public class YieldController {
     return  ResponseMessage.ok();
   }
 
+  /**
+   * pdf导出生产产量报表
+   */
+  @PostMapping("/pdfOutData")
+  @ApiOperation(value="exce导出生产产量报表")
+  @UserOperationLog("exce导出生产产量报表")
+  public ResponseMessage pdfOutData(YieldQuery yieldQuery,  HttpServletResponse response)throws Exception{
+    yieldService.pdfOutData(yieldQuery ,response);
+    return  ResponseMessage.ok();
+  }
 
- /* public static void main(String[] args) throws Exception {
+  /* public static void main(String[] args) throws Exception {
     // 建立一个Excel
      Workbook book = new HSSFWorkbook();
     HSSFCellStyle style2 = getHssfCellStyle(book);
@@ -116,11 +125,11 @@ public class YieldController {
  public static void main(String[] args) throws IOException
  {
 
-     String html = PDFKit.readFileByUrl("http://127.0.0.1/export/1/1"); // 将html代码读取到html字符串中
-
+    // String html = PDFKit.readFileByUrl("https://www.cnblogs.com/blueskyli/p/9921832.html"); // 将html代码读取到html字符串中
+   String html =  POIReadExcelToHtml.readExcelToHtml("c:\\yield.xls", true);
    try {
      Document document = new Document();
-     PdfWriter mPdfWriter = PdfWriter.getInstance(document, new FileOutputStream(new File("C:\\data\\3.pdf")));
+     PdfWriter mPdfWriter = PdfWriter.getInstance(document, new FileOutputStream(new File("D:\\3.pdf")));
      document.open();
      ByteArrayInputStream bin = new ByteArrayInputStream(html.getBytes());
      XMLWorkerHelper.getInstance().parseXHtml(mPdfWriter, document, bin, null, new ChinaFontProvide());
@@ -131,33 +140,7 @@ public class YieldController {
    }
  }
 
-  public static final class ChinaFontProvide implements FontProvider
-  {
 
-
-    public boolean isRegistered(String s)
-    {
-      return false;
-    }
-
-
-    public Font getFont(String arg0, String arg1, boolean arg2, float arg3, int arg4, BaseColor arg5)
-    {
-      BaseFont bfChinese = null;
-      try
-      {
-        bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
-      }
-      catch(Exception e)
-      {
-        e.printStackTrace();
-      }
-      Font FontChinese = new Font(bfChinese, 12, Font.NORMAL);
-      return FontChinese;
-    }
-
-
-  }
 
 
 

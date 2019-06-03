@@ -146,10 +146,19 @@
         <!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
         <dependency>
             <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml-schemas</artifactId>
+            <version>3.17-beta1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>3.17-beta1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
             <version>3.17-beta1</version>
         </dependency>
-
         <!--pdf生成工具类-->
         <dependency>
             <groupId>com.itextpdf</groupId>
@@ -171,6 +180,8 @@
             <artifactId>flying-saucer-pdf</artifactId>
             <version>9.0.3</version>
         </dependency>
+
+
         <!--<dependency>
             <groupId>org.flowable</groupId>
             <artifactId>flowable-spring-boot-starter</artifactId>
