@@ -27,7 +27,12 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
     MesMoDescTime mesMoDescTime = new MesMoDescTime();
     List<MesMoDescAndProcess> mesMoDescAndProcesses = getMesMoDescAndProcesses();
     Set<MesMoDescTimeData> mesMoDescTimeDatas =new HashSet<>();
-    Set<String>processnames= new HashSet<>();
+    Set<String>processnames= new TreeSet<>(new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        return o2.compareTo(o1);//降序排列
+      }
+    });
     for(MesMoDescAndProcess x:mesMoDescAndProcesses){
       MesMoDescTimeData mesMoDescTimeData = new MesMoDescTimeData();
       mesMoDescTimeData.setMoNumber(x.getMoNumber());
