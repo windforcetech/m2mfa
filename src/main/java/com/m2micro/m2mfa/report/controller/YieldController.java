@@ -72,8 +72,8 @@ public class YieldController {
    * pdf导出生产产量报表
    */
   @PostMapping("/pdfOutData")
-  @ApiOperation(value="exce导出生产产量报表")
-  @UserOperationLog("exce导出生产产量报表")
+  @ApiOperation(value="pdf导出生产产量报表")
+  @UserOperationLog("pdf导出生产产量报表")
   public ResponseMessage pdfOutData(YieldQuery yieldQuery,  HttpServletResponse response)throws Exception{
     yieldService.pdfOutData(yieldQuery ,response);
     return  ResponseMessage.ok();

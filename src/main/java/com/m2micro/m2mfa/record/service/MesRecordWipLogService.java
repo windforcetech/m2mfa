@@ -30,6 +30,17 @@ public interface MesRecordWipLogService extends BaseService<MesRecordWipLog,Stri
     Integer getAllOutputQty(String scheduleId,String processId);
 
     /**
+     * 过站的员工实时数据
+     * @param scheduleId
+     * @param processId
+     * @param satffid
+     * @param outTime
+     * @return
+     */
+    Integer getActualOutput(String scheduleId,String processId,String satffid,String outTime);
+
+
+    /**
      * 获取条码关联的所有排产单当前工序的产出
      * @param scheduleIds
      * @param processId

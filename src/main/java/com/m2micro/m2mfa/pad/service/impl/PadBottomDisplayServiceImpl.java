@@ -7,6 +7,7 @@ import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDescRepository;
 import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.base.service.BaseStationService;
+import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -205,6 +207,16 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
         }
         //如果不是从在制表拿
         return mesRecordWipLogService.getAllOutputQty(scheduleId,baseProcess.getProcessId());
+    }
+
+    @Override
+    public Integer getActualOutput(String scheduleId, BaseProcess baseProcess, String staffId, Date outTime) {
+        //如果产出工序是注塑成型
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            return 0;
+        }
+        //如果不是从在制表拿
+        return mesRecordWipLogService.getActualOutput(scheduleId,baseProcess.getProcessId(),staffId, DateUtil.format(outTime,DateUtil.DATE_TIME_PATTERN));
     }
 
     /**

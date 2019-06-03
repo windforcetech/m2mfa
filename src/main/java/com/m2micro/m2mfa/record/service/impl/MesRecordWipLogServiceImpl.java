@@ -50,6 +50,12 @@ public class MesRecordWipLogServiceImpl implements MesRecordWipLogService {
         return allOutputQty==null?0:allOutputQty;
     }
 
+    @Override
+    public Integer getActualOutput(String scheduleId, String processId, String satffid, String outTime) {
+        Integer allOutputQty = mesRecordWipLogRepository.getActualOutput(scheduleId, processId,satffid,outTime);
+        return allOutputQty==null?0:allOutputQty;
+    }
+
     /**
      * 获取条码关联的排产单当前工序的产出
      * @param scheduleIds
