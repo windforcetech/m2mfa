@@ -210,13 +210,16 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     }
 
     @Override
-    public Integer getActualOutput(String scheduleId, BaseProcess baseProcess, String staffId, Date outTime) {
+    public BigDecimal getActualOutput(String scheduleId, BaseProcess baseProcess, String staffId, Date outTime,IotMachineOutput iotMachineOutput,BigDecimal startMolds) {
         //如果产出工序是注塑成型
         if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
-            return 0;
+            if(startMolds==null){
+                return new BigDecimal(0);
+            }
+            return (iotMachineOutput.getOutput().subtract(startMolds));
         }
         //如果不是从在制表拿
-        return mesRecordWipLogService.getActualOutput(scheduleId,baseProcess.getProcessId(),staffId,outTime);
+        return new BigDecimal( mesRecordWipLogService.getActualOutput(scheduleId,baseProcess.getProcessId(),staffId,outTime));
     }
 
     /**
