@@ -216,7 +216,7 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
             return 0;
         }
         //如果不是从在制表拿
-        return mesRecordWipLogService.getActualOutput(scheduleId,baseProcess.getProcessId(),staffId, DateUtil.format(outTime,DateUtil.DATE_TIME_PATTERN));
+        return mesRecordWipLogService.getActualOutput(scheduleId,baseProcess.getProcessId(),staffId,outTime);
     }
 
     /**

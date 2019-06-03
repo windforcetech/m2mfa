@@ -122,9 +122,9 @@ public class PadHomeServiceImpl  implements PadHomeService {
       Integer actualOutputgz = padBottomDisplayService.getActualOutput(padHomePara.getScheduleId(), baseProcess, baseStaff.getStaffId(), startTime);
       if(actualOutputgz==0){
         //实际产出
-            if(startMolds !=null && startMolds.compareTo(BigDecimal.ZERO)!=0){
-              actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
-            }
+        if(startMolds !=null){
+          actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
+        }
         }else {
         actualOutput=new BigDecimal(actualOutputgz);
       }

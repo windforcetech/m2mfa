@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,7 +38,7 @@ public interface MesRecordWipLogService extends BaseService<MesRecordWipLog,Stri
      * @param outTime
      * @return
      */
-    Integer getActualOutput(String scheduleId,String processId,String satffid,String outTime);
+    Integer getActualOutput(String scheduleId, String processId, String satffid, Date outTime);
 
 
     /**
