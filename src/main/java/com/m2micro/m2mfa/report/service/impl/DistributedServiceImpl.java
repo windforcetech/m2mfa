@@ -29,7 +29,7 @@ public class DistributedServiceImpl implements DistributedService {
         "bp.part_no,\n" +
         "	bp.`name` part_name,\n" +
         "	bp.spec,\n" +
-        "	vmpi.mo_number,\n" +
+        "	mmd.mo_number,\n" +
         "	mms.schedule_no,\n" +
         "	vmpi.process_name,\n" +
         "	vmpi.output_qty,\n" +
