@@ -16,6 +16,12 @@ public class YieldQuery {
   private String partNo;
   @ApiModelProperty(value = "物料类型")
   private String category;
+  @ApiModelProperty(value = "工单完成")
+  private boolean moflag;
+  @ApiModelProperty(value = "工序完成")
+  private boolean processflag;
+  @ApiModelProperty(value = "排单完成")
+  private boolean cheduleflag;
   @ApiModelProperty(
       value = "生产时间",
       example = "2018-11-11 12:00:00"

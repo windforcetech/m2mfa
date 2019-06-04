@@ -5,4 +5,6 @@ package com.m2micro.m2mfa.report.controller;
  *
  */
 public class DistributedController {
+
+
 }

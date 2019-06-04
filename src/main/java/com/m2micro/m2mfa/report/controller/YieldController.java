@@ -27,12 +27,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.print.PrintService;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.standard.Sides;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.print.Book;
+import java.awt.print.PageFormat;
+import java.awt.print.Paper;
+import java.awt.print.PrinterJob;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+
+import static jdk.nashorn.internal.objects.Global.print;
 
 /**
  * 生产产量报表
@@ -122,7 +131,7 @@ public class YieldController {
     return style2;
   }
 */
- public static void main(String[] args) throws IOException
+/* public static void main(String[] args) throws IOException
  {
 
     // String html = PDFKit.readFileByUrl("https://www.cnblogs.com/blueskyli/p/9921832.html"); // 将html代码读取到html字符串中
@@ -138,8 +147,7 @@ public class YieldController {
    } catch (Exception e) {
      e.printStackTrace();
    }
- }
-
+ }*/
 
 
 

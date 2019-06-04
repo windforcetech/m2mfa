@@ -69,21 +69,15 @@ public class YieldServiceImpl implements YieldService {
         "					mms.mo_id = mmd.mo_id\n" +
         "			)\n" +
         "	) output_qty,\n" +
-        "	(\n" +
+        "(\n" +
         "		SELECT\n" +
-        "			IFNULL(SUM(mrwf.fail_qty), 0)\n" +
+        "			IFNULL(SUM(fail_qty), 0) failsum\n" +
         "		FROM\n" +
-        "			mes_record_wip_fail mrwf\n" +
+        "			mes_record_wip_fail mrw\n" +
         "		WHERE\n" +
-        "			mrwf.schedule_id IN (\n" +
-        "				SELECT\n" +
-        "					mms.schedule_id\n" +
-        "				FROM\n" +
-        "					mes_mo_schedule mms\n" +
-        "				WHERE\n" +
-        "					mms.mo_id = mmd.mo_id\n" +
-        "			)\n" +
-        "	) fail_qty \n" +
+        "			mrw.mo_id = mmd.mo_id\n" +
+        "		AND mrw.target_process_id = bp.process_id\n" +
+        "	) fail_qty\n"+
         "FROM\n" +
         "	mes_mo_desc mmd\n" +
         "LEFT JOIN base_parts bpi ON bpi.part_id = mmd.part_id\n" +
@@ -111,6 +105,7 @@ public class YieldServiceImpl implements YieldService {
     if (StringUtils.isNotEmpty(yieldQuery.getTimecondition())) {
       sql = getTimeCondition(yieldQuery.getTimecondition(), sql);
     }
+    sql = isMoAndprossceAndChedule(yieldQuery, sql);
     sql += " ORDER BY\n" +
         "	mmd.mo_number";
     RowMapper<Yield> rowMapper = BeanPropertyRowMapper.newInstance(Yield.class);
@@ -120,6 +115,39 @@ public class YieldServiceImpl implements YieldService {
     }).collect(Collectors.toList());
 
     return collect ;
+  }
+
+  /**
+   * 工单完成，排工完成，工序完成
+   * @param yieldQuery
+   * @param sql
+   * @return
+   */
+  private String isMoAndprossceAndChedule(YieldQuery yieldQuery, String sql) {
+    if (yieldQuery.isMoflag()) {
+      sql += " and (mmd.close_flag="+MoStatus.CLOSE.getKey()+" or mmd.close_flag="+MoStatus.FORCECLOSE.getKey()+")";
+    }
+    if (yieldQuery.isProcessflag()) {
+      sql += "  and (\n" +
+          "		SELECT\n" +
+          "			IFNULL(SUM(mmsp.output_qty), 0)\n" +
+          "		FROM\n" +
+          "			mes_mo_schedule_process mmsp\n" +
+          "		WHERE\n" +
+          "			mmsp.schedule_id IN (\n" +
+          "				SELECT\n" +
+          "					mms.schedule_id\n" +
+          "				FROM\n" +
+          "					mes_mo_schedule mms\n" +
+          "				WHERE\n" +
+          "					mms.mo_id = mmd.mo_id\n" +
+          "			)\n" +
+          "	)>= mmd.target_qty";
+    }
+    if (yieldQuery.isCheduleflag()) {
+      sql += " and mmd.is_schedul=true";
+    }
+    return sql;
   }
 
 
@@ -220,7 +248,7 @@ public class YieldServiceImpl implements YieldService {
 
   private void getRow( Row row,Yield yield,Integer id,Workbook book) {
     HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
-    for(int i=0;i<10; i++){
+    for(int i=0;i<11; i++){
       Cell cell = row.createCell(i);
       cell.setCellStyle(hssfCellStyle);
       switch (i){
@@ -286,7 +314,7 @@ public class YieldServiceImpl implements YieldService {
    */
   public void addRowOne( Row row,Workbook book){
     HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
-    for(int i=0;i<10; i++){
+    for(int i=0;i<11; i++){
       Cell cell = row.createCell(i);
       cell.setCellStyle(hssfCellStyle);
       switch (i){
