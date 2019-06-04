@@ -39,6 +39,8 @@ public class BaseLedConfig extends BaseEntity implements Serializable {
     private Integer colQty;
     @ApiModelProperty(value = "机台展示行数")
     private Integer rowQty;
+    @ApiModelProperty(value = "数据内容")
+    private String  dataTxt;
     @ApiModelProperty(value = "机台对应的列表id")
     private String machineList;
     @Transient
@@ -114,5 +116,13 @@ public class BaseLedConfig extends BaseEntity implements Serializable {
 
     public void setBaseMachineLists(List<BaseMachineList> baseMachineLists) {
         this.baseMachineLists = baseMachineLists;
+    }
+
+    public String getDataTxt() {
+        return dataTxt;
+    }
+
+    public void setDataTxt(String dataTxt) {
+        this.dataTxt = dataTxt;
     }
 }
