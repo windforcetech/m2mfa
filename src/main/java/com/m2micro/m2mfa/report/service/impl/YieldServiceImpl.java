@@ -7,9 +7,7 @@ import com.m2micro.m2mfa.common.util.ChinaFontProvide;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.FileUtil;
 import com.m2micro.m2mfa.common.util.POIReadExcelToHtml;
-import com.m2micro.m2mfa.kanban.vo.MachinerealTimeStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
-import com.m2micro.m2mfa.report.controller.YieldController;
 import com.m2micro.m2mfa.report.query.YieldQuery;
 import com.m2micro.m2mfa.report.service.YieldService;
 import com.m2micro.m2mfa.report.vo.Yield;
@@ -28,11 +26,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
