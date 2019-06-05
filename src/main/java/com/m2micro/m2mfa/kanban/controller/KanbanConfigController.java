@@ -10,6 +10,7 @@ import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.kanban.entity.BaseLedConfig;
 import com.m2micro.m2mfa.kanban.service.KanbanConfigService;
+import com.m2micro.m2mfa.push.MyChatServerHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ public class KanbanConfigController {
   @UserOperationLog("保存")
   public ResponseMessage<BaseLedConfig> save(@RequestBody BaseLedConfig baseLedConfig){
     kanbanConfigService.save(baseLedConfig);
+    MyChatServerHandler.pushMainScreen();
     return ResponseMessage.ok();
   }
 
@@ -47,6 +49,7 @@ public class KanbanConfigController {
     return ResponseMessage.ok();
   }
 
+
   /**
    * 详情
    */
@@ -58,6 +61,7 @@ public class KanbanConfigController {
     return ResponseMessage.ok(baseLedConfig);
   }
 
+
   /**
    * 列表
    */
@@ -68,6 +72,7 @@ public class KanbanConfigController {
     PageUtil<BaseLedConfig> page = kanbanConfigService.list(query);
     return ResponseMessage.ok(page);
   }
+
 
   /**
    * 更新
@@ -84,6 +89,9 @@ public class KanbanConfigController {
     String [] ids=new String[]{baseLedConfig.getConfigId()};
     kanbanConfigService.deleteByIds(ids);
     kanbanConfigService.renew(baseLedConfig);
+    MyChatServerHandler.pushMainScreen();
     return ResponseMessage.ok();
   }
+
+
 }
