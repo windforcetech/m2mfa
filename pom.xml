@@ -180,8 +180,12 @@
             <artifactId>flying-saucer-pdf</artifactId>
             <version>9.0.3</version>
         </dependency>
-
-
+        <!--netyy-->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.15.Final</version>
+        </dependency>
         <!--<dependency>
             <groupId>org.flowable</groupId>
             <artifactId>flowable-spring-boot-starter</artifactId>

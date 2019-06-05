@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -36,6 +37,18 @@ public class DistributedController {
   public ResponseMessage<List<Distributed>> DistributedShow(DistributedQuery  distributedQuery){
 
     return  ResponseMessage.ok(distributedService.DistributedShow(distributedQuery));
+  }
+
+
+  /**
+   * exce导出在制分布报表
+   */
+  @PostMapping("/excelOutData")
+  @ApiOperation(value="exce导出在制分布报表")
+  @UserOperationLog("exce导出在制分布报表")
+  public ResponseMessage excelOutData(DistributedQuery distributedQuery,  HttpServletResponse response)throws Exception{
+    distributedService.excelOutData(distributedQuery,response);
+    return  ResponseMessage.ok();
   }
 
 }
