@@ -60,12 +60,12 @@ public class FileUtil {
    * @param response
    * @param book
    */
-  public static void excelDownloadFlie(HttpServletResponse response, Workbook book) {
+  public static void excelDownloadFlie(HttpServletResponse response, Workbook book,String fileName) {
     response.reset(); // 清除buffer缓存
     Date date =new Date();
     SimpleDateFormat sdf =new SimpleDateFormat("yyyyMMddHHmmss");
     String time =sdf.format(date);
-    response.setHeader("Content-Disposition", "attachment;filename=yield" + time +".xlsx");
+    response.setHeader("Content-Disposition", "attachment;filename="+ fileName+time +".xlsx");
     response.setContentType("application/vnd.ms-excel;charset=UTF-8");
     response.setHeader("Pragma", "no-cache");
     response.setHeader("Cache-Control", "no-cache");

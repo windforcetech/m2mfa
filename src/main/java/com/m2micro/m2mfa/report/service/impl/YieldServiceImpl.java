@@ -178,7 +178,7 @@ public class YieldServiceImpl implements YieldService {
     addRowOne(row,book);
     addRowData(sheet1,yields,book);
     book.close();
-    FileUtil.excelDownloadFlie(response, book);
+    FileUtil.excelDownloadFlie(response, book,"yield");
   }
 
   @Override
