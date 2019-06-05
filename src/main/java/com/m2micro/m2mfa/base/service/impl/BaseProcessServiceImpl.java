@@ -11,6 +11,7 @@ import com.m2micro.m2mfa.base.vo.Processvo;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
+import com.m2micro.m2mfa.pad.constant.StationConstant;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -196,6 +197,11 @@ public class BaseProcessServiceImpl implements BaseProcessService {
         }
 
         return Processvo.builder().baseProcess(p).baseProcessStations(baseProcessStations).basePageElemen(basePageElemenService.findById(processId).orElse(null)).build();
+    }
+
+    @Override
+    public BaseProcess getMachineProcess() {
+        return baseProcessRepository.getMachineProcess(StationConstant.BOOT.getKey());
     }
 
 }

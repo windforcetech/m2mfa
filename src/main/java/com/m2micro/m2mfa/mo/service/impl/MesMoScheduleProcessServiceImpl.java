@@ -1,8 +1,11 @@
 package com.m2micro.m2mfa.mo.service.impl;
 
+import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleProcessService;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -25,6 +28,9 @@ public class MesMoScheduleProcessServiceImpl implements MesMoScheduleProcessServ
     MesMoScheduleProcessRepository mesMoScheduleProcessRepository;
     @Autowired
     JPAQueryFactory queryFactory;
+    @Autowired
+    @Qualifier("secondaryJdbcTemplate")
+    JdbcTemplate jdbcTemplate;
 
     public MesMoScheduleProcessRepository getRepository() {
         return mesMoScheduleProcessRepository;
@@ -56,6 +62,41 @@ public class MesMoScheduleProcessServiceImpl implements MesMoScheduleProcessServ
         MesMoScheduleProcess mesMoScheduleProcess = mesMoScheduleProcessRepository.findByScheduleIdAndProcessId(scheduleId, processId);
         mesMoScheduleProcess.setActualEndTime(new Date());
         save(mesMoScheduleProcess);
+    }
+
+    @Override
+    public void updateOutputQtyAndMold(String scheduleId, String processId, Integer outputQty, Integer mold) {
+        MesMoScheduleProcess mesMoScheduleProcess = mesMoScheduleProcessRepository.findByScheduleIdAndProcessId(scheduleId, processId);
+        /*if(mold!=null){
+            Integer beerQty = mesMoScheduleProcess.getBeerQty();
+            beerQty=beerQty==null?0:beerQty;
+            mesMoScheduleProcess.setBeerQty(beerQty+mold);
+        }
+        if(outputQty!=null){
+            Integer processOutputQty = mesMoScheduleProcess.getOutputQty();
+            processOutputQty= processOutputQty==null?0:processOutputQty;
+            mesMoScheduleProcess.setOutputQty(processOutputQty+outputQty);
+        }
+        save(mesMoScheduleProcess);*/
+        updateOutputQtyAndMold(mesMoScheduleProcess,outputQty,mold);
+    }
+
+    @Override
+    @Transactional
+    public void updateOutputQtyAndMold(MesMoScheduleProcess mesMoScheduleProcess, Integer outputQty, Integer mold) {
+        if(mold!=null){
+            Integer beerQty = mesMoScheduleProcess.getBeerQty();
+            beerQty=beerQty==null?0:beerQty;
+            mesMoScheduleProcess.setBeerQty(beerQty+mold);
+        }
+        if(outputQty!=null){
+            Integer processOutputQty = mesMoScheduleProcess.getOutputQty();
+            processOutputQty= processOutputQty==null?0:processOutputQty;
+            mesMoScheduleProcess.setOutputQty(processOutputQty+outputQty);
+        }
+        jdbcTemplate.update("update mes_mo_schedule_process set output_qty = ?,beer_qty = ? where id = ?",mesMoScheduleProcess.getOutputQty(),mesMoScheduleProcess.getBeerQty(),mesMoScheduleProcess.getId());
+        throw new MMException("ssssss");
+        //mesMoScheduleProcessRepository.updateOutputQtyAndMold(mesMoScheduleProcess.getOutputQty(),mesMoScheduleProcess.getBeerQty(),new Date(),mesMoScheduleProcess.getModifiedBy(),mesMoScheduleProcess.getId());
     }
 
 }

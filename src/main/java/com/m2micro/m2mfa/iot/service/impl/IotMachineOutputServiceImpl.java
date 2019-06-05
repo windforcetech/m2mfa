@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.iot.service.impl;
 
+import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.starter.entity.OrgAndDeviceNode;
 import com.m2micro.framework.starter.services.OrgAndDeviceNodeService;
@@ -7,9 +8,11 @@ import com.m2micro.iot.client.DataPoint;
 import com.m2micro.iot.client.model.DeviceData;
 import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.m2mfa.base.entity.BaseMold;
+import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.base.repository.BaseMachineRepository;
 import com.m2micro.m2mfa.base.repository.BaseMoldRepository;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
+import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.iot.constant.IotConstant;
 import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
@@ -23,6 +26,7 @@ import com.m2micro.m2mfa.mo.entity.MesMoScheduleProcess;
 import com.m2micro.m2mfa.mo.model.MesMoScheduleModel;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleProcessService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -71,6 +75,10 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
     MesMoScheduleProcessRepository mesMoScheduleProcessRepository;
     @Autowired
     BaseMoldRepository baseMoldRepository;
+    @Autowired
+    BaseProcessService baseProcessService;
+    @Autowired
+    MesMoScheduleProcessService mesMoScheduleProcessService;
 
 
     public IotMachineOutputRepository getRepository() {
@@ -122,44 +130,54 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
      * @param deviceData
      * @param orgId
      */
-    @Transactional
+
     public void updateMoldsAndOutput(DeviceData deviceData,String orgId){
         /*2、通过org_id拿mch_id,如果拿不到，cavity=1
         3、通过mch_id找正在生产的排产单ID，如果拿不到，cavity=1
         4、通过排产单ID找模具ID，如果拿不到，cavity=1
         5、通过模具ID，得到cavity
-        6、更新模数，产量=穴数*(模数-上次模数)+上次产量*/
+        6、更新模数，产量=穴数*(模数-上次模数)+上次产量
+        7.将产量和模数更新到具有开机工位的工序上方便后续统计*/
         //可用穴数
         Integer cavityAvailable=1;
         //通过org_id拿mch_id,如果拿不到(机台没有绑定)
         BaseMachine baseMachine = baseMachineRepository.findByOrgId(orgId);
-        if(baseMachine!=null){
-            //通过mch_id找正在生产的排产单ID，如果拿不到(该机台上没有分配排产单)
-            List<MesMoSchedule> productionMesMoSchedule = mesMoScheduleRepository.getProductionMesMoScheduleByMachineId(baseMachine.getMachineId(), MoScheduleStatus.PRODUCTION.getKey());
-            //同一台机器上正在生产两个排产单，数据异常情况>1，不作处理
-            if(productionMesMoSchedule.size()>1){
-                return;
-            }
-            if(productionMesMoSchedule!=null&&productionMesMoSchedule.size()==1){
-                //通过排产单ID找模具ID，如果拿不到(排产单工序中没有选模具)
-                String scheduleId = productionMesMoSchedule.get(0).getScheduleId();
-                //String productionMoldId = mesMoScheduleProcessRepository.getProductionMoldId(scheduleId, iotConstant.getProcessId());
-                List<MesMoScheduleProcess> mesMoScheduleProcesses = mesMoScheduleProcessRepository.findByScheduleIdAndMoldIdNotNull(scheduleId);
-                if(mesMoScheduleProcesses==null||mesMoScheduleProcesses.size()!=1){
-                    return;
-                }
-
-                String productionMoldId = mesMoScheduleProcesses.get(0).getMoldId();
-                if(StringUtils.isNotEmpty(productionMoldId)){
-                    //通过模具ID，得到cavity
-                    BaseMold baseMold = baseMoldRepository.findById(productionMoldId).orElse(null);
-                    if(baseMold!=null){
-                        cavityAvailable = baseMold.getCavityAvailable();
-                    }
-                }
-            }
+        //拿不到直接忽略
+        if(baseMachine==null){
+            return;
+        }
+        //if(baseMachine!=null){
+        //通过mch_id找正在生产的排产单ID，如果拿不到(该机台上没有分配排产单)
+        List<MesMoSchedule> productionMesMoSchedule = mesMoScheduleRepository.getProductionMesMoScheduleByMachineId(baseMachine.getMachineId(), MoScheduleStatus.PRODUCTION.getKey());
+        //同一台机器上正在生产两个排产单，数据异常情况>1，或者一个也没有，不作处理
+        if(productionMesMoSchedule==null||productionMesMoSchedule.size()>1){
+            return;
+        }
+        //if(productionMesMoSchedule!=null&&productionMesMoSchedule.size()==1){
+            //通过排产单ID找模具ID，如果拿不到(排产单工序中没有选模具)
+        String scheduleId = productionMesMoSchedule.get(0).getScheduleId();
+        List<MesMoScheduleProcess> mesMoScheduleProcesses = mesMoScheduleProcessRepository.findByScheduleIdAndMoldIdNotNull(scheduleId);
+        if(mesMoScheduleProcesses==null||mesMoScheduleProcesses.size()!=1){
+            return;
         }
 
+        String productionMoldId = mesMoScheduleProcesses.get(0).getMoldId();
+        if(StringUtils.isNotEmpty(productionMoldId)){
+            //通过模具ID，得到cavity
+            BaseMold baseMold = baseMoldRepository.findById(productionMoldId).orElse(null);
+            if(baseMold!=null){
+                cavityAvailable = baseMold.getCavityAvailable();
+            }
+        }
+        //}
+        //}
+        //修改操作,有模具的工序一定是开机工位所在的工序，也是注塑成型工序
+        modify(deviceData, orgId, cavityAvailable, mesMoScheduleProcesses.get(0));
+    }
+
+    @Transactional
+    public void modify(DeviceData deviceData, String orgId, Integer cavityAvailable,MesMoScheduleProcess mesMoScheduleProcess) {
+        //6.更新到iot表中
         IotMachineOutput iotMachineOutput = iotMachineOutputRepository.findByOrgId(orgId);
         BigDecimal molds = IotUtil.toBigDecimal(deviceData.getValue());
         BigDecimal oldMolds = iotMachineOutput.getMolds();
@@ -169,7 +187,47 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
         iotMachineOutput.setModifiedOn(new Date());
         iotMachineOutput.setOutput(output);
         iotMachineOutputRepository.save(iotMachineOutput);
+
+
+        //--------------以下为后续补充的业务逻辑：更新到排产单的工序产量和模数-----------
+        //获取开机工位所在工序（机台生产所在工序：注塑成型）
+        BaseProcess machineProcess = baseProcessService.getMachineProcess();
+        if(machineProcess==null){
+            return;
+        }
+        //7.将产量和模数更新到具有开机工位的工序上方便后续统计
+        //mesMoScheduleProcessService.updateOutputQtyAndMold(scheduleId,machineProcess.getProcessId(),processOutputQty,processMold);
+        updateOutputQtyAndMold(mesMoScheduleProcess,molds.intValue(),oldMolds.intValue(),cavity.intValue());
+
     }
+
+    @Transactional
+    public void updateOutputQtyAndMold(MesMoScheduleProcess mesMoScheduleProcess, Integer molds,Integer oldMolds,Integer cavity) {
+        if(mesMoScheduleProcess.getOldMolds()==null){
+            mesMoScheduleProcess.setOldMolds(oldMolds);
+        }
+        //获取注塑成型模数
+        Integer processMold = molds-mesMoScheduleProcess.getOldMolds();
+        Integer beerQty = mesMoScheduleProcess.getBeerQty();
+        beerQty=beerQty==null?0:beerQty;
+        mesMoScheduleProcess.setBeerQty(beerQty+processMold);
+        //设置当前模数为旧模数
+        mesMoScheduleProcess.setOldMolds(molds);
+        //设置产量
+        Integer processOutputQty = mesMoScheduleProcess.getOutputQty();
+        processOutputQty= processOutputQty==null?0:processOutputQty;
+        mesMoScheduleProcess.setOutputQty(processOutputQty+cavity*processMold);
+        //jdbcTemplate.update("update mes_mo_schedule_process set output_qty = ?, beer_qty = ?, old_molds = ? where id = ?",mesMoScheduleProcess.getOutputQty(),mesMoScheduleProcess.getBeerQty(),mesMoScheduleProcess.getOldMolds(),mesMoScheduleProcess.getId());
+        mesMoScheduleProcessRepository.updateOutputQtyAndMold(mesMoScheduleProcess.getOutputQty(),mesMoScheduleProcess.getBeerQty(),mesMoScheduleProcess.getOldMolds(),mesMoScheduleProcess.getId());
+    }
+
+
+   /* @Transactional
+    public void updateIotMachineOutput(IotMachineOutput iotMachineOutput){
+        //String sql="INSERT iot_machine_output(id,org_id,power,molds,output,create_on,modified_on) VALUES (?,?,?,?,?,?,?)";
+        String sql= "UPDATE iot_machine_output SET org_id=?,power=?,molds=?,output=?,create_on=?,modified_on=? WHERE id=?";
+        jdbcTemplate.update(sql,iotMachineOutput.getOrgId(),iotMachineOutput.getPower(),iotMachineOutput.getMolds(),iotMachineOutput.getOutput(),iotMachineOutput.getCreateOn(),iotMachineOutput.getModifiedOn(),iotMachineOutput.getId());
+    }*/
 
     @Override
     public PageUtil<IotMachineOutput> list(Query query) {
