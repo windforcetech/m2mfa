@@ -68,9 +68,9 @@ public class MyChatServerHandler  extends SimpleChannelInboundHandler<String> {
   /**
    * 推送更新大屏数据
    */
-  public static  void pushMainScreen(String ip){
+  public static  void pushMainScreen(){
     channelGroup.stream().forEach(ch -> {
-        ch.writeAndFlush("updateMainScreen"+ip);
+        ch.writeAndFlush("updateMainScreen");
     });
   }
 }
