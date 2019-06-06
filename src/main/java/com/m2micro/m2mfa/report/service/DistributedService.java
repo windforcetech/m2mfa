@@ -22,4 +22,11 @@ public interface DistributedService {
    * @throws Exception
    */
   void  excelOutData(DistributedQuery distributedQuery,  HttpServletResponse response)throws Exception;
+
+  /**
+   * pdf数据导出
+   * @param distributedQuery
+   * @param response
+   */
+  void  pdfOutData(DistributedQuery distributedQuery,  HttpServletResponse response)throws Exception ;
 }

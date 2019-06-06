@@ -51,4 +51,15 @@ public class DistributedController {
     return  ResponseMessage.ok();
   }
 
+
+  /**
+   * pdf导出生产产量报表
+   */
+  @PostMapping("/pdfOutData")
+  @ApiOperation(value="pdf导出在制分布报表")
+  @UserOperationLog("pdf导出在制分布报表")
+  public ResponseMessage pdfOutData(DistributedQuery distributedQuery,  HttpServletResponse response)throws Exception{
+    distributedService.pdfOutData(distributedQuery ,response);
+    return  ResponseMessage.ok();
+  }
 }

@@ -68,13 +68,14 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
 
   private long  getProcessOutputQty(String moNumber,String processName){
     String sql ="SELECT\n" +
-        "	SUM(vmpi.output_qty)  process_output_qty \n" +
+        "	IFNULL(SUM(vmpi.output_qty),0)\t  process_output_qty \n" +
         "FROM\n" +
         "	v_mes_process_info vmpi\n" +
         "LEFT JOIN mes_mo_desc mmd on mmd.mo_id=vmpi.mo_id\n" +
         "LEFT JOIN base_customer  bc on bc.customer_id=mmd.customer_id\n" +
         "LEFT JOIN base_parts bp   on bp.part_id=mmd.part_id\n" +
-        "where   mmd.mo_number='"+moNumber+"'  and process_name= '"+processName+"'";
+        "LEFT JOIN base_process bpd  on  bpd.process_id= vmpi.process_id\n"+
+        "where   mmd.mo_number='"+moNumber+"'  and bpd.process_name= '"+processName+"'";
         return  jdbcTemplate.queryForObject(sql,long.class);
   }
 
@@ -91,14 +92,14 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
         "	mmd.target_qty  mes_mo_desc_target_qty,\n" +
         "  IFNULL(mmd.output_qty,0)  mes_mo_desc_output_qty,\n" +
         "	vmpi.output_qty  process_output_qty,\n" +
-        "	vmpi.process_name \n" +
+        "	bp.`name` process_name \n" +
         "FROM\n" +
         "	v_mes_process_info vmpi\n" +
         "LEFT JOIN mes_mo_desc mmd on mmd.mo_id=vmpi.mo_id\n" +
         "LEFT JOIN base_customer  bc on bc.customer_id=mmd.customer_id\n" +
         "LEFT JOIN base_parts bp   on bp.part_id=mmd.part_id  where   mmd.close_flag="+ MoStatus.PRODUCTION.getKey() +"  \n" +
         "ORDER BY\n" +
-        "	vmpi.mo_number , vmpi.process_id";
+        "	mmd.mo_number , vmpi.process_id";
     RowMapper<MesMoDescAndProcess> rowMapper = BeanPropertyRowMapper.newInstance(MesMoDescAndProcess.class);
     return jdbcTemplate.query(sql,rowMapper);
   }

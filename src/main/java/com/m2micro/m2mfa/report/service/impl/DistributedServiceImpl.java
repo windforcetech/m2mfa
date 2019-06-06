@@ -1,6 +1,11 @@
 package com.m2micro.m2mfa.report.service.impl;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
+import com.m2micro.m2mfa.common.util.ChinaFontProvide;
 import com.m2micro.m2mfa.common.util.FileUtil;
+import com.m2micro.m2mfa.common.util.POIReadExcelToHtml;
 import com.m2micro.m2mfa.report.query.DistributedQuery;
 import com.m2micro.m2mfa.report.service.DistributedService;
 import com.m2micro.m2mfa.report.vo.Distributed;
@@ -21,6 +26,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
 
 @Service
@@ -73,7 +81,7 @@ public class DistributedServiceImpl implements DistributedService {
     List<Distributed> distributeds = DistributedShow(distributedQuery);
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
-    Sheet sheet1 = book.createSheet("产量报表");
+    Sheet sheet1 = book.createSheet("在制报表");
     List<Integer> integers = GroupBy(distributedQuery);
     Integer y=1;
     System.out.println("xxxxx"+integers.size());
@@ -97,6 +105,51 @@ public class DistributedServiceImpl implements DistributedService {
     FileUtil.excelDownloadFlie(response, book,"distributed");
 
   }
+
+  @Override
+  public void pdfOutData(DistributedQuery distributedQuery, HttpServletResponse response)throws Exception  {
+    List<Distributed> distributeds = DistributedShow(distributedQuery);
+    Workbook book = new HSSFWorkbook();
+    // 在对应的Excel中建立一个分表
+    Sheet sheet1 = book.createSheet("在制报表");
+    List<Integer> integers = GroupBy(distributedQuery);
+    Integer y=1;
+    System.out.println("xxxxx"+integers.size());
+    for( int x =0; x<integers.size();x++){
+      Integer i = integers.get(x);
+      int v=y+i;
+      v = v - 1;
+      System.out.println("y==="+y+"v===="+v+"x==="+x);
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,0,0));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,1,1));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,2,2));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,3,3));
+      sheet1.addMergedRegion(new CellRangeAddress(y,v,4,4));
+      y+=i;
+
+    }
+    Row row =sheet1.createRow(0);
+    addRowOne(row,book);
+    addRowData(sheet1,distributeds,book);
+    // 保存到计算机相应路径
+    String fileSeperator = File.separator;
+    book.write( new FileOutputStream(fileSeperator+"distributed.xls"));
+    book.close();
+    String html =  POIReadExcelToHtml.readExcelToHtml(fileSeperator+"distributed.xls", true);
+    try {
+      Document document = new Document();
+      PdfWriter mPdfWriter = PdfWriter.getInstance(document, new FileOutputStream(new File(fileSeperator+"distributed.pdf")));
+      document.open();
+      ByteArrayInputStream bin = new ByteArrayInputStream(html.getBytes());
+      XMLWorkerHelper.getInstance().parseXHtml(mPdfWriter, document, bin, null, new ChinaFontProvide());
+      System.out.println("生成完毕"+fileSeperator);
+      document.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    FileUtil.download(fileSeperator+"distributed.pdf",response,false,"distributed.pdf");
+  }
+
   /**
    * N   行数据
    * @param sheet1
