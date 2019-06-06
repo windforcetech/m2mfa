@@ -33,4 +33,11 @@ public interface BaseProcessService extends BaseService<BaseProcess,String> {
 
      Processvo info(String processId );
 
+    /**
+     * 获取机台所在工序（注塑成型，开机工位所在工序）
+     * @param code
+     * @return
+     */
+    BaseProcess getMachineProcess();
+
     }
