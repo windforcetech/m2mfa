@@ -31,7 +31,7 @@ public class MachinerealTimeStatusController {
   @ApiOperation(value="机台实时数据显示")
   @UserOperationLog("机台实时数据显示")
   public ResponseMessage<List<MachinerealTimeData>> MachinerealTimeStatusShow(HttpServletRequest request){
-
+    System.out.println("ip"+getRemortIP(request));
     MyChatServerHandler.pushMainScreen(getRemortIP(request));
     return  ResponseMessage.ok(machinerealTimeStatusService.MachinerealTimeStatusShow(getRemortIP(request)));
   }
@@ -45,29 +45,17 @@ public class MachinerealTimeStatusController {
    */
   public String getRemortIP(HttpServletRequest request) {
 
-
-      String ip = null;
-      try {
-        ip = request.getHeader("x-forwarded-for");
-        if (StringUtils.isEmpty(ip) || "unknown".equalsIgnoreCase(ip)) {
-          ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (StringUtils.isEmpty(ip) || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-          ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (StringUtils.isEmpty(ip) || "unknown".equalsIgnoreCase(ip)) {
-          ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (StringUtils.isEmpty(ip) || "unknown".equalsIgnoreCase(ip)) {
-          ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (StringUtils.isEmpty(ip) || "unknown".equalsIgnoreCase(ip)) {
-          ip = request.getRemoteAddr();
-        }
-      } catch (Exception e) {
-
-      }
-      return ip;
+    String ip = request.getHeader("x-forwarded-for");
+    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+      ip = request.getHeader("Proxy-Client-IP");
+    }
+    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+      ip = request.getHeader("WL-Proxy-Client-IP");
+    }
+    if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+      ip = request.getRemoteAddr();
+    }
+    return ip;
 
 
   }
