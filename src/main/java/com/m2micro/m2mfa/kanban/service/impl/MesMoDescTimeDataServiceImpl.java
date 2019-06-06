@@ -1,5 +1,10 @@
 package com.m2micro.m2mfa.kanban.service.impl;
 
+import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.kanban.entity.BaseLedConfig;
+import com.m2micro.m2mfa.kanban.entity.BaseMachineList;
+import com.m2micro.m2mfa.kanban.repository.BaseLedConfigRepository;
+import com.m2micro.m2mfa.kanban.service.KanbanConfigService;
 import com.m2micro.m2mfa.kanban.service.MesMoDescTimeDataService;
 import com.m2micro.m2mfa.kanban.vo.MesMoDescAndProcess;
 import com.m2micro.m2mfa.kanban.vo.MesMoDescTime;
@@ -14,6 +19,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
@@ -21,11 +27,21 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
   @Autowired
   @Qualifier("secondaryJdbcTemplate")
   private JdbcTemplate jdbcTemplate;
+  @Autowired
+  private BaseLedConfigRepository  baseLedConfigRepository;
+  @Autowired
+  private KanbanConfigService kanbanConfigService;
 
   @Override
-  public MesMoDescTime MesMoDescTimeDataShow() {
+  public MesMoDescTime MesMoDescTimeDataShow(String elemen ) {
     MesMoDescTime mesMoDescTime = new MesMoDescTime();
-    List<MesMoDescAndProcess> mesMoDescAndProcesses = getMesMoDescAndProcesses();
+    List<BaseLedConfig> byElemen = baseLedConfigRepository.findByElemen(elemen);
+    if(byElemen!=null && byElemen.size()<0){
+      throw  new MMException("看板ip不一致！！！");
+    }
+    BaseLedConfig byId = kanbanConfigService.findById(byElemen.get(0).getConfigId());
+
+    List<MesMoDescAndProcess> mesMoDescAndProcesses = getMesMoDescAndProcesses(byId.getBaseMachineLists());
     Set<MesMoDescTimeData> mesMoDescTimeDatas =new HashSet<>();
     Set<String>processnames= new TreeSet<>(new Comparator<String>() {
       @Override
@@ -80,7 +96,9 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
   }
 
 
-  private List<MesMoDescAndProcess> getMesMoDescAndProcesses() {
+  private List<MesMoDescAndProcess> getMesMoDescAndProcesses(List<BaseMachineList> baseMachineLists) {
+    String mids = baseMachineLists.stream().map(x -> x.getMachineId()).collect(Collectors.joining("','", "'", "'"));
+
     String sql ="SELECT\n" +
         "	mmd.mo_number,\n" +
         "  bc.`name` customer_name,\n" +
@@ -98,7 +116,9 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
         "LEFT JOIN mes_mo_desc mmd on mmd.mo_id=vmpi.mo_id\n" +
         "LEFT JOIN base_customer  bc on bc.customer_id=mmd.customer_id\n" +
         "LEFT JOIN base_process  bpd on bpd.process_id= vmpi.process_id\n" +
-        "LEFT JOIN base_parts bp   on bp.part_id=mmd.part_id  where   mmd.close_flag="+ MoStatus.PRODUCTION.getKey() +"  \n" +
+        "LEFT JOIN base_parts bp   on bp.part_id=mmd.part_id \n"+
+        " LEFT JOIN mes_mo_schedule mms on mms.schedule_id = vmpi.schedule_id\n"+
+        "  where   mmd.close_flag="+ MoStatus.PRODUCTION.getKey() +"   and  mms.machine_id in("+mids+") \n" +
         "ORDER BY\n" +
         "	mmd.mo_number , vmpi.process_id";
     RowMapper<MesMoDescAndProcess> rowMapper = BeanPropertyRowMapper.newInstance(MesMoDescAndProcess.class);

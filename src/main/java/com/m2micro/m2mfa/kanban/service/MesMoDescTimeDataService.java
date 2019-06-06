@@ -7,5 +7,5 @@ public interface MesMoDescTimeDataService {
    * 获取工单实时数据
    * @return
    */
-  MesMoDescTime MesMoDescTimeDataShow();
+  MesMoDescTime MesMoDescTimeDataShow( String elemen );
 }

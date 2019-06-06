@@ -1,10 +1,9 @@
 package com.m2micro.m2mfa.kanban.service.impl;
 
-import com.m2micro.framework.authorization.TokenInfo;
+import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.m2mfa.kanban.constant.MachineConstant;
 import com.m2micro.m2mfa.kanban.entity.BaseLedConfig;
 import com.m2micro.m2mfa.kanban.repository.BaseLedConfigRepository;
-import com.m2micro.m2mfa.kanban.service.BaseLedConfigService;
 import com.m2micro.m2mfa.kanban.service.KanbanConfigService;
 import com.m2micro.m2mfa.kanban.service.MachinerealTimeStatusService;
 import com.m2micro.m2mfa.kanban.vo.MachinerealTimeData;
@@ -95,7 +94,7 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
         "	COUNT(*)\n" +
         "FROM  "  ;
     sql +=sqlPing(baseLedConfig);
-    sql +="  and  (bm.flag=  '"+ MachineConstant.PRODUCE.getKey()+"' or bm.flag=  '"+ MachineConstant.TUNING.getKey()+"')";
+    sql +="  and  (bm.flag=  '"+getItemIdAndItemValue( MachineConstant.PRODUCE.getKey()).getId()+"' or bm.flag=  '"+ getItemIdAndItemValue(MachineConstant.TUNING.getKey()).getId()+"')";
 
     return jdbcTemplate.queryForObject(sql,Integer.class);
   }
@@ -111,7 +110,7 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
         "	COUNT(*)\n" +
         "FROM  "  ;
     sql +=sqlPing(baseLedConfig);
-    sql +="  and bm.flag=  '"+ MachineConstant.MAINTENANCE.getKey()+"'";
+    sql +="  and bm.flag=  '"+ getItemIdAndItemValue(MachineConstant.MAINTENANCE.getKey()).getId()+"'";
     return jdbcTemplate.queryForObject(sql,Integer.class);
   }
 
@@ -126,7 +125,7 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
         "	COUNT(*)\n" +
         "FROM  "  ;
     sql +=sqlPing(baseLedConfig);
-    sql +="  and bm.flag=  '"+ MachineConstant.SERVICE.getKey()+"'";
+    sql +="  and bm.flag=  '"+ getItemIdAndItemValue(MachineConstant.SERVICE.getKey()).getId()+"'";
     return jdbcTemplate.queryForObject(sql,Integer.class);
   }
 
@@ -141,7 +140,7 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
         "	COUNT(*)\n" +
         "FROM  "  ;
     sql +=sqlPing(baseLedConfig);
-    sql +="  and bm.flag=  '"+ MachineConstant.DOWNTIME.getKey()+"'";
+    sql +="  and bm.flag=  '"+ getItemIdAndItemValue(MachineConstant.DOWNTIME.getKey()).getId()+"'";
     return jdbcTemplate.queryForObject(sql,Integer.class);
   }
 
@@ -161,7 +160,7 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
      "	WHERE\n" +
      "		mms.machine_id = bm.machine_id\n" +
      "	ORDER BY\n" +
-     "		mms.modified_by\n" +
+     "		bm.placement,bm.`name` \n" +
      "	LIMIT 0,\n" +
      "	1\n" +
      ") ";
@@ -172,5 +171,19 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
     return  sqlping;
   }
 
+  /**
+   * 获取标签
+   * @param itemData
+   * @return
+   */
+  public BaseItemsTarget  getItemIdAndItemValue(String itemData){
+    String[] s = itemData.split("_");
+    String sql1 ="select item_id  from base_items  where item_code='"+s[0]+"_"+s[1]+"'";
+    String itemId = jdbcTemplate.queryForObject(sql1, String.class);
+    String sql2 ="select * from base_items_target where  item_id='"+itemId+"' and item_value='"+s[2]+"'";
+    RowMapper<BaseItemsTarget> rowMapper = BeanPropertyRowMapper.newInstance(BaseItemsTarget.class);
+    BaseItemsTarget baseItemsTarget = jdbcTemplate.queryForObject(sql2, rowMapper);
+    return baseItemsTarget;
+  }
 
 }

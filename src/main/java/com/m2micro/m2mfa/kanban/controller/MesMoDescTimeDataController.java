@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.kanban.vo.MesMoDescTimeData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,10 +24,10 @@ public class MesMoDescTimeDataController {
   /**
    * 机台实时数据显示
    */
-  @PostMapping("/MesMoDescTimeDataShow")
+  @PostMapping("/MesMoDescTimeDataShow/{elemen}")
   @ApiOperation(value="工单实时数据显示")
   @UserOperationLog("工单实时数据显示")
-  public ResponseMessage<MesMoDescTime> MesMoDescTimeDataShow(){
-    return ResponseMessage.ok(mesMoDescTimeDataService.MesMoDescTimeDataShow());
+  public ResponseMessage<MesMoDescTime> MesMoDescTimeDataShow(@PathVariable("elemen") String elemen){
+    return ResponseMessage.ok(mesMoDescTimeDataService.MesMoDescTimeDataShow(elemen));
   }
 }
