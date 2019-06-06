@@ -106,7 +106,10 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
             sql = sql+" and bc.code like '%"+query.getCode()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getName())){
-            sql = sql+" and (bc.name like '%"+query.getName()+"%'"+" or bc.fullname like '%"+query.getName()+"%')";
+            sql = sql+" and bc.name like '%"+query.getName()+"%'";
+        }
+        if(StringUtils.isNotEmpty(query.getFullname())){
+            sql = sql+" and bc.fullname like '%"+query.getFullname()+"%'";
         }
         if(StringUtils.isNotEmpty(query.getCategory())){
             sql = sql+" and bc.category = '"+query.getCategory()+"' ";

@@ -99,4 +99,28 @@ public class MesMoScheduleProcessServiceImpl implements MesMoScheduleProcessServ
         //mesMoScheduleProcessRepository.updateOutputQtyAndMold(mesMoScheduleProcess.getOutputQty(),mesMoScheduleProcess.getBeerQty(),new Date(),mesMoScheduleProcess.getModifiedBy(),mesMoScheduleProcess.getId());
     }
 
+    @Override
+    public void updateOutputQtyForFail(String scheduleId, String processId, Integer fail) {
+        if(fail==null||fail==0){
+            return;
+        }
+        MesMoScheduleProcess mesMoScheduleProcess = mesMoScheduleProcessRepository.findByScheduleIdAndProcessId(scheduleId, processId);
+        Integer outputQty = mesMoScheduleProcess.getOutputQty();
+        outputQty=outputQty==null?0:outputQty;
+        mesMoScheduleProcess.setOutputQty(outputQty-fail);
+        save(mesMoScheduleProcess);
+    }
+
+    @Override
+    public void updateOutputQtyForAdd(String scheduleId, String processId, Integer outputQty) {
+        if(outputQty==null||outputQty==0){
+            return;
+        }
+        MesMoScheduleProcess mesMoScheduleProcess = mesMoScheduleProcessRepository.findByScheduleIdAndProcessId(scheduleId, processId);
+        Integer qty = mesMoScheduleProcess.getOutputQty();
+        qty=qty==null?0:qty;
+        mesMoScheduleProcess.setOutputQty(qty+outputQty);
+        save(mesMoScheduleProcess);
+    }
+
 }

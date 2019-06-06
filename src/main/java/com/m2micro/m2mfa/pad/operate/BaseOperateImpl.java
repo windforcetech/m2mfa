@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
 import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.repository.BaseProcessRepository;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
@@ -23,6 +24,7 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleStationRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleProcessService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleStaffService;
 import com.m2micro.m2mfa.pad.constant.PadConstant;
@@ -113,6 +115,10 @@ public class BaseOperateImpl implements BaseOperate {
     MesPartRouteRepository mesPartRouteRepository;
     @Autowired
     MesRecordWipFailRepository mesRecordWipFailRepository;
+    @Autowired
+    BaseProcessRepository baseProcessRepository;
+    @Autowired
+    MesMoScheduleProcessService mesMoScheduleProcessService;
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return mesMoScheduleRepository.findById(scheduleId).orElse(null);
@@ -783,6 +789,25 @@ public class BaseOperateImpl implements BaseOperate {
             //保存到在制不良记录表方便后续统计
             saveMesRecordWipFail(mesRecordFail1);
         }
+        //将当前工序产量减去不良数量（目前只有注塑成型）
+        updateProcessOutputQtyForFail(padbad);
+   }
+
+   @Transactional
+   public void updateProcessOutputQtyForFail(Padbad padbad){
+        if(padbad.getMesRecordFails()==null||padbad.getMesRecordFails().size()<=0){
+            return;
+        }
+        //获取不良总数
+       Long failQty = 0l;
+       for(MesRecordFail mesRecordFail1 :  padbad.getMesRecordFails()){
+           failQty = failQty+(mesRecordFail1.getQty()==null?0:mesRecordFail1.getQty());
+       }
+        //获取工位所在工序
+       BaseProcess baseProcess = baseProcessRepository.getProcessByStationId(padbad.getStationId());
+       MesRecordWork mesRecordWork = mesRecordWorkService.findById(padbad.getMesRecordFails().get(0).getRwId()).orElse(null);
+       //更新工序产量
+       mesMoScheduleProcessService.updateOutputQtyForFail(mesRecordWork.getScheduleId(),baseProcess.getProcessId(),failQty.intValue());
    }
 
     /**
