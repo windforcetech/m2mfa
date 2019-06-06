@@ -108,6 +108,6 @@ public interface MesMoScheduleProcessRepository extends BaseRepository<MesMoSche
 
 
     @Modifying
-    @Query(value = "update mes_mo_schedule_process set output_qty = ?1, beer_qty = ?2, old_molds = ?3 where id = ?4",nativeQuery = true)
-    Integer updateOutputQtyAndMold(Integer outputQty,Integer beerQty,Integer oldMolds,String id);
+    @Query(value = "update mes_mo_schedule_process set output_qty = ?1, beer_qty = ?2 where id = ?3",nativeQuery = true)
+    Integer updateOutputQtyAndMold(Integer outputQty,Integer beerQty,String id);
 }

@@ -203,22 +203,22 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
 
     @Transactional
     public void updateOutputQtyAndMold(MesMoScheduleProcess mesMoScheduleProcess, Integer molds,Integer oldMolds,Integer cavity) {
-        if(mesMoScheduleProcess.getOldMolds()==null){
+        /*if(mesMoScheduleProcess.getOldMolds()==null){
             mesMoScheduleProcess.setOldMolds(oldMolds);
-        }
+        }*/
         //获取注塑成型模数
-        Integer processMold = molds-mesMoScheduleProcess.getOldMolds();
+        Integer processMold = molds-oldMolds;
         Integer beerQty = mesMoScheduleProcess.getBeerQty();
         beerQty=beerQty==null?0:beerQty;
         mesMoScheduleProcess.setBeerQty(beerQty+processMold);
         //设置当前模数为旧模数
-        mesMoScheduleProcess.setOldMolds(molds);
+        //mesMoScheduleProcess.setOldMolds(molds);
         //设置产量
         Integer processOutputQty = mesMoScheduleProcess.getOutputQty();
         processOutputQty= processOutputQty==null?0:processOutputQty;
         mesMoScheduleProcess.setOutputQty(processOutputQty+cavity*processMold);
         //jdbcTemplate.update("update mes_mo_schedule_process set output_qty = ?, beer_qty = ?, old_molds = ? where id = ?",mesMoScheduleProcess.getOutputQty(),mesMoScheduleProcess.getBeerQty(),mesMoScheduleProcess.getOldMolds(),mesMoScheduleProcess.getId());
-        mesMoScheduleProcessRepository.updateOutputQtyAndMold(mesMoScheduleProcess.getOutputQty(),mesMoScheduleProcess.getBeerQty(),mesMoScheduleProcess.getOldMolds(),mesMoScheduleProcess.getId());
+        mesMoScheduleProcessRepository.updateOutputQtyAndMold(mesMoScheduleProcess.getOutputQty(),mesMoScheduleProcess.getBeerQty(),mesMoScheduleProcess.getId());
     }
 
 
