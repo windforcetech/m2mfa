@@ -202,6 +202,8 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         }*/
         //更新mes_record_wip_rec
         updateMesRecordWipRec(para, mesRecordWipRec, nextProcessId, isOutputProcess);
+        //更新工序产量（产出，不良）
+        updateProcessOutputQty(crossStationFails,source,para);
         //保存当前在制信息到日志
         copyDataToLog(mesRecordWipRec);
         //保存不良
@@ -235,6 +237,25 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
             }
         }
 
+    }
+
+    @Transactional
+    public void updateProcessOutputQty(ArrayList<CrossStationFail> crossStationFails,String source,OutStationModel para){
+        //获取注塑成型所在工序的不良
+        Long fail = 0l;
+        String processId=null;
+        for(CrossStationFail crossStationFail:crossStationFails){
+            if(isFirstProcess(crossStationFail.getProcessId())){
+                fail=fail+crossStationFail.getQty();
+                processId=crossStationFail.getProcessId();
+            }
+        }
+        if(processId!=null){
+            //将注塑成型工序不良数减去
+            mesMoScheduleProcessService.updateOutputQtyForFail(source,processId,fail.intValue());
+        }
+        //更新当前过站工序的产出
+        mesMoScheduleProcessService.updateOutputQtyForAdd(source,para.getProcessId(),para.getOutputQty());
     }
 
     private void updateInlineTimeAndNowProcessId(MesRecordWipRec mesRecordWipRec) {
