@@ -92,7 +92,7 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
         "	mmd.target_qty  mes_mo_desc_target_qty,\n" +
         "  IFNULL(mmd.output_qty,0)  mes_mo_desc_output_qty,\n" +
         "	vmpi.output_qty  process_output_qty,\n" +
-        "	bpd.`name` process_name \n" +
+        "	bpd.process_name  process_name \n" +
         "FROM\n" +
         "	v_mes_process_info vmpi\n" +
         "LEFT JOIN mes_mo_desc mmd on mmd.mo_id=vmpi.mo_id\n" +
