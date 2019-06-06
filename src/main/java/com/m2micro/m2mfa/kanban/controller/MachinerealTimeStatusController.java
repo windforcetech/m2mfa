@@ -4,6 +4,7 @@ import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.kanban.service.MachinerealTimeStatusService;
 import com.m2micro.m2mfa.kanban.vo.MachinerealTimeData;
+import com.m2micro.m2mfa.push.MyChatServerHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +32,7 @@ public class MachinerealTimeStatusController {
   @UserOperationLog("机台实时数据显示")
   public ResponseMessage<List<MachinerealTimeData>> MachinerealTimeStatusShow(HttpServletRequest request){
 
-    System.out.println("ip+"+getRemortIP(request));
+    MyChatServerHandler.pushMainScreen(getRemortIP(request));
     return  ResponseMessage.ok(machinerealTimeStatusService.MachinerealTimeStatusShow(getRemortIP(request)));
   }
 
