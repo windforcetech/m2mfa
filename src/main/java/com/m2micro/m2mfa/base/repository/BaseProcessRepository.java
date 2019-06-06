@@ -38,4 +38,16 @@ public interface BaseProcessRepository extends BaseRepository<BaseProcess,String
                     "	AND bs.code=?1", nativeQuery = true)
     BaseProcess getMachineProcess(String code);
 
+    @Query(value = "SELECT\n" +
+            "	bp.* \n" +
+            "FROM\n" +
+            "	base_process bp,\n" +
+            "	base_process_station bps,\n" +
+            "	base_station bs \n" +
+            "WHERE\n" +
+            "	bp.process_id = bps.process_id\n" +
+            "	AND bps.station_id=bs.station_id\n" +
+            "	AND bs.station_id=?1", nativeQuery = true)
+    BaseProcess getProcessByStationId(String stationId);
+
 }

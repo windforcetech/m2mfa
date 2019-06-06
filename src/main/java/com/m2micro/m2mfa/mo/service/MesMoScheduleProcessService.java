@@ -56,4 +56,27 @@ public interface MesMoScheduleProcessService extends BaseService<MesMoSchedulePr
      *          模数
      */
     void updateOutputQtyAndMold(MesMoScheduleProcess mesMoScheduleProcess,Integer outputQty,Integer mold);
+
+    /**
+     * 更新工序的产量减去不良数
+     * @param scheduleId
+     *          排产单id
+     * @param processId
+     *          工序id
+     * @param fail
+     *          不良数
+     */
+    void updateOutputQtyForFail(String scheduleId,String processId,Integer fail);
+
+
+    /**
+     * 更新工序的产量加上产出数
+     * @param scheduleId
+     *          排产单id
+     * @param processId
+     *          工序id
+     * @param outputQty
+     *          产出数
+     */
+    void updateOutputQtyForAdd(String scheduleId,String processId,Integer outputQty);
 }
