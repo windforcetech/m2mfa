@@ -33,7 +33,7 @@ public class KanbanConfigController {
   @UserOperationLog("保存")
   public ResponseMessage<BaseLedConfig> save(@RequestBody BaseLedConfig baseLedConfig){
     kanbanConfigService.save(baseLedConfig);
-    MyChatServerHandler.pushMainScreen();
+    MyChatServerHandler.pushMainScreen("");
     return ResponseMessage.ok();
   }
 
@@ -89,7 +89,7 @@ public class KanbanConfigController {
     String [] ids=new String[]{baseLedConfig.getConfigId()};
     kanbanConfigService.deleteByIds(ids);
     kanbanConfigService.renew(baseLedConfig);
-    MyChatServerHandler.pushMainScreen();
+    MyChatServerHandler.pushMainScreen("");
     return ResponseMessage.ok();
   }
 
