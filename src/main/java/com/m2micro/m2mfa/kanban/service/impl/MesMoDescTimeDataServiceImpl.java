@@ -85,7 +85,7 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
         "	mmd.mo_number,\n" +
         "  bc.`name` customer_name,\n" +
         "	#vmpi.schedule_no,\n" +
-        "	bp.`name` part_name,\n" +
+        "	bp.`name` process_name,\n" +
         "	bp.part_no part_no,\n" +
         "	mmd.reach_date,\n" +
         "	mmd.close_flag,\n" +

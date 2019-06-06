@@ -49,7 +49,7 @@ public class DistributedServiceImpl implements DistributedService {
         "	bp.spec,\n" +
         "	mmd.mo_number,\n" +
         "	mms.schedule_no,\n" +
-        "	vmpi.process_name,\n" +
+        "	bpd.process_name,\n" +
         "	vmpi.output_qty,\n" +
         "	bm.`name` machine_name\n" +
         "	\n" +
@@ -59,6 +59,7 @@ public class DistributedServiceImpl implements DistributedService {
         "LEFT JOIN mes_mo_schedule mms ON vmpi.schedule_id = mms.schedule_id\n" +
         "LEFT JOIN base_machine bm ON bm.machine_id = mms.machine_id\n" +
         "LEFT JOIN base_parts bp ON bp.part_id = vmpi.part_id\n" +
+        "LEFT JOIN base_process bpd on bpd.process_id=vmpi.process_id\n"+
         "WHERE\n" +
         "	mmd.close_flag = 3\n" ;
     if(StringUtils.isNotEmpty(distributedQuery.getPartNo())){
