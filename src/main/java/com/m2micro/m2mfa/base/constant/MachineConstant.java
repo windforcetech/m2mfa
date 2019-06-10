@@ -1,5 +1,4 @@
-package com.m2micro.m2mfa.kanban.constant;
-
+package com.m2micro.m2mfa.base.constant;
 /**
  * 机台状态
  */
