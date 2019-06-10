@@ -267,7 +267,7 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
      * @param itemValue
      * @return
      */
-    public BaseItemsTarget  getItemIdAndItemValue(String itemCode,String itemValue){
+    /*public BaseItemsTarget  getItemIdAndItemValue(String itemCode,String itemValue){
 
         String sql ="SELECT\n" +
             "	*\n" +
@@ -283,6 +283,16 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
         RowMapper<BaseItemsTarget> rowMapper = BeanPropertyRowMapper.newInstance(BaseItemsTarget.class);
         BaseItemsTarget baseItemsTarget = jdbcTemplate.queryForObject(sql, rowMapper);
         return baseItemsTarget;
+    }*/
+
+    /**
+     * 获取机台状态标签
+     * @param itemCode
+     * @param itemValue
+     * @return
+     */
+    public BaseItemsTarget  getItemIdAndItemValue(String itemCode,String itemValue){
+        return baseItemsTargetRepository.getByItemCodeAndItemValue(itemCode,itemValue);
     }
 
 }
