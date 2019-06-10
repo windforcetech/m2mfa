@@ -78,7 +78,7 @@ public class BaseBomDescController {
         QBaseBomDesc baseBomDesc = QBaseBomDesc.baseBomDesc;
         JPAQuery<BaseBomDesc> jq = queryFactory.selectFrom(baseBomDesc);
         BooleanBuilder expression = new BooleanBuilder();
-        String[] partIds = new String[0];
+        String[] partIds;
         if (StringUtils.isNotEmpty(query.getPartsCategory())) {
             BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(query.getPartsCategory()).orElse(null);
             //不等于全部
