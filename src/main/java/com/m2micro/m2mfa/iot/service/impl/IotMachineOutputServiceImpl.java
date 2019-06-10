@@ -146,11 +146,16 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
         if(baseMachine==null){
             return;
         }
+        //获取开机工位所在工序（机台生产所在工序：注塑成型）add by 20190610
+        BaseProcess machineProcess = baseProcessService.getMachineProcess();
+        if(machineProcess==null){
+            return;
+        }
         //if(baseMachine!=null){
-        //通过mch_id找正在生产的排产单ID，如果拿不到(该机台上没有分配排产单)
-        List<MesMoSchedule> productionMesMoSchedule = mesMoScheduleRepository.getProductionMesMoScheduleByMachineId(baseMachine.getMachineId(), MoScheduleStatus.PRODUCTION.getKey());
+        //通过mch_id找正在生产的排产单ID(注塑成型工序未结束的排产单)，如果拿不到(该机台上没有分配排产单)
+        List<MesMoSchedule> productionMesMoSchedule = mesMoScheduleRepository.getProductionMesMoScheduleByMachineId( MoScheduleStatus.PRODUCTION.getKey(),baseMachine.getMachineId(),machineProcess.getProcessId());
         //同一台机器上正在生产两个排产单，数据异常情况>1，或者一个也没有，不作处理
-        if(productionMesMoSchedule==null||productionMesMoSchedule.size()>1){
+        if(productionMesMoSchedule==null||productionMesMoSchedule.size()!=1){
             return;
         }
         //if(productionMesMoSchedule!=null&&productionMesMoSchedule.size()==1){
@@ -190,11 +195,7 @@ public class IotMachineOutputServiceImpl implements IotMachineOutputService {
 
 
         //--------------以下为后续补充的业务逻辑：更新到排产单的工序产量和模数-----------
-        //获取开机工位所在工序（机台生产所在工序：注塑成型）
-        BaseProcess machineProcess = baseProcessService.getMachineProcess();
-        if(machineProcess==null){
-            return;
-        }
+
         //7.将产量和模数更新到具有开机工位的工序上方便后续统计
         //mesMoScheduleProcessService.updateOutputQtyAndMold(scheduleId,machineProcess.getProcessId(),processOutputQty,processMold);
         updateOutputQtyAndMold(mesMoScheduleProcess,molds.intValue(),oldMolds.intValue(),cavity.intValue());
