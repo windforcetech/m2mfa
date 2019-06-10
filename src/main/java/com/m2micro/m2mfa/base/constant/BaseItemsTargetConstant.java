@@ -7,4 +7,6 @@ public class BaseItemsTargetConstant {
     public final static String SCAN = "scan";
     //一般作业站
     public final static String SYSCOMMON = "syscommon";
+    //设备状态
+    public final static  String MACHINE_STATE="machine_state";
 }
