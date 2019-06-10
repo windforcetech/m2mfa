@@ -26,6 +26,16 @@ public class BaseBarcodeRuleObj {
     private String description;
     @ApiModelProperty(value = "条形码规则变量列表")
     private List<BaseBarcodeRuleDefineObj> baseBarcodeRuleDefineObjList;
+    @ApiModelProperty(value = "批量删除变量")
+    List<String> ids;
+
+    public List<String> getIds() {
+        return ids;
+    }
+
+    public void setIds(List<String> ids) {
+        this.ids = ids;
+    }
 
     public BaseBarcodeRuleObj() {
         baseBarcodeRuleDefineObjList = new ArrayList<>();

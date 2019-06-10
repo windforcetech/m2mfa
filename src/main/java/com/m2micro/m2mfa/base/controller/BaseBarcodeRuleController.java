@@ -72,16 +72,16 @@ public class BaseBarcodeRuleController {
         return  baseBarcodeRuleService.deleteByIdIn(ids);
     }
 
-    /**
+   /* *//**
      * 删除变量
-     */
+     *//*
     @RequestMapping(value = "/deleteVar",method = RequestMethod.POST)
     @ApiOperation(value="批量删除条形码规则变量")
     @UserOperationLog("批量删除条形码变量")
     public ResponseMessage deleteVar(@RequestBody List<String> ids){
         baseBarcodeRuleService.deleteVal(ids);
         return ResponseMessage.ok();
-    }
+    }*/
 
     /**
      * 添加或修改条形码规则
@@ -90,6 +90,7 @@ public class BaseBarcodeRuleController {
     @ApiOperation(value="添加或修改条形码规则")
     @UserOperationLog("添加或修改条形码规则")
     public ResponseMessage<BaseBarcodeRuleObj> addAndUpdate(@RequestBody BaseBarcodeRuleObj baseBarcodeRuleObj){
+        baseBarcodeRuleService.deleteVal(baseBarcodeRuleObj.getIds());
         BaseBarcodeRuleObj baseBarcodeRuleObj1 = baseBarcodeRuleService.AddOrUpdate(baseBarcodeRuleObj);
         return ResponseMessage.ok(baseBarcodeRuleObj1);
     }
