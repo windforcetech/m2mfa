@@ -63,5 +63,13 @@ public interface BaseItemsTargetService extends BaseService<BaseItemsTarget,Stri
 
     ResponseMessage  delete(String [] ids);
 
+    /**
+     * 获取机台状态标签
+     * @param itemCode
+     * @param itemValue
+     * @return
+     */
+    BaseItemsTarget  getItemIdAndItemValue(String itemCode,String itemValue);
+
 
 }

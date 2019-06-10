@@ -1,8 +1,8 @@
 package com.m2micro.m2mfa.kanban.service.impl;
 
 import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
-import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
-import com.m2micro.m2mfa.kanban.constant.MachineConstant;
+import com.m2micro.m2mfa.base.constant.MachineConstant;
+import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.kanban.entity.BaseLedConfig;
 import com.m2micro.m2mfa.kanban.repository.BaseLedConfigRepository;
 import com.m2micro.m2mfa.kanban.service.KanbanConfigService;
@@ -31,7 +31,8 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
   @Autowired
   @Qualifier("secondaryJdbcTemplate")
   private JdbcTemplate jdbcTemplate;
-
+  @Autowired
+  private BaseItemsTargetService baseItemsTargetService;
   @Override
   public List<MachinerealTimeData> MachinerealTimeStatusShow(String elemen) {
 
@@ -96,7 +97,7 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
         "	COUNT(*)\n" +
         "FROM  "  ;
     sql +=sqlPing(baseLedConfig);
-    sql +="  and  (bm.flag=  '"+getItemIdAndItemValue( BaseItemsTargetConstant.MACHINE_STATE,MachineConstant.PRODUCE.getKey()).getId()+"' or bm.flag=  '"+ getItemIdAndItemValue(BaseItemsTargetConstant.MACHINE_STATE,MachineConstant.TUNING.getKey()).getId()+"')";
+    sql +="  and  (bm.flag=  '"+baseItemsTargetService.getItemIdAndItemValue( BaseItemsTargetConstant.MACHINE_STATE,MachineConstant.PRODUCE.getKey()).getId()+"' or bm.flag=  '"+ baseItemsTargetService.getItemIdAndItemValue(BaseItemsTargetConstant.MACHINE_STATE,MachineConstant.TUNING.getKey()).getId()+"')";
 
     return jdbcTemplate.queryForObject(sql,Integer.class);
   }
@@ -113,7 +114,7 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
         "	COUNT(*)\n" +
         "FROM  "  ;
     sql +=sqlPing(baseLedConfig);
-    sql +="  and bm.flag=  '"+ getItemIdAndItemValue(BaseItemsTargetConstant.MACHINE_STATE,MachineConstant.MAINTENANCE.getKey()).getId()+"'";
+    sql +="  and bm.flag=  '"+ baseItemsTargetService.getItemIdAndItemValue(BaseItemsTargetConstant.MACHINE_STATE,MachineConstant.MAINTENANCE.getKey()).getId()+"'";
     return jdbcTemplate.queryForObject(sql,Integer.class);
   }
 
@@ -129,7 +130,7 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
         "	COUNT(*)\n" +
         "FROM  "  ;
     sql +=sqlPing(baseLedConfig);
-    sql +="  and bm.flag=  '"+ getItemIdAndItemValue(BaseItemsTargetConstant.MACHINE_STATE,MachineConstant.SERVICE.getKey()).getId()+"'";
+    sql +="  and bm.flag=  '"+ baseItemsTargetService.getItemIdAndItemValue(BaseItemsTargetConstant.MACHINE_STATE,MachineConstant.SERVICE.getKey()).getId()+"'";
     return jdbcTemplate.queryForObject(sql,Integer.class);
   }
 
@@ -145,7 +146,7 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
         "	COUNT(*)\n" +
         "FROM  "  ;
     sql +=sqlPing(baseLedConfig);
-    sql +="  and bm.flag=  '"+ getItemIdAndItemValue(BaseItemsTargetConstant.MACHINE_STATE,MachineConstant.DOWNTIME.getKey()).getId()+"'";
+    sql +="  and bm.flag=  '"+ baseItemsTargetService.getItemIdAndItemValue(BaseItemsTargetConstant.MACHINE_STATE,MachineConstant.DOWNTIME.getKey()).getId()+"'";
     return jdbcTemplate.queryForObject(sql,Integer.class);
   }
 
@@ -174,23 +175,6 @@ public class MachinerealTimeStatusServiceImpl  implements MachinerealTimeStatusS
       sqlping +=" where bm.machine_id in("+machineids+")";
     }
     return  sqlping;
-  }
-
-  /**
-   * 获取标签
-   * @param itemCode
-   * @param itemValue
-   * @return
-   */
-  public BaseItemsTarget  getItemIdAndItemValue(String itemCode,String itemValue){
-
-
-    String sql1 ="select item_id  from base_items  where item_code='"+itemCode+"'";
-    String itemId = jdbcTemplate.queryForObject(sql1, String.class);
-    String sql2 ="select * from base_items_target where  item_id='"+itemId+"' and item_value='"+itemValue+"'";
-    RowMapper<BaseItemsTarget> rowMapper = BeanPropertyRowMapper.newInstance(BaseItemsTarget.class);
-    BaseItemsTarget baseItemsTarget = jdbcTemplate.queryForObject(sql2, rowMapper);
-    return baseItemsTarget;
   }
 
 }
