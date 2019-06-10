@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/report/Distributed")
-@Api(value="在制分布报表")
+@Api(value="在制分布报表",description="在制分布报表")
 
 public class DistributedController {
 

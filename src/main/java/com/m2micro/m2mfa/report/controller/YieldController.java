@@ -48,7 +48,7 @@ import static jdk.nashorn.internal.objects.Global.print;
  */
 @RestController
 @RequestMapping("/report/Yield")
-@Api(value="看板配置项")
+@Api(value="生产产量报表",description ="生产产量报表" )
 public class YieldController {
 
   @Autowired
