@@ -71,4 +71,27 @@ public interface BaseMachineService extends BaseService<BaseMachine,String> {
      */
     boolean isMachineandDepartment(String departmentId);
 
+    /**
+     * 更新机台状态
+     * @param flag
+     *          状态
+     * @param machineId
+     *          机台id
+     * @return
+     */
+    Integer setFlagFor(String flag, String machineId);
+
+    /**
+     * 更新机台状态为生产
+     * @param machineId
+     *          机台id
+     */
+    void setFlagForProduce(String machineId);
+
+    /**
+     * 更新机台状态为停机
+     * @param machineId
+     *          机台id
+     */
+    void setFlagForStop(String machineId);
 }
