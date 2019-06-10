@@ -4,12 +4,13 @@ import com.google.common.base.CaseFormat;
 import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.m2mfa.base.entity.BaseCustomer;
-import com.m2micro.m2mfa.base.entity.BaseMachine;
-import com.m2micro.m2mfa.base.entity.BaseParts;
+import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
+import com.m2micro.m2mfa.base.constant.MachineConstant;
+import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.node.SelectNode;
 import com.m2micro.m2mfa.base.query.BaseMachineQuery;
 import com.m2micro.m2mfa.base.repository.BaseMachineRepository;
+import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.base.service.BaseMachineService;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
@@ -30,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.m2mfa.base.entity.QBaseMachine;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -56,6 +56,8 @@ public class BaseMachineServiceImpl implements BaseMachineService {
     IotMachineOutputService iotMachineOutputService;
     @Autowired
     MesMoScheduleRepository mesMoScheduleRepository;
+    @Autowired
+    BaseItemsTargetService baseItemsTargetService;
 
     public BaseMachineRepository getRepository() {
         return baseMachineRepository;
@@ -339,6 +341,26 @@ public class BaseMachineServiceImpl implements BaseMachineService {
             return true;
         }
         return false;
+    }
+
+    @Override
+    @Transactional
+    public Integer setFlagFor(String flag, String machineId) {
+        return baseMachineRepository.setFlagFor(flag,machineId);
+    }
+
+    @Override
+    @Transactional
+    public void setFlagForProduce(String machineId) {
+        BaseItemsTarget baseItemsTarget = baseItemsTargetService.getItemIdAndItemValue(BaseItemsTargetConstant.MACHINE_STATE, MachineConstant.PRODUCE.getKey());
+        setFlagFor(baseItemsTarget.getId(),machineId);
+    }
+
+    @Override
+    @Transactional
+    public void setFlagForStop(String machineId) {
+        BaseItemsTarget baseItemsTarget = baseItemsTargetService.getItemIdAndItemValue(BaseItemsTargetConstant.MACHINE_STATE, MachineConstant.DOWNTIME.getKey());
+        setFlagFor(baseItemsTarget.getId(),machineId);
     }
 
     /**
