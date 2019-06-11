@@ -174,9 +174,12 @@ public class BaseBarcodeRuleServiceImpl implements BaseBarcodeRuleService {
     @Transactional
     @Override
     public void deleteVal(List<String> varIds) {
-        String[] ids = new String[varIds.size()];
-        String[] strings = varIds.toArray(ids);
-        baseBarcodeRuleDefService.deleteByIds(strings);
+        if(varIds!=null){
+            String[] ids = new String[varIds.size()];
+            String[] strings = varIds.toArray(ids);
+            baseBarcodeRuleDefService.deleteByIds(strings);
+        }
+
     }
 
 
