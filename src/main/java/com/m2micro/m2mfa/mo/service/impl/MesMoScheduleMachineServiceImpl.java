@@ -166,6 +166,8 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
                     Mes_Mo_Schedule_Station，自动在选择的机台重新生成新的排产记录。排产数量是上机台未完成数。状态为初始。
                     PS：复制时有些内容需要根据当前的机台变更，如排产单号的生成。
                 */
+                //正在生产中的要变更机台状态 add by 20190611
+                mesMoScheduleService.updateMachineStateForStop(mesMoSchedule.getScheduleId());
                 //获取所有的排产单相关数据
                 ScheduleAllInfoModel scheduleAllInfoModel = mesMoScheduleService.getScheduleAllInfoModel(mesMoSchedule.getScheduleId());
                 //填充所有数据
@@ -176,6 +178,7 @@ public class MesMoScheduleMachineServiceImpl implements MesMoScheduleMachineServ
                 MesMoSchedule mesMoSchedule1 = scheduleAllInfoModel.getMesMoSchedule();
                 mesMoSchedule1.setFlag(MoScheduleStatus.FORCECLOSE.getKey());
                 mesMoScheduleService.save(mesMoSchedule1);
+
             }
             //如果排产单状态是初始或是已审核
             else if(MoScheduleStatus.INITIAL.getKey().equals(mesMoSchedule.getFlag())||

@@ -1,10 +1,14 @@
 package com.m2micro.m2mfa.pad.service.impl;
 
 import com.m2micro.framework.commons.exception.MMException;
+import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
+import com.m2micro.m2mfa.base.constant.MachineConstant;
+import com.m2micro.m2mfa.base.entity.BaseItemsTarget;
 import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.base.entity.BaseStaff;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseStaffRepository;
+import com.m2micro.m2mfa.base.service.BaseItemsTargetService;
 import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
@@ -54,6 +58,8 @@ public class PadScheduleServiceImpl implements PadScheduleService {
     PadDispatchService padDispatchService;
     @Autowired
     BaseProcessService baseProcessService;
+    @Autowired
+    BaseItemsTargetService baseItemsTargetService;
 
     @Override
     public List<PadScheduleModel> getMesMoSchedule() {

@@ -201,4 +201,32 @@ public interface MesMoScheduleService extends BaseService<MesMoSchedule,String> 
      */
     Integer maxSequence(String machineId);
 
+    /**
+     * 获取注塑成型工序正在生产的排产单
+     * @param machineId
+     *          机台id
+     * @param processId
+     *          注塑成型工序id
+     * @return  排产单
+     */
+    MesMoSchedule getProductionMesMoSchedule(String machineId,String processId);
+
+    /**
+     * 是否能更新机台状态为生产中
+     * @param scheduleId
+     *          排产单id
+     * @param machineId
+     *          机台id
+     * @param processId
+     *          工序id
+     * @return  是：能更新
+     */
+    Boolean isUpdateMachineStateForProduction(String scheduleId,String machineId,String processId);
+
+    /**
+     * 将正在生产的排产单所关联机台更新机台为关闭状态
+     * @param scheduleId
+     */
+    void updateMachineStateForStop(String scheduleId);
+
 }
