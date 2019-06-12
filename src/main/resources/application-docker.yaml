@@ -18,8 +18,7 @@ spring:
   cache:
     type: redis
   redis:
-    host: redis
-    port: 6666
+    host: redis-mes
 
 m2miot:
   client:
