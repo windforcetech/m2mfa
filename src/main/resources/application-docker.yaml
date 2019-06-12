@@ -19,7 +19,6 @@ spring:
     type: redis
   redis:
     host: redis-mes
-    port: 6666
 
 m2miot:
   client:
