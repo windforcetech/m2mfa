@@ -1,9 +1,12 @@
 package com.m2micro.m2mfa.pad.service;
 
 import com.m2micro.m2mfa.base.entity.BaseProcess;
+import com.m2micro.m2mfa.iot.entity.IotMachineOutput;
 import com.m2micro.m2mfa.pad.model.MoDescInfoModel;
 import com.m2micro.m2mfa.pad.model.StationInfoModel;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -71,6 +74,16 @@ public interface PadBottomDisplayService {
      * @return
      */
     Integer getOutputQtyForProcess(String scheduleId, BaseProcess baseProcess);
+
+    /**
+     * 过站获取员工实际产出
+     * @param scheduleId
+     * @param baseProcess
+     * @param staffId
+     * @param outTime
+     * @return
+     */
+    BigDecimal getActualOutput(String  scheduleId, BaseProcess baseProcess, String staffId, Date outTime, IotMachineOutput iotMachineOutput, BigDecimal startMolds);
 
     /**
      * 获取机台产量（注塑成型工序的产量）

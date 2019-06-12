@@ -21,7 +21,7 @@ public class BaseBomDescQuery extends Query {
     @ApiModelProperty(value = "主键")
     private String bomId;
     @ApiModelProperty(value = "料件编号")
-    private String partId;
+    private String partNo;
     @ApiModelProperty(value = "版本号")
     private Integer version;
     @ApiModelProperty(value = "类型")

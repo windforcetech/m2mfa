@@ -78,8 +78,8 @@ public class BaseInstructionServiceImpl implements BaseInstructionService {
        if(query.getEnabled()!=null){
          condition.and(qBaseInstruction.enabled.eq(query.getEnabled()));
        }
-        if(query.getCheckflag()!=null){
-            condition.and(qBaseInstruction.checkFlag.eq(query.getCheckflag()));
+        if(query.getCheckFlag()!=null){
+            condition.and(qBaseInstruction.checkFlag.eq(query.getCheckFlag()));
         }
         jq.where(condition);
         OrderSpecifier orderSpecifier = null;

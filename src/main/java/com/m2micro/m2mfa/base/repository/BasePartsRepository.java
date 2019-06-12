@@ -28,11 +28,13 @@ public interface BasePartsRepository extends BaseRepository<BaseParts, String> {
     @Query(value = "select * from base_parts  where  part_no=?1 and enabled=1 and group_id=?2", nativeQuery = true)
     BaseParts selectpartNoAndGroupId(String partNo, String groupId);
 
-    int countByPartNoAndGroupId(String partNo,String groupId);
+    int countByPartNoAndGroupId(String partNo, String groupId);
 
-    List<BaseParts> findByPartNoAndGroupId(String partNo,String groupId);
+    List<BaseParts> findByPartNoAndGroupId(String partNo, String groupId);
 
     List<BaseParts> findAllByCategory(String category);
 
-    List<BaseParts>findByPartNo(String partNo);
+    List<BaseParts> findByPartNo(String partNo);
+
+    List<BaseParts> findAllByPartNoLike(String partNo);
 }

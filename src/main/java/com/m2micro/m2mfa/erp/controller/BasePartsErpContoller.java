@@ -35,11 +35,11 @@ public class BasePartsErpContoller {
   @ApiOperation(value="料件erp")
   //@UserOperationLog("料件erp")
   public ResponseMessage erpParts(String partNos){
-    Thread th=Thread.currentThread();
+
     lock.lock();
     Long aLong = basePartsErpService.erpPartsCount(partNos);
     Long chun = chun(aLong);
-    //FileUtil.WriteStringToFile( "总数 +"+aLong+"除开"+chun+"当前线程id"+th.getId()+"时间》》》》》"+new Date());
+
       for(long i=0;i<chun;i++){
           basePartsErpService.erpParts(partNos,i,1000L);
       }

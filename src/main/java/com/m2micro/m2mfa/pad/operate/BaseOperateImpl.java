@@ -3,8 +3,10 @@ package com.m2micro.m2mfa.pad.operate;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
+import com.m2micro.m2mfa.base.constant.MachineConstant;
 import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.base.entity.*;
+import com.m2micro.m2mfa.base.repository.BaseProcessRepository;
 import com.m2micro.m2mfa.base.service.*;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
@@ -23,6 +25,7 @@ import com.m2micro.m2mfa.mo.repository.MesMoScheduleProcessRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleStationRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
+import com.m2micro.m2mfa.mo.service.MesMoScheduleProcessService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleStaffService;
 import com.m2micro.m2mfa.pad.constant.PadConstant;
@@ -113,6 +116,12 @@ public class BaseOperateImpl implements BaseOperate {
     MesPartRouteRepository mesPartRouteRepository;
     @Autowired
     MesRecordWipFailRepository mesRecordWipFailRepository;
+    @Autowired
+    BaseProcessRepository baseProcessRepository;
+    @Autowired
+    MesMoScheduleProcessService mesMoScheduleProcessService;
+    @Autowired
+    BaseMachineService baseMachineService;
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return mesMoScheduleRepository.findById(scheduleId).orElse(null);
@@ -443,8 +452,14 @@ public class BaseOperateImpl implements BaseOperate {
         MesMoDesc moDesc =  mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
         isMoDescFlag(moDesc);
         StartWorkPara startWorkPara = new StartWorkPara();
+        BaseProcess baseProcess = baseProcessService.findById(obj.getProcessId()).orElse(null);
+        //校验机台状态 add by 20190611
+        validMachineState(mesMoSchedule.getMachineId(),baseProcess);
         //跟新工序开始时间
         updateProcessStarTime(obj.getScheduleId(),obj.getProcessId());
+        //注塑成型工序：变更机台状态为生产中 add by 20190611
+        updateMachineState(obj.getScheduleId(), mesMoSchedule, baseProcess);
+
         //判断工位是否有上工记录
         if(!isStationisWork(obj.getScheduleId(),obj.getStationId())){
             //新增上工记录返回上工记录id
@@ -466,8 +481,37 @@ public class BaseOperateImpl implements BaseOperate {
         return startWorkPara;
     }
 
+    /**
+     * 校验机台状态
+     * @param machineId
+     * @param baseProcess
+     */
+    public void validMachineState(String machineId,BaseProcess baseProcess) {
+        //注塑成型工序：校验机台状态
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            BaseMachine baseMachine = baseMachineService.findById(machineId).orElse(null);
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseMachine.getFlag()).orElse(null);
+            //维修和保养不允许上工
+            if(MachineConstant.SERVICE.getKey().equals(baseItemsTarget.getItemValue())||MachineConstant.MAINTENANCE.getKey().equals(baseItemsTarget.getItemValue())){
+                throw new MMException("当前机台正处于维修和保养中，不允许上工");
+            }
+        }
+    }
 
-/**
+    @Transactional
+    public void updateMachineState(String scheduleId, MesMoSchedule mesMoSchedule, BaseProcess baseProcess) {
+        //注塑成型工序：变更机台状态为生产中
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            //校验正在此机台生产的排产单
+            if(mesMoScheduleService.isUpdateMachineStateForProduction(scheduleId,mesMoSchedule.getMachineId(),baseProcess.getProcessId())){
+                //变更机台状态为生产中
+                baseMachineService.setFlagForProduce(mesMoSchedule.getMachineId());
+            }
+        }
+    }
+
+
+    /**
      * 工单校验已审待排
      * @param moDesc
      */
@@ -783,6 +827,25 @@ public class BaseOperateImpl implements BaseOperate {
             //保存到在制不良记录表方便后续统计
             saveMesRecordWipFail(mesRecordFail1);
         }
+        //将当前工序产量减去不良数量（目前只有注塑成型）
+        updateProcessOutputQtyForFail(padbad);
+   }
+
+   @Transactional
+   public void updateProcessOutputQtyForFail(Padbad padbad){
+        if(padbad.getMesRecordFails()==null||padbad.getMesRecordFails().size()<=0){
+            return;
+        }
+        //获取不良总数
+       Long failQty = 0l;
+       for(MesRecordFail mesRecordFail1 :  padbad.getMesRecordFails()){
+           failQty = failQty+(mesRecordFail1.getQty()==null?0:mesRecordFail1.getQty());
+       }
+        //获取工位所在工序
+       BaseProcess baseProcess = baseProcessRepository.getProcessByStationId(padbad.getStationId());
+       MesRecordWork mesRecordWork = mesRecordWorkService.findById(padbad.getMesRecordFails().get(0).getRwId()).orElse(null);
+       //更新工序产量
+       mesMoScheduleProcessService.updateOutputQtyForFail(mesRecordWork.getScheduleId(),baseProcess.getProcessId(),failQty.intValue());
    }
 
     /**
@@ -819,14 +882,16 @@ public class BaseOperateImpl implements BaseOperate {
         MesRecordWork mesRecordWork = mesRecordWorkService.findById(mesRecordFail1.getRwId()).orElse(null);
         //完工数量
        //Integer completedQty = getCompletedQty(findIotMachineOutputByMachineId(mesRecordWork.getMachineId()), mesRecordWork.getScheduleId(), mesRecordWork.getScheduleId()).intValue();
-        MoDescInfoModel moDescForStationFail = getMoDescForStationFail(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
+        MoDescInfoModel moDescForStationFail = getMoDescForProcessFail(mesRecordWork.getScheduleId(), mesRecordWork.getProcessId());
         Integer completedQty = padBottomDisplayService.getOutputQtyForStation(mesRecordWork.getScheduleId(), mesRecordWork.getStationId(), mesRecordWork.getProcessId(), mesRecordWork.getMachineId(), moDescForStationFail);
         if(mesRecordFail1.getQty()>completedQty){
             throw new MMException("不良负数量不可大于完工数量");
         }
 
-        long badsum = getBadsum(mesRecordFail1);
-        //不良数量为负
+        //long badsum = getBadsum(mesRecordFail1);
+        long badsum = moDescForStationFail.getQty();
+
+    //不良数量为负
         if(mesRecordFail1.getQty() <0){
             long qtynum= Math.abs(mesRecordFail1.getQty());
             if (qtynum > badsum) {
@@ -855,6 +920,7 @@ public class BaseOperateImpl implements BaseOperate {
             }
             return num;
         }
+
 
 
     @Override
@@ -1207,7 +1273,7 @@ public class BaseOperateImpl implements BaseOperate {
         Integer scheduleQty = mesMoSchedule.getScheduleQty();
         BigDecimal qty = new BigDecimal(scheduleQty);
         BigDecimal completedQty = getCompletedQty(iotMachineOutput,mesRecordWork.getScheduleId(),mesRecordWork.getStationId());
-        MoDescInfoModel moDescForStationFail = getMoDescForStationFail(mesRecordWork.getScheduleId(), mesRecordWork.getStationId());
+        MoDescInfoModel moDescForStationFail = getMoDescForProcessFail(mesRecordWork.getScheduleId(), mesRecordWork.getProcessId());
         BigDecimal fail = new BigDecimal(moDescForStationFail.getQty());
         BigDecimal output = completedQty.subtract(fail);
         return output.compareTo(qty);
@@ -1242,7 +1308,7 @@ public class BaseOperateImpl implements BaseOperate {
     }*/
 
     /**
-     *  获取当前排产单当前工位的不良数量及报废数量（整改后）
+     *  获取当前排产单当前工位的不良数量及报废数量（整改后，已经没用了）
      * @param scheduleId
      * @param stationId
      * @return
@@ -1255,6 +1321,31 @@ public class BaseOperateImpl implements BaseOperate {
                 "mes_record_wip_fail WHERE \n" +
                 "schedule_id='" + scheduleId + "'\n" +
                 "AND target_station_id='" + stationId + "'";
+        RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
+        MoDescInfoModel moDescInfoModel = jdbcTemplate.queryForObject(sql, rowMapper);
+        if(moDescInfoModel.getQty()==null){
+            moDescInfoModel.setQty(0l);
+        }
+        if(moDescInfoModel.getScrapQty()==null){
+            moDescInfoModel.setScrapQty(0);
+        }
+        return moDescInfoModel;
+    }
+
+    /**
+     *  获取当前排产单当前工序的不良数量及报废数量（整改后）
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+    protected MoDescInfoModel getMoDescForProcessFail(String scheduleId,String processId) {
+        String sql = "SELECT\n" +
+                "	sum( IFNULL( fail_qty, 0 ) ) qty,\n" +
+                "	sum( IFNULL( scrap_qty, 0 ) ) scrapQty \n" +
+                "FROM\n" +
+                "mes_record_wip_fail WHERE \n" +
+                "schedule_id='" + scheduleId + "'\n" +
+                "AND target_process_id='" + processId + "'";
         RowMapper<MoDescInfoModel> rowMapper = BeanPropertyRowMapper.newInstance(MoDescInfoModel.class);
         MoDescInfoModel moDescInfoModel = jdbcTemplate.queryForObject(sql, rowMapper);
         if(moDescInfoModel.getQty()==null){
@@ -1554,6 +1645,11 @@ public class BaseOperateImpl implements BaseOperate {
             return true;
         }
         return false;
+    }
+
+    @Transactional
+    public void setMachineFlagForStop(String machineId){
+        baseMachineService.setFlagForStop(machineId);
     }
 
 }

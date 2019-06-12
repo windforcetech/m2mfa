@@ -110,8 +110,8 @@ public class BaseInstructionController {
      * 下载
      */
     @RequestMapping("/download")
-    @ApiOperation(value="下载这也指导书")
-    @UserOperationLog("下载这也指导书")
+    @ApiOperation(value="下载作业指导书")
+    @UserOperationLog("下载作业指导书")
     public void download( String id, HttpServletResponse response)throws IOException {
         BaseInstruction baseInstruction = baseInstructionService.findById(id).orElse(null);
         if(baseInstruction.equals(null)){

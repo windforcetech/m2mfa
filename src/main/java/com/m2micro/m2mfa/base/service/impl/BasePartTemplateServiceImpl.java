@@ -100,7 +100,7 @@ public class BasePartTemplateServiceImpl implements BasePartTemplateService {
         }
 
         if (StringUtils.isNotEmpty(query.getDescription() ) ) {
-            sql += "and b.description like  '%" + query.getDescription() + "%'\n";
+            sql += "and a.description like  '%" + query.getDescription() + "%'\n";
         }
         if (query.getValid()!=null ) {
             sql += "and a.valid  =   " + query.getValid() + "\n";

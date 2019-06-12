@@ -2,6 +2,7 @@ package com.m2micro.m2mfa.base.repository;
 
 import com.m2micro.m2mfa.base.entity.BaseMachine;
 import com.m2micro.framework.commons.BaseRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -35,4 +36,9 @@ public interface BaseMachineRepository extends BaseRepository<BaseMachine,String
 
     @Query(value = "SELECT bm.* FROM base_machine bm WHERE bm.id = ?1 AND bm.group_id = ?2",nativeQuery = true)
     List<BaseMachine> findByOrgIds(String orgId,String groupId);
+
+
+    @Modifying
+    @Query("update BaseMachine m set m.flag = ?1 where m.machineId = ?2")
+    Integer setFlagFor(String flag, String machineId);
 }

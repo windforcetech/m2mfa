@@ -57,4 +57,6 @@ public interface MesRecordWorkRepository extends BaseRepository<MesRecordWork,St
     @Modifying
     @Query("update MesRecordWork m set m.endTime = ?1 , m.endPower = ?2 , m.endMolds = ?3 where m.scheduleId = ?4 and m.startTime is not null and m.endTime is null")
     Integer setEndAll(Date endTime, BigDecimal endPower, BigDecimal endMolds, String scheduleId);
+
+    List<MesRecordWork>findByRwidIn(List<String> rws);
 }

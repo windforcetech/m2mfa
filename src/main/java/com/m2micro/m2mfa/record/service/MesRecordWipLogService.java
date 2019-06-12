@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,6 +29,17 @@ public interface MesRecordWipLogService extends BaseService<MesRecordWipLog,Stri
      * @return
      */
     Integer getAllOutputQty(String scheduleId,String processId);
+
+    /**
+     * 过站的员工实时数据
+     * @param scheduleId
+     * @param processId
+     * @param satffid
+     * @param outTime
+     * @return
+     */
+    Integer getActualOutput(String scheduleId, String processId, String satffid, Date outTime);
+
 
     /**
      * 获取条码关联的所有排产单当前工序的产出

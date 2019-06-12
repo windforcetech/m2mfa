@@ -5,6 +5,7 @@ import com.m2micro.framework.commons.BaseRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,4 +21,7 @@ public interface MesRecordWipLogRepository extends BaseRepository<MesRecordWipLo
 
     @Query("select sum(outputQty) from MesRecordWipLog where scheduleId=?1 and wipNowProcess=?2")
     Integer getAllOutputQty(String scheduleId,String processId);
+
+    @Query("select sum(outputQty) from MesRecordWipLog where scheduleId=?1 and wipNowProcess=?2  and staffId=?3 and outTime>=?4")
+    Integer getActualOutput(String scheduleId,String processId,String staffId, Date outTime);
 }

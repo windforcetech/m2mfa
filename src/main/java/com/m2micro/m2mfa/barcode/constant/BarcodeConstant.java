@@ -18,7 +18,8 @@ public enum  BarcodeConstant
   GROSS_WEIGHT("10000336","毛重"),
   VOLUME("10000337","材积"),
   PART_NAME("10000338","料件品名"),
-  MATERIAL_SPECIFICATIONS("10000339","料件规格");
+  MATERIAL_SPECIFICATIONS("10000339","料件规格"),
+  ORDER_NUMBER("10000320","排单号码");
 
   private final String key;
   private final String value;
@@ -71,6 +72,9 @@ public enum  BarcodeConstant
       case "10000312":
         ms = BarcodeConstant.DATE_FUNCTION;
         break;
+      case "10000320":
+        ms = BarcodeConstant.ORDER_NUMBER;
+        break;
       default:
         ms = BarcodeConstant.DATE_FUNCTION;
     }
@@ -91,6 +95,9 @@ public enum  BarcodeConstant
   public static String  barCodeGeneration(String  key, String dateNow, PrintApplyObj printApplyObj, Integer allQty, int n, Integer i, RuleObj rule) {
     String str = "";
     switch (key){
+      case "10000320":
+        str = printApplyObj.getOrderNumber();
+        break;
       case "10000313":
         str = printApplyObj.getMoNumber();
         break;

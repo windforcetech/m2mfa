@@ -112,8 +112,18 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      *              机台id
      * @return
      */
-    @Query(value = "SELECT mms.*  from mes_mo_schedule mms WHERE mms.flag =?2 and mms.machine_id=?1",nativeQuery = true)
-    List<MesMoSchedule> getProductionMesMoScheduleByMachineId(String machineId,Integer flag);
+    @Query(value = "SELECT\n" +
+            "	mms.* \n" +
+            "FROM\n" +
+            "	mes_mo_schedule mms,\n" +
+            "	mes_mo_schedule_process mmsp \n" +
+            "WHERE\n" +
+            "	mms.schedule_id = mmsp.schedule_id \n" +
+            "	AND mms.flag = ?1 \n" +
+            "	AND mms.machine_id = ?2 \n" +
+            "	AND mmsp.process_id = ?3 \n" +
+            "	AND mmsp.actual_end_time IS NULL",nativeQuery = true)
+    List<MesMoSchedule> getProductionMesMoScheduleByMachineId(Integer flag,String machineId,String processId);
 
     /**
      * 获取当前机台优先级最高的排产单
@@ -155,4 +165,27 @@ public interface MesMoScheduleRepository extends BaseRepository<MesMoSchedule,St
      * @return
      */
     List<MesMoSchedule> findByMoIdAndFlagIn(String moId,List<Integer> flags);
+
+    /**
+     * 当前排产单在注塑成型工序是否正在生产
+     * @param flag
+     *          正在生产
+     * @param scheduleId
+     *          排产单id
+     * @param processId
+     *          注塑成型工序id
+     * @return
+     */
+    @Query(value = "SELECT\n" +
+            "	mms.* \n" +
+            "FROM\n" +
+            "	mes_mo_schedule mms,\n" +
+            "	mes_mo_schedule_process mmsp \n" +
+            "WHERE\n" +
+            "	mms.schedule_id = mmsp.schedule_id \n" +
+            "	AND mms.flag = ?1\n" +
+            "	AND mms.schedule_id = ?2\n" +
+            "	AND mmsp.process_id = ?3\n" +
+            "	AND mmsp.actual_end_time IS NULL",nativeQuery = true)
+    MesMoSchedule getIsProductMesMoSchedule(Integer flag,String scheduleId,String processId);
 }

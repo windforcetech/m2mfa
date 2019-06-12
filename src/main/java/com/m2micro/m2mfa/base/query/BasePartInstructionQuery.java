@@ -15,4 +15,8 @@ public class BasePartInstructionQuery extends Query {
   private Boolean enabled;
   @ApiModelProperty(value = "描述")
   private String description;
+  @ApiModelProperty(value = "生效日期")
+  private String effectiveDate;
+  @ApiModelProperty(value = "失效日期")
+  private String invalidDate;
 }

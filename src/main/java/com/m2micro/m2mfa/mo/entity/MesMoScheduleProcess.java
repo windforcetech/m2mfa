@@ -65,6 +65,8 @@ public class MesMoScheduleProcess extends BaseEntity implements Serializable {
     private String qualitySolutionId;
     @ApiModelProperty(value = "啤/次数")
     private Integer beerQty;
+    /*@ApiModelProperty(value = "上次模数")
+    private Integer oldMolds;*/
     @ApiModelProperty(value = "产出数")
     private Integer outputQty;
 
@@ -86,6 +88,15 @@ public class MesMoScheduleProcess extends BaseEntity implements Serializable {
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
+
+
+    /*public Integer getOldMolds() {
+        return oldMolds;
+    }
+
+    public void setOldMolds(Integer oldMolds) {
+        this.oldMolds = oldMolds;
+    }*/
 
     public String getId() {
         return id;

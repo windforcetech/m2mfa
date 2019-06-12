@@ -10,6 +10,8 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.record.entity.QMesRecordWipLog;
+
+import java.util.Date;
 import java.util.List;
 /**
  * 在制记录表历史 服务实现类
@@ -47,6 +49,12 @@ public class MesRecordWipLogServiceImpl implements MesRecordWipLogService {
     @Override
     public Integer getAllOutputQty(String scheduleId, String processId) {
         Integer allOutputQty = mesRecordWipLogRepository.getAllOutputQty(scheduleId, processId);
+        return allOutputQty==null?0:allOutputQty;
+    }
+
+    @Override
+    public Integer getActualOutput(String scheduleId, String processId, String satffid, Date outTime) {
+        Integer allOutputQty = mesRecordWipLogRepository.getActualOutput(scheduleId, processId,satffid,outTime);
         return allOutputQty==null?0:allOutputQty;
     }
 

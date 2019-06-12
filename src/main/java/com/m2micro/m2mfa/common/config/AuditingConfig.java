@@ -25,6 +25,12 @@ class SpringSecurityAuditAwareImpl implements AuditorAware<String> {
     @Override
     public Optional<String> getCurrentAuditor() {
         TokenInfo tokenInfo = TokenInfo.getTokenInfo("");
+        if(tokenInfo==null){
+            return Optional.ofNullable(null);
+        }
+        if(tokenInfo.getUserID()==null){
+            return Optional.ofNullable(null);
+        }
         return Optional.ofNullable(tokenInfo.getUserID());
     }
 

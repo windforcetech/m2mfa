@@ -48,7 +48,7 @@ public class BasePartsErpServiceImpl implements BasePartsErpService {
       long num = (x * 1000);
       long end = num + 1000l;
 
-    //  FileUtil.WriteStringToFile("开始" + num + "结束" + end + " 当前线程：" +Thread.currentThread().getId());
+
       String sql = "select * from (SELECT a.*, ROWNUM rn\n" +
               "    FROM (SELECT * FROM IMA_FILE) a\n" +
               "      WHERE ROWNUM <=  " + end + ")  \n" +
@@ -62,7 +62,7 @@ public class BasePartsErpServiceImpl implements BasePartsErpService {
       sql += "  and rn > " + num + "";
 
       RowMapper rm = BeanPropertyRowMapper.newInstance(ImaFile.class);
-     // FileUtil.WriteStringToFile("打印出来的sql +"+sql);
+
       List<ImaFile> list = primaryJdbcTemplate.query(sql, rm);
 
       for (ImaFile imaFile : list) {

@@ -18,6 +18,10 @@ import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
 import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -47,7 +51,9 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
     BaseItemsRepository baseItemsRepository;
     @Autowired
     BaseInstructionRepository baseInstructionRepository;
-
+    @Autowired
+    @Qualifier("secondaryJdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
     public BaseItemsTargetRepository getRepository() {
         return baseItemsTargetRepository;
     }
@@ -253,6 +259,40 @@ public class BaseItemsTargetServiceImpl implements BaseItemsTargetService {
             }
         }
         return list;
+    }
+
+    /**
+     * 获取机台状态标签
+     * @param itemCode
+     * @param itemValue
+     * @return
+     */
+    /*public BaseItemsTarget  getItemIdAndItemValue(String itemCode,String itemValue){
+
+        String sql ="SELECT\n" +
+            "	*\n" +
+            "FROM\n" +
+            "	base_items_target bit\n" +
+            "WHERE\n" +
+            "	item_id = (select bs.item_id\n" +
+            "FROM\n" +
+            "	base_items bs\n" +
+            "WHERE\n" +
+            "	bs.item_code = '"+itemCode+"')\n" +
+            "AND bit.item_value = '"+itemValue+"'";
+        RowMapper<BaseItemsTarget> rowMapper = BeanPropertyRowMapper.newInstance(BaseItemsTarget.class);
+        BaseItemsTarget baseItemsTarget = jdbcTemplate.queryForObject(sql, rowMapper);
+        return baseItemsTarget;
+    }*/
+
+    /**
+     * 获取机台状态标签
+     * @param itemCode
+     * @param itemValue
+     * @return
+     */
+    public BaseItemsTarget  getItemIdAndItemValue(String itemCode,String itemValue){
+        return baseItemsTargetRepository.getByItemCodeAndItemValue(itemCode,itemValue);
     }
 
 }

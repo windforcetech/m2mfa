@@ -17,6 +17,7 @@ import com.m2micro.m2mfa.pad.constant.StationConstant;
 import com.m2micro.m2mfa.pad.model.PadHomeModel;
 import com.m2micro.m2mfa.pad.model.PadHomePara;
 import com.m2micro.m2mfa.pad.model.PadYieldPara;
+import com.m2micro.m2mfa.pad.service.PadBottomDisplayService;
 import com.m2micro.m2mfa.pad.service.PadHomeService;
 import com.m2micro.m2mfa.pad.util.PadStaffUtil;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
@@ -68,7 +69,8 @@ public class PadHomeServiceImpl  implements PadHomeService {
   ProcessConstant processConstant;
   @Autowired
   private BaseStationService baseStationService;
-
+  @Autowired
+  private PadBottomDisplayService padBottomDisplayService ;
   @Override
   public PadHomeModel findByHome(PadHomePara padHomePara) {
 
@@ -117,10 +119,9 @@ public class PadHomeServiceImpl  implements PadHomeService {
 
       //获取当前员工开始模数
       BigDecimal startMolds=startMolds(rwId,PadStaffUtil.getStaff().getStaffId());
-      //实际产出
-      if(startMolds !=null && startMolds.compareTo(BigDecimal.ZERO)!=0){
-        actualOutput =startMolds==null ? new  BigDecimal(0) :(iotMachineOutput.getOutput().subtract(startMolds));
-      }
+      //获取员工实际产出
+      actualOutput = padBottomDisplayService.getActualOutput(padHomePara.getScheduleId(), baseProcess, baseStaff.getStaffId(), startTime,iotMachineOutput,startMolds);
+
 
        //达成率
       rate = standardOutput.longValue()==0?0:(actualOutput.doubleValue()/standardOutput.longValue());

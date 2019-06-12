@@ -1,7 +1,7 @@
 spring:
   datasource:
     secondary:
-      jdbc-url: jdbc:mysql://192.168.1.132:3306/saas?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
+      jdbc-url: jdbc:mysql://192.168.1.132:3306/liaotao?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
       username: root
       password:
       driverClassName: com.mysql.jdbc.Driver
@@ -28,3 +28,5 @@ file:
   baseDir: /home/test001/m2m_mes/files
 labServer:
   url: http://192.168.2.16:9666/api/
+kanban:
+  url: http://192.168.1.111:9000
