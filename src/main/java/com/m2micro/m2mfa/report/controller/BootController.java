@@ -8,6 +8,7 @@ import com.m2micro.m2mfa.report.service.BootService;
 import com.m2micro.m2mfa.report.vo.Distributed;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,7 +23,7 @@ import java.util.List;
 @Api(value="开机日报",description="开机日报")
 public class BootController {
 
-
+  @Autowired
   private BootService bootService;
   /**
    * 开机日报报表

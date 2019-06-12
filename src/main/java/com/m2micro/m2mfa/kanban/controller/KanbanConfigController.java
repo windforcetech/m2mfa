@@ -14,6 +14,7 @@ import com.m2micro.m2mfa.push.MyChatServerHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -70,6 +71,7 @@ public class KanbanConfigController {
   @UserOperationLog("列表")
   public ResponseMessage<PageUtil<BaseLedConfig>> list(Query query){
     PageUtil<BaseLedConfig> page = kanbanConfigService.list(query);
+   
     return ResponseMessage.ok(page);
   }
 

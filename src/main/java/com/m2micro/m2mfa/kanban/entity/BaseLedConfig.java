@@ -11,6 +11,7 @@ import java.util.List;
 import com.m2micro.m2mfa.common.entity.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  *
@@ -48,6 +49,10 @@ public class BaseLedConfig extends BaseEntity implements Serializable {
     @Transient
     @ApiModelProperty(value = "机台对应的列表数据")
     private List<BaseMachineList> baseMachineLists;
+
+    @Transient
+    @ApiModelProperty(value = "配置服务ip")
+    private String configIp;
 
     public String getConfigId() {
         return configId;
@@ -134,5 +139,13 @@ public class BaseLedConfig extends BaseEntity implements Serializable {
 
     public void setContentFontSize(String contentFontSize) {
         this.contentFontSize = contentFontSize;
+    }
+
+    public String getConfigIp() {
+        return configIp;
+    }
+
+    public void setConfigIp(   String configIp) {
+        this.configIp = configIp;
     }
 }

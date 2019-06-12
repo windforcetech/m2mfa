@@ -28,3 +28,6 @@ file:
   baseDir: /home/test001/m2m_mes/files
 labServer:
   url: http://192.168.1.32:61080/api/
+kanban:
+  url: http://192.168.1.111:9000
+
