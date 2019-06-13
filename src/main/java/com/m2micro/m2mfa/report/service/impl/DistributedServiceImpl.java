@@ -330,7 +330,6 @@ public class DistributedServiceImpl implements DistributedService {
      */
     private  HSSFCellStyle getHssfCellStyle(Workbook book) {
       HSSFCellStyle style2 = (HSSFCellStyle) book.createCellStyle();
-      style2.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
       style2.setBorderBottom(HSSFCellStyle.BORDER_THIN);
       style2.setBorderLeft(HSSFCellStyle.BORDER_THIN);
       style2.setBorderRight(HSSFCellStyle.BORDER_THIN);
