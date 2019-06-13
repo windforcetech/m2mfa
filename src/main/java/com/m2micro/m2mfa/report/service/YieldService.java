@@ -1,5 +1,7 @@
 package com.m2micro.m2mfa.report.service;
 
+import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.m2mfa.report.query.YieldDataQuery;
 import com.m2micro.m2mfa.report.query.YieldQuery;
 import com.m2micro.m2mfa.report.vo.Yield;
 
@@ -13,7 +15,15 @@ public interface YieldService {
    * 产量报表
    * @return
    */
-  List<Yield> YieldShow(YieldQuery yieldQuery);
+  List<Yield> yieldShow(YieldQuery yieldQuery);
+
+
+  /**
+   * 产量报表分页
+   * @return
+   */
+  PageUtil<Yield> yielddata(YieldDataQuery yieldQuery);
+
 
   /**
    * excel导出生产报表
