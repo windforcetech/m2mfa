@@ -902,6 +902,8 @@ public class MesMoDescServiceImpl implements MesMoDescService {
             Integer scheduleQty = mesMoDesc.getSchedulQty()==null?0:mesMoDesc.getSchedulQty();
             //工单的可排数量是否为0
             if(mesMoDesc.getTargetQty()-scheduleQty==0){
+                //保存工单产量相关信息
+                saveMoDescQtyInfo(moId);
                 //结束工单
                 mesMoDesc.setCloseFlag(MoStatus.CLOSE.getKey());
                 save(mesMoDesc);
