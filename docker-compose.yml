@@ -2,8 +2,6 @@ version: '2'
 services:
   redis-mes:
     image: redis
-    ports:
-      - 6666:6379
   web:
     environment:
       - TZ=Asia/Shanghai
