@@ -30,7 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -234,23 +236,27 @@ public class YieldServiceImpl implements YieldService {
    * @param sheet1
    */
   public void addRowData( Sheet sheet1,List<Yield> yields,Workbook book){
+    Set<String> ids = new HashSet<>();
     for(int i =0; i<yields.size();i++){
       Row row =sheet1.createRow(i+1);
       sheet1.setDefaultRowHeightInPoints(20);
       sheet1.setDefaultColumnWidth(20);
-      getRow(row,yields.get(i),i+1,book);
+      getRow(row,yields.get(i),book,ids);
     }
   }
 
 
-  private void getRow( Row row,Yield yield,Integer id,Workbook book) {
+  private void getRow( Row row,Yield yield, Workbook book, Set<String> ids ) {
+
+
     HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
     for(int i=0;i<11; i++){
       Cell cell = row.createCell(i);
       cell.setCellStyle(hssfCellStyle);
+      ids.add(yield.getMoNumber());
       switch (i){
         case 0:
-          cell.setCellValue(id);
+          cell.setCellValue(ids.size());
           break;
         case 1:
           cell.setCellValue(yield.getMoNumber());
