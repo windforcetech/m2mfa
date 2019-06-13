@@ -3,15 +3,12 @@ package com.m2micro.m2mfa.mo.service.impl;
 import com.google.common.base.CaseFormat;
 import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
-import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.framework.commons.util.PageUtil;
-import com.m2micro.m2mfa.base.entity.BaseBomDef;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.PropertyUtil;
 import com.m2micro.m2mfa.common.util.UUIDUtil;
 import com.m2micro.m2mfa.common.util.ValidatorUtil;
 import com.m2micro.m2mfa.common.validator.AddGroup;
-import com.m2micro.m2mfa.common.validator.UpdateGroup;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoBom;
@@ -28,6 +25,12 @@ import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
 import com.m2micro.m2mfa.pr.entity.MesPartRoute;
 import com.m2micro.m2mfa.pr.repository.MesPartRouteRepository;
+import com.m2micro.m2mfa.report.entity.MesInfo;
+import com.m2micro.m2mfa.report.entity.MesProcessInfo;
+import com.m2micro.m2mfa.report.entity.MesStaffInfo;
+import com.m2micro.m2mfa.report.service.MesInfoService;
+import com.m2micro.m2mfa.report.service.MesProcessInfoService;
+import com.m2micro.m2mfa.report.service.MesStaffInfoService;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +72,12 @@ public class MesMoDescServiceImpl implements MesMoDescService {
     MesMoBomService mesMoBomService;
     @Autowired
     MesMoBomRepository mesMoBomRepository;
+    @Autowired
+    MesInfoService mesInfoService;
+    @Autowired
+    MesProcessInfoService mesProcessInfoService;
+    @Autowired
+    MesStaffInfoService mesStaffInfoService;
 
 
     public MesMoDescRepository getRepository() {
@@ -420,10 +429,127 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                 MoStatus.FROZEN.getKey().equals(mesMoDesc.getCloseFlag()))) {
             throw new MMException("用户工单【" + mesMoDesc.getMoNumber() + "】当前状态【" + MoStatus.valueOf(mesMoDesc.getCloseFlag()).getValue() + "】,不允许强制结案！");
         }
-        //更改为强制结案状态
-        mesMoDescRepository.setCloseFlagFor(MoStatus.FORCECLOSE.getKey(), mesMoDesc.getMoId());
+
         //强制结案工单相关的排产单
         forceCloseSchedules(mesMoDesc);
+        //保存工单产量相关信息
+        saveMoDescQtyInfo(id);
+        //更改为强制结案状态
+        mesMoDescRepository.setCloseFlagFor(MoStatus.FORCECLOSE.getKey(), mesMoDesc.getMoId());
+
+    }
+
+    /**
+     * 保存工单产量相关信息（已完结和强制结案的工单）
+     * @param moId
+     *          工单id
+     */
+    @Override
+    @Transactional
+    public void saveMoDescQtyInfo(String moId) {
+        //获取工单下职员产量相关信息
+        List<MesStaffInfo> mesStaffInfos = getMesStaffInfosByMoId(moId);
+        if(mesStaffInfos!=null){
+            mesStaffInfos.stream().forEach(mesStaffInfo -> {
+                mesStaffInfo.setMesStaffInfoId(UUIDUtil.getUUID());
+            });
+            mesStaffInfoService.saveAll(mesStaffInfos);
+        }
+        //获取工单下工序产量信息
+        List<MesProcessInfo> mesProcessInfos = getMesProcessInfosByMoId(moId);
+        if(mesProcessInfos!=null){
+            mesProcessInfos.stream().forEach(mesProcessInfo -> {
+                mesProcessInfo.setMesProcessInfoId(UUIDUtil.getUUID());
+            });
+            mesProcessInfoService.saveAll(mesProcessInfos);
+        }
+        //获取工单产量信息
+        MesInfo mesInfo = getMesInfosByMoId(moId);
+        if(mesInfo!=null){
+            mesInfo.setMesInfoId(UUIDUtil.getUUID());
+            mesInfoService.save(mesInfo);
+        }
+    }
+
+    /**
+     * 获取工单下职员产量相关信息
+     * @param id
+     *          工单id
+     * @return
+     */
+    private List<MesStaffInfo> getMesStaffInfosByMoId(String id) {
+        String sql = "SELECT\n" +
+                "	machine_id machineId,\n" +
+                "	staff_id staffId,\n" +
+                "	mo_id moId,\n" +
+                "	schedule_id scheduleId,\n" +
+                "	process_id processId,\n" +
+                "	part_id partId,\n" +
+                "	start_time startTime,\n" +
+                "	end_time endTime,\n" +
+                "	flag flag,\n" +
+                "	output_qty outputQty,\n" +
+                "	fail_qty failQty,\n" +
+                "	scrap_qty scrapQty,\n" +
+                "	mold_id moldId,\n" +
+                "	molds molds,\n" +
+                "	cavity_available cavityAvailable,\n" +
+                "	standard_hours standardHours \n" +
+                "FROM\n" +
+                "	v_mes_staff_info \n" +
+                "WHERE\n" +
+                "	mo_id = ?";
+        return selectBySql(sql, MesStaffInfo.class,id);
+    }
+
+    /**
+     *  获取工单下工序产量信息
+     * @param id
+     *          工单id
+     * @return
+     */
+    private List<MesProcessInfo> getMesProcessInfosByMoId(String id) {
+        String sql = "SELECT\n" +
+                "	mo_id moId,\n" +
+                "	schedule_id scheduleId,\n" +
+                "	part_id partId,\n" +
+                "	process_id processId,\n" +
+                "	output_qty outputQty,\n" +
+                "	flag flag,\n" +
+                "	start_time startTime,\n" +
+                "	end_time endTime,\n" +
+                "	fail_qty failQty,\n" +
+                "	scrap_qty scrapQty \n" +
+                "FROM\n" +
+                "	v_mes_process_info \n" +
+                "WHERE\n" +
+                "	mo_id = ?";
+        return selectBySql(sql, MesProcessInfo.class,id);
+    }
+
+    /**
+     *  获取工单产量信息
+     * @param id
+     *          工单id
+     * @return
+     */
+    private MesInfo getMesInfosByMoId(String id) {
+        String sql = "SELECT\n" +
+                "	mo_id moId,\n" +
+                "	part_id partId,\n" +
+                "	sum( IFNULL( output_qty, 0 ) ) outputQty,\n" +
+                "	min( start_time ) startTime,\n" +
+                "	max( end_time ) endTime,\n" +
+                "	sum( IFNULL( fail_qty, 0 ) ) failQty,\n" +
+                "	sum( IFNULL( scrap_qty, 0 ) ) scrapQty \n" +
+                "FROM\n" +
+                "	v_mes_process_info \n" +
+                "WHERE\n" +
+                "	mo_id = ? \n" +
+                "GROUP BY\n" +
+                "	mo_id,\n" +
+                "	part_id";
+        return selectSingleBySql(sql, MesInfo.class,id);
     }
 
     /**
