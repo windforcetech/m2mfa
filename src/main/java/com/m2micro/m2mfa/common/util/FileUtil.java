@@ -65,7 +65,7 @@ public class FileUtil {
     Date date =new Date();
     SimpleDateFormat sdf =new SimpleDateFormat("yyyyMMddHHmmss");
     String time =sdf.format(date);
-    response.setHeader("Content-Disposition", "attachment;filename="+ fileName+time );
+    response.setHeader("Content-Disposition", "attachment;filename="+ fileName+time+".xls" );
     response.setContentType("application/vnd.ms-excel;charset=UTF-8");
     response.setHeader("Pragma", "no-cache");
     response.setHeader("Cache-Control", "no-cache");

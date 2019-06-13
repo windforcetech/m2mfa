@@ -688,7 +688,14 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
       JSONObject parse = JSONObject.parseObject(data);
       Object barCode =  parse.get("Barcode");
       if(barCode !=null){
+        String sql ="select COUNT(*) from barcode_print_resources where barcode='"+barCode+"'";
+        Integer byBarcode =jdbcTemplate.queryForObject(sql,Integer.class);
+        if(byBarcode >0){
+          throw  new MMException("请保证barCod码的唯一性。");
+        }
         one.setBarcode((String) barCode);
+      }else {
+        throw  new MMException("barCod不可为空");
       }
       rs.add(one);
     }
