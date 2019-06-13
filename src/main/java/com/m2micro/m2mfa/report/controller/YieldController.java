@@ -10,6 +10,7 @@ import com.m2micro.m2mfa.report.vo.Yield;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,7 +44,7 @@ public class YieldController {
   /**
    * 生产产量报表分页
    */
-  @PostMapping("/Yielddata")
+  @GetMapping("/Yielddata")
   @ApiOperation(value="生产产量报表显示")
   @UserOperationLog("生产产量报表显示")
   public ResponseMessage<PageUtil<Yield>> Yielddata(YieldDataQuery yieldQuery){
