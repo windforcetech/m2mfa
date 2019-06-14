@@ -3,9 +3,8 @@ package com.m2micro.m2mfa.report.controller;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
 import com.m2micro.m2mfa.report.query.BootQuery;
-import com.m2micro.m2mfa.report.query.DistributedQuery;
 import com.m2micro.m2mfa.report.service.BootService;
-import com.m2micro.m2mfa.report.vo.Distributed;
+import com.m2micro.m2mfa.report.vo.BootAndData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,7 @@ public class BootController {
   @PostMapping("/BootShow")
   @ApiOperation(value="开机日报报表显示")
   @UserOperationLog("开机日报报表显示")
-  public ResponseMessage<List<Distributed>> BootShow(BootQuery bootQuery){
+  public ResponseMessage<List<BootAndData>> BootShow(BootQuery bootQuery){
 
     return  ResponseMessage.ok(bootService.BootShow(bootQuery));
   }

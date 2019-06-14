@@ -8,9 +8,11 @@ import com.m2micro.m2mfa.report.vo.DistributedDate;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import retrofit2.http.GET;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,7 +32,7 @@ public class DistributedController {
   /**
    * 在制分布报表
    */
-  @PostMapping("/DistributedShow")
+  @GetMapping("/DistributedShow")
   @ApiOperation(value="在制分布报表显示")
   @UserOperationLog("在制分布报表显示")
   public ResponseMessage<DistributedDate> DistributedShow(DistributedQuery  distributedQuery){
@@ -41,7 +43,7 @@ public class DistributedController {
   /**
    * exce导出在制分布报表
    */
-  @PostMapping("/excelOutData")
+  @GetMapping("/excelOutData")
   @ApiOperation(value="exce导出在制分布报表")
   @UserOperationLog("exce导出在制分布报表")
   public ResponseMessage excelOutData(DistributedQuery distributedQuery,  HttpServletResponse response)throws Exception{
@@ -53,7 +55,7 @@ public class DistributedController {
   /**
    * pdf导出生产产量报表
    */
-  @PostMapping("/pdfOutData")
+  @GetMapping("/pdfOutData")
   @ApiOperation(value="pdf导出在制分布报表")
   @UserOperationLog("pdf导出在制分布报表")
   public ResponseMessage pdfOutData(DistributedQuery distributedQuery,  HttpServletResponse response)throws Exception{

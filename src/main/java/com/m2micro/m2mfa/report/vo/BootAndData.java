@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-public class bootAndData {
+public class BootAndData {
 
   @ApiModelProperty(value = "日期")
   private Date Time ;

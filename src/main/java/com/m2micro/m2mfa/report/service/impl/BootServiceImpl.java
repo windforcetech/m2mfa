@@ -4,7 +4,7 @@ import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.report.query.BootQuery;
 import com.m2micro.m2mfa.report.service.BootService;
 import com.m2micro.m2mfa.report.vo.Boot;
-import com.m2micro.m2mfa.report.vo.Distributed;
+import com.m2micro.m2mfa.report.vo.BootAndData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -23,7 +23,7 @@ public class BootServiceImpl  implements BootService {
 
 
   @Override
-  public List<Distributed> BootShow(BootQuery bootQuery) {
+  public List<BootAndData> BootShow(BootQuery bootQuery) {
 
     String  sql= "SELECT\n" +
         "	vmsi.start_time,\n" +
@@ -78,9 +78,14 @@ public class BootServiceImpl  implements BootService {
         "FROM";
 
     sql += pingSql(bootQuery);
-
     RowMapper<Boot> rowMapper = BeanPropertyRowMapper.newInstance(Boot.class);
     List<Boot> boots = jdbcTemplate.query(sql, rowMapper);
+
+     sql ="SUM(IFNULL(vmsi.output_qty,0))  ";
+     sql += pingSql(bootQuery);
+     Long  summary = jdbcTemplate.queryForObject(sql, Long.class);
+
+
 
     return null;
   }
@@ -111,7 +116,11 @@ public class BootServiceImpl  implements BootService {
         "	AND staff_id = vmsi.staff_id\n" +
         "	LIMIT 0,\n" +
         "	1\n" +
-        ") where  mrw.start_time LIKE '"+ DateUtil.format(bootQuery.getBootTime(),DateUtil.DATE_PATTERN)+"%'   #GROUP BY bs.shift_id";
+        ") where 1=1  ";
+      if(bootQuery.getBootTime()!=null){
+       sql += "   mrw.start_time LIKE '"+ DateUtil.format(bootQuery.getBootTime(),DateUtil.DATE_PATTERN)+"%'   #GROUP BY bs.shift_id";
+      }
+
     return  sql;
   }
 
