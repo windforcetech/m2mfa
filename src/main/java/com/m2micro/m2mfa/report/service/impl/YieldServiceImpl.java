@@ -3,11 +3,13 @@ package com.m2micro.m2mfa.report.service.impl;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
+import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.common.util.ChinaFontProvide;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.FileUtil;
 import com.m2micro.m2mfa.common.util.POIReadExcelToHtml;
 import com.m2micro.m2mfa.mo.constant.MoStatus;
+import com.m2micro.m2mfa.report.query.YieldDataQuery;
 import com.m2micro.m2mfa.report.query.YieldQuery;
 import com.m2micro.m2mfa.report.service.YieldService;
 import com.m2micro.m2mfa.report.vo.Yield;
@@ -19,6 +21,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -43,8 +46,39 @@ public class YieldServiceImpl implements YieldService {
   private JdbcTemplate jdbcTemplate;
 
   @Override
-  public List<Yield> YieldShow(YieldQuery yieldQuery) {
-    String sql ="SELECT\n" +
+  public List<Yield> yieldShow(YieldQuery yieldQuery) {
+    String sql = getBaoBiaSql();
+    sql += pingSql(yieldQuery);
+    RowMapper<Yield> rowMapper = BeanPropertyRowMapper.newInstance(Yield.class);
+    List<Yield> collect = jdbcTemplate.query(sql, rowMapper).stream().filter(x -> {
+      x.setCloseFlag(MoStatus.valueOf(Integer.parseInt(x.getCloseFlag())).getValue());
+      return true;
+    }).collect(Collectors.toList());
+
+    return collect ;
+  }
+
+  @Override
+  public PageUtil<Yield> yielddata(YieldDataQuery yieldQuery) {
+    YieldQuery query = new YieldQuery();
+    BeanUtils.copyProperties(yieldQuery, query);
+    String sql = getBaoBiaSql();
+    sql += pingSql(query);
+    sql +=  " LIMIT   " + (yieldQuery.getPage() - 1) * yieldQuery.getSize() + "," + yieldQuery.getSize();
+    RowMapper<Yield> rowMapper = BeanPropertyRowMapper.newInstance(Yield.class);
+    List<Yield> collect = jdbcTemplate.query(sql, rowMapper).stream().filter(x -> {
+      x.setCloseFlag(MoStatus.valueOf(Integer.parseInt(x.getCloseFlag())).getValue());
+      return true;
+    }).collect(Collectors.toList());
+    return PageUtil.of(collect, getcount(query), yieldQuery.getSize(), yieldQuery.getPage());
+  }
+
+  /**
+   * 报表，跟显示共用sql
+   * @return
+   */
+  private String getBaoBiaSql() {
+    return "SELECT\n" +
         "	mmd.mo_number,\n" +
         "	mmd.close_flag,\n" +
         "	bpi.part_no partNo,\n" +
@@ -76,17 +110,39 @@ public class YieldServiceImpl implements YieldService {
         "		WHERE\n" +
         "			mrw.mo_id = mmd.mo_id\n" +
         "		AND mrw.target_process_id = bp.process_id\n" +
-        "	) fail_qty\n"+
-        "FROM\n" +
-        "	mes_mo_desc mmd\n" +
-        "LEFT JOIN base_parts bpi ON bpi.part_id = mmd.part_id\n" +
-        "LEFT JOIN mes_part_route mpr ON mpr.part_id = mmd.part_id\n" +
-        "LEFT JOIN mes_part_route_process mprp ON mpr.part_route_id = mprp.partrouteid\n" +
-        "LEFT JOIN base_process  bp  on bp.process_id=mprp.processid\n" +
-        "where 1=1\n" ;
+        "	) fail_qty\n" +
+        "FROM\n";
+
+  }
+
+  /**
+   * 获取总页数
+   * @param yieldQuery
+   * @return
+   */
+  public long getcount(YieldQuery yieldQuery) {
+    String sql ="SELECT  count(*)  from " ;
+    sql += pingSql(yieldQuery);
+    return jdbcTemplate.queryForObject(sql, Long.class);
+  }
+
+  /**
+   * 共用代码
+   * @param yieldQuery
+   * @return
+   */
+  private String pingSql(YieldQuery yieldQuery) {
+    String  sql="";
+
+    sql+=   "	mes_mo_desc mmd\n" +
+      "LEFT JOIN base_parts bpi ON bpi.part_id = mmd.part_id\n" +
+      "LEFT JOIN mes_part_route mpr ON mpr.part_id = mmd.part_id\n" +
+      "LEFT JOIN mes_part_route_process mprp ON mpr.part_route_id = mprp.partrouteid\n" +
+      "LEFT JOIN base_process  bp  on bp.process_id=mprp.processid\n" +
+      "where 1=1\n" ;
 
     if (StringUtils.isNotEmpty(yieldQuery.getMoNumber())) {
-     sql += " and mmd.mo_number  LIKE '%"+yieldQuery.getMoNumber()+"%'\n" ;
+      sql += " and mmd.mo_number  LIKE '%"+yieldQuery.getMoNumber()+"%'\n" ;
     }
     if (StringUtils.isNotEmpty(yieldQuery.getProcessName())) {
       sql +=" and bp.process_name LIKE '%"+yieldQuery.getProcessName()+"%'\n" ;
@@ -99,22 +155,17 @@ public class YieldServiceImpl implements YieldService {
     }
 
     if (yieldQuery.getProduceTime()!=null) {
-      sql += " and mmd.create_on='"+DateUtil.format(yieldQuery.getProduceTime())+"'\n" ;
+      sql += " and mmd.create_on='"+ DateUtil.format(yieldQuery.getProduceTime())+"'\n" ;
     }
     if (StringUtils.isNotEmpty(yieldQuery.getTimecondition())) {
       sql = getTimeCondition(yieldQuery.getTimecondition(), sql);
     }
     sql = isMoAndprossceAndChedule(yieldQuery, sql);
     sql += " ORDER BY\n" +
-        "	mmd.mo_number";
-    RowMapper<Yield> rowMapper = BeanPropertyRowMapper.newInstance(Yield.class);
-    List<Yield> collect = jdbcTemplate.query(sql, rowMapper).stream().filter(x -> {
-      x.setCloseFlag(MoStatus.valueOf(Integer.parseInt(x.getCloseFlag())).getValue());
-      return true;
-    }).collect(Collectors.toList());
-
-    return collect ;
+        "	mmd.mo_number  ";
+    return sql;
   }
+
 
   /**
    * 工单完成，排工完成，工序完成
@@ -153,7 +204,7 @@ public class YieldServiceImpl implements YieldService {
   @Override
   public void excelOutData(YieldQuery yieldQuery, HttpServletResponse response)throws Exception {
 
-    List<Yield> yields = YieldShow(yieldQuery);
+    List<Yield> yields = yieldShow(yieldQuery);
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("产量报表");
@@ -185,7 +236,7 @@ public class YieldServiceImpl implements YieldService {
 
   @Override
   public void pdfOutData(YieldQuery yieldQuery, HttpServletResponse response) throws Exception {
-    List<Yield> yields = YieldShow(yieldQuery);
+    List<Yield> yields = yieldShow(yieldQuery);
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("产量报表");
@@ -300,7 +351,6 @@ public class YieldServiceImpl implements YieldService {
    */
   private  HSSFCellStyle getHssfCellStyle(Workbook book) {
     HSSFCellStyle style2 = (HSSFCellStyle) book.createCellStyle();
-    style2.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
     style2.setBorderBottom(HSSFCellStyle.BORDER_THIN);
     style2.setBorderLeft(HSSFCellStyle.BORDER_THIN);
     style2.setBorderRight(HSSFCellStyle.BORDER_THIN);

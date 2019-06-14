@@ -1,47 +1,22 @@
 package com.m2micro.m2mfa.report.controller;
 
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.tool.xml.XMLWorkerHelper;
 import com.m2micro.framework.commons.annotation.UserOperationLog;
 import com.m2micro.framework.commons.model.ResponseMessage;
-import com.m2micro.m2mfa.common.util.ChinaFontProvide;
-import com.m2micro.m2mfa.common.util.PDFKit;
-import com.m2micro.m2mfa.common.util.POIReadExcelToHtml;
+import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.m2mfa.report.query.YieldQuery;
+import com.m2micro.m2mfa.report.query.YieldDataQuery;
 import com.m2micro.m2mfa.report.service.YieldService;
 import com.m2micro.m2mfa.report.vo.Yield;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.print.PrintService;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.standard.Sides;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.awt.print.Book;
-import java.awt.print.PageFormat;
-import java.awt.print.Paper;
-import java.awt.print.PrinterJob;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
-
-import static jdk.nashorn.internal.objects.Global.print;
 
 /**
  * 生产产量报表
@@ -62,8 +37,21 @@ public class YieldController {
   @UserOperationLog("生产产量报表显示")
   public ResponseMessage<List<Yield>> YieldShow(YieldQuery yieldQuery){
 
-    return  ResponseMessage.ok(yieldService.YieldShow(yieldQuery));
+    return  ResponseMessage.ok(yieldService.yieldShow(yieldQuery));
   }
+
+
+  /**
+   * 生产产量报表分页
+   */
+  @GetMapping("/Yielddata")
+  @ApiOperation(value="生产产量报表显示")
+  @UserOperationLog("生产产量报表显示")
+  public ResponseMessage<PageUtil<Yield>> Yielddata(YieldDataQuery yieldQuery){
+
+    return  ResponseMessage.ok(yieldService.yielddata(yieldQuery));
+  }
+
 
 
   /**
