@@ -1,12 +1,13 @@
 DROP TABLE IF EXISTS mes_staff_info;
+
 CREATE TABLE `mes_staff_info` (
-  `mes_staff_info_id` varchar(50) NOT NULL DEFAULT '',
-  `machine_id` varchar(50) DEFAULT NULL COMMENT '机台',
-  `staff_id` varchar(50) DEFAULT NULL COMMENT '人员',
-  `mo_id` varchar(50) DEFAULT NULL COMMENT '工单',
-  `schedule_id` varchar(50) DEFAULT NULL COMMENT '排单',
-  `process_id` varchar(50) DEFAULT NULL COMMENT '工序',
-  `part_id` varchar(50) DEFAULT NULL COMMENT '料件',
+  `mes_staff_info_id` varchar(20) NOT NULL DEFAULT '',
+  `machine_id` varchar(20) DEFAULT NULL COMMENT '机台',
+  `staff_id` varchar(20) DEFAULT NULL COMMENT '人员',
+  `mo_id` varchar(20) DEFAULT NULL COMMENT '工单',
+  `schedule_id` varchar(20) DEFAULT NULL COMMENT '排单',
+  `process_id` varchar(20) DEFAULT NULL COMMENT '工序',
+  `part_id` varchar(20) DEFAULT NULL COMMENT '料件',
   `start_time` datetime DEFAULT NULL COMMENT '开始时间',
   `end_time` datetime DEFAULT NULL COMMENT '结束时间',
   `flag` int(11) DEFAULT NULL COMMENT '状态',
