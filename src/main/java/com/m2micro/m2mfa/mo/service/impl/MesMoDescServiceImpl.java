@@ -922,6 +922,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         ValidatorUtil.validateEntity(mesMoDesc, AddGroup.class);
         ValidatorUtil.validateEntity(mesMoBoms, AddGroup.class);
         //保存工单信息
+        mesMoDesc.setIsSchedul(0);//没有完成排产
         saveMoDesc(mesMoDesc);
         //保存工单料件
         saveMesBom(mesMoDesc.getMoId(), mesMoBoms);

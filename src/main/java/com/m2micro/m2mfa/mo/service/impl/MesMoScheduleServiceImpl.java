@@ -1161,7 +1161,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     }
 
-    private void updateMesMoDescscheduQty(MesMoSchedule mesMoSchedule) {
+    /*private void updateMesMoDescscheduQty(MesMoSchedule mesMoSchedule) {
         MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
         Integer scheduQty = (moDesc.getSchedulQty() == null ? 0 : moDesc.getSchedulQty()) + mesMoSchedule.getScheduleQty();
         mesMoDescRepository.setSchedulQtyFor(scheduQty, moDesc.getMoId());
@@ -1171,6 +1171,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoDescRepository.updateIsSchedeul(1, moDesc.getMoId());
         }
         mesMoDescRepository.setCloseFlagFor(MoStatus.SCHEDULED.getKey(), moDesc.getMoId());
+    }*/
+
+    private void updateMesMoDescscheduQty(MesMoSchedule mesMoSchedule) {
+        MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
+        Integer scheduQty = (moDesc.getSchedulQty() == null ? 0 : moDesc.getSchedulQty()) + mesMoSchedule.getScheduleQty();
+        moDesc.setSchedulQty(scheduQty);
+        if(moDesc.getTargetQty().equals(moDesc.getSchedulQty()) || moDesc.getSchedulQty() > moDesc.getTargetQty()){
+            moDesc.setIsSchedul(1);
+        }else{
+            moDesc.setIsSchedul(0);
+        }
+        moDesc.setCloseFlag(MoStatus.SCHEDULED.getKey());
+        mesMoDescRepository.save(moDesc);
     }
 
     /**
