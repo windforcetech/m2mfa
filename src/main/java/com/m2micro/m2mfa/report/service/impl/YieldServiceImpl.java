@@ -14,6 +14,7 @@ import com.m2micro.m2mfa.report.query.YieldQuery;
 import com.m2micro.m2mfa.report.service.YieldService;
 import com.m2micro.m2mfa.report.vo.Yield;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -33,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -157,8 +159,9 @@ public class YieldServiceImpl implements YieldService {
     if (yieldQuery.getProduceTime()!=null) {
       sql += " and mmd.create_on='"+ DateUtil.format(yieldQuery.getProduceTime())+"'\n" ;
     }
-    if (StringUtils.isNotEmpty(yieldQuery.getTimecondition())) {
-      sql = getTimeCondition(yieldQuery.getTimecondition(), sql);
+    if (yieldQuery.getStartTiem() !=null &&  yieldQuery.getEndTime()!=null) {
+      sql += " and  mmd.create_on  >= '"+DateUtil.format(yieldQuery.getStartTiem())+"'     \n" ;
+      sql += " and  mmd.create_on  <= '"+DateUtil.format(yieldQuery.getEndTime())+"'     \n" ;
     }
     sql = isMoAndprossceAndChedule(yieldQuery, sql);
     sql += " ORDER BY\n" +
@@ -410,47 +413,6 @@ public class YieldServiceImpl implements YieldService {
   }
 
 
-  /**
-   * 时间端获取
-   * @param timecondition
-   * @param sql
-   * @return
-   */
-  private String getTimeCondition(String  timecondition, String sql) {
-    switch (timecondition){
-      case "month":
-         sql += "  and DATE_FORMAT(mmd.create_on,'%Y %m') = date_format(DATE_SUB(curdate(), INTERVAL 0 MONTH),'%Y %m')\n" ;
-        break;
-      case "onmonth":
-        sql +=  "  and DATE_FORMAT(mmd.create_on, '%Y %m') = date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y %m')\n" ;
-        break;
-      case "day":
-        sql +=  "   and to_days( mmd.create_on ) = to_days(now())\n" ;
-        break;
-      case "yesterday":
-        sql += "   and  TO_DAYS( NOW( ) ) - TO_DAYS( mmd.create_on ) <= 1\n" ;
-        break;
-      case "week":
-        sql += "  and YEARWEEK(date_format(mmd.create_on,'%Y-%m-%d')) = YEARWEEK(now())\n" ;
-        break;
-      case "onweek":
-        sql += " and  YEARWEEK(date_format(mmd.create_on,'%Y-%m-%d')) = YEARWEEK(now())-1\n" ;
-        break;
-      case "year":
-        sql +=  "  and YEAR(mmd.create_on)=YEAR(NOW())\n" ;
-        break;
-      case "onyear":
-        sql += " and  year(mmd.create_on)=year(date_sub(now(),interval 1 year))\n" ;
-        break;
-      case "season":
-        sql += "  and QUARTER(mmd.create_on)=QUARTER(now())\n" ;
-        break;
-      case "onseason":
-        sql += " and  QUARTER(mmd.create_on)=QUARTER(DATE_SUB(now(),interval 1 QUARTER))\n" ;
-        break;
-    }
-    return sql;
-  }
 
 
   /**
@@ -484,8 +446,10 @@ public class YieldServiceImpl implements YieldService {
     if (yieldQuery.getProduceTime()!=null) {
       sql += " and mmd.create_on='"+DateUtil.format(yieldQuery.getProduceTime())+"'\n" ;
     }
-    if (StringUtils.isNotEmpty(yieldQuery.getTimecondition())) {
-      sql = getTimeCondition(yieldQuery.getTimecondition(), sql);
+    if (yieldQuery.getStartTiem() !=null &&  yieldQuery.getEndTime()!=null) {
+      // sql = getTimeCondition(yieldQuery.getTimecondition(), sql);
+      sql += " and  mmd.create_on  >= '"+DateUtil.format(yieldQuery.getStartTiem())+"'     \n" ;
+      sql += " and  mmd.create_on  <= '"+DateUtil.format(yieldQuery.getEndTime())+"'     \n" ;
     }
     sql += " GROUP BY\n" +
         "	mmd.mo_number";
