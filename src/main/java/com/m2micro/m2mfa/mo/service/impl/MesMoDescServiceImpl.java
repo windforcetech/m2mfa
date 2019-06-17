@@ -44,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -467,6 +468,9 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         MesInfo mesInfo = getMesInfosByMoId(moId);
         if(mesInfo!=null){
             mesInfo.setMesInfoId(UUIDUtil.getUUID());
+            if(mesInfo.getStartTime()!=null){
+                mesInfo.setEndTime(new Date());
+            }
             mesInfoService.save(mesInfo);
         }
     }
