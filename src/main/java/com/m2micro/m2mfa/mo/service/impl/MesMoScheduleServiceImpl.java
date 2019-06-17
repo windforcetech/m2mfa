@@ -534,11 +534,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag())){
             updateMachineStateForStop(id);
         }
+        //做强制结案的额外业务逻辑操作
+        stopWorkForAll(mesMoSchedule);
         //更改为强制结案状态
         mesMoScheduleRepository.setFlagFor(MoScheduleStatus.FORCECLOSE.getKey(), mesMoSchedule.getScheduleId());
         mesMoScheduleRepository.updateactualStartTime(new Date(), mesMoSchedule.getScheduleId());
-        //做强制结案的额外业务逻辑操作
-        stopWorkForAll(mesMoSchedule);
+        //结束工单操作：工单下所有排产单已结束且工单的可排数量为0就结束排产单，否则不做任何操作
+        mesMoDescService.endMoDesc(mesMoSchedule.getMoId());
 
     }
 
