@@ -35,4 +35,7 @@ public class BootAndData {
   @ApiModelProperty(value = "班别数据")
   private List<ShiftAndData> shiftAndDatas;
 
+  @ApiModelProperty(value = "详情")
+  private List<Boot> boots;
+
 }

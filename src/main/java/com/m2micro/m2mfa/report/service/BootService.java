@@ -11,5 +11,5 @@ public interface BootService {
    * @param bootQuery
    * @return
    */
-  List<BootAndData> BootShow(BootQuery bootQuery);
+   BootAndData BootShow(BootQuery bootQuery);
 }

@@ -36,11 +36,13 @@ public class MesMoDescTimeDataServiceImpl implements MesMoDescTimeDataService {
   public MesMoDescTime MesMoDescTimeDataShow(String elemen ) {
     MesMoDescTime mesMoDescTime = new MesMoDescTime();
     List<BaseLedConfig> byElemen = baseLedConfigRepository.findByElemen(elemen);
-    if(byElemen!=null && byElemen.size()<0){
+    if(byElemen == null ||  byElemen.size()<=0){
       throw  new MMException("看板ip不一致！！！");
     }
     BaseLedConfig byId = kanbanConfigService.findById(byElemen.get(0).getConfigId());
-
+    if(byId==null  ){
+      throw  new MMException("未找到对应的看板ip！！");
+    }
     List<MesMoDescAndProcess> mesMoDescAndProcesses = getMesMoDescAndProcesses(byId.getBaseMachineLists());
     Set<MesMoDescTimeData> mesMoDescTimeDatas =new HashSet<>();
     Set<String>processnames= new TreeSet<>(new Comparator<String>() {

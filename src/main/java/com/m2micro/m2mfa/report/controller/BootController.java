@@ -30,7 +30,7 @@ public class BootController {
   @PostMapping("/BootShow")
   @ApiOperation(value="开机日报报表显示")
   @UserOperationLog("开机日报报表显示")
-  public ResponseMessage<List<BootAndData>> BootShow(BootQuery bootQuery){
+  public ResponseMessage<BootAndData> BootShow(BootQuery bootQuery){
 
     return  ResponseMessage.ok(bootService.BootShow(bootQuery));
   }
