@@ -32,7 +32,7 @@ public class DistributedController {
   /**
    * 在制分布报表
    */
-  @GetMapping("/DistributedShow")
+  @RequestMapping("/DistributedShow")
   @ApiOperation(value="在制分布报表显示")
   @UserOperationLog("在制分布报表显示")
   public ResponseMessage<DistributedDate> DistributedShow(DistributedQuery  distributedQuery){
@@ -43,7 +43,7 @@ public class DistributedController {
   /**
    * exce导出在制分布报表
    */
-  @GetMapping("/excelOutData")
+  @RequestMapping("/excelOutData")
   @ApiOperation(value="exce导出在制分布报表")
   @UserOperationLog("exce导出在制分布报表")
   public ResponseMessage excelOutData(DistributedQuery distributedQuery,  HttpServletResponse response)throws Exception{
@@ -55,7 +55,7 @@ public class DistributedController {
   /**
    * pdf导出生产产量报表
    */
-  @GetMapping("/pdfOutData")
+  @RequestMapping("/pdfOutData")
   @ApiOperation(value="pdf导出在制分布报表")
   @UserOperationLog("pdf导出在制分布报表")
   public ResponseMessage pdfOutData(DistributedQuery distributedQuery,  HttpServletResponse response)throws Exception{

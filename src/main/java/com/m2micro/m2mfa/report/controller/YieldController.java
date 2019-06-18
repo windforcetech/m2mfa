@@ -32,7 +32,7 @@ public class YieldController {
   /**
    * 生产产量报表
    */
-  @PostMapping("/YieldShow")
+  @RequestMapping("/YieldShow")
   @ApiOperation(value="生产产量报表显示")
   @UserOperationLog("生产产量报表显示")
   public ResponseMessage<List<Yield>> YieldShow(YieldQuery yieldQuery){
@@ -44,7 +44,7 @@ public class YieldController {
   /**
    * 生产产量报表分页
    */
-  @GetMapping("/Yielddata")
+  @RequestMapping("/Yielddata")
   @ApiOperation(value="生产产量报表显示")
   @UserOperationLog("生产产量报表显示")
   public ResponseMessage<PageUtil<Yield>> Yielddata(YieldDataQuery yieldQuery){
@@ -57,7 +57,7 @@ public class YieldController {
   /**
    * exce导出生产产量报表
    */
-  @PostMapping("/excelOutData")
+  @RequestMapping("/excelOutData")
   @ApiOperation(value="exce导出生产产量报表")
   @UserOperationLog("exce导出生产产量报表")
   public ResponseMessage excelOutData(YieldQuery yieldQuery,  HttpServletResponse response)throws Exception{
@@ -68,7 +68,7 @@ public class YieldController {
   /**
    * pdf导出生产产量报表
    */
-  @PostMapping("/pdfOutData")
+  @RequestMapping("/pdfOutData")
   @ApiOperation(value="pdf导出生产产量报表")
   @UserOperationLog("pdf导出生产产量报表")
   public ResponseMessage pdfOutData(YieldQuery yieldQuery,  HttpServletResponse response)throws Exception{

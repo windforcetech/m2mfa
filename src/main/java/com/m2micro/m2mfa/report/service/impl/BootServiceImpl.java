@@ -81,7 +81,7 @@ public class BootServiceImpl  implements BootService {
     RowMapper<Boot> rowMapper = BeanPropertyRowMapper.newInstance(Boot.class);
     List<Boot> boots = jdbcTemplate.query(sql, rowMapper);
 
-     sql ="SUM(IFNULL(vmsi.output_qty,0))  ";
+     sql ="select SUM(IFNULL(vmsi.output_qty,0)) from  ";
      sql += pingSql(bootQuery);
      Long  summary = jdbcTemplate.queryForObject(sql, Long.class);
 
