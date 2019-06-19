@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Order(1)
 public class MyChatServer implements ApplicationRunner {
 
-  @Value("${kanban.port}")
+  @Value("${kanban.port:8089}")
   Integer port;
 
   @Override

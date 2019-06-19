@@ -30,3 +30,4 @@ labServer:
   url: http://192.168.2.16:9666/api/
 kanban:
   url: http://192.168.1.111:9000
+  port: 8089

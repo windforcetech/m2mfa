@@ -55,17 +55,25 @@ public class BootServiceImpl  implements BootService {
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("开机报表");
-    sheet1.addMergedRegion(new CellRangeAddress(1, bootAndData.getShiftAndDatas().size(), 0, 0));
-    sheet1.addMergedRegion(new CellRangeAddress(1, bootAndData.getShiftAndDatas().size(), 1, 1));
-    sheet1.addMergedRegion(new CellRangeAddress(1, 1, 1, 1));
+    int shiftMun =bootAndData.getShiftAndDatas().size()+1;
+    sheet1.addMergedRegion(new CellRangeAddress(0, shiftMun, 0, 0));
+    sheet1.addMergedRegion(new CellRangeAddress(0, shiftMun, 1, 1));
+    for(int x =0; x<shiftMun; x++){
+      sheet1.addMergedRegion(new CellRangeAddress(x, x, 2, 3));
+      sheet1.addMergedRegion(new CellRangeAddress(x, x, 4, 5));
+      sheet1.addMergedRegion(new CellRangeAddress(x, x, 7, 8));
+      sheet1.addMergedRegion(new CellRangeAddress(x, x, 11, 13));
+      sheet1.addMergedRegion(new CellRangeAddress(x, x, 15, 16));
+    }
 
     Row rowA =sheet1.createRow(0);
     addRowA(rowA,book,bootAndData);
+
     Row row =sheet1.createRow(bootAndData.getShiftAndDatas().size()+1);
     addRowOne(row,book);
     addRowData(sheet1,bootAndData,book);
     book.close();
-    FileUtil.excelDownloadFlie(response, book,"yield");
+    FileUtil.excelDownloadFlie(response, book,"boot");
 
 
 
