@@ -160,28 +160,30 @@ public class DistributedServiceImpl implements DistributedService {
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("在制报表");
-    List<Integer> integers = GroupBy(distributedQuery);
-    Integer y=1;
-    System.out.println("xxxxx"+integers.size());
-    for( int x =0; x<integers.size();x++){
-      Integer i = integers.get(x);
-      int v=y+i;
-      v = v - 1;
-      System.out.println("y==="+y+"v===="+v+"x==="+x);
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,0,0));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,1,1));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,2,2));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,3,3));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,4,4));
-      y+=i;
-
-    }
+    getCombination(distributedQuery, sheet1);
     Row row =sheet1.createRow(0);
     addRowOne(row,book);
     addRowData(sheet1,distributeds,book);
     book.close();
     FileUtil.excelDownloadFlie(response, book,"distributed");
 
+  }
+
+  private void getCombination(DistributedQuery distributedQuery, Sheet sheet1) {
+    List<Integer> integers = GroupBy(distributedQuery);
+    Integer y = 1;
+    for (int x = 0; x < integers.size(); x++) {
+      Integer i = integers.get(x);
+      int v = y + i;
+      v = v - 1;
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 0, 0));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 1, 1));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 2, 2));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 3, 3));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 4, 4));
+      y += i;
+
+    }
   }
 
   @Override
@@ -191,22 +193,7 @@ public class DistributedServiceImpl implements DistributedService {
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("在制报表");
-    List<Integer> integers = GroupBy(distributedQuery);
-    Integer y=1;
-    System.out.println("xxxxx"+integers.size());
-    for( int x =0; x<integers.size();x++){
-      Integer i = integers.get(x);
-      int v=y+i;
-      v = v - 1;
-      System.out.println("y==="+y+"v===="+v+"x==="+x);
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,0,0));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,1,1));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,2,2));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,3,3));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,4,4));
-      y+=i;
-
-    }
+    getCombination(distributedQuery, sheet1);
     Row row =sheet1.createRow(0);
     addRowOne(row,book);
     addRowData(sheet1,distributeds,book);
@@ -221,7 +208,6 @@ public class DistributedServiceImpl implements DistributedService {
       document.open();
       ByteArrayInputStream bin = new ByteArrayInputStream(html.getBytes());
       XMLWorkerHelper.getInstance().parseXHtml(mPdfWriter, document, bin, null, new ChinaFontProvide());
-      System.out.println("生成完毕"+fileSeperator);
       document.close();
     } catch (Exception e) {
       e.printStackTrace();
