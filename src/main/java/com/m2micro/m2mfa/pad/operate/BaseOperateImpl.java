@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.pad.operate;
 import com.m2micro.framework.authorization.Authorize;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.m2mfa.base.constant.BaseItemsTargetConstant;
+import com.m2micro.m2mfa.base.constant.MachineConstant;
 import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.repository.BaseProcessRepository;
@@ -119,6 +120,8 @@ public class BaseOperateImpl implements BaseOperate {
     BaseProcessRepository baseProcessRepository;
     @Autowired
     MesMoScheduleProcessService mesMoScheduleProcessService;
+    @Autowired
+    BaseMachineService baseMachineService;
 
     protected MesMoSchedule findMesMoScheduleById(String scheduleId){
         return mesMoScheduleRepository.findById(scheduleId).orElse(null);
@@ -449,8 +452,14 @@ public class BaseOperateImpl implements BaseOperate {
         MesMoDesc moDesc =  mesMoDescRepository.findById(mesMoSchedule.getMoId()).orElse(null);
         isMoDescFlag(moDesc);
         StartWorkPara startWorkPara = new StartWorkPara();
+        BaseProcess baseProcess = baseProcessService.findById(obj.getProcessId()).orElse(null);
+        //校验机台状态 add by 20190611
+        validMachineState(mesMoSchedule.getMachineId(),baseProcess);
         //跟新工序开始时间
         updateProcessStarTime(obj.getScheduleId(),obj.getProcessId());
+        //注塑成型工序：变更机台状态为生产中 add by 20190611
+        updateMachineState(obj.getScheduleId(), mesMoSchedule, baseProcess);
+
         //判断工位是否有上工记录
         if(!isStationisWork(obj.getScheduleId(),obj.getStationId())){
             //新增上工记录返回上工记录id
@@ -472,8 +481,37 @@ public class BaseOperateImpl implements BaseOperate {
         return startWorkPara;
     }
 
+    /**
+     * 校验机台状态
+     * @param machineId
+     * @param baseProcess
+     */
+    public void validMachineState(String machineId,BaseProcess baseProcess) {
+        //注塑成型工序：校验机台状态
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            BaseMachine baseMachine = baseMachineService.findById(machineId).orElse(null);
+            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(baseMachine.getFlag()).orElse(null);
+            //维修和保养不允许上工
+            if(MachineConstant.SERVICE.getKey().equals(baseItemsTarget.getItemValue())||MachineConstant.MAINTENANCE.getKey().equals(baseItemsTarget.getItemValue())){
+                throw new MMException("当前机台正处于维修和保养中，不允许上工");
+            }
+        }
+    }
 
-/**
+    @Transactional
+    public void updateMachineState(String scheduleId, MesMoSchedule mesMoSchedule, BaseProcess baseProcess) {
+        //注塑成型工序：变更机台状态为生产中
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            //校验正在此机台生产的排产单
+            if(mesMoScheduleService.isUpdateMachineStateForProduction(scheduleId,mesMoSchedule.getMachineId(),baseProcess.getProcessId())){
+                //变更机台状态为生产中
+                baseMachineService.setFlagForProduce(mesMoSchedule.getMachineId());
+            }
+        }
+    }
+
+
+    /**
      * 工单校验已审待排
      * @param moDesc
      */
@@ -1607,6 +1645,11 @@ public class BaseOperateImpl implements BaseOperate {
             return true;
         }
         return false;
+    }
+
+    @Transactional
+    public void setMachineFlagForStop(String machineId){
+        baseMachineService.setFlagForStop(machineId);
     }
 
 }

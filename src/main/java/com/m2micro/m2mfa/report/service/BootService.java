@@ -1,7 +1,7 @@
 package com.m2micro.m2mfa.report.service;
 
 import com.m2micro.m2mfa.report.query.BootQuery;
-import com.m2micro.m2mfa.report.vo.Distributed;
+import com.m2micro.m2mfa.report.vo.BootAndData;
 
 import java.util.List;
 
@@ -11,5 +11,5 @@ public interface BootService {
    * @param bootQuery
    * @return
    */
-  List<Distributed> BootShow(BootQuery bootQuery);
+   BootAndData BootShow(BootQuery bootQuery);
 }

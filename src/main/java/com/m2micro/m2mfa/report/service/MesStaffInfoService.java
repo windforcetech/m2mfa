@@ -5,9 +5,9 @@ import com.m2micro.framework.commons.BaseService;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.commons.util.Query;
 /**
- *  服务类
- * @author chenshuhong
- * @since 2019-06-10
+ * 工单职员信息 服务类
+ * @author liaotao
+ * @since 2019-06-13
  */
 public interface MesStaffInfoService extends BaseService<MesStaffInfo,String> {
     /**

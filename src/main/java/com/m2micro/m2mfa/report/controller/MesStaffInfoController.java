@@ -21,13 +21,13 @@ import com.m2micro.m2mfa.report.entity.MesStaffInfo;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- *  前端控制器
- * @author chenshuhong
- * @since 2019-06-10
+ * 工单职员信息 前端控制器
+ * @author liaotao
+ * @since 2019-06-13
  */
 @RestController
 @RequestMapping("/report/mesStaffInfo")
-@Api(value=" 前端控制器",description="前端控制器")
+@Api(value="工单职员信息 前端控制器")
 @Authorize
 public class MesStaffInfoController {
     @Autowired
@@ -37,8 +37,8 @@ public class MesStaffInfoController {
      * 列表
      */
     @RequestMapping("/list")
-    @ApiOperation(value="列表")
-    @UserOperationLog("列表")
+    @ApiOperation(value="工单职员信息列表")
+    @UserOperationLog("工单职员信息列表")
     public ResponseMessage<PageUtil<MesStaffInfo>> list(Query query){
         PageUtil<MesStaffInfo> page = mesStaffInfoService.list(query);
         return ResponseMessage.ok(page);
@@ -48,8 +48,8 @@ public class MesStaffInfoController {
      * 详情
      */
     @RequestMapping("/info/{id}")
-    @ApiOperation(value="详情")
-    @UserOperationLog("详情")
+    @ApiOperation(value="工单职员信息详情")
+    @UserOperationLog("工单职员信息详情")
     public ResponseMessage<MesStaffInfo> info(@PathVariable("id") String id){
         MesStaffInfo mesStaffInfo = mesStaffInfoService.findById(id).orElse(null);
         return ResponseMessage.ok(mesStaffInfo);
@@ -59,8 +59,8 @@ public class MesStaffInfoController {
      * 保存
      */
     @RequestMapping("/save")
-    @ApiOperation(value="保存")
-    @UserOperationLog("保存")
+    @ApiOperation(value="保存工单职员信息")
+    @UserOperationLog("保存工单职员信息")
     public ResponseMessage<MesStaffInfo> save(@RequestBody MesStaffInfo mesStaffInfo){
         ValidatorUtil.validateEntity(mesStaffInfo, AddGroup.class);
         mesStaffInfo.setMesStaffInfoId(UUIDUtil.getUUID());
@@ -71,8 +71,8 @@ public class MesStaffInfoController {
      * 更新
      */
     @RequestMapping("/update")
-    @ApiOperation(value="更新")
-    @UserOperationLog("更新")
+    @ApiOperation(value="更新工单职员信息")
+    @UserOperationLog("更新工单职员信息")
     public ResponseMessage<MesStaffInfo> update(@RequestBody MesStaffInfo mesStaffInfo){
         ValidatorUtil.validateEntity(mesStaffInfo, UpdateGroup.class);
         MesStaffInfo mesStaffInfoOld = mesStaffInfoService.findById(mesStaffInfo.getMesStaffInfoId()).orElse(null);
@@ -87,8 +87,8 @@ public class MesStaffInfoController {
      * 删除
      */
     @RequestMapping("/delete")
-    @ApiOperation(value="删除")
-    @UserOperationLog("删除")
+    @ApiOperation(value="删除工单职员信息")
+    @UserOperationLog("删除工单职员信息")
     public ResponseMessage delete(@RequestBody String[] ids){
         mesStaffInfoService.deleteByIds(ids);
         return ResponseMessage.ok();

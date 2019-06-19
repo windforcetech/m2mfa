@@ -130,7 +130,7 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         //下模
 
         //结束工序
-        if(num>0){
+        /*if(num>0){
             //结束工序
             endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
             endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
@@ -142,7 +142,17 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
             endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
             //排产单状态“已完成”
             //scheduleclose(obj.getScheduleId());
+        }*/
+        //结束工序及工位
+        if(num>=0){
+            //结束工序
+            endProcessEndTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId());
+            //结束工位
+            endStationTime(mesRecordWork.getScheduleId(),mesRecordWork.getProcessId() );
+            //变更排产单关联的机台状态
+            setMachineFlagForStop(mesMoSchedule.getMachineId());
         }
+
 
         //是否交接班
         if(!isChangeShifts(PadStaffUtil.getStaff().getStaffId())){

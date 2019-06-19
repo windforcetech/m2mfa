@@ -30,6 +30,21 @@ public class YieldQuery {
       pattern = "yyyy-MM-dd HH:mm:ss"
   )
   private Date produceTime;
-  @ApiModelProperty(value = " 本月 (month),上个月(onmonth),今天(day),昨天(yesterday),本周(week),上周(onweek),本年(year),上年(onyear),本季(season),上季(onseason)")
-  private String timecondition;
+
+@ApiModelProperty(
+    value = "开始时间",
+    example = "2018-11-11 12:00:00"
+)
+@DateTimeFormat(
+    pattern = "yyyy-MM-dd HH:mm:ss"
+)
+  private Date startTiem;
+  @ApiModelProperty(
+      value = "结束时间",
+      example = "2018-11-11 12:00:00"
+  )
+  @DateTimeFormat(
+      pattern = "yyyy-MM-dd HH:mm:ss"
+  )
+  private Date  endTime;
 }

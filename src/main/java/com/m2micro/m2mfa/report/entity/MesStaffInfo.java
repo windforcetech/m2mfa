@@ -11,41 +11,42 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- *
- * @author chenshuhong
- * @since 2019-06-10
+ * 工单职员信息
+ * @author liaotao
+ * @since 2019-06-13
  */
 @Entity
-@ApiModel(value="MesStaffInfo对象", description="")
-public class MesStaffInfo extends BaseEntity implements Serializable {
+@ApiModel(value="MesStaffInfo对象", description="工单职员信息")
+public class MesStaffInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    @ApiModelProperty(value = "主键")
     @Id
     private String mesStaffInfoId;
     @ApiModelProperty(value = "机台")
     private String machineId;
     @ApiModelProperty(value = "人员")
     private String staffId;
-    @ApiModelProperty(value = "工单")
+    @ApiModelProperty(value = "工单ID")
     private String moId;
     @ApiModelProperty(value = "排单")
     private String scheduleId;
     @ApiModelProperty(value = "工序")
     private String processId;
-    @ApiModelProperty(value = "料件")
+    @ApiModelProperty(value = "料件ID")
     private String partId;
     @ApiModelProperty(value = "开始时间")
     private Date startTime;
     @ApiModelProperty(value = "结束时间")
     private Date endTime;
-    @ApiModelProperty(value = "状态")
+    @ApiModelProperty(value = "是否结束")
     private Integer flag;
     @ApiModelProperty(value = "产量")
     private BigDecimal outputQty;
-    @ApiModelProperty(value = "不良")
-    private BigDecimal failQty;
-    @ApiModelProperty(value = "报废")
-    private BigDecimal scrapQty;
+    @ApiModelProperty(value = "不良数量")
+    private Integer failQty;
+    @ApiModelProperty(value = "报废数量")
+    private Integer scrapQty;
     @ApiModelProperty(value = "模具")
     private String moldId;
     @ApiModelProperty(value = "模数")
@@ -132,17 +133,17 @@ public class MesStaffInfo extends BaseEntity implements Serializable {
         this.outputQty = outputQty;
     }
 
-    public BigDecimal getFailQty() {
+    public Integer getFailQty() {
         return failQty;
     }
-    public void setFailQty(BigDecimal failQty) {
+    public void setFailQty(Integer failQty) {
         this.failQty = failQty;
     }
 
-    public BigDecimal getScrapQty() {
+    public Integer getScrapQty() {
         return scrapQty;
     }
-    public void setScrapQty(BigDecimal scrapQty) {
+    public void setScrapQty(Integer scrapQty) {
         this.scrapQty = scrapQty;
     }
 

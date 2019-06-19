@@ -119,4 +119,11 @@ public interface MesMoDescService extends BaseService<MesMoDesc,String> {
      */
     void saveEntity(MesMoDescAllModel mesMoDesc);
 
+    /**
+     * 保存工单产量相关信息（已完结和强制结案的工单）
+     * @param moId
+     *          工单id
+     */
+    void saveMoDescQtyInfo(String moId);
+
 }

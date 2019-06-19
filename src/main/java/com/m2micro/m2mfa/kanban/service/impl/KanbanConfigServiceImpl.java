@@ -18,6 +18,7 @@ import com.m2micro.m2mfa.kanban.service.KanbanConfigService;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,10 @@ public class KanbanConfigServiceImpl implements KanbanConfigService {
   BaseMachineListRepository baseMachineListRepository;
   @Autowired
   BaseMachineService baseMachineService;
+
+  @Value("${kanban.url}")
+  String configIp;
+
   @Autowired
   JPAQueryFactory queryFactory;
   @Transactional
@@ -97,6 +102,8 @@ public class KanbanConfigServiceImpl implements KanbanConfigService {
     List<BaseLedConfig> list = jq.fetch();
     List<BaseLedConfig> collect = list.stream().filter(x -> {
       BaseLedConfig byId = findById(x.getConfigId());
+
+      byId.setConfigIp(configIp);
       x = byId;
       return true;
     }).collect(Collectors.toList());

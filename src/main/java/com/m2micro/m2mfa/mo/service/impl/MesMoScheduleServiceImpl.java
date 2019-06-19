@@ -456,6 +456,10 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag()))) {
             throw new MMException("用户排产单【" + mesMoSchedule.getScheduleNo() + "】当前状态【" + MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue() + "】,不允许冻结！");
         }
+        //正在生产中的要变更机台状态 add by 20190611
+        if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag())){
+            updateMachineStateForStop(id);
+        }
         //更改为冻结状态及冻结前状态
         mesMoScheduleRepository.setFlagAndPrefreezingStateFor(MoScheduleStatus.FROZEN.getKey(), mesMoSchedule.getFlag(), mesMoSchedule.getScheduleId());
         //做冻结额外业务逻辑操作（已审待产不要做此操作，但不影响，因为上工记录表数据库没记录，更新0条）
@@ -526,11 +530,17 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
                 MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag()))) {
             throw new MMException("用户排产单【" + mesMoSchedule.getScheduleNo() + "】当前状态【" + MoScheduleStatus.valueOf(mesMoSchedule.getFlag()).getValue() + "】,不允许强制结案！");
         }
+        //正在生产中的要变更机台状态 add by 20190611
+        if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag())){
+            updateMachineStateForStop(id);
+        }
+        //做强制结案的额外业务逻辑操作
+        stopWorkForAll(mesMoSchedule);
         //更改为强制结案状态
         mesMoScheduleRepository.setFlagFor(MoScheduleStatus.FORCECLOSE.getKey(), mesMoSchedule.getScheduleId());
         mesMoScheduleRepository.updateactualStartTime(new Date(), mesMoSchedule.getScheduleId());
-        //做强制结案的额外业务逻辑操作
-        stopWorkForAll(mesMoSchedule);
+        //结束工单操作：工单下所有排产单已结束且工单的可排数量为0就结束排产单，否则不做任何操作
+        mesMoDescService.endMoDesc(mesMoSchedule.getMoId());
 
     }
 
@@ -1153,7 +1163,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     }
 
-    private void updateMesMoDescscheduQty(MesMoSchedule mesMoSchedule) {
+    /*private void updateMesMoDescscheduQty(MesMoSchedule mesMoSchedule) {
         MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
         Integer scheduQty = (moDesc.getSchedulQty() == null ? 0 : moDesc.getSchedulQty()) + mesMoSchedule.getScheduleQty();
         mesMoDescRepository.setSchedulQtyFor(scheduQty, moDesc.getMoId());
@@ -1163,6 +1173,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoDescRepository.updateIsSchedeul(1, moDesc.getMoId());
         }
         mesMoDescRepository.setCloseFlagFor(MoStatus.SCHEDULED.getKey(), moDesc.getMoId());
+    }*/
+
+    private void updateMesMoDescscheduQty(MesMoSchedule mesMoSchedule) {
+        MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
+        Integer scheduQty = (moDesc.getSchedulQty() == null ? 0 : moDesc.getSchedulQty()) + mesMoSchedule.getScheduleQty();
+        moDesc.setSchedulQty(scheduQty);
+        if(moDesc.getTargetQty().equals(moDesc.getSchedulQty()) || moDesc.getSchedulQty() > moDesc.getTargetQty()){
+            moDesc.setIsSchedul(1);
+        }else{
+            moDesc.setIsSchedul(0);
+        }
+        moDesc.setCloseFlag(MoStatus.SCHEDULED.getKey());
+        mesMoDescRepository.save(moDesc);
     }
 
     /**
@@ -1286,6 +1309,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         }
         return max == null ? 1 : max;
     }
+
+
 
     /**
      * 排产单工位保存
@@ -1414,6 +1439,44 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             restTime = 0;
         }
         return offDate.getTime() - onDate.getTime() - restTime * 60 * 1000;
+    }
+
+
+    @Override
+    public MesMoSchedule getProductionMesMoSchedule(String machineId, String processId) {
+        List<MesMoSchedule> productionMesMoSchedule = mesMoScheduleRepository.getProductionMesMoScheduleByMachineId( MoScheduleStatus.PRODUCTION.getKey(),machineId,processId);
+        if(productionMesMoSchedule==null||productionMesMoSchedule.size()==0){
+            return null;
+        }
+        if(productionMesMoSchedule.size()>1){
+            throw new MMException("同一个机台不能同时生产两个排产单！");
+        }
+        return productionMesMoSchedule.get(0);
+    }
+
+    @Override
+    public Boolean isUpdateMachineStateForProduction(String scheduleId, String machineId, String processId) {
+        MesMoSchedule productionMesMoSchedule = getProductionMesMoSchedule(machineId, processId);
+        //该机台没有正在生产的排产单，能更新机台状态
+        if(productionMesMoSchedule==null){
+            return true;
+        }
+        //该机台正在生产的排产单就是当前排产单，能更新机台状态为生产中
+        if(productionMesMoSchedule.getScheduleId().equals(scheduleId)){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void updateMachineStateForStop(String scheduleId) {
+        //获取开机工位所在工序（机台生产所在工序：注塑成型）
+        BaseProcess machineProcess = baseProcessService.getMachineProcess();
+        //当前排产单注塑成型工序是否结束
+        MesMoSchedule mesMoSchedule = mesMoScheduleRepository.getIsProductMesMoSchedule(MoScheduleStatus.PRODUCTION.getKey(), scheduleId, machineProcess.getProcessId());
+        if(mesMoSchedule!=null){
+            baseMachineService.setFlagForStop(mesMoSchedule.getMachineId());
+        }
     }
 
 }
