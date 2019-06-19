@@ -1,11 +1,20 @@
 package com.m2micro.m2mfa.report.service.impl;
 
 import com.m2micro.m2mfa.common.util.DateUtil;
+import com.m2micro.m2mfa.common.util.FileUtil;
 import com.m2micro.m2mfa.report.query.BootQuery;
 import com.m2micro.m2mfa.report.service.BootService;
 import com.m2micro.m2mfa.report.vo.Boot;
 import com.m2micro.m2mfa.report.vo.BootAndData;
 import com.m2micro.m2mfa.report.vo.ShiftAndData;
+import com.m2micro.m2mfa.report.vo.Yield;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -13,7 +22,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class BootServiceImpl  implements BootService {
@@ -34,6 +46,257 @@ public class BootServiceImpl  implements BootService {
       bootAndData.setShiftAndDatas(shiftAndData);
     }
     return bootAndData;
+  }
+
+  @Override
+  public void excelOutData(BootQuery bootQuery, HttpServletResponse response) throws Exception {
+
+    BootAndData bootAndData = BootShow(bootQuery);
+    Workbook book = new HSSFWorkbook();
+    // 在对应的Excel中建立一个分表
+    Sheet sheet1 = book.createSheet("开机报表");
+    sheet1.addMergedRegion(new CellRangeAddress(1, bootAndData.getShiftAndDatas().size(), 0, 0));
+    sheet1.addMergedRegion(new CellRangeAddress(1, bootAndData.getShiftAndDatas().size(), 1, 1));
+    sheet1.addMergedRegion(new CellRangeAddress(1, 1, 1, 1));
+
+    Row rowA =sheet1.createRow(0);
+    addRowA(rowA,book,bootAndData);
+    Row row =sheet1.createRow(bootAndData.getShiftAndDatas().size()+1);
+    addRowOne(row,book);
+    addRowData(sheet1,bootAndData,book);
+    book.close();
+    FileUtil.excelDownloadFlie(response, book,"yield");
+
+
+
+  }
+
+  @Override
+  public void pdfOutData(BootQuery bootQuery, HttpServletResponse response) throws Exception {
+
+  }
+
+  /**
+   * N   行数据
+   * @param sheet1
+   */
+  public void addRowData( Sheet sheet1 ,BootAndData bootAndData,Workbook book){
+    for(int i =0; i<bootAndData.getBoots().size();i++){
+      int x =i+1+bootAndData.getShiftAndDatas().size();
+      Row row =sheet1.createRow(x);
+      sheet1.setDefaultRowHeightInPoints(20);
+      sheet1.setDefaultColumnWidth(20);
+      getRow(row,bootAndData.getBoots().get(i),book);
+    }
+  }
+
+
+  private void getRow( Row row,Boot boot, Workbook book ) {
+
+    HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
+    for(int i=0;i<16; i++){
+      Cell cell = row.createCell(i);
+      cell.setCellStyle(hssfCellStyle);
+      switch (i){
+        case 0:
+          cell.setCellValue(boot.getStartTime());
+          break;
+        case 1:
+          cell.setCellValue(boot.getShiftName());
+          break;
+        case 2:
+          cell.setCellValue(boot.getMachineName());
+          break;
+        case 3:
+          cell.setCellValue(boot.getStaffCode());
+          break;
+        case 4:
+          cell.setCellValue(boot.getStaffName());
+          break;
+        case 5:
+          cell.setCellValue(boot.getUseTime());
+          break;
+        case 6:
+          cell.setCellValue(boot.getMachineTime());
+
+          break;
+        case 7:
+          cell.setCellValue(boot.getPartName());
+
+          break;
+        case 8:
+          cell.setCellValue(boot.getMoldCode());
+
+          break;
+        case 9:
+          cell.setCellValue(boot.getMolds());
+
+          break;
+        case 10:
+          cell.setCellValue(boot.getCavityQty());
+
+          break;
+        case 11:
+          cell.setCellValue(boot.getScheduleQty());
+
+          break;
+        case 12:
+          cell.setCellValue(String.valueOf(boot.getReach()));
+
+          break;
+        case 13:
+          cell.setCellValue(String.valueOf(boot.getOutputQty()));
+
+          break;
+        case 14:
+          cell.setCellValue(String.valueOf(boot.getAchievingRate()));
+
+          break;
+        case 15:
+          cell.setCellValue(String.valueOf(boot.getScrapQty()));
+
+          break;
+        case 16:
+          cell.setCellValue(String.valueOf(boot.getFailQty()));
+
+          break;
+     }
+    }
+  }
+  /**
+   * 设置文字居中
+   * @param book
+   * @return
+   */
+  private  HSSFCellStyle getHssfCellStyle(Workbook book) {
+    HSSFCellStyle style2 = (HSSFCellStyle) book.createCellStyle();
+    style2.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+    style2.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+    style2.setBorderRight(HSSFCellStyle.BORDER_THIN);
+    style2.setBorderTop(HSSFCellStyle.BORDER_THIN);
+    style2.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+    style2.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+    return style2;
+  }
+
+  /**
+   * 总汇
+   * @param row
+   */
+  public void addRowA( Row row,Workbook book,BootAndData bootAndData){
+
+    HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
+    for(int i=0;i<16; i++){
+      Cell cell = row.createCell(i);
+      cell.setCellStyle(hssfCellStyle);
+      switch (i){
+        case 0:
+          cell.setCellValue("日期");
+          break;
+        case 1:
+          cell.setCellValue(bootAndData.getTime());
+          break;
+        case 2:
+          cell.setCellValue("总生产数（PCS）");
+          break;
+        case 4:
+          cell.setCellValue(bootAndData.getSummary());
+          break;
+        case 6:
+          cell.setCellValue("达成率");
+          break;
+        case 7:
+          cell.setCellValue(bootAndData.getAchievingRate());
+          break;
+        case 8:
+          cell.setCellValue("不良");
+          break;
+        case 9:
+          cell.setCellValue(bootAndData.getBad());
+          break;
+        case 10:
+          cell.setCellValue("总人工工时（H）");
+          break;
+        case 13:
+          cell.setCellValue(bootAndData.getHours());
+          break;
+        case 14:
+          cell.setCellValue("人均产值（PCS）");
+          break;
+        case 16:
+          cell.setCellValue(bootAndData.getMean());
+          break;
+
+      }
+    }
+
+  }
+
+  /**
+   * 第一行标题
+   * @param row
+   */
+  public void addRowOne( Row row,Workbook book){
+
+    HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
+    for(int i=0;i<16; i++){
+      Cell cell = row.createCell(i);
+      cell.setCellStyle(hssfCellStyle);
+      switch (i){
+        case 0:
+          cell.setCellValue("归属日期");
+          break;
+        case 1:
+          cell.setCellValue("班别");
+          break;
+        case 2:
+          cell.setCellValue("机台");
+          break;
+        case 3:
+          cell.setCellValue("工号");
+          break;
+        case 4:
+          cell.setCellValue("姓名");
+          break;
+        case 5:
+          cell.setCellValue("人力工时");
+          break;
+        case 6:
+          cell.setCellValue("机台工时");
+          break;
+        case 7:
+          cell.setCellValue("品名");
+          break;
+        case 8:
+          cell.setCellValue("模号");
+          break;
+        case 9:
+          cell.setCellValue("模数");
+          break;
+        case 10:
+          cell.setCellValue("穴数");
+          break;
+        case 11:
+          cell.setCellValue("目标");
+          break;
+        case 12:
+          cell.setCellValue("达成数");
+          break;
+        case 13:
+          cell.setCellValue("生产数");
+          break;
+        case 14:
+          cell.setCellValue("达成率");
+          break;
+        case 15:
+          cell.setCellValue("报废数");
+          break;
+        case 16:
+          cell.setCellValue("不良率");
+          break;
+      }
+    }
+
   }
 
 
