@@ -352,7 +352,7 @@ public class BaseBomDescController {
             BaseBomDesc baseBomDesc = baseBomDescService.findById(id).orElse(null);
             boolean wh = checkWhetherReferenceByMesMoDesc(baseBomDesc.getPartId());
             if (wh)
-                throw new MMException("bom与工单产生业务,不允许删除");
+                throw new MMException("bomdesc与工单产生业务,不允许删除");
 
             baseBomDefService.findAllByBomId(id).forEach(baseBomDef -> {
                 boolean whdef = checkWhetherReferenceByMesMoDesc(baseBomDef.getPartId());
@@ -371,8 +371,8 @@ public class BaseBomDescController {
     private boolean checkWhetherReferenceByMesMoDesc(String partId) {
         List<MesMoDesc> byPartId = mesMoDescService.findByPartId(partId);
         if (byPartId.size() > 0)
-            return false;
-        return true;
+            return true;
+        return false;
 
     }
 
