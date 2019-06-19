@@ -10,7 +10,7 @@ import java.util.List;
 public class BootAndData {
 
   @ApiModelProperty(value = "日期")
-  private Date Time ;
+  private Date startTime ;
 
 
   @ApiModelProperty(value = "汇总")

@@ -23,6 +23,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +49,7 @@ public class BootServiceImpl  implements BootService {
     return bootAndData;
   }
 
+
   @Override
   public void excelOutData(BootQuery bootQuery, HttpServletResponse response) throws Exception {
 
@@ -55,21 +57,20 @@ public class BootServiceImpl  implements BootService {
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("开机报表");
-    int shiftMun =bootAndData.getShiftAndDatas().size()+1;
+    int shiftMun =bootAndData.getShiftAndDatas().size();
     sheet1.addMergedRegion(new CellRangeAddress(0, shiftMun, 0, 0));
     sheet1.addMergedRegion(new CellRangeAddress(0, shiftMun, 1, 1));
-    for(int x =0; x<shiftMun; x++){
+    for(int x =0; x<shiftMun+1; x++){
       sheet1.addMergedRegion(new CellRangeAddress(x, x, 2, 3));
       sheet1.addMergedRegion(new CellRangeAddress(x, x, 4, 5));
-      sheet1.addMergedRegion(new CellRangeAddress(x, x, 7, 8));
-      sheet1.addMergedRegion(new CellRangeAddress(x, x, 11, 13));
-      sheet1.addMergedRegion(new CellRangeAddress(x, x, 15, 16));
+      sheet1.addMergedRegion(new CellRangeAddress(x, x, 10, 12));
+      sheet1.addMergedRegion(new CellRangeAddress(x, x, 14, 15));
     }
 
     Row rowA =sheet1.createRow(0);
     addRowA(rowA,book,bootAndData);
-  //  addRowShigtData(sheet1,bootAndData,book);
-    Row row =sheet1.createRow(bootAndData.getShiftAndDatas().size()+1);
+    addRowShiftData(sheet1,bootAndData,book);
+    Row row =sheet1.createRow(shiftMun+1);
     addRowOne(row,book);
     addRowData(sheet1,bootAndData,book);
     book.close();
@@ -79,10 +80,12 @@ public class BootServiceImpl  implements BootService {
 
   }
 
+
   @Override
   public void pdfOutData(BootQuery bootQuery, HttpServletResponse response) throws Exception {
 
   }
+
 
   /**
    * N   行数据
@@ -90,7 +93,7 @@ public class BootServiceImpl  implements BootService {
    */
   public void addRowData( Sheet sheet1 ,BootAndData bootAndData,Workbook book){
     for(int i =0; i<bootAndData.getBoots().size();i++){
-      int x =i+1+bootAndData.getShiftAndDatas().size();
+      int x =i+1+bootAndData.getShiftAndDatas().size()+1;
       Row row =sheet1.createRow(x);
       sheet1.setDefaultRowHeightInPoints(20);
       sheet1.setDefaultColumnWidth(20);
@@ -99,15 +102,75 @@ public class BootServiceImpl  implements BootService {
   }
 
 
+  /**
+   * N   行数据
+   * @param sheet1
+   */
+  public void addRowShiftData( Sheet sheet1 ,BootAndData bootAndData,Workbook book){
+    for(int i =0; i<bootAndData.getShiftAndDatas().size();i++){
+      int x =i+bootAndData.getShiftAndDatas().size()-1;
+      System.out.println("======"+x);
+      Row row =sheet1.createRow(x);
+      sheet1.setDefaultRowHeightInPoints(20);
+      sheet1.setDefaultColumnWidth(20);
+      getShiftRow(row,bootAndData.getShiftAndDatas().get(i),book);
+    }
+  }
+
+
+  private void getShiftRow( Row row,ShiftAndData shiftAndData, Workbook book ) {
+
+    HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
+    for(int i=0;i<17; i++){
+      Cell cell = row.createCell(i);
+      cell.setCellStyle(hssfCellStyle);
+      switch (i){
+
+        case 2:
+          cell.setCellValue(shiftAndData.getShiftName());
+          break;
+        case 4:
+          cell.setCellValue(shiftAndData.getShiftSummary());
+          break;
+        case 6:
+          cell.setCellValue(shiftAndData.getShiftName());
+          break;
+        case 7:
+          cell.setCellValue(shiftAndData.getShiftAchievingRate());
+          break;
+        case 8:
+          cell.setCellValue(shiftAndData.getShiftName());
+          break;
+        case 9:
+          cell.setCellValue(shiftAndData.getShiftBad());
+          break;
+        case 10:
+          cell.setCellValue(shiftAndData.getShiftName());
+          break;
+        case 13:
+          cell.setCellValue(shiftAndData.getShiftHours());
+          break;
+        case 14:
+          cell.setCellValue(shiftAndData.getShiftName());
+          break;
+        case 16:
+          cell.setCellValue(shiftAndData.getShiftMean());
+          break;
+
+      }
+    }
+  }
+
+
   private void getRow( Row row,Boot boot, Workbook book ) {
 
     HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
-    for(int i=0;i<16; i++){
+    for(int i=0;i<17; i++){
       Cell cell = row.createCell(i);
       cell.setCellStyle(hssfCellStyle);
       switch (i){
         case 0:
-          cell.setCellValue(boot.getStartTime());
+          cell.setCellValue(DateUtil.format(boot.getStartTime(), DateUtil.DATE_PATTERN));
           break;
         case 1:
           cell.setCellValue(boot.getShiftName());
@@ -168,9 +231,11 @@ public class BootServiceImpl  implements BootService {
           cell.setCellValue(String.valueOf(boot.getFailQty()));
 
           break;
-     }
+      }
     }
   }
+
+
   /**
    * 设置文字居中
    * @param book
@@ -187,6 +252,7 @@ public class BootServiceImpl  implements BootService {
     return style2;
   }
 
+
   /**
    * 总汇
    * @param row
@@ -194,7 +260,7 @@ public class BootServiceImpl  implements BootService {
   public void addRowA( Row row,Workbook book,BootAndData bootAndData){
 
     HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
-    for(int i=0;i<16; i++){
+    for(int i=0;i<17; i++){
       Cell cell = row.createCell(i);
       cell.setCellStyle(hssfCellStyle);
       switch (i){
@@ -202,7 +268,7 @@ public class BootServiceImpl  implements BootService {
           cell.setCellValue("日期");
           break;
         case 1:
-          cell.setCellValue(bootAndData.getTime());
+          cell.setCellValue(DateUtil.format(bootAndData.getStartTime(), DateUtil.DATE_PATTERN));
           break;
         case 2:
           cell.setCellValue("总生产数（PCS）");
@@ -240,6 +306,7 @@ public class BootServiceImpl  implements BootService {
 
   }
 
+
   /**
    * 第一行标题
    * @param row
@@ -247,7 +314,7 @@ public class BootServiceImpl  implements BootService {
   public void addRowOne( Row row,Workbook book){
 
     HSSFCellStyle hssfCellStyle = getHssfCellStyle(book);
-    for(int i=0;i<16; i++){
+    for(int i=0;i<17; i++){
       Cell cell = row.createCell(i);
       cell.setCellStyle(hssfCellStyle);
       switch (i){
@@ -314,7 +381,7 @@ public class BootServiceImpl  implements BootService {
    */
   private List<ShiftAndData> getShiftAndData(BootQuery bootQuery) {
     String sql="SELECT\n" +
-        "	bs.`name` shift_name,\n" +
+        "	bs.`name` shift_name,DATE_FORMAT(mrw.start_time,'%Y-%m-%d') start_time,\n" +
         "	vmsi.output_qty shift_summary,\n" +
         "	CONVERT (\n" +
         "		vmsi.output_qty / (\n" +
@@ -418,7 +485,7 @@ public class BootServiceImpl  implements BootService {
          "	(\n" +
          "		vmsi.end_time - vmsi.start_time\n" +
          "	) \n" +
-         " ))/COUNT(*)  mean from ";
+         " ))/COUNT(*)  mean    ,vmsi.start_time  startTime from ";
 
     sql += pingSql(bootQuery);
     RowMapper<BootAndData> rowRoot = BeanPropertyRowMapper.newInstance(BootAndData.class);
@@ -464,6 +531,7 @@ public class BootServiceImpl  implements BootService {
     return  sql;
   }
 
+
   /**
    * 获取详情
    * @return
@@ -471,7 +539,7 @@ public class BootServiceImpl  implements BootService {
   public  List<Boot>getBoots(BootQuery bootQuery){
 
    String sql= "SELECT\n" +
-        "	vmsi.start_time,\n" +
+         "DATE_FORMAT(mrw.start_time,'%Y-%m-%d') start_time	,\n" +
         "	bs.`name` shift_name,\n" +
         "	bm.`name` machine_name,\n" +
         "	bst.`code` staff_code,\n" +
@@ -527,6 +595,7 @@ public class BootServiceImpl  implements BootService {
      return  jdbcTemplate.query(sql, rowMapper);
   }
 
+
   /**
    * 获取组合表
    * @return
@@ -559,6 +628,6 @@ public class BootServiceImpl  implements BootService {
     return  sql;
 
   }
+
+
 }
-
-
