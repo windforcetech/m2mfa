@@ -485,7 +485,7 @@ public class BootServiceImpl  implements BootService {
          "	(\n" +
          "		vmsi.end_time - vmsi.start_time\n" +
          "	) \n" +
-         " ))/COUNT(*)  mean    ,vmsi.start_time  startTime from ";
+         " ))/COUNT(*)  mean    ,DATE_FORMAT(vmsi.start_time,'%Y-%m-%d')   startTime from ";
 
     sql += pingSql(bootQuery);
     RowMapper<BootAndData> rowRoot = BeanPropertyRowMapper.newInstance(BootAndData.class);
