@@ -240,7 +240,7 @@ public class YieldServiceImpl implements YieldService {
       document.open();
       ByteArrayInputStream bin = new ByteArrayInputStream(html.getBytes());
       XMLWorkerHelper.getInstance().parseXHtml(mPdfWriter, document, bin, null, new ChinaFontProvide());
-      System.out.println("生成完毕"+fileSeperator);
+
       document.close();
     } catch (Exception e) {
       e.printStackTrace();

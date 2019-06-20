@@ -1,7 +1,12 @@
 package com.m2micro.m2mfa.report.service.impl;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
+import com.m2micro.m2mfa.common.util.ChinaFontProvide;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.FileUtil;
+import com.m2micro.m2mfa.common.util.POIReadExcelToHtml;
 import com.m2micro.m2mfa.report.query.BootQuery;
 import com.m2micro.m2mfa.report.service.BootService;
 import com.m2micro.m2mfa.report.vo.Boot;
@@ -23,6 +28,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -54,6 +62,7 @@ public class BootServiceImpl  implements BootService {
   public void excelOutData(BootQuery bootQuery, HttpServletResponse response) throws Exception {
 
     BootAndData bootAndData = BootShow(bootQuery);
+    if(bootAndData !=null){
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("开机报表");
@@ -75,14 +84,52 @@ public class BootServiceImpl  implements BootService {
     addRowData(sheet1,bootAndData,book);
     book.close();
     FileUtil.excelDownloadFlie(response, book,"boot");
-
-
-
+    }
   }
 
 
   @Override
   public void pdfOutData(BootQuery bootQuery, HttpServletResponse response) throws Exception {
+
+    BootAndData bootAndData = BootShow(bootQuery);
+    if(bootAndData !=null) {
+      Workbook book = new HSSFWorkbook();
+      // 在对应的Excel中建立一个分表
+      Sheet sheet1 = book.createSheet("开机报表");
+      int shiftMun = bootAndData.getShiftAndDatas().size();
+      sheet1.addMergedRegion(new CellRangeAddress(0, shiftMun, 0, 0));
+      sheet1.addMergedRegion(new CellRangeAddress(0, shiftMun, 1, 1));
+      for (int x = 0; x < shiftMun + 1; x++) {
+        sheet1.addMergedRegion(new CellRangeAddress(x, x, 2, 3));
+        sheet1.addMergedRegion(new CellRangeAddress(x, x, 4, 5));
+        sheet1.addMergedRegion(new CellRangeAddress(x, x, 10, 12));
+        sheet1.addMergedRegion(new CellRangeAddress(x, x, 14, 15));
+      }
+
+      Row rowA = sheet1.createRow(0);
+      addRowA(rowA, book, bootAndData);
+      addRowShiftData(sheet1, bootAndData, book);
+      Row row = sheet1.createRow(shiftMun + 1);
+      addRowOne(row, book);
+      addRowData(sheet1, bootAndData, book);
+      // 保存到计算机相应路径
+      String fileSeperator = File.separator;
+      book.write(new FileOutputStream(fileSeperator + "boot.xls"));
+      book.close();
+      String html = POIReadExcelToHtml.readExcelToHtml(fileSeperator + "boot.xls", true);
+      try {
+        Document document = new Document();
+        PdfWriter mPdfWriter = PdfWriter.getInstance(document, new FileOutputStream(new File(fileSeperator + "boot.pdf")));
+        document.open();
+        ByteArrayInputStream bin = new ByteArrayInputStream(html.getBytes());
+        XMLWorkerHelper.getInstance().parseXHtml(mPdfWriter, document, bin, null, new ChinaFontProvide());
+
+        document.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      FileUtil.download(fileSeperator + "boot.pdf", response, false, "boot.pdf");
+    }
 
   }
 
@@ -109,6 +156,9 @@ public class BootServiceImpl  implements BootService {
   public void addRowShiftData( Sheet sheet1 ,BootAndData bootAndData,Workbook book){
     for(int i =0; i<bootAndData.getShiftAndDatas().size();i++){
       int x =i+bootAndData.getShiftAndDatas().size()-1;
+      if(x==0){
+        x=x+1;
+      }
       System.out.println("======"+x);
       Row row =sheet1.createRow(x);
       sheet1.setDefaultRowHeightInPoints(20);
