@@ -1261,6 +1261,11 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
         ValidatorUtil.validateEntity(mesMoSchedule, AddGroup.class);
         MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
+       Integer schduQty = moDesc.getSchedulQty()==null? 0:moDesc.getSchedulQty();
+        Integer  num = moDesc.getTargetQty()-schduQty;
+        if(num <=0){
+            throw new MMException("工单已排产完。");
+        }
         if (moDesc == null) {
             throw new MMException("工单ID有误。");
         }

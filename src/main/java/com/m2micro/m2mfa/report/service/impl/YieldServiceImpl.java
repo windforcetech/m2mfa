@@ -102,7 +102,7 @@ public class YieldServiceImpl implements YieldService {
         "					mes_mo_schedule mms\n" +
         "				WHERE\n" +
         "					mms.mo_id = mmd.mo_id\n" +
-        "			)\n" +
+        "			)  AND mmsp.process_id=bp.process_id \n" +
         "	) output_qty,\n" +
         "(\n" +
         "		SELECT\n" +
