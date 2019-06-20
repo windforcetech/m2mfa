@@ -211,25 +211,7 @@ public class YieldServiceImpl implements YieldService {
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("产量报表");
-    List<Integer> integers = GroupBy(yieldQuery);
-    Integer y=1;
-    System.out.println("xxxxx"+integers.size());
-    for( int x =0; x<integers.size();x++){
-      Integer i = integers.get(x);
-      int v=y+i;
-        v = v - 1;
-      System.out.println("y==="+y+"v===="+v+"x==="+x);
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,0,0));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,1,1));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,2,2));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,3,3));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,4,4));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,5,5));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,6,6));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,7,7));
-      y+=i;
-
-    }
+    getCombination(yieldQuery, sheet1);
     Row row =sheet1.createRow(0);
     addRowOne(row,book);
     addRowData(sheet1,yields,book);
@@ -243,25 +225,7 @@ public class YieldServiceImpl implements YieldService {
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("产量报表");
-    List<Integer> integers = GroupBy(yieldQuery);
-    Integer y=1;
-    System.out.println("xxxxx"+integers.size());
-    for( int x =0; x<integers.size();x++){
-      Integer i = integers.get(x);
-      int v=y+i;
-      v = v - 1;
-      System.out.println("y==="+y+"v===="+v+"x==="+x);
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,0,0));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,1,1));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,2,2));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,3,3));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,4,4));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,5,5));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,6,6));
-      sheet1.addMergedRegion(new CellRangeAddress(y,v,7,7));
-      y+=i;
-
-    }
+    getCombination(yieldQuery, sheet1);
     Row row =sheet1.createRow(0);
     addRowOne(row,book);
     addRowData(sheet1,yields,book);
@@ -276,12 +240,32 @@ public class YieldServiceImpl implements YieldService {
       document.open();
       ByteArrayInputStream bin = new ByteArrayInputStream(html.getBytes());
       XMLWorkerHelper.getInstance().parseXHtml(mPdfWriter, document, bin, null, new ChinaFontProvide());
-      System.out.println("生成完毕"+fileSeperator);
+
       document.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
     FileUtil.download(fileSeperator+"yield.pdf",response,false,"yield.pdf");
+  }
+
+  private void getCombination(YieldQuery yieldQuery, Sheet sheet1) {
+    List<Integer> integers = GroupBy(yieldQuery);
+    Integer y = 1;
+    for (int x = 0; x < integers.size(); x++) {
+      Integer i = integers.get(x);
+      int v = y + i;
+      v = v - 1;
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 0, 0));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 1, 1));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 2, 2));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 3, 3));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 4, 4));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 5, 5));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 6, 6));
+      sheet1.addMergedRegion(new CellRangeAddress(y, v, 7, 7));
+      y += i;
+
+    }
   }
 
 

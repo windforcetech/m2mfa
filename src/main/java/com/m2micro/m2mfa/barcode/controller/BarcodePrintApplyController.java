@@ -19,7 +19,11 @@ import com.m2micro.m2mfa.common.validator.AddGroup;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 标签打印表单 前端控制器
@@ -113,6 +117,30 @@ public class BarcodePrintApplyController {
           barcodePrintResourcesRepository.deleteByApplyId(id);
       }
         return ResponseMessage.ok();
+    }
+
+    @PostMapping("/deleteListAndCheckFlag")
+    @ApiOperation(value = "批量删除打印申请")
+    @UserOperationLog("批量删除打印申请")
+    @Transactional
+    public ResponseMessage deleteListAndCheckFlag(@RequestBody String[] ids) {
+
+        List<String> des = new ArrayList<>();
+        for(String id :ids ){
+            BarcodePrintApply barcodePrintApply = barcodePrintApplyService.findById(id).orElse(null);
+            if(barcodePrintApply !=null){
+                if( barcodePrintApply.getCheckFlag()==1){
+                    des.add(barcodePrintApply.getId());
+                    continue;
+                }
+            }
+            barcodePrintResourcesRepository.deleteByApplyId(id);
+            barcodePrintApplyService.deleteById(id);
+        }
+        ResponseMessage  re = ResponseMessage.ok();
+        String[] strings = des.stream().toArray(String[]::new);
+        re.setMessage("条码编号【" + String.join(",", strings) + "】已产生业务,不允许删除！");
+        return re;
     }
 
     /**
