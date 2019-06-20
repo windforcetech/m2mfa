@@ -21,3 +21,5 @@ CREATE TABLE `mes_staff_info` (
   PRIMARY KEY (`mes_staff_info_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 alter table mes_staff_info comment '工单职员信息';
+
+DROP TABLE IF EXISTS mes_record_machine;

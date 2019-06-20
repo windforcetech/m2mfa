@@ -61,4 +61,23 @@ public interface MesMoScheduleStaffRepository extends BaseRepository<MesMoSchedu
      * @return
      */
     List<MesMoScheduleStaff> findByScheduleIdAndStationId(String scheduleId, String stationId);
+
+    /**
+     * 获取开机工位人员信息
+     * @param scheduleId
+     *          排产单id
+     * @param code
+     *          开机工位所在code
+     * @return
+     */
+    @Query(value = "SELECT\n" +
+                    "	ms.* \n" +
+                    "FROM\n" +
+                    "	mes_mo_schedule_staff ms,\n" +
+                    "	base_station bs \n" +
+                    "WHERE\n" +
+                    "	ms.station_id = bs.station_id \n" +
+                    "	AND ms.schedule_id = ?1\n" +
+                    "	AND bs.code = ?2",nativeQuery = true)
+    MesMoScheduleStaff getMesMoScheduleStaffForBoot(String scheduleId,String code);
 }

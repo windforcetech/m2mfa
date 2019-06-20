@@ -10,6 +10,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * @Auther: liaotao
  * @Date: 2019/1/11 17:38
@@ -23,17 +25,21 @@ public class IotListenner {
     IotMachineOutputService iotMachineOutputService;
     @Autowired
     SysDebugLogService sysDebugLogService;
+    ReentrantLock lock = new ReentrantLock();
 
     @EventListener
     @Async
     public void handleDeviceData(DeviceData deviceData) {
         log.info(Thread.currentThread().getId() + "");
         log.info(deviceData.toString());
+        lock.lock();
         try {
             iotMachineOutputService.handleDeviceData(deviceData);
         }catch (Exception e){
             System.out.println(e);
             sysDebugLogService.saveLog(SysDebugLogType.EXCEPTION,"iot 平台推送过来的数据处理异常！"+e);
+        }finally {
+            lock.unlock();
         }
 
     }

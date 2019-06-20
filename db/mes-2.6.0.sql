@@ -21,3 +21,22 @@ create table mes_staff_info
    primary key (mes_staff_info_id)
 );
 alter table mes_staff_info comment '工单职员信息';
+
+create table mes_record_machine
+(
+   id                   VARCHAR(50) not null comment '主键',
+   machine_id           VARCHAR(50) comment '机台',
+   schedule_id          VARCHAR(50) comment '排产单id',
+   part_id              VARCHAR(50) comment '料件ID',
+   mold_id              VARCHAR(50) comment '模具id',
+   cavity_qty           INT comment '模具穴数',
+   cavity_available     INT comment '生产穴数',
+   open_qty             INT comment '开模次数',
+   power                decimal(18,2) comment '电量',
+   shift_id             VARCHAR(50) comment '班别',
+   staff_id             VARCHAR(50) comment '操作员id',
+   create_on            datetime comment '创建时间',
+   primary key (id)
+);
+
+alter table mes_record_machine comment '机台抄读历史记录';
