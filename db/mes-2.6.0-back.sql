@@ -21,3 +21,11 @@ CREATE TABLE `mes_staff_info` (
   PRIMARY KEY (`mes_staff_info_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 alter table mes_staff_info comment '工单职员信息';
+
+DROP TABLE IF EXISTS mes_record_machine;
+
+
+ALTER TABLE mes_record_wip_log MODIFY in_time date COMMENT '进工序时间';
+ALTER TABLE mes_record_wip_log MODIFY out_time date COMMENT '出工序时间';
+ALTER TABLE mes_record_wip_log MODIFY inline_time date COMMENT '进线时间';
+ALTER TABLE mes_record_wip_log MODIFY outline_time date COMMENT '出线时间';
