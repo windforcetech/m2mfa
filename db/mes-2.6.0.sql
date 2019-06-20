@@ -40,3 +40,9 @@ create table mes_record_machine
 );
 
 alter table mes_record_machine comment '机台抄读历史记录';
+
+
+ALTER TABLE mes_record_wip_log MODIFY in_time datetime COMMENT '进工序时间';
+ALTER TABLE mes_record_wip_log MODIFY out_time datetime COMMENT '出工序时间';
+ALTER TABLE mes_record_wip_log MODIFY inline_time datetime COMMENT '进线时间';
+ALTER TABLE mes_record_wip_log MODIFY outline_time datetime COMMENT '出线时间';
