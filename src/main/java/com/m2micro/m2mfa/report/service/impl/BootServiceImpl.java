@@ -48,8 +48,9 @@ public class BootServiceImpl  implements BootService {
   public BootAndData  BootShow(BootQuery bootQuery) {
     List<Boot> boots = getBoots(bootQuery);
     BootAndData bootAndData = getBootAndData(bootQuery);
-    bootAndData.setHours(DateUtil.getGapTime(Long.parseLong(bootAndData.getHours())));
+
     if(bootAndData !=null){
+      bootAndData.setHours(DateUtil.getGapTime(Long.parseLong(bootAndData.getHours())));
       Long bad = getFailCount(bootQuery);
 
       bootAndData.setBad(bad);
