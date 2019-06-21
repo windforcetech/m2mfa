@@ -575,7 +575,7 @@ public class BootServiceImpl  implements BootService {
         "	1\n" +
         ") where 1=1 and vmsi.process_id IN(select process_id from base_process where process_code='gxdm')   ";
       if(bootQuery.getBootTime()!=null){
-       sql += "  and  mrw.start_time LIKE '"+ DateUtil.format(bootQuery.getBootTime(),DateUtil.DATE_PATTERN)+"%'  ";
+       sql += "  and  mrw.start_time LIKE '"+ DateUtil.format(bootQuery.getBootTime(),DateUtil.DATE_PATTERN)+"%'   GROUP BY  vmsi.staff_id ";
       }
 
     return  sql;
