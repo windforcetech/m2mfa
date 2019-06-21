@@ -451,7 +451,7 @@ public class BootServiceImpl  implements BootService {
         "	vmsi.fail_qty,\n" +
         "	(\n" +
         "		vmsi.end_time - vmsi.start_time\n" +
-        "	) use_time,\n" +
+        "	) shiftHours,\n" +
         "	(\n" +
         "	vmsi.output_qty  / COUNT(*) \n" +
         "	)  shift_mean\n" +
@@ -535,7 +535,7 @@ public class BootServiceImpl  implements BootService {
         "	) achieving_rate,\n" +
         "	SUM(\n" +
         "		(vmsi.end_time - vmsi.start_time)\n" +
-        "	) use_time,\n" +
+        "	) hours,\n" +
         "	SUM(IFNULL(vmsi.output_qty, 0)) / COUNT(*) mean\n" +
         "FROM  \n";
     sql +=pingSql(bootQuery);
