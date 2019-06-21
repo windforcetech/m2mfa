@@ -456,7 +456,7 @@ public class BootServiceImpl  implements BootService {
         "		vmsi.end_time - vmsi.start_time\n" +
         "	) / COUNT(*) shift_mean\n" +
         "FROM\n" +
-        "(	"+tableName()+") vmsi\n" +
+        "(	"+tableName(bootQuery)+") vmsi\n" +
         "LEFT JOIN mes_record_work mrw ON mrw.schedule_id = vmsi.schedule_id\n"+
         "LEFT JOIN mes_mo_schedule mms ON mms.schedule_id = vmsi.schedule_id\n" +
         "LEFT JOIN base_mold bmd ON bmd.mold_id = vmsi.mold_id\n" +
@@ -538,6 +538,7 @@ public class BootServiceImpl  implements BootService {
          " ))/COUNT(*)  mean    ,DATE_FORMAT(vmsi.start_time,'%Y-%m-%d')   startTime from ";
 
     sql += pingSql(bootQuery);
+    sql +="  GROUP BY vmsi.staff_id LIMIT 0,1";
     RowMapper<BootAndData> rowRoot = BeanPropertyRowMapper.newInstance(BootAndData.class);
     try {
       return jdbcTemplate.queryForObject(sql, rowRoot);
@@ -554,7 +555,7 @@ public class BootServiceImpl  implements BootService {
    * @return
    */
   public String pingSql(BootQuery bootQuery){
-    String sql ="	("+tableName()+" ) vmsi\n" +
+    String sql ="	("+tableName(bootQuery )+" ) vmsi\n" +
         "LEFT JOIN mes_record_work mrw ON mrw.schedule_id = vmsi.schedule_id\n" +
         "AND mrw.process_id = vmsi.process_id\n" +
         "AND mrw.machine_id = vmsi.machine_id\n" +
@@ -651,11 +652,11 @@ public class BootServiceImpl  implements BootService {
    * 获取组合表
    * @return
    */
-  public String tableName(){
+  public String tableName(BootQuery bootQuery){
     String sql ="SELECT\n" +
         "	vm.*\n" +
         "FROM\n" +
-        "	v_mes_staff_info vm\n" +
+        "	v_mes_staff_info vm  where  vm.start_time LIKE '"+ DateUtil.format(bootQuery.getBootTime(),DateUtil.DATE_PATTERN)+"%' \n" +
         "UNION\n" +
         "	SELECT\n" +
         "		msi.machine_id,\n" +
@@ -675,7 +676,7 @@ public class BootServiceImpl  implements BootService {
         "		msi.cavity_available,\n" +
         "		msi.standard_hours\n" +
         "	FROM\n" +
-        "		mes_staff_info msi";
+        "		mes_staff_info msi  where  msi.start_time LIKE '"+ DateUtil.format(bootQuery.getBootTime(),DateUtil.DATE_PATTERN)+"%'";
     return  sql;
 
   }
