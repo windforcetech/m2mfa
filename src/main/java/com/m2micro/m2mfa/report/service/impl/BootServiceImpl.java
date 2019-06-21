@@ -511,34 +511,38 @@ public class BootServiceImpl  implements BootService {
    * @return
    */
   private BootAndData getBootAndData(BootQuery bootQuery) {
-    String sql ="select SUM(IFNULL(vmsi.output_qty,0)) summary,	IFNULL( CONVERT (\n" +
-         "		 SUM(vmsi.output_qty) / SUM( (\n" +
-         "			CASE\n" +
-         "			WHEN vmsi.end_time IS NULL THEN\n" +
-         "				(\n" +
-         "					UNIX_TIMESTAMP(vmsi.end_time) - UNIX_TIMESTAMP(vmsi.start_time)\n" +
-         "				) / vmsi.standard_hours\n" +
-         "			ELSE\n" +
-         "				(\n" +
-         "					UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(vmsi.start_time)\n" +
-         "				) / vmsi.standard_hours\n" +
-         "			END\n" +
-         "		)),\n" +
-         "		DECIMAL (10, 2)\n" +
-         "	),0.00) achieving_rate ,\n" +
-         "  SUM( \n" +
-         "	(\n" +
-         "		vmsi.end_time - vmsi.start_time\n" +
-         "	) \n" +
-         " ) use_time\n" +
-         ", (SUM( \n" +
-         "	(\n" +
-         "		vmsi.end_time - vmsi.start_time\n" +
-         "	) \n" +
-         " ))/COUNT(*)  mean    ,DATE_FORMAT(vmsi.start_time,'%Y-%m-%d')   startTime from ";
-
-    sql += pingSql(bootQuery);
-    sql +="  GROUP BY vmsi.staff_id LIMIT 0,1";
+    String sql ="SELECT\n" +
+        "	SUM(IFNULL(vmsi.output_qty, 0)) summary,\n" +
+        "	IFNULL(\n" +
+        "		CONVERT (\n" +
+        "			SUM(vmsi.output_qty) / SUM(\n" +
+        "				(\n" +
+        "					CASE\n" +
+        "					WHEN vmsi.end_time IS NULL THEN\n" +
+        "						(\n" +
+        "							UNIX_TIMESTAMP(vmsi.end_time) - UNIX_TIMESTAMP(vmsi.start_time)\n" +
+        "						) / vmsi.standard_hours\n" +
+        "					ELSE\n" +
+        "						(\n" +
+        "							UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(vmsi.start_time)\n" +
+        "						) / vmsi.standard_hours\n" +
+        "					END\n" +
+        "				)\n" +
+        "			),\n" +
+        "			DECIMAL (10, 2)\n" +
+        "		),\n" +
+        "		0.00\n" +
+        "	) achieving_rate,\n" +
+        "	SUM(\n" +
+        "		(vmsi.end_time - vmsi.start_time)\n" +
+        "	) use_time,\n" +
+        "	(\n" +
+        "		SUM(\n" +
+        "			(vmsi.end_time - vmsi.start_time)\n" +
+        "		)\n" +
+        "	) / COUNT(*) mean\n" +
+        "FROM  \n";
+    sql +=pingSql(bootQuery);
     RowMapper<BootAndData> rowRoot = BeanPropertyRowMapper.newInstance(BootAndData.class);
     try {
       return jdbcTemplate.queryForObject(sql, rowRoot);
@@ -556,9 +560,6 @@ public class BootServiceImpl  implements BootService {
    */
   public String pingSql(BootQuery bootQuery){
     String sql ="	("+tableName(bootQuery )+" ) vmsi\n" +
-        "LEFT JOIN mes_record_work mrw ON mrw.schedule_id = vmsi.schedule_id\n" +
-        "AND mrw.process_id = vmsi.process_id\n" +
-        "AND mrw.machine_id = vmsi.machine_id\n" +
         "LEFT JOIN mes_mo_schedule mms ON mms.schedule_id = vmsi.schedule_id\n" +
         "LEFT JOIN base_mold bmd ON bmd.mold_id = vmsi.mold_id\n" +
         "LEFT JOIN base_parts bp ON bp.part_id = vmsi.part_id\n" +
@@ -574,9 +575,18 @@ public class BootServiceImpl  implements BootService {
         "	AND staff_id = vmsi.staff_id\n" +
         "	LIMIT 0,\n" +
         "	1\n" +
-        ") where 1=1 and vmsi.process_id IN(select process_id from base_process where process_code='gxdm')   ";
+        ")\n" +
+        "WHERE\n" +
+        "	1 = 1\n" +
+        "AND vmsi.process_id IN (\n" +
+        "	SELECT\n" +
+        "		process_id\n" +
+        "	FROM\n" +
+        "		base_process\n" +
+        "	WHERE\n" +
+        "		process_code = 'gxdm')\n";
       if(bootQuery.getBootTime()!=null){
-       sql += "  and  mrw.start_time LIKE '"+ DateUtil.format(bootQuery.getBootTime(),DateUtil.DATE_PATTERN)+"%'  ";
+       sql += "  and  vmsi.start_time LIKE '"+ DateUtil.format(bootQuery.getBootTime(),DateUtil.DATE_PATTERN)+"%'  ";
       }
 
     return  sql;
@@ -590,7 +600,7 @@ public class BootServiceImpl  implements BootService {
   public  List<Boot>getBoots(BootQuery bootQuery){
 
    String sql= "SELECT\n" +
-         "DATE_FORMAT(mrw.start_time,'%Y-%m-%d') start_time	,\n" +
+         "DATE_FORMAT(vmsi.start_time,'%Y-%m-%d') start_time	,\n" +
         "	bs.`name` shift_name,\n" +
         "	bm.`name` machine_name,\n" +
         "	bst.`code` staff_code,\n" +
@@ -599,7 +609,7 @@ public class BootServiceImpl  implements BootService {
         "		IFNULL(vmsi.end_time,NOW()) - vmsi.start_time\n" +
         "	) use_time,\n" +
         "	(\n" +
-        "		IFNULL(mrw.end_time ,NOW())- mrw.start_time\n" +
+        "		IFNULL(vmsi.end_time ,NOW())- vmsi.start_time\n" +
         "	) machine_time,\n" +
         "  bp.`name` part_name,\n" +
         "	bmd.`code` mold_code,\n" +
