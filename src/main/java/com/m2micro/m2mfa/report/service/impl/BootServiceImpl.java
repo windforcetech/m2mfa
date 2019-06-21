@@ -48,7 +48,7 @@ public class BootServiceImpl  implements BootService {
     List<Boot> boots = getBoots(bootQuery);
     BootAndData bootAndData = getBootAndData(bootQuery);
     if(bootAndData !=null){
-      Long bad = getFailCount();
+      Long bad = getFailCount(bootQuery);
       bootAndData.setBoots(boots);
       bootAndData.setBad(bad);
       List<ShiftAndData> shiftAndData = getShiftAndData(bootQuery);
@@ -499,8 +499,8 @@ public class BootServiceImpl  implements BootService {
    * 获取开机当前的不良总数
    * @return
    */
-  private Long getFailCount() {
-    String sql ="select  SUM(fail_qty) from  mes_record_wip_fail where    create_on LIKE'2019-06-14 %' and target_process_id IN(select process_id from base_process where process_code='gxdm')";
+  private Long getFailCount(BootQuery bootQuery) {
+    String sql ="select IFNULL(SUM(fail_qty),0)  from  mes_record_wip_fail where    create_on  LIKE '"+ DateUtil.format(bootQuery.getBootTime(),DateUtil.DATE_PATTERN)+"%'  and target_process_id IN(select process_id from base_process where process_code='gxdm')";
     return jdbcTemplate.queryForObject(sql, long.class);
   }
 
@@ -536,11 +536,7 @@ public class BootServiceImpl  implements BootService {
         "	SUM(\n" +
         "		(vmsi.end_time - vmsi.start_time)\n" +
         "	) use_time,\n" +
-        "	(\n" +
-        "		SUM(\n" +
-        "			(vmsi.end_time - vmsi.start_time)\n" +
-        "		)\n" +
-        "	) / COUNT(*) mean\n" +
+        "	SUM(IFNULL(vmsi.output_qty, 0)) / COUNT(*) mean\n" +
         "FROM  \n";
     sql +=pingSql(bootQuery);
     RowMapper<BootAndData> rowRoot = BeanPropertyRowMapper.newInstance(BootAndData.class);
