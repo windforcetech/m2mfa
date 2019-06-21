@@ -7,6 +7,8 @@ import java.util.Date;
 
 @Data
 public class ShiftAndData {
+  @ApiModelProperty(value = "班别人数")
+  private  long shiftnum;
 
   @ApiModelProperty(value = "日期")
   private Date startTime ;

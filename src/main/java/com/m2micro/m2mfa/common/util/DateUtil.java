@@ -201,7 +201,10 @@ public class DateUtil {
     }
 
 
+  public static void main(String[] args) {
+    System.out.println( DateUtil.getGapTime(294990));
 
+  }
 
 
 }

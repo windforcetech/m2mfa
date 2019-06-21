@@ -51,6 +51,7 @@ public class BootServiceImpl  implements BootService {
 
     if(bootAndData !=null){
       bootAndData.setHours(DateUtil.getGapTime(Long.parseLong(bootAndData.getHours())));
+
       Long bad = getFailCount(bootQuery);
 
       bootAndData.setBad(bad);
@@ -64,6 +65,11 @@ public class BootServiceImpl  implements BootService {
         x.setMachineTime(DateUtil.getGapTime(Long.parseLong(x.getMachineTime())));
         return true;
       }).collect(Collectors.toList());
+      long shiftnum=0;
+    for(ShiftAndData x :  shiftAndDatanew ){
+      shiftnum+=x.getShiftnum();
+    }
+      bootAndData.setMean(bootAndData.getSummary()/shiftnum);
       bootAndData.setBoots(bootnew);
       bootAndData.setShiftAndDatas(shiftAndDatanew);
     }
@@ -444,7 +450,7 @@ public class BootServiceImpl  implements BootService {
    */
   private List<ShiftAndData> getShiftAndData(BootQuery bootQuery) {
     String sql="SELECT\n" +
-        "	bs.`name` shift_name,DATE_FORMAT(mrw.start_time,'%Y-%m-%d') start_time,\n" +
+        "	 COUNT(*) shiftnum,     bs.`name` shift_name,DATE_FORMAT(mrw.start_time,'%Y-%m-%d') start_time,\n" +
         "	vmsi.output_qty shift_summary,\n" +
         "	CONVERT (\n" +
         "		vmsi.output_qty / (\n" +
@@ -459,7 +465,7 @@ public class BootServiceImpl  implements BootService {
         "				) / vmsi.standard_hours\n" +
         "			END\n" +
         "		),\n" +
-        "		DECIMAL (10, 2)\n" +
+        "		DECIMAL (10, 0)\n" +
         "	) shiftAchievingRate,\n" +
         "	vmsi.fail_qty,\n" +
         "	(\n" +
@@ -542,9 +548,9 @@ public class BootServiceImpl  implements BootService {
         "					END\n" +
         "				)\n" +
         "			),\n" +
-        "			DECIMAL (10, 2)\n" +
+        "			DECIMAL (10, 0)\n" +
         "		),\n" +
-        "		0.00\n" +
+        "		0\n" +
         "	) achieving_rate,\n" +
         "	SUM(\n" +
         "		(vmsi.end_time - vmsi.start_time)\n" +
@@ -638,8 +644,8 @@ public class BootServiceImpl  implements BootService {
         "				) / vmsi.standard_hours\n" +
         "			END\n" +
         "		),\n" +
-        "		DECIMAL (10, 2)\n" +
-        "	),0.00) reach,\n" +
+        "		DECIMAL (10)\n" +
+        "	),0) reach,\n" +
         "	IFNULL(vmsi.output_qty,0) output_qty,\n" +
         "	IFNULL( CONVERT (\n" +
         "		vmsi.output_qty / (\n" +
@@ -654,8 +660,8 @@ public class BootServiceImpl  implements BootService {
         "				) / vmsi.standard_hours\n" +
         "			END\n" +
         "		),\n" +
-        "		DECIMAL (10, 2)\n" +
-        "	),0.00) achieving_rate,\n" +
+        "		DECIMAL (10, 0)\n" +
+        "	),0) achieving_rate,\n" +
         "	vmsi.scrap_qty,\n" +
         "	vmsi.fail_qty\n" +
         "FROM";
