@@ -28,7 +28,7 @@ public class ShiftAndData {
 
 
   @ApiModelProperty(value = "班别总工时")
-  private long shiftHours ;
+  private String shiftHours ;
 
 
   @ApiModelProperty(value = "班别人均值")

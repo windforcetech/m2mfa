@@ -11,12 +11,13 @@ import java.util.Date;
 
 /**
  * 日期处理
- * 
+ *
  * @author liaotao
  * @date 2018-11-21
  */
 public class DateUtil {
-	/** 时间格式(yyyy-MM-dd) */
+
+  /** 时间格式(yyyy-MM-dd) */
 	public final static String DATE_PATTERN = "yyyy-MM-dd";
 	/** 时间格式(yyyy-MM-dd HH:mm:ss) */
 	public final static String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
@@ -32,7 +33,8 @@ public class DateUtil {
         return format(date, DATE_TIME_PATTERN);
     }
 
-    /**
+
+  /**
      * 日期格式化 日期格式为：yyyy-MM-dd
      * @param date  日期
      * @param pattern  格式，如：DateUtils.DATE_TIME_PATTERN
@@ -46,7 +48,8 @@ public class DateUtil {
         return null;
     }
 
-    /**
+
+  /**
      * 字符串转换成日期
      * @param strDate 日期字符串
      * @param pattern 日期的格式，如：DateUtils.DATE_TIME_PATTERN
@@ -60,7 +63,8 @@ public class DateUtil {
         return fmt.parseLocalDateTime(strDate).toDate();
     }
 
-    /**
+
+  /**
      * 根据周数，获取开始日期、结束日期
      * @param week  周期  0本周，-1上周，-2上上周，1下周，2下下周
      * @return  返回date[0]开始日期、date[1]结束日期
@@ -75,7 +79,8 @@ public class DateUtil {
         return new Date[]{beginDate, endDate};
     }
 
-    /**
+
+  /**
      * 对日期的【秒】进行加/减
      *
      * @param date 日期
@@ -87,7 +92,8 @@ public class DateUtil {
         return dateTime.plusSeconds(seconds).toDate();
     }
 
-    /**
+
+  /**
      * 对日期的【分钟】进行加/减
      *
      * @param date 日期
@@ -99,7 +105,8 @@ public class DateUtil {
         return dateTime.plusMinutes(minutes).toDate();
     }
 
-    /**
+
+  /**
      * 对日期的【小时】进行加/减
      *
      * @param date 日期
@@ -111,7 +118,8 @@ public class DateUtil {
         return dateTime.plusHours(hours).toDate();
     }
 
-    /**
+
+  /**
      * 对日期的【天】进行加/减
      *
      * @param date 日期
@@ -123,7 +131,8 @@ public class DateUtil {
         return dateTime.plusDays(days).toDate();
     }
 
-    /**
+
+  /**
      * 对日期的【周】进行加/减
      *
      * @param date 日期
@@ -135,7 +144,8 @@ public class DateUtil {
         return dateTime.plusWeeks(weeks).toDate();
     }
 
-    /**
+
+  /**
      * 对日期的【月】进行加/减
      *
      * @param date 日期
@@ -147,7 +157,8 @@ public class DateUtil {
         return dateTime.plusMonths(months).toDate();
     }
 
-    /**
+
+  /**
      * 对日期的【年】进行加/减
      *
      * @param date 日期
@@ -159,7 +170,8 @@ public class DateUtil {
         return dateTime.plusYears(years).toDate();
     }
 
-    /**
+
+  /**
      * 将时间字符串转化为毫秒
      * @param dateStr
      * @return
@@ -168,4 +180,28 @@ public class DateUtil {
         Date date = stringToDate(dateStr,TIME_PATTERN);
         return date.getTime();
     }
+
+
+  /**
+     * 将毫秒值转为时分秒
+     *
+     * @param time
+     * @return
+     */
+    public static  String getGapTime(long time){
+        long hours = time / (1000 * 60 * 60);
+        long minutes = (time-hours*(1000 * 60 * 60 ))/(1000* 60);
+        String diffTime="";
+        if(minutes<10){
+            diffTime=hours+":0"+minutes;
+        }else{
+            diffTime=hours+":"+minutes;
+        }
+        return diffTime;
+    }
+
+
+
+
+
 }

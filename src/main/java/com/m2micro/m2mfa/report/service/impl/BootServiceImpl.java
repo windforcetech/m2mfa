@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class BootServiceImpl  implements BootService {
@@ -47,12 +48,23 @@ public class BootServiceImpl  implements BootService {
   public BootAndData  BootShow(BootQuery bootQuery) {
     List<Boot> boots = getBoots(bootQuery);
     BootAndData bootAndData = getBootAndData(bootQuery);
+    bootAndData.setHours(DateUtil.getGapTime(Long.parseLong(bootAndData.getHours())));
     if(bootAndData !=null){
       Long bad = getFailCount(bootQuery);
-      bootAndData.setBoots(boots);
+
       bootAndData.setBad(bad);
       List<ShiftAndData> shiftAndData = getShiftAndData(bootQuery);
-      bootAndData.setShiftAndDatas(shiftAndData);
+      List<ShiftAndData> shiftAndDatanew = shiftAndData.stream().filter(x -> {
+        x.setShiftHours(DateUtil.getGapTime(Long.parseLong(x.getShiftHours())));
+        return true;
+      }).collect(Collectors.toList());
+      List<Boot> bootnew = boots.stream().filter(x -> {
+        x.setUseTime(DateUtil.getGapTime(Long.parseLong(x.getUseTime())));
+        x.setMachineTime(DateUtil.getGapTime(Long.parseLong(x.getMachineTime())));
+        return true;
+      }).collect(Collectors.toList());
+      bootAndData.setBoots(bootnew);
+      bootAndData.setShiftAndDatas(shiftAndDatanew);
     }
     return bootAndData;
   }
