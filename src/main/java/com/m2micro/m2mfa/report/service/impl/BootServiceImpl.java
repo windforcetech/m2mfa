@@ -453,8 +453,8 @@ public class BootServiceImpl  implements BootService {
         "		vmsi.end_time - vmsi.start_time\n" +
         "	) use_time,\n" +
         "	(\n" +
-        "		vmsi.end_time - vmsi.start_time\n" +
-        "	) / COUNT(*) shift_mean\n" +
+        "	vmsi.output_qty  / COUNT(*) \n" +
+        "	)  shift_mean\n" +
         "FROM\n" +
         "(	"+tableName(bootQuery)+") vmsi\n" +
         "LEFT JOIN mes_record_work mrw ON mrw.schedule_id = vmsi.schedule_id\n"+
