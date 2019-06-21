@@ -59,4 +59,14 @@ public interface MesRecordWorkRepository extends BaseRepository<MesRecordWork,St
     Integer setEndAll(Date endTime, BigDecimal endPower, BigDecimal endMolds, String scheduleId);
 
     List<MesRecordWork>findByRwidIn(List<String> rws);
+
+    /**
+     * 根据排产单id和工序查找记录
+     * @param scheduleId
+     *          排产单
+     * @param processId
+     *          工序
+     * @return  上工记录
+     */
+    List<MesRecordWork> findByScheduleIdAndProcessId(String scheduleId,String processId);
 }

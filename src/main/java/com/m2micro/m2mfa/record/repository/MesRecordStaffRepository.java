@@ -57,5 +57,23 @@ public interface MesRecordStaffRepository extends BaseRepository<MesRecordStaff,
      */
     List<MesRecordStaff>findByRwIdAndStaffId(String rwId,String staffId );
 
+    /**
+     * 获取
+     * @param scheduleId
+     * @param processId
+     * @return
+     */
+    @Query(value = "SELECT\n" +
+                    "	mrs.* \n" +
+                    "FROM\n" +
+                    "	mes_record_staff mrs,\n" +
+                    "	mes_record_work mrw \n" +
+                    "WHERE\n" +
+                    "	mrs.rw_id = mrw.rwid \n" +
+                    "	AND mrs.schedule_id = mrw.schedule_id \n" +
+                    "	AND mrw.schedule_id = ?1 \n" +
+                    "	AND mrw.process_id= ?2",nativeQuery = true)
+    List<MesRecordStaff> selectByScheduleIdAndProcessId(String scheduleId,String processId);
+
 
 }
