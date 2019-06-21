@@ -447,7 +447,7 @@ public class BootServiceImpl  implements BootService {
         "			END\n" +
         "		),\n" +
         "		DECIMAL (10, 2)\n" +
-        "	) achieving_rate,\n" +
+        "	) shiftAchievingRate,\n" +
         "	vmsi.fail_qty,\n" +
         "	(\n" +
         "		vmsi.end_time - vmsi.start_time\n" +
