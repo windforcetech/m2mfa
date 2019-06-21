@@ -61,4 +61,37 @@ public interface MesMoScheduleStaffRepository extends BaseRepository<MesMoSchedu
      * @return
      */
     List<MesMoScheduleStaff> findByScheduleIdAndStationId(String scheduleId, String stationId);
+
+    /**
+     * 获取开机工位人员信息
+     * @param scheduleId
+     *          排产单id
+     * @param code
+     *          开机工位所在code
+     * @return
+     */
+    @Query(value = "SELECT\n" +
+                    "	ms.* \n" +
+                    "FROM\n" +
+                    "	mes_mo_schedule_staff ms,\n" +
+                    "	base_station bs \n" +
+                    "WHERE\n" +
+                    "	ms.station_id = bs.station_id \n" +
+                    "	AND ms.schedule_id = ?1\n" +
+                    "	AND bs.code = ?2",nativeQuery = true)
+    MesMoScheduleStaff getMesMoScheduleStaffForBoot(String scheduleId,String code);
+
+    /**
+     * 设置工序员工的结束时间
+     * @param actualEndTime
+     *          结束时间
+     * @param scheduleId
+     *          排产单
+     * @param processId
+     *          工序
+     * @return  影响行数
+     */
+    @Modifying
+    @Query("update MesMoScheduleStaff m set m.actualEndTime = ?1 where m.scheduleId = ?2 and m.processId=?3 and m.actualStartTime is not null and m.actualEndTime is null")
+    Integer setEndTimeForProcess(Date actualEndTime, String scheduleId,String processId);
 }

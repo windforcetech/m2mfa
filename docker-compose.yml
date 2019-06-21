@@ -5,11 +5,11 @@ services:
   web:
     environment:
       - TZ=Asia/Shanghai
-    image: m2micro/m2mfa-pad:2.5.0-snapshot
+    image: m2micro/m2mfa-pad:2.6.0-snapshot
     build:
       context: .
       args:
-        - JAR_FILE=target/m2mfa-2.5.0-SNAPSHOT.jar
+        - JAR_FILE=target/m2mfa-2.6.0-SNAPSHOT.jar
       dockerfile: Dockerfile
     ports:
       - 9000:8081

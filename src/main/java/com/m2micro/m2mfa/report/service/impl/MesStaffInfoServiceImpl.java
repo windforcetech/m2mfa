@@ -12,9 +12,9 @@ import com.m2micro.framework.commons.util.Query;
 import com.m2micro.m2mfa.report.entity.QMesStaffInfo;
 import java.util.List;
 /**
- *  服务实现类
- * @author chenshuhong
- * @since 2019-06-10
+ * 工单职员信息 服务实现类
+ * @author liaotao
+ * @since 2019-06-13
  */
 @Service
 public class MesStaffInfoServiceImpl implements MesStaffInfoService {

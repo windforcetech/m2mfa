@@ -4,6 +4,7 @@ import com.google.common.base.CaseFormat;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
 import com.m2micro.framework.starter.entity.Organization;
+import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.repository.BaseShiftRepository;
 import com.m2micro.m2mfa.base.service.*;
@@ -115,6 +116,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     private MesMoScheduleShiftRepository mesMoScheduleShiftRepository;
     @Autowired
     PadBottomDisplayService padBottomDisplayService;
+    @Autowired
+    ProcessConstant processConstant;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -534,11 +537,13 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if(MoScheduleStatus.PRODUCTION.getKey().equals(mesMoSchedule.getFlag())){
             updateMachineStateForStop(id);
         }
+        //做强制结案的额外业务逻辑操作
+        stopWorkForAll(mesMoSchedule);
         //更改为强制结案状态
         mesMoScheduleRepository.setFlagFor(MoScheduleStatus.FORCECLOSE.getKey(), mesMoSchedule.getScheduleId());
         mesMoScheduleRepository.updateactualStartTime(new Date(), mesMoSchedule.getScheduleId());
-        //做强制结案的额外业务逻辑操作
-        stopWorkForAll(mesMoSchedule);
+        //结束工单操作：工单下所有排产单已结束且工单的可排数量为0就结束排产单，否则不做任何操作
+        mesMoDescService.endMoDesc(mesMoSchedule.getMoId());
 
     }
 
@@ -1065,6 +1070,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     }
 
     @Override
+    @Transactional
     public void processEnd(ProcessStatus processStatus) {
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.findById(processStatus.getScheduleId()).orElse(null);
         if (mesMoSchedule == null || mesMoSchedule.getFlag() != 2) {
@@ -1074,8 +1080,74 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         if (mesMoScheduleProcess == null || mesMoScheduleProcess.getActualStartTime() == null) {
             throw new MMException("工序未开始。");
         }
+        //结束工序
         mesMoScheduleProcess.setActualEndTime(new Date());
         mesMoScheduleProcessService.updateById(mesMoScheduleProcess.getId(), mesMoScheduleProcess);
+        //--------------------------------------------------------
+        //排程人员结束
+        mesMoScheduleStaffRepository.setEndTimeForProcess(new Date(), processStatus.getScheduleId(), processStatus.getProcessId());
+        IotMachineOutput iotMachineOutput = iotMachineOutputService.findIotMachineOutputByMachineId(mesMoSchedule.getMachineId());
+        //人员记录下工（1.冻结状态并且冻结前状态为生产中2.生产中，两种情况做此操作，不然人员记录表没有相关数据，这里没有做判定但不影响，人员记录表没有记录更新0条）
+        stopWorkForStaff(processStatus.getScheduleId(), processStatus.getProcessId(),iotMachineOutput);
+        //上下工记录下工
+        stopRecordWork(processStatus.getScheduleId(), processStatus.getProcessId(),iotMachineOutput);
+        BaseProcess baseProcess=baseProcessService.findById(processStatus.getProcessId()).orElse(null);
+        //如果是注塑成型工序，变更机台状态为停机
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            baseMachineService.setFlagForStop(mesMoSchedule.getMachineId());
+        }
+    }
+
+    /**
+     * 结束人员记录
+     * @param scheduleId
+     * @param processId
+     * @param iotMachineOutput
+     */
+    private void stopRecordWork(String scheduleId,String processId,IotMachineOutput iotMachineOutput){
+
+        BigDecimal power = iotMachineOutput.getPower()==null?null:iotMachineOutput.getPower();
+        BigDecimal outputQty = iotMachineOutput.getOutput()==null?null:iotMachineOutput.getOutput();
+        //找到关联的所有记录
+        List<MesRecordWork> mesRecordWorks=mesRecordWorkRepository.findByScheduleIdAndProcessId(scheduleId, processId);
+        if(mesRecordWorks!=null){
+            mesRecordWorks.stream().forEach(mesRecordWork -> {
+                if(mesRecordWork.getStratPower()!=null){
+                    mesRecordWork.setEndPower(power);
+                }
+                if(mesRecordWork.getStartMolds()!=null){
+                    mesRecordWork.setEndMolds(outputQty);
+                }
+                mesRecordWork.setEndTime(new Date());
+            });
+            mesRecordWorkRepository.saveAll(mesRecordWorks);
+        }
+    }
+
+    /**
+     * 结束人员记录
+     * @param scheduleId
+     * @param processId
+     * @param iotMachineOutput
+     */
+    private void stopWorkForStaff(String scheduleId,String processId,IotMachineOutput iotMachineOutput){
+
+        BigDecimal power = iotMachineOutput.getPower()==null?null:iotMachineOutput.getPower();
+        BigDecimal outputQty = iotMachineOutput.getOutput()==null?null:iotMachineOutput.getOutput();
+        //找到关联的所有记录
+        List<MesRecordStaff> mesRecordStaffs=mesRecordStaffRepository.selectByScheduleIdAndProcessId(scheduleId, processId);
+        if(mesRecordStaffs!=null){
+            mesRecordStaffs.stream().forEach(mesRecordStaff -> {
+                if(mesRecordStaff.getStratPower()!=null){
+                    mesRecordStaff.setEndPower(power);
+                }
+                if(mesRecordStaff.getStartMolds()!=null){
+                    mesRecordStaff.setEndMolds(outputQty);
+                }
+                mesRecordStaff.setEndTime(new Date());
+            });
+            mesRecordStaffRepository.saveAll(mesRecordStaffs);
+        }
     }
 
     @Override
@@ -1161,7 +1233,7 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
     }
 
-    private void updateMesMoDescscheduQty(MesMoSchedule mesMoSchedule) {
+    /*private void updateMesMoDescscheduQty(MesMoSchedule mesMoSchedule) {
         MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
         Integer scheduQty = (moDesc.getSchedulQty() == null ? 0 : moDesc.getSchedulQty()) + mesMoSchedule.getScheduleQty();
         mesMoDescRepository.setSchedulQtyFor(scheduQty, moDesc.getMoId());
@@ -1171,6 +1243,19 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
             mesMoDescRepository.updateIsSchedeul(1, moDesc.getMoId());
         }
         mesMoDescRepository.setCloseFlagFor(MoStatus.SCHEDULED.getKey(), moDesc.getMoId());
+    }*/
+
+    private void updateMesMoDescscheduQty(MesMoSchedule mesMoSchedule) {
+        MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
+        Integer scheduQty = (moDesc.getSchedulQty() == null ? 0 : moDesc.getSchedulQty()) + mesMoSchedule.getScheduleQty();
+        moDesc.setSchedulQty(scheduQty);
+        if(moDesc.getTargetQty().equals(moDesc.getSchedulQty()) || moDesc.getSchedulQty() > moDesc.getTargetQty()){
+            moDesc.setIsSchedul(1);
+        }else{
+            moDesc.setIsSchedul(0);
+        }
+        moDesc.setCloseFlag(MoStatus.SCHEDULED.getKey());
+        mesMoDescRepository.save(moDesc);
     }
 
     /**
@@ -1246,6 +1331,11 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
 
         ValidatorUtil.validateEntity(mesMoSchedule, AddGroup.class);
         MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
+       Integer schduQty = moDesc.getSchedulQty()==null? 0:moDesc.getSchedulQty();
+        Integer  num = moDesc.getTargetQty()-schduQty;
+        if(num <=0){
+            throw new MMException("工单已排产完。");
+        }
         if (moDesc == null) {
             throw new MMException("工单ID有误。");
         }

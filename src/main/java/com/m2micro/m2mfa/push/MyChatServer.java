@@ -6,6 +6,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import javafx.application.Application;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Component;
 @Order(1)
 public class MyChatServer implements ApplicationRunner {
 
+  @Value("${kanban.port:8089}")
+  Integer port;
 
   @Override
   public void run(ApplicationArguments args) throws Exception {
@@ -25,7 +28,7 @@ public class MyChatServer implements ApplicationRunner {
     try {
       ServerBootstrap serverBootstrap = new ServerBootstrap();
       serverBootstrap.group(bossGroup,workerGroup).channel(NioServerSocketChannel.class).childHandler(new MyChatServerInitializer());
-      ChannelFuture sync = serverBootstrap.bind(8089).sync();
+      ChannelFuture sync = serverBootstrap.bind(port).sync();
       sync.channel().closeFuture().sync();
     }finally {
       bossGroup.shutdownGracefully();

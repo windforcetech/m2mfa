@@ -77,94 +77,6 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
         return mesPartRouteRepository;
     }
 
-//    @Override
-//    public PageUtil<MesPartRoute> list(MesPartRouteQuery query) {
-//        QMesPartRoute qMesPartRoute = QMesPartRoute.mesPartRoute;
-//        JPAQuery<MesPartRoute> jq = queryFactory.selectFrom(qMesPartRoute);
-//
-//        QBaseParts qBaseParts=QBaseParts.baseParts;
-//        JPAQuery<BaseParts> jqbaseParts=queryFactory.selectFrom(qBaseParts);
-//
-//
-//
-//
-//        BooleanBuilder condition = new BooleanBuilder();
-//        if(StringUtils.isNotEmpty(query.getPartNo())){
-//            BaseParts baseParts  =basePartsService.selectpartNo(query.getPartNo());
-//            if(baseParts !=null){
-//                condition.and(qMesPartRoute.partNo.eq(baseParts.getPartNo()));
-//            }else {
-//                condition.and(qMesPartRoute.partNo.eq(query.getPartNo()));
-//            }
-//        }
-//        if(StringUtils.isNotEmpty(query.getTouteName())){
-//          BaseRouteDesc baseRouteDesc = baseRouteDescService.findName(query.getTouteName());
-//            if(baseRouteDesc !=null){
-//                condition.and(qMesPartRoute.routeId.eq(baseRouteDesc.getRouteId()));
-//            }else {
-//                condition.and(qMesPartRoute.routeId.eq(query.getTouteName()));
-//            }
-//        }
-//        if(StringUtils.isNotEmpty(query.getControlInformation())){
-//                condition.and(qMesPartRoute.controlInformation.eq(query.getControlInformation()));
-//        }
-//
-//
-//        if (query.getEnabled() != null) {
-//            condition.and(qMesPartRoute.enabled.eq(query.getEnabled()));
-//        }
-//        if (StringUtils.isNotEmpty(query.getDescription())) {
-//            condition.and(qMesPartRoute.description.like("%" + query.getDescription() + "%"));
-//        }
-//
-//
-//
-//
-//        jq.where(condition).offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
-//
-//
-//        if (StringUtils.isEmpty(query.getOrder()) || StringUtils.isEmpty(query.getDirect())) {
-//            jq.orderBy(qMesPartRoute.modifiedOn.desc());
-//        } else if(!(query.getOrder().equals("partNo")||query.getOrder().equals("touteName"))) {
-//            PathBuilder<MesPartRoute> entityPath = new PathBuilder<>(MesPartRoute.class, "mesPartRoute");
-//            Order order = "ASC".equalsIgnoreCase(query.getDirect()) ? Order.ASC : Order.DESC;
-//            OrderSpecifier orderSpecifier = new OrderSpecifier(order, entityPath.get(query.getOrder()));
-//            jq.orderBy(orderSpecifier);
-//
-//
-//            queryFactory.select(qMesPartRoute,qBaseParts.partNo).from(qMesPartRoute,qBaseParts)
-//                    .where(condition).orderBy(orderSpecifier)
-//                    .offset((query.getPage() - 1) *query.getSize() ).limit(query.getSize());
-//
-//        }
-//
-//
-//        List<MesPartRoute> list = jq.fetch();
-//        for(MesPartRoute mesPartRoute :list ){
-//            BaseProcess iprocess =   baseProcessService.findById(mesPartRoute.getInputProcessId()).orElse(null);
-//            BaseProcess oprocess =   baseProcessService.findById(mesPartRoute.getOutputProcessId()).orElse(null);
-//            BaseRouteDesc baseRouteDesc =baseRouteDescService.findById(mesPartRoute.getRouteId()).orElse(null);
-//            BaseParts baseParts = basePartsService.findById(mesPartRoute.getPartNo()).orElse(null);
-//            BaseItemsTarget baseItemsTarget = baseItemsTargetService.findById(mesPartRoute.getControlInformation()).orElse(null);
-//            if(iprocess !=null){
-//                mesPartRoute.setInputProcessIdName(iprocess.getProcessName());
-//            }
-//            if(oprocess !=null){
-//                mesPartRoute.setOutputProcessIdName(oprocess.getProcessName());
-//            }
-//            if(baseRouteDesc !=null){
-//                mesPartRoute.setTouteName(baseRouteDesc.getRouteName());
-//            }
-//            if(baseParts !=null){
-//                mesPartRoute.setPartNo(baseParts.getPartNo());
-//            }
-//            if(baseItemsTarget !=null ){
-//                mesPartRoute.setControlInformationName(baseItemsTarget.getItemName());
-//            }
-//        }
-//        long totalCount = jq.fetchCount();
-//        return PageUtil.of(list,totalCount,query.getSize(),query.getPage());
-//    }
 
     @Override
     public PageUtil<MesPartRoute> list(MesPartRouteQuery query) {
@@ -180,7 +92,7 @@ public class MesPartRouteServiceImpl implements MesPartRouteService {
                 qBaseItemsTarget.itemName).from(qMesPartRoute)
                 .leftJoin(qBaseParts).on(qMesPartRoute.partId.eq(qBaseParts.partId))
                 .leftJoin(qBaseProcessIn).on(qMesPartRoute.inputProcessId.eq(qBaseProcessIn.processId))
-                .leftJoin(qBaseProcessOut).on(qMesPartRoute.inputProcessId.eq(qBaseProcessOut.processId))
+                .leftJoin(qBaseProcessOut).on(qMesPartRoute.outputProcessId.eq(qBaseProcessOut.processId))
                 .leftJoin(qBaseRouteDesc).on(qMesPartRoute.routeId.eq(qBaseRouteDesc.routeId))
                 .leftJoin(qBaseItemsTarget).on(qMesPartRoute.controlInformation.eq(qBaseItemsTarget.id));
 

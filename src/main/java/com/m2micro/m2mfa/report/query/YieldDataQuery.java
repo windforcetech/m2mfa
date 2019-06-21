@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.report.query;
 
+import com.m2micro.framework.commons.util.Query;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -7,7 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Data
-public class YieldQuery {
+public class YieldDataQuery extends Query {
   @ApiModelProperty(value = "工单号码")
   private String moNumber;
   @ApiModelProperty(value = "工序名称")
@@ -30,14 +31,13 @@ public class YieldQuery {
       pattern = "yyyy-MM-dd HH:mm:ss"
   )
   private Date produceTime;
-
-@ApiModelProperty(
-    value = "开始时间",
-    example = "2018-11-11 12:00:00"
-)
-@DateTimeFormat(
-    pattern = "yyyy-MM-dd HH:mm:ss"
-)
+  @ApiModelProperty(
+      value = "开始时间",
+      example = "2018-11-11 12:00:00"
+  )
+  @DateTimeFormat(
+      pattern = "yyyy-MM-dd HH:mm:ss"
+  )
   private Date startTiem;
   @ApiModelProperty(
       value = "结束时间",
