@@ -71,13 +71,15 @@ public class DistributedServiceImpl implements DistributedService {
         "LEFT JOIN base_machine bm ON bm.machine_id = mms.machine_id\n" +
         "LEFT JOIN base_parts bp ON bp.part_id = vmpi.part_id\n" +
         "LEFT JOIN base_process bpd on bpd.process_id=vmpi.process_id\n" +
+        "LEFT JOIN mes_part_route mpr ON mpr.part_id = vmpi.part_id\n"+
+        "LEFT JOIN mes_part_route_process mprp ON mpr.part_route_id = mprp.partrouteid and mprp.processid=vmpi.process_id\n"+
         "WHERE\n" +
         "	mmd.close_flag = 3\n" ;
     if(StringUtils.isNotEmpty(distributedQuery.getPartNo())){
-      machinesql += "   and bp.part_no='"+distributedQuery.getPartNo()+"'";
+      machinesql += "   and bp.part_no LIKE '%"+distributedQuery.getPartNo()+"%'";
     }
     if(StringUtils.isNotEmpty(distributedQuery.getMoNumber())){
-      machinesql += "   and mmd.mo_number ='"+distributedQuery.getMoNumber()+"'";
+      machinesql += "   and mmd.mo_number LIKE '%"+distributedQuery.getMoNumber()+"%'";
     }
     machinesql += " GROUP BY  bm.`name`";
     RowMapper<MacheineAndOutputQty> rowMapper = BeanPropertyRowMapper.newInstance(MacheineAndOutputQty.class);
@@ -100,13 +102,15 @@ public class DistributedServiceImpl implements DistributedService {
         "LEFT JOIN base_machine bm ON bm.machine_id = mms.machine_id\n" +
         "LEFT JOIN base_parts bp ON bp.part_id = vmpi.part_id\n" +
         "LEFT JOIN base_process bpd on bpd.process_id=vmpi.process_id\n" +
+        "LEFT JOIN mes_part_route mpr ON mpr.part_id = vmpi.part_id\n"+
+        "LEFT JOIN mes_part_route_process mprp ON mpr.part_route_id = mprp.partrouteid and mprp.processid=vmpi.process_id\n"+
         "WHERE\n" +
         "	mmd.close_flag = 3\n" ;
     if(StringUtils.isNotEmpty(distributedQuery.getPartNo())){
-      processsSql += "   and bp.part_no='"+distributedQuery.getPartNo()+"'";
+      processsSql += "   and bp.part_no LIKE '%"+distributedQuery.getPartNo()+"%'";
     }
     if(StringUtils.isNotEmpty(distributedQuery.getMoNumber())){
-      processsSql += "   and mmd.mo_number ='"+distributedQuery.getMoNumber()+"'";
+      processsSql += "   and mmd.mo_number LIKE'%"+distributedQuery.getMoNumber()+"%'";
     }
     processsSql+= " GROUP BY  bpd.process_name;";
     RowMapper<ProcessAndOutputQty> rowMapper = BeanPropertyRowMapper.newInstance(ProcessAndOutputQty.class);
@@ -136,16 +140,18 @@ public class DistributedServiceImpl implements DistributedService {
         "LEFT JOIN base_machine bm ON bm.machine_id = mms.machine_id\n" +
         "LEFT JOIN base_parts bp ON bp.part_id = vmpi.part_id\n" +
         "LEFT JOIN base_process bpd on bpd.process_id=vmpi.process_id\n"+
+        "LEFT JOIN mes_part_route mpr ON mpr.part_id = vmpi.part_id\n"+
+        "LEFT JOIN mes_part_route_process mprp ON mpr.part_route_id = mprp.partrouteid and mprp.processid=vmpi.process_id\n"+
         "WHERE\n" +
         "	mmd.close_flag = 3\n" ;
     if(StringUtils.isNotEmpty(distributedQuery.getPartNo())){
-      sql += "   and bp.part_no='"+distributedQuery.getPartNo()+"'";
+      sql += "   and bp.part_no LIKE '%"+distributedQuery.getPartNo()+"%'";
     }
     if(StringUtils.isNotEmpty(distributedQuery.getMoNumber())){
-      sql += "   and mmd.mo_number ='"+distributedQuery.getMoNumber()+"'";
+      sql += "   and mmd.mo_number LIKE '%"+distributedQuery.getMoNumber()+"%'";
     }
     sql +="ORDER BY\n" +
-        "	bp.part_id , mms.schedule_no";
+        "	bp.part_id , mms.schedule_no,mprp.Setp ";
 
     RowMapper<Distributed> rowMapper = BeanPropertyRowMapper.newInstance(Distributed.class);
 
@@ -342,10 +348,10 @@ public class DistributedServiceImpl implements DistributedService {
         "WHERE\n" +
         "	mmd.close_flag = 3\n" ;
     if(StringUtils.isNotEmpty(distributedQuery.getPartNo())){
-      sql += "   and bp.part_no='"+distributedQuery.getPartNo()+"'";
+      sql += "   and bp.part_no LIKE'%"+distributedQuery.getPartNo()+"%'";
     }
     if(StringUtils.isNotEmpty(distributedQuery.getMoNumber())){
-      sql += "   and mmd.mo_number ='"+distributedQuery.getMoNumber()+"'";
+      sql += "   and mmd.mo_number LIKE '%"+distributedQuery.getMoNumber()+"%'";
     }
      sql +=  "GROUP BY\n" +
         "	bp.part_no";

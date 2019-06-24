@@ -38,7 +38,7 @@ public class YieldQuery {
 @DateTimeFormat(
     pattern = "yyyy-MM-dd HH:mm:ss"
 )
-  private Date startTiem;
+  private Date yieldStartTime;
   @ApiModelProperty(
       value = "结束时间",
       example = "2018-11-11 12:00:00"
@@ -46,5 +46,5 @@ public class YieldQuery {
   @DateTimeFormat(
       pattern = "yyyy-MM-dd HH:mm:ss"
   )
-  private Date  endTime;
+  private Date  yieldEndTime;
 }
