@@ -75,10 +75,11 @@ public class BootServiceImpl  implements BootService {
   public void excelOutData(BootQuery bootQuery, HttpServletResponse response) throws Exception {
 
     BootAndData bootAndData = BootShow(bootQuery);
-    if(bootAndData !=null){
+
     Workbook book = new HSSFWorkbook();
     // 在对应的Excel中建立一个分表
     Sheet sheet1 = book.createSheet("开机报表");
+    if(bootAndData !=null){
     int shiftMun =bootAndData.getShiftAndDatas().size();
     sheet1.addMergedRegion(new CellRangeAddress(0, shiftMun, 0, 0));
     sheet1.addMergedRegion(new CellRangeAddress(0, shiftMun, 1, 1));
@@ -95,9 +96,9 @@ public class BootServiceImpl  implements BootService {
     Row row =sheet1.createRow(shiftMun+1);
     addRowOne(row,book);
     addRowData(sheet1,bootAndData,book);
+    }
     book.close();
     FileUtil.excelDownloadFlie(response, book,"boot");
-    }
   }
 
 
