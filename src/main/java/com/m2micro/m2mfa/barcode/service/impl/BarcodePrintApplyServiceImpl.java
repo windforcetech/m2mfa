@@ -699,7 +699,7 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
       }
       rs.add(one);
     }
-    barcodePrintApply.setFlag(0);
+    barcodePrintApply.setFlag(1);
     barcodePrintApplyRepository.save(barcodePrintApply);
     barcodePrintResourcesRepository.saveAll(rs);
 
@@ -724,13 +724,9 @@ public class BarcodePrintApplyServiceImpl implements BarcodePrintApplyService {
   @Transactional
   public void printCheckList(String[] ids, Integer flag) {
     for (String id : ids) {
-      BarcodePrintResources barcodePrintResources = barcodePrintResourcesRepository.findById(id).orElse(null);
-      barcodePrintResources.setFlag(flag);
-      barcodePrintResourcesRepository.save(barcodePrintResources);
-
-      BarcodePrintApply barcodePrintApply = barcodePrintApplyRepository.findById(barcodePrintResources.getApplyId()).orElse(null);
-      barcodePrintApply.setFlag(1);
-      barcodePrintApplyRepository.save(barcodePrintApply);
+      Optional<BarcodePrintResources> byId = barcodePrintResourcesRepository.findById(id);
+      byId.get().setFlag(flag);
+      barcodePrintResourcesRepository.save(byId.get());
     }
 
   }
