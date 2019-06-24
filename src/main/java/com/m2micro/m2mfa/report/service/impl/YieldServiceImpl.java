@@ -159,9 +159,9 @@ public class YieldServiceImpl implements YieldService {
     if (yieldQuery.getProduceTime()!=null) {
       sql += " and mmd.create_on='"+ DateUtil.format(yieldQuery.getProduceTime())+"'\n" ;
     }
-    if (yieldQuery.getStartTiem() !=null &&  yieldQuery.getEndTime()!=null) {
-      sql += " and  mmd.create_on  >= '"+DateUtil.format(yieldQuery.getStartTiem())+"'     \n" ;
-      sql += " and  mmd.create_on  <= '"+DateUtil.format(yieldQuery.getEndTime())+"'     \n" ;
+    if (yieldQuery.getYieldStartTime() !=null &&  yieldQuery.getYieldEndTime()!=null) {
+      sql += " and  mmd.create_on  >= '"+DateUtil.format(yieldQuery.getYieldStartTime())+"'     \n" ;
+      sql += " and  mmd.create_on  <= '"+DateUtil.format(yieldQuery.getYieldEndTime())+"'     \n" ;
     }
     sql = isMoAndprossceAndChedule(yieldQuery, sql);
     sql += " ORDER BY\n" +
@@ -430,10 +430,10 @@ public class YieldServiceImpl implements YieldService {
     if (yieldQuery.getProduceTime()!=null) {
       sql += " and mmd.create_on='"+DateUtil.format(yieldQuery.getProduceTime())+"'\n" ;
     }
-    if (yieldQuery.getStartTiem() !=null &&  yieldQuery.getEndTime()!=null) {
+    if (yieldQuery.getYieldStartTime() !=null &&  yieldQuery.getYieldEndTime()!=null) {
       // sql = getTimeCondition(yieldQuery.getTimecondition(), sql);
-      sql += " and  mmd.create_on  >= '"+DateUtil.format(yieldQuery.getStartTiem())+"'     \n" ;
-      sql += " and  mmd.create_on  <= '"+DateUtil.format(yieldQuery.getEndTime())+"'     \n" ;
+      sql += " and  mmd.create_on  >= '"+DateUtil.format(yieldQuery.getYieldStartTime())+"'     \n" ;
+      sql += " and  mmd.create_on  <= '"+DateUtil.format(yieldQuery.getYieldEndTime())+"'     \n" ;
     }
     sql += " GROUP BY\n" +
         "	mmd.mo_number";
