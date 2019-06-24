@@ -20,6 +20,8 @@ public class BaseCustomerQuery extends Query {
     private String name;
     @ApiModelProperty(value = "类型")
     private String category;
+    @ApiModelProperty(value = "类型名称")
+    private String categoryName;
     @ApiModelProperty(value = "全称")
     private String fullname;
     @ApiModelProperty(value = "简码")
