@@ -1302,12 +1302,6 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         String scheduleNo = getScheduleNoByMoId(mesMoSchedule.getMoId());
         MesMoSchedule mesMoSchedule1 = findById(mesMoSchedule.getScheduleId()).orElse(null);
         if (mesMoSchedule1 != null) {
-            //删除
-            String msg = deleteMesMoschedule(mesMoSchedule.getScheduleId(), "");
-            if (msg.trim().equals("")) {
-            } else {
-                throw new MMException("排产单已执行不可修改。");
-            }
             mesMoSchedule.setScheduleNo(mesMoSchedule1.getScheduleNo());
         } else {
             mesMoSchedule.setScheduleNo(scheduleNo);
@@ -1328,8 +1322,8 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
      * @param scheduleId
      */
     private void checkschedule(MesMoSchedule mesMoSchedule, String scheduleId) {
-
         ValidatorUtil.validateEntity(mesMoSchedule, AddGroup.class);
+        isDelete(mesMoSchedule);
         MesMoDesc moDesc = mesMoDescService.findById(mesMoSchedule.getMoId()).orElse(null);
        Integer schduQty = moDesc.getSchedulQty()==null? 0:moDesc.getSchedulQty();
         Integer  num = moDesc.getTargetQty()-schduQty;
@@ -1366,6 +1360,22 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
         mesMoSchedule.setSequence(sequence + 1);
 
 
+    }
+
+    /**
+     * 校验删除原有的排产单
+     * @param mesMoSchedule
+     */
+    private void isDelete(MesMoSchedule mesMoSchedule) {
+        MesMoSchedule mesMoScheduleold = findById(mesMoSchedule.getScheduleId()).orElse(null);
+        if (mesMoScheduleold != null) {
+            //删除
+            String msg = deleteMesMoschedule(mesMoSchedule.getScheduleId(), "");
+            if (msg.trim().equals("")) {
+            } else {
+                throw new MMException("排产单已执行不可修改。");
+            }
+        }
     }
 
     /**
