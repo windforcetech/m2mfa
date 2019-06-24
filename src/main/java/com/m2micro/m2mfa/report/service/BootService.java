@@ -23,5 +23,5 @@ public interface BootService {
    * pdf导出生产报表
    * @param bootQuery
    */
-  void pdfOutData(BootQuery bootQuery,  HttpServletResponse response)throws Exception;
+  void pdfOutData(BootQuery bootQuery, HttpServletResponse response)throws Exception;
 }

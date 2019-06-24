@@ -29,11 +29,11 @@ public interface YieldService {
    * excel导出生产报表
    * @param yieldQuery
    */
-  void excelOutData(YieldQuery yieldQuery,  HttpServletResponse response)throws Exception;
+  void excelOutData(YieldQuery yieldQuery, HttpServletResponse response)throws Exception;
 
   /**
    * pdf导出生产报表
    * @param yieldQuery
    */
-  void pdfOutData(YieldQuery yieldQuery,  HttpServletResponse response)throws Exception;
+  void pdfOutData(YieldQuery yieldQuery, HttpServletResponse response)throws Exception;
 }
