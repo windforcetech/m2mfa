@@ -42,9 +42,9 @@ public class BootController {
   @RequestMapping("/excelOutData")
   @ApiOperation(value="exce导出生产产量报表")
   @UserOperationLog("exce导出生产产量报表")
-  public ResponseMessage excelOutData(BootQuery bootQuery,  HttpServletResponse response)throws Exception{
+  public void  excelOutData(BootQuery bootQuery,  HttpServletResponse response)throws Exception{
     bootService.excelOutData(bootQuery ,response);
-    return  ResponseMessage.ok();
+
   }
 
   /**
@@ -53,8 +53,8 @@ public class BootController {
   @RequestMapping("/pdfOutData")
   @ApiOperation(value="pdf导出生产产量报表")
   @UserOperationLog("pdf导出生产产量报表")
-  public ResponseMessage pdfOutData(BootQuery bootQuery,  HttpServletResponse response)throws Exception{
+  public void  pdfOutData(BootQuery bootQuery,  HttpServletResponse response)throws Exception{
     bootService.pdfOutData(bootQuery ,response);
-    return  ResponseMessage.ok();
+
   }
 }
