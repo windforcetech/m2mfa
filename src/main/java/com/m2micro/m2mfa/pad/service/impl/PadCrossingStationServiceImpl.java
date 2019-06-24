@@ -21,8 +21,10 @@ import com.m2micro.m2mfa.common.validator.QueryGroup;
 import com.m2micro.m2mfa.mo.constant.MoScheduleStatus;
 import com.m2micro.m2mfa.mo.entity.MesMoDesc;
 import com.m2micro.m2mfa.mo.entity.MesMoSchedule;
+import com.m2micro.m2mfa.mo.entity.MesMoScheduleStaff;
 import com.m2micro.m2mfa.mo.model.ScheduleAndPartsModel;
 import com.m2micro.m2mfa.mo.repository.MesMoScheduleRepository;
+import com.m2micro.m2mfa.mo.repository.MesMoScheduleStaffRepository;
 import com.m2micro.m2mfa.mo.service.MesMoDescService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleProcessService;
 import com.m2micro.m2mfa.mo.service.MesMoScheduleService;
@@ -107,6 +109,8 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
     MesMoScheduleProcessService mesMoScheduleProcessService;
     @Autowired
     ProcessConstant processConstant;
+    @Autowired
+    MesMoScheduleStaffRepository mesMoScheduleStaffRepository;
 
 
 
@@ -510,7 +514,10 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         mesRecordWipRec.setOutTime(date);
         mesRecordWipRec.setOutlineTime(date);
         //职员（预留）
-
+        MesMoScheduleStaff mesMoScheduleStaff = mesMoScheduleStaffRepository.getMesMoScheduleStaffForBoot(source, StationConstant.BOOT.getKey());
+        if(mesMoScheduleStaff!=null){
+            mesRecordWipRec.setStaffId(mesMoScheduleStaff.getStaffId());
+        }
         //途程
         mesRecordWipRec.setRouteId(partRouteId);
         //下一工序
