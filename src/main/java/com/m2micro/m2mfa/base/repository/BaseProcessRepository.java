@@ -50,4 +50,12 @@ public interface BaseProcessRepository extends BaseRepository<BaseProcess,String
             "	AND bs.station_id=?1", nativeQuery = true)
     BaseProcess getProcessByStationId(String stationId);
 
+    /**
+     * 获取注塑成型工序
+     * @param processCode
+     *          工序代码
+     * @return  工序
+     */
+    BaseProcess findByProcessCode(String processCode);
+
 }

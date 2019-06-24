@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.base.service.impl;
 import com.m2micro.framework.authorization.TokenInfo;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
+import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.base.entity.*;
 import com.m2micro.m2mfa.base.query.BaseProcessQuery;
 import com.m2micro.m2mfa.base.repository.BaseProcessRepository;
@@ -54,6 +55,8 @@ public class BaseProcessServiceImpl implements BaseProcessService {
     JdbcTemplate jdbcTemplate;
     @Autowired
     JPAQueryFactory queryFactory;
+    @Autowired
+    ProcessConstant processConstant;
 
     public BaseProcessRepository getRepository() {
         return baseProcessRepository;
@@ -201,7 +204,8 @@ public class BaseProcessServiceImpl implements BaseProcessService {
 
     @Override
     public BaseProcess getMachineProcess() {
-        return baseProcessRepository.getMachineProcess(StationConstant.BOOT.getKey());
+        //return baseProcessRepository.getMachineProcess(StationConstant.BOOT.getKey());
+        return baseProcessRepository.findByProcessCode(processConstant.getProcessCode());
     }
 
 }

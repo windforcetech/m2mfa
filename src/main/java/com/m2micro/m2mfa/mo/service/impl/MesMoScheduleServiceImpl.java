@@ -1547,6 +1547,9 @@ public class MesMoScheduleServiceImpl implements MesMoScheduleService {
     public void updateMachineStateForStop(String scheduleId) {
         //获取开机工位所在工序（机台生产所在工序：注塑成型）
         BaseProcess machineProcess = baseProcessService.getMachineProcess();
+        if(machineProcess==null){
+            return;
+        }
         //当前排产单注塑成型工序是否结束
         MesMoSchedule mesMoSchedule = mesMoScheduleRepository.getIsProductMesMoSchedule(MoScheduleStatus.PRODUCTION.getKey(), scheduleId, machineProcess.getProcessId());
         if(mesMoSchedule!=null){

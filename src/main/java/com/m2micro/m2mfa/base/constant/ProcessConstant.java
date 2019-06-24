@@ -7,6 +7,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Data
 public class ProcessConstant {
-    @Value("${m2mfa.processConstant.processCode}")
+    @Value("${m2mfa.processConstant.processCode:KZ001}")
     private String processCode ;
 }

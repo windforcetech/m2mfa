@@ -104,4 +104,15 @@ public class BaseProcessController {
         return  rm;
     }
 
+
+    /**
+     * 详情
+     */
+    @PostMapping("/getMachineProcess")
+    @ApiOperation(value="获取注塑成型工序")
+    @UserOperationLog("获取注塑成型工序")
+    public ResponseMessage<BaseProcess> getMachineProcess(){
+        return ResponseMessage.ok(baseProcessService.getMachineProcess());
+    }
+
 }
