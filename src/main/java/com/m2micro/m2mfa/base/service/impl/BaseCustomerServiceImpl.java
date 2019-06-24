@@ -74,7 +74,7 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
                     "	bc.abbreviation abbreviation,\n" +
                     "	bc.name name,\n" +
                     "	bc.fullname fullname,\n" +
-                    "	bc.category categoryName,\n" +
+                    "	bc.category category,\n" +
                     "	bc.area area,\n" +
                     "	bc.telephone telephone,\n" +
                     "	bc.fax fax,\n" +
@@ -84,9 +84,11 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
                     "	bc.create_on createOn,\n" +
                     "	bc.create_by createBy,\n" +
                     "	bc.modified_on modifiedOn,\n" +
-                    "	bc.modified_by modifiedBy\n" +
+                    "	bc.modified_by modifiedBy,\n" +
+                    "	bi.item_name categoryName\n" +
                     "FROM\n" +
                     "	base_customer bc\n" +
+                    "LEFT JOIN base_items_target bi ON bi.id = bc.category\n" +
                     "WHERE\n" +
                     "	1 = 1";
         sql = addSqlCondition(sql,query,groupId);
@@ -109,8 +111,8 @@ public class BaseCustomerServiceImpl implements BaseCustomerService {
         if(StringUtils.isNotEmpty(query.getFullname())){
             sql = sql+" and bc.fullname like '%"+query.getFullname()+"%'";
         }
-        if(StringUtils.isNotEmpty(query.getCategoryName())){
-            sql = sql+" and bc.category like '%"+query.getCategoryName()+"%' ";
+        if(StringUtils.isNotEmpty(query.getCategory())){
+            sql = sql+" and bc.category = '"+query.getCategory()+"' ";
         }
         if(query.getEnabled()!=null){
             sql = sql+" and bc.enabled = "+query.getEnabled()+" ";

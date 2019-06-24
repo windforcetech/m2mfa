@@ -35,7 +35,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class BootServiceImpl  implements BootService {
@@ -48,30 +47,12 @@ public class BootServiceImpl  implements BootService {
   public BootAndData  BootShow(BootQuery bootQuery) {
     List<Boot> boots = getBoots(bootQuery);
     BootAndData bootAndData = getBootAndData(bootQuery);
-
     if(bootAndData !=null){
-      bootAndData.setHours(DateUtil.getGapTime(Long.parseLong(bootAndData.getHours())));
-
       Long bad = getFailCount(bootQuery);
-
+      bootAndData.setBoots(boots);
       bootAndData.setBad(bad);
       List<ShiftAndData> shiftAndData = getShiftAndData(bootQuery);
-      List<ShiftAndData> shiftAndDatanew = shiftAndData.stream().filter(x -> {
-        x.setShiftHours(DateUtil.getGapTime(Long.parseLong(x.getShiftHours())));
-        return true;
-      }).collect(Collectors.toList());
-      List<Boot> bootnew = boots.stream().filter(x -> {
-        x.setUseTime(DateUtil.getGapTime(Long.parseLong(x.getUseTime())));
-        x.setMachineTime(DateUtil.getGapTime(Long.parseLong(x.getMachineTime())));
-        return true;
-      }).collect(Collectors.toList());
-      long shiftnum=0;
-    for(ShiftAndData x :  shiftAndDatanew ){
-      shiftnum+=x.getShiftnum();
-    }
-      bootAndData.setMean(bootAndData.getSummary()/shiftnum);
-      bootAndData.setBoots(bootnew);
-      bootAndData.setShiftAndDatas(shiftAndDatanew);
+      bootAndData.setShiftAndDatas(shiftAndData);
     }
     return bootAndData;
   }
@@ -450,7 +431,7 @@ public class BootServiceImpl  implements BootService {
    */
   private List<ShiftAndData> getShiftAndData(BootQuery bootQuery) {
     String sql="SELECT\n" +
-        "	 COUNT(*) shiftnum,     bs.`name` shift_name,DATE_FORMAT(mrw.start_time,'%Y-%m-%d') start_time,\n" +
+        "	bs.`name` shift_name,DATE_FORMAT(mrw.start_time,'%Y-%m-%d') start_time,\n" +
         "	vmsi.output_qty shift_summary,\n" +
         "	CONVERT (\n" +
         "		vmsi.output_qty / (\n" +
@@ -465,7 +446,7 @@ public class BootServiceImpl  implements BootService {
         "				) / vmsi.standard_hours\n" +
         "			END\n" +
         "		),\n" +
-        "		DECIMAL (10, 0)\n" +
+        "		DECIMAL (10, 2)\n" +
         "	) shiftAchievingRate,\n" +
         "	vmsi.fail_qty,\n" +
         "	(\n" +
@@ -548,9 +529,9 @@ public class BootServiceImpl  implements BootService {
         "					END\n" +
         "				)\n" +
         "			),\n" +
-        "			DECIMAL (10, 0)\n" +
+        "			DECIMAL (10, 2)\n" +
         "		),\n" +
-        "		0\n" +
+        "		0.00\n" +
         "	) achieving_rate,\n" +
         "	SUM(\n" +
         "		(vmsi.end_time - vmsi.start_time)\n" +
@@ -644,8 +625,8 @@ public class BootServiceImpl  implements BootService {
         "				) / vmsi.standard_hours\n" +
         "			END\n" +
         "		),\n" +
-        "		DECIMAL (10)\n" +
-        "	),0) reach,\n" +
+        "		DECIMAL (10, 2)\n" +
+        "	),0.00) reach,\n" +
         "	IFNULL(vmsi.output_qty,0) output_qty,\n" +
         "	IFNULL( CONVERT (\n" +
         "		vmsi.output_qty / (\n" +
@@ -660,8 +641,8 @@ public class BootServiceImpl  implements BootService {
         "				) / vmsi.standard_hours\n" +
         "			END\n" +
         "		),\n" +
-        "		DECIMAL (10, 0)\n" +
-        "	),0) achieving_rate,\n" +
+        "		DECIMAL (10, 2)\n" +
+        "	),0.00) achieving_rate,\n" +
         "	vmsi.scrap_qty,\n" +
         "	vmsi.fail_qty\n" +
         "FROM";

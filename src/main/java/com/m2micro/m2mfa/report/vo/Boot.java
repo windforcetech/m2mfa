@@ -25,10 +25,10 @@ public class Boot {
   private String staffName ;
 
   @ApiModelProperty(value = "人力时间")
-  private String useTime ;
+  private long useTime ;
 
   @ApiModelProperty(value = "机台工时")
-  private String machineTime ;
+  private long machineTime ;
 
   @ApiModelProperty(value = "品名")
   private String partName ;
