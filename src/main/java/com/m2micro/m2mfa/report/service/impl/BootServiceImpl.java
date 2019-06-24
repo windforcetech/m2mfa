@@ -12,7 +12,6 @@ import com.m2micro.m2mfa.report.service.BootService;
 import com.m2micro.m2mfa.report.vo.Boot;
 import com.m2micro.m2mfa.report.vo.BootAndData;
 import com.m2micro.m2mfa.report.vo.ShiftAndData;
-import com.m2micro.m2mfa.report.vo.Yield;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -31,10 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,9 +47,7 @@ public class BootServiceImpl  implements BootService {
 
     if(bootAndData !=null){
       bootAndData.setHours(DateUtil.getGapTime(Long.parseLong(bootAndData.getHours())));
-
       Long bad = getFailCount(bootQuery);
-
       bootAndData.setBad(bad);
       List<ShiftAndData> shiftAndData = getShiftAndData(bootQuery);
       List<ShiftAndData> shiftAndDatanew = shiftAndData.stream().filter(x -> {
@@ -452,7 +446,7 @@ public class BootServiceImpl  implements BootService {
     String sql="SELECT\n" +
         "	 COUNT(*) shiftnum,     bs.`name` shift_name,DATE_FORMAT(mrw.start_time,'%Y-%m-%d') start_time,\n" +
         "	vmsi.output_qty shift_summary,\n" +
-        "	CONVERT (\n" +
+        "	TRUNCATE(CONVERT (\n" +
         "		vmsi.output_qty / (\n" +
         "			CASE\n" +
         "			WHEN vmsi.end_time IS NULL THEN\n" +
@@ -466,7 +460,7 @@ public class BootServiceImpl  implements BootService {
         "			END\n" +
         "		),\n" +
         "		DECIMAL (10, 0)\n" +
-        "	) shiftAchievingRate,\n" +
+        "	)*100,2) shiftAchievingRate,\n" +
         "	vmsi.fail_qty,\n" +
         "	(\n" +
         "		vmsi.end_time - vmsi.start_time\n" +
@@ -530,9 +524,9 @@ public class BootServiceImpl  implements BootService {
    * @return
    */
   private BootAndData getBootAndData(BootQuery bootQuery) {
-    String sql ="SELECT\n" +
+    String sql ="SELECT  vmsi.start_time,\n" +
         "	SUM(IFNULL(vmsi.output_qty, 0)) summary,\n" +
-        "	IFNULL(\n" +
+        "TRUNCATE(	IFNULL(\n" +
         "		CONVERT (\n" +
         "			SUM(vmsi.output_qty) / SUM(\n" +
         "				(\n" +
@@ -551,7 +545,7 @@ public class BootServiceImpl  implements BootService {
         "			DECIMAL (10, 0)\n" +
         "		),\n" +
         "		0\n" +
-        "	) achieving_rate,\n" +
+        "	)  * 100,2) achieving_rate,\n" +
         "	SUM(\n" +
         "		(vmsi.end_time - vmsi.start_time)\n" +
         "	) hours,\n" +
@@ -647,7 +641,7 @@ public class BootServiceImpl  implements BootService {
         "		DECIMAL (10)\n" +
         "	),0) reach,\n" +
         "	IFNULL(vmsi.output_qty,0) output_qty,\n" +
-        "	IFNULL( CONVERT (\n" +
+        "	TRUNCATE(IFNULL( CONVERT (\n" +
         "		vmsi.output_qty / (\n" +
         "			CASE\n" +
         "			WHEN vmsi.end_time IS NULL THEN\n" +
@@ -661,9 +655,9 @@ public class BootServiceImpl  implements BootService {
         "			END\n" +
         "		),\n" +
         "		DECIMAL (10, 0)\n" +
-        "	),0) achieving_rate,\n" +
+        "	),0) * 100,2) achieving_rate,\n" +
         "	vmsi.scrap_qty,\n" +
-        "	vmsi.fail_qty\n" +
+        "TRUNCATE(IFNULL((IFNULL(vmsi.output_qty,0) / \tIFNULL(vmsi.fail_qty,0)),0) * 100 ,2)  fail_qty  \n" +
         "FROM";
 
     sql += pingSql(bootQuery);

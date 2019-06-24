@@ -165,7 +165,7 @@ public class YieldServiceImpl implements YieldService {
     }
     sql = isMoAndprossceAndChedule(yieldQuery, sql);
     sql += " ORDER BY\n" +
-        "	mmd.mo_number  ";
+        "	mmd.mo_number ,mprp.Setp  ";
     return sql;
   }
 
