@@ -1,4 +1,4 @@
-//package com.m2micro.m2mfa.common.util;
+package com.m2micro.m2mfa.common.util;//package com.m2micro.m2mfa.common.util;
 //
 //import org.springframework.beans.factory.annotation.Value;
 //import org.springframework.context.annotation.Bean;

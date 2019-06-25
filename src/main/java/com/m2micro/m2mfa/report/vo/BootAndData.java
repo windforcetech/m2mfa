@@ -26,7 +26,7 @@ public class BootAndData {
 
 
   @ApiModelProperty(value = "总工时")
-  private long hours ;
+  private String hours ;
 
 
   @ApiModelProperty(value = "人均值")
