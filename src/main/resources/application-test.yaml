@@ -1,10 +1,10 @@
 spring:
   datasource:
     secondary:
-      jdbc-url: jdbc:mysql://192.168.2.24:3306/mes?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
+      jdbc-url: jdbc:mysql://192.168.2.36:3308/mes250?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
       username: root
-      password: ABCabc@123
-      driverClassName: com.mysql.jdbc.Driver
+      password: root
+      driverClassName: org.mariadb.jdbc.Driver
       druid:
         max-active: 10
         min-idle: 2
