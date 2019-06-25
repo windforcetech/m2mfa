@@ -355,6 +355,17 @@ public class PadCrossingStationServiceImpl implements PadCrossingStationService 
         Boolean endProcess = mesMoScheduleProcessService.isEndProcess(scheduleId, beforeProcessId);
         //待进站是否已处理完毕
         Boolean completedForPullIn = isCompletedForPullIn(scheduleId,processId);
+        //上工序如果是注塑成型工序:三个条件：结余量==0，上工序已结束，待进站已处理
+        BaseProcess baseProcess = baseProcessService.findById(beforeProcessId).orElse(null);
+        if(processConstant.getProcessCode().equals(baseProcess.getProcessCode())){
+            //获取结余量
+            Integer surplusQty = getSurplusQty(processId, scheduleId,beforeProcessId);
+            if(surplusQty==0&&endProcess&&completedForPullIn){
+                return true;
+            }else {
+                return false;
+            }
+        }
         //上一工序已结束并且待进站已处理完毕
         if(endProcess&&completedForPullIn){
             return true;
