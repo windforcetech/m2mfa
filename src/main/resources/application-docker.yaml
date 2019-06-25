@@ -1,7 +1,7 @@
 spring:
   datasource:
     secondary:
-      jdbc-url: jdbc:mysql://192.168.1.132:3306/saas?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
+      jdbc-url: jdbc:mysql://192.168.1.111:3306/saas?useSSL=false&useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
       username: root
       password:
       driverClassName: org.mariadb.jdbc.Driver
