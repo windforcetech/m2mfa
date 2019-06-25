@@ -1,4 +1,4 @@
-//package com.m2micro.m2mfa.common.util;
+package com.m2micro.m2mfa.common.util;//package com.m2micro.m2mfa.common.util;
 //
 //import org.springframework.stereotype.Component;
 //
