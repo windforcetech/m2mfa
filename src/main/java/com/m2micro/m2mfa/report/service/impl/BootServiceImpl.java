@@ -3,6 +3,7 @@ package com.m2micro.m2mfa.report.service.impl;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
+import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.common.util.ChinaFontProvide;
 import com.m2micro.m2mfa.common.util.DateUtil;
 import com.m2micro.m2mfa.common.util.FileUtil;
@@ -35,7 +36,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class BootServiceImpl  implements BootService {
-
+  @Autowired
+  private ProcessConstant processConstant;
   @Autowired
   @Qualifier("secondaryJdbcTemplate")
   private JdbcTemplate jdbcTemplate;
@@ -496,7 +498,7 @@ public class BootServiceImpl  implements BootService {
         "	FROM\n" +
         "		base_process\n" +
         "	WHERE\n" +
-        "		process_code = 'gxdm'\n" +
+        "		process_code = '"+processConstant.getProcessCode()+"'\n" +
         ")\n" ;
 
     if(bootQuery.getBootTime()!=null){
@@ -594,7 +596,7 @@ public class BootServiceImpl  implements BootService {
         "	FROM\n" +
         "		base_process\n" +
         "	WHERE\n" +
-        "		process_code = 'gxdm')\n";
+        "		process_code = '"+processConstant.getProcessCode()+"')\n";
       if(bootQuery.getBootTime()!=null){
        sql += "  and  vmsi.start_time LIKE '"+ DateUtil.format(bootQuery.getBootTime(),DateUtil.DATE_PATTERN)+"%'  ";
       }
