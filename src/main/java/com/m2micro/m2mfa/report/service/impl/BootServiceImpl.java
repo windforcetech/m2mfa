@@ -47,7 +47,9 @@ public class BootServiceImpl  implements BootService {
     List<Boot> boots = getBoots(bootQuery);
     BootAndData bootAndData = getBootAndData(bootQuery);
 
-    if(bootAndData !=null){
+    if(bootAndData==null){
+      return null;
+    }
       bootAndData.setHours(DateUtil.getGapTime(Long.parseLong(bootAndData.getHours())));
       Long bad = getFailCount(bootQuery);
       bootAndData.setBad(bad);
@@ -68,7 +70,7 @@ public class BootServiceImpl  implements BootService {
       bootAndData.setMean(bootAndData.getSummary()/shiftnum);
       bootAndData.setBoots(bootnew);
       bootAndData.setShiftAndDatas(shiftAndDatanew);
-    }
+
     return bootAndData;
   }
 
