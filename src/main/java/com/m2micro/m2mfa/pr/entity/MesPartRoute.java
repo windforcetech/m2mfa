@@ -30,11 +30,11 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     private String partRouteId;
     @ApiModelProperty(value = "料件id")
     @NotNull(message="料件id不能为空。",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "料件id长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+
     private String partId;
     @ApiModelProperty(value = "管制方式")
     @NotNull(message="管制方式不能为空。",groups = {AddGroup.class, UpdateGroup.class})
-    @Size(max=32,message = "料件id长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+
     private String controlInformation;
 
     @Transient
@@ -43,7 +43,7 @@ public class MesPartRoute extends BaseEntity implements Serializable {
 
 
     @ApiModelProperty(value = "工艺主键")
-    @Size(max=32,message = "料件id长度不能大于32位",groups = {AddGroup.class, UpdateGroup.class})
+
     private String routeId;
 
     @ApiModelProperty(value = "投入工序")
@@ -74,7 +74,8 @@ public class MesPartRoute extends BaseEntity implements Serializable {
     @ApiModelProperty(value = "产出工序名称")
     private String outputProcessIdName;
 
-    public MesPartRoute(@NotNull(message = "主键不能为空。", groups = {AddGroup.class, UpdateGroup.class}) String partRouteId, @NotNull(message = "料件id不能为空。", groups = {AddGroup.class, UpdateGroup.class}) @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String partId, @NotNull(message = "管制方式不能为空。", groups = {AddGroup.class, UpdateGroup.class}) @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String controlInformation, String controlInformationName, @Size(max = 32, message = "料件id长度不能大于32位", groups = {AddGroup.class, UpdateGroup.class}) String routeId, String inputProcessId, String outputProcessId, Integer enabled, String description, String touteName, String partNo, String inputProcessIdName, String outputProcessIdName) {
+    public MesPartRoute(@NotNull(message = "主键不能为空。", groups = {AddGroup.class, UpdateGroup.class}) String partRouteId, @NotNull(message = "料件id不能为空。", groups = {AddGroup.class, UpdateGroup.class})   String partId, @NotNull(message = "管制方式不能为空。", groups = {AddGroup.class, UpdateGroup.class})   String controlInformation, String controlInformationName,
+                        String routeId, String inputProcessId, String outputProcessId, Integer enabled, String description, String touteName, String partNo, String inputProcessIdName, String outputProcessIdName) {
         this.partRouteId = partRouteId;
         this.partId = partId;
         this.controlInformation = controlInformation;
