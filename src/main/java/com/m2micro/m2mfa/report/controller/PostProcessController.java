@@ -27,7 +27,7 @@ public class PostProcessController {
   /**
    * 后工序日报报表
    */
-  @RequestMapping("/BootShow")
+  @RequestMapping("/PostProcessShow")
   @ApiOperation(value="后工序日报报表显示")
   @UserOperationLog("后工序日报报表显示")
   public ResponseMessage<PostProcessAndData> PostProcessShow(PostProcessQuery postProcessQuery) {
