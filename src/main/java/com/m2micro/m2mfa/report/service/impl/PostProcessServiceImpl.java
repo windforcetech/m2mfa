@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PostProcessServiceImpl implements PostProcessService {
@@ -55,10 +56,15 @@ public class PostProcessServiceImpl implements PostProcessService {
         " ORDER BY mrwl.process_id , mms.shift_id , mrwl.staff_id \n";
     RowMapper<PostProcess> postProcessMapper = BeanPropertyRowMapper.newInstance(PostProcess.class);
     List<PostProcess> postProcesses = jdbcTemplate.query(sql, postProcessMapper);
-    if(postProcessAndData ==null){
+    if(postProcessAndData.getOutTime() ==null){
       return null;
     }
-    postProcessAndData.setPostProcesses(postProcesses);
+    List<PostProcess> postProcessesdata = postProcesses.stream().filter(x -> {
+      x.setWorkinghours(DateUtil.getGapTime(Long.parseLong(x.getWorkinghours())));
+      return true;
+    }).collect(Collectors.toList());
+    postProcessAndData.setPostProcesses(postProcessesdata);
+    postProcessAndData.setWorkinghours(DateUtil.getGapTime(Long.parseLong(postProcessAndData.getWorkinghours())));
     return postProcessAndData;
   }
 
@@ -79,7 +85,7 @@ public class PostProcessServiceImpl implements PostProcessService {
         "LEFT JOIN mes_mo_schedule_station  mmstation on mmstation.schedule_id=mms.schedule_id and mrwl.process_id=mmstation.process_id\n" +
         "LEFT JOIN mes_mo_schedule_process  mmsc on mmsc.schedule_id = mms.schedule_id and NOT ISNULL(mmsc.mold_id)\n" +
         "LEFT JOIN base_mold bm on bm.mold_id=mmsc.mold_id"+
-        "  and mrwl.out_time  LIKE '"+ DateUtil.format(postProcessQuery.getPostProcessTime(),DateUtil.DATE_PATTERN)+"%'  ";
+        "   where 1=1   and mrwl.out_time  LIKE '"+ DateUtil.format(postProcessQuery.getPostProcessTime(),DateUtil.DATE_PATTERN)+"%'  ";
 
     return sql;
 
