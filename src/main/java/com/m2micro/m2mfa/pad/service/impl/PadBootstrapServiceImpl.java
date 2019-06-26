@@ -71,6 +71,7 @@ public class PadBootstrapServiceImpl extends BaseOperateImpl implements PadBoots
         if(obj.getMesRecordFails()!=null){
             Padbad padbad= new Padbad();
             padbad.setMesRecordFails(obj.getMesRecordFails());
+            padbad.setStationId(obj.getStationId());
             saveMesRocerdRail(padbad);
         }
 
