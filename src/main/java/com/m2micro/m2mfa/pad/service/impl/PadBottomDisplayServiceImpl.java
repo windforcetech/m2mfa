@@ -5,6 +5,7 @@ import com.m2micro.m2mfa.base.constant.ProcessConstant;
 import com.m2micro.m2mfa.base.entity.BaseProcess;
 import com.m2micro.m2mfa.base.entity.BaseStation;
 import com.m2micro.m2mfa.base.repository.BaseQualitySolutionDescRepository;
+import com.m2micro.m2mfa.base.repository.BaseStationRepository;
 import com.m2micro.m2mfa.base.service.BaseProcessService;
 import com.m2micro.m2mfa.base.service.BaseStationService;
 import com.m2micro.m2mfa.common.util.DateUtil;
@@ -73,6 +74,8 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     ProcessConstant processConstant;
     @Autowired
     MesRecordWipLogService mesRecordWipLogService;
+    @Autowired
+    BaseStationRepository baseStationRepository;
 
     @Override
     public MoDescInfoModel getMoDescInfo(String scheduleId) {
@@ -245,7 +248,8 @@ public class PadBottomDisplayServiceImpl extends BaseOperateImpl implements PadB
     @Override
     public Integer getMachineOutputQty(String scheduleId, String outputProcessId) {
         //获取产出工序的最后一个工位
-        BaseStation baseStation = atlastStation(outputProcessId);
+        //BaseStation baseStation = atlastStation(outputProcessId);
+        BaseStation baseStation = baseStationRepository.findByCode(StationConstant.BOOT.getKey());
         String stationId=baseStation.getStationId();
 
         //获取工单完工数量(包含不良数量)

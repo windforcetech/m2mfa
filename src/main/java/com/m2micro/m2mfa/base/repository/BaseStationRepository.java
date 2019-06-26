@@ -20,4 +20,6 @@ public interface BaseStationRepository extends BaseRepository<BaseStation,String
     @Query(value = "select * from  base_station where `name`=?1",nativeQuery = true)
     String selectName(String name );
 
+    BaseStation findByCode(String code);
+
 }
