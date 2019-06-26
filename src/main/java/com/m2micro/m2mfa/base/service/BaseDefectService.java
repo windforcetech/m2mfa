@@ -27,4 +27,11 @@ public interface BaseDefectService extends BaseService<BaseDefect,String> {
     BaseDefect saveEntity(BaseDefect baseDefect);
 
     BaseDefect updateEntity(BaseDefect baseDefect);
+
+    /**
+     * 根据不良现象代码查不良现象名称
+     * @param ectCode
+     * @return
+     */
+    BaseDefect queryByEctCode(String ectCode);
 }

@@ -1,5 +1,6 @@
 package com.m2micro.m2mfa.base.service.impl;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.google.common.base.CaseFormat;
 import com.m2micro.framework.commons.exception.MMException;
 import com.m2micro.framework.commons.util.PageUtil;
@@ -166,6 +167,15 @@ public class BaseDefectServiceImpl implements BaseDefectService {
         validCodeAndName(baseDefect, baseDefect.getEctId());
         PropertyUtil.copy(baseDefect,baseDefectOld);
         return save(baseDefectOld);
+    }
+
+    @Override
+    public BaseDefect queryByEctCode(String ectCode) {
+        List<BaseDefect> baseList = baseDefectRepository.findByEctCode(ectCode);
+        if(null != baseList && baseList.size() > 0){
+            return baseList.get(0);
+        }
+        return null;
     }
 
     /**

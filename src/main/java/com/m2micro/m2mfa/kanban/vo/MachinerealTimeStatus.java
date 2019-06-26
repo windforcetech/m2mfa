@@ -15,6 +15,8 @@ public class MachinerealTimeStatus {
   private String targetQty ;
   @ApiModelProperty(value = "完成量")
   private String outputQty ;
+  @ApiModelProperty(value = "不良量")
+  private String failQty ;
   @ApiModelProperty(value = "完成率")
   private String rate ;
 }
