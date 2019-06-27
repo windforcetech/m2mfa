@@ -14,6 +14,7 @@ import com.m2micro.m2mfa.report.query.BootQuery;
 import com.m2micro.m2mfa.report.service.BootService;
 import com.m2micro.m2mfa.report.vo.BootAndData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -39,7 +40,8 @@ public class AppHomeServiceImpl implements AppHomeService {
     BootService bootService;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    @Qualifier("secondaryJdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     BaseDefectService baseDefectService;
