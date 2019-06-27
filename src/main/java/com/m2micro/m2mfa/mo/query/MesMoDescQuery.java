@@ -30,6 +30,7 @@ public class MesMoDescQuery extends Query {
     private String partNo;
     @ApiModelProperty(value = "目标量")
     private Integer targetQty;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ApiModelProperty(value = "达交时间")
     private Date reachDate;
     @ApiModelProperty(value = "预排机台数")
@@ -47,6 +48,41 @@ public class MesMoDescQuery extends Query {
     @ApiModelProperty(value = "bom版本")
     private Integer bomRevsion;
 
+    @ApiModelProperty(value = "订单号码")
+    private String orderId;
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
+    //开始时间
+    @ApiModelProperty(value="开始时间",example = "2018-11-11 12:00:00")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date planInputDate;
+    //结束时间
+    @ApiModelProperty(value="结束时间",example = "2018-11-11 12:00:00")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date planCloseDate;
+
+    public Date getPlanInputDate() {
+        return planInputDate;
+    }
+
+    public void setPlanInputDate(Date planInputDate) {
+        this.planInputDate = planInputDate;
+    }
+
+    public Date getPlanCloseDate() {
+        return planCloseDate;
+    }
+
+    public void setPlanCloseDate(Date planCloseDate) {
+        this.planCloseDate = planCloseDate;
+    }
 
     public String getCategory() {
         return category;

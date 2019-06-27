@@ -145,14 +145,17 @@ public class MesMoDescServiceImpl implements MesMoDescService {
         if (StringUtils.isNotEmpty(query.getMoNumber())) {
             sql = sql + " and md.mo_number like '%" + query.getMoNumber() + "%'";
         }
+        if (StringUtils.isNotEmpty(query.getOrderId())) {
+            sql = sql + " and md.order_id like '%" + query.getOrderId() + "%'";
+        }
         if (StringUtils.isNotEmpty(query.getCloseFlag())) {
             sql = sql + " and md.close_flag = " + query.getCloseFlag();
         }
-        if (query.getStartTime() != null) {
-            sql = sql + " and md.plan_input_date >= " + "'" + DateUtil.format(query.getStartTime()) + "'";
+        if (query.getPlanInputDate() != null) {
+            sql = sql + " and md.plan_input_date >= " + "'" + DateUtil.format(query.getPlanInputDate()) + "'";
         }
-        if (query.getEndTime() != null) {
-            sql = sql + " and md.plan_input_date <= " + "'" + DateUtil.format(query.getEndTime()) + "'";
+        if (query.getPlanCloseDate() != null) {
+            sql = sql + " and md.plan_close_date <= " + "'" + DateUtil.format(query.getPlanCloseDate()) + "'";
         }
 
 
@@ -217,18 +220,20 @@ public class MesMoDescServiceImpl implements MesMoDescService {
                 "WHERE\n" +
                 "	1 = 1 ";
 
-
+        if (StringUtils.isNotEmpty(query.getOrderId())) {
+            countSql = countSql + " and md.order_id like '%" + query.getOrderId() + "%'";
+        }
         if (StringUtils.isNotEmpty(query.getMoNumber())) {
             countSql = countSql + " and md.mo_number like '%" + query.getMoNumber() + "%'";
         }
         if (StringUtils.isNotEmpty(query.getCloseFlag())) {
             countSql = countSql + " and md.close_flag = " + query.getCloseFlag();
         }
-        if (query.getStartTime() != null) {
-            countSql = countSql + " and md.plan_input_date >= " + "'" + DateUtil.format(query.getStartTime()) + "'";
+        if (query.getPlanInputDate() != null) {
+            countSql = countSql + " and md.plan_input_date >= " + "'" + DateUtil.format(query.getPlanInputDate()) + "'";
         }
-        if (query.getEndTime() != null) {
-            countSql = countSql + " and md.plan_input_date <= " + "'" + DateUtil.format(query.getEndTime()) + "'";
+        if (query.getPlanCloseDate() != null) {
+            countSql = countSql + " and md.plan_close_date <= " + "'" + DateUtil.format(query.getPlanCloseDate()) + "'";
         }
 
 
@@ -242,7 +247,7 @@ public class MesMoDescServiceImpl implements MesMoDescService {
             countSql = countSql + " and md.target_qty = " + Integer.valueOf(query.getTargetQty());
         }
         if (query.getReachDate() != null) {
-            countSql = countSql + " and md.reach_date >= " + "'" + DateUtil.format(query.getReachDate()) + "'";
+            countSql = countSql + " and md.reach_date >= " + "'" + DateUtil.format(query.getReachDate(),DateUtil.DATE_PATTERN) + "'";
         }
         if (query.getMachineQty() != null) {
             countSql = countSql + " and md.machine_qty = " + Integer.valueOf(query.getMachineQty());
